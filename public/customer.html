@@ -122,7 +122,10 @@
   <div class="phone-stage">
     <div class="phone">
       <div class="screen">
-        <div class="notch"></div>
+        <div class="statusbar">
+          <span class="sb-time">9:41</span>
+          <span class="sb-right"><span class="sb-sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:9px"></i><i style="height:11px"></i></span><span class="sb-5g">5G</span><span class="sb-bat"></span></span>
+        </div>
         <div class="app-top">
           <div class="hi">안녕하세요, <b>양지근</b>님</div>
           <div class="ring">VIP</div>
@@ -263,12 +266,12 @@
 
             <div class="appcard" id="ordCard">
               <h4>주문 / 픽업</h4>
-              <div class="label" style="margin:6px 0 8px">도수 제품(안경·콘택트)은 매장 방문이 원칙이에요. 데모에선 선결제로 시연해요. 소모품은 케어 탭에서 바로 구매.</div>
+              <div class="label" style="margin:6px 0 8px">도수 안경·콘택트는 매장 방문·결제가 원칙이에요. 앱에선 예약만 하고, 노쇼 방지용 소액 보증금만 받아요(방문 시 차감 또는 환불). 소모품은 케어 탭에서 바로 구매.</div>
               <div class="label" style="margin-bottom:4px">주문 유형</div>
               <div class="chips" id="ordKind">
                 <button class="chip active" data-k="B" data-pay="매장">안경테 (잡아두기)</button>
-                <button class="chip" data-k="A" data-pay="선결제">도수 안경</button>
-                <button class="chip" data-k="A" data-pay="선결제">콘택트렌즈</button>
+                <button class="chip" data-k="A" data-pay="보증금">도수 안경</button>
+                <button class="chip" data-k="A" data-pay="보증금">콘택트렌즈</button>
               </div>
               <div class="label" style="margin:11px 0 4px">제품 / 옵션</div>
               <input type="text" id="ordItem" class="finput" placeholder="예: 로마 클래식 / 알도R 1.60">
@@ -400,6 +403,14 @@
   <span><a href="index.html">← 홈</a></span>
 </div>
 
+<script>
+window.__bvGuide={title:'고객 앱 가이드',sub:'안경 사는 불확실성을 없애는 게 목표.',points:[
+{click:'.ptab[data-s="measure"]',sel:'#scanwrap',t:'얼굴 측정',d:'카메라로 안면폭·PD 측정 → 사이즈 자동 매칭.'},
+{click:'.ptab[data-s="measure"]',sel:'#tryonCard',t:'가상 피팅',d:'카메라 얼굴 위에 안경을 얹어 미리 써봐요.'},
+{click:'.ptab[data-s="products"]',sel:'#csub',t:'상품·견적',d:'투명 가격 시뮬레이터, 렌즈 굴절률·코팅, PB 안내.'},
+{click:'.ptab[data-s="care"]',sel:'#remindCard',t:'재구매·위시',d:'교체주기 알림(도수=방문/소모품=바로구매)·위시리스트.'}
+]};
+</script>
 <script src="/assets/app.js"></script>
 <script type="module">
 import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
@@ -450,19 +461,40 @@ window.bvFaceMeasure=async function(onDone,onErr,onStat){
 window.__tryStyle="round"; window.__tryColor="#1a1a1a";
 let tryStream=null, tryRAF=null;
 function glassSVG(style,color){
-  var st='stroke="'+color+'" stroke-width="3" fill="rgba(0,0,0,0.08)"';
-  var bridge='<path d="M44 22 Q50 18 56 22" stroke="'+color+'" stroke-width="3" fill="none"/>';
-  var temples='<line x1="8" y1="22" x2="0" y2="18" stroke="'+color+'" stroke-width="3"/><line x1="92" y1="22" x2="100" y2="18" stroke="'+color+'" stroke-width="3"/>';
-  var lenses;
+  var defs='<defs>'+
+    '<linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0" stop-color="rgba(150,172,194,0.34)"/>'+
+      '<stop offset="0.55" stop-color="rgba(88,100,116,0.16)"/>'+
+      '<stop offset="1" stop-color="rgba(28,30,36,0.10)"/>'+
+    '</linearGradient>'+
+    '<linearGradient id="gl" x1="0" y1="0" x2="1" y2="1">'+
+      '<stop offset="0" stop-color="rgba(255,255,255,0.6)"/>'+
+      '<stop offset="0.45" stop-color="rgba(255,255,255,0.06)"/>'+
+      '<stop offset="1" stop-color="rgba(255,255,255,0)"/>'+
+    '</linearGradient>'+
+  '</defs>';
+  var rimW='3.2';
+  var bridge='<path d="M44.5 21 Q50 17 55.5 21" fill="none" stroke="'+color+'" stroke-width="'+rimW+'" stroke-linecap="round"/>';
+  var hinge='<circle cx="7.6" cy="20" r="1.8" fill="'+color+'"/><circle cx="92.4" cy="20" r="1.8" fill="'+color+'"/>';
+  var temples='<path d="M8 20 Q3.5 18 0 13.5" fill="none" stroke="'+color+'" stroke-width="'+rimW+'" stroke-linecap="round"/><path d="M92 20 Q96.5 18 100 13.5" fill="none" stroke="'+color+'" stroke-width="'+rimW+'" stroke-linecap="round"/>';
+  var fill, rim, gloss;
   if(style==='square'){
-    lenses='<rect x="8" y="10" width="34" height="26" rx="7" '+st+'/><rect x="58" y="10" width="34" height="26" rx="7" '+st+'/>';
+    fill='<rect x="6.5" y="9" width="35" height="28" rx="9" fill="url(#lg)"/><rect x="58.5" y="9" width="35" height="28" rx="9" fill="url(#lg)"/>';
+    rim ='<rect x="6.5" y="9" width="35" height="28" rx="9" fill="none" stroke="'+color+'" stroke-width="'+rimW+'"/><rect x="58.5" y="9" width="35" height="28" rx="9" fill="none" stroke="'+color+'" stroke-width="'+rimW+'"/>';
+    gloss='<rect x="10" y="12" width="13" height="5" rx="2.5" fill="url(#gl)" transform="rotate(-16 16 14)"/><rect x="62" y="12" width="13" height="5" rx="2.5" fill="url(#gl)" transform="rotate(-16 68 14)"/>';
   } else if(style==='audio'){
-    lenses='<rect x="8" y="11" width="34" height="24" rx="6" '+st+'/><rect x="58" y="11" width="34" height="24" rx="6" '+st+'/>';
-    temples='<rect x="0" y="19" width="10" height="7" rx="3" fill="'+color+'"/><rect x="90" y="19" width="10" height="7" rx="3" fill="'+color+'"/>';
+    fill='<rect x="7" y="10" width="34" height="26" rx="7" fill="url(#lg)"/><rect x="59" y="10" width="34" height="26" rx="7" fill="url(#lg)"/>';
+    rim ='<rect x="7" y="10" width="34" height="26" rx="7" fill="none" stroke="'+color+'" stroke-width="'+rimW+'"/><rect x="59" y="10" width="34" height="26" rx="7" fill="none" stroke="'+color+'" stroke-width="'+rimW+'"/>';
+    gloss='<rect x="10" y="13" width="12" height="5" rx="2.5" fill="url(#gl)" transform="rotate(-16 16 15)"/><rect x="62" y="13" width="12" height="5" rx="2.5" fill="url(#gl)" transform="rotate(-16 68 15)"/>';
+    temples='<rect x="-1.5" y="16.5" width="12" height="9" rx="4.5" fill="'+color+'"/><rect x="89.5" y="16.5" width="12" height="9" rx="4.5" fill="'+color+'"/>'+
+            '<rect x="0.5" y="18" width="6" height="2" rx="1" fill="rgba(255,255,255,0.35)"/><rect x="93.5" y="18" width="6" height="2" rx="1" fill="rgba(255,255,255,0.35)"/>';
+    hinge='';
   } else {
-    lenses='<ellipse cx="25" cy="23" rx="18" ry="15" '+st+'/><ellipse cx="75" cy="23" rx="18" ry="15" '+st+'/>';
+    fill='<ellipse cx="26" cy="23" rx="18.5" ry="15.5" fill="url(#lg)"/><ellipse cx="74" cy="23" rx="18.5" ry="15.5" fill="url(#lg)"/>';
+    rim ='<ellipse cx="26" cy="23" rx="18.5" ry="15.5" fill="none" stroke="'+color+'" stroke-width="'+rimW+'"/><ellipse cx="74" cy="23" rx="18.5" ry="15.5" fill="none" stroke="'+color+'" stroke-width="'+rimW+'"/>';
+    gloss='<ellipse cx="20" cy="17" rx="7" ry="3.3" fill="url(#gl)" transform="rotate(-24 20 17)"/><ellipse cx="68" cy="17" rx="7" ry="3.3" fill="url(#gl)" transform="rotate(-24 68 17)"/>';
   }
-  return '<svg viewBox="0 0 100 46" xmlns="http://www.w3.org/2000/svg">'+lenses+bridge+temples+'</svg>';
+  return '<svg viewBox="0 0 100 46" xmlns="http://www.w3.org/2000/svg">'+defs+fill+gloss+rim+bridge+hinge+temples+'</svg>';
 }
 function refreshGlass(){ var w=document.getElementById("glassWrap"); if(w) w.innerHTML=glassSVG(window.__tryStyle, window.__tryColor); }
 window.bvTrySetStyle=function(s){ window.__tryStyle=s; refreshGlass(); };
@@ -690,6 +722,7 @@ renderCart();
 
 /* ===== 주문 / 픽업 ===== */
 var ORD_SLOTS=['10:00','11:00','14:00','16:00','18:00'];
+var ORD_DEPOSIT=10000;
 (function(){
   var st=document.getElementById('ordStore'); if(!st)return;
   ['성수점','홍대점','판교점'].forEach(function(s){var o=document.createElement('option');o.textContent=s;st.appendChild(o);});
@@ -703,7 +736,7 @@ var ORD_SLOTS=['10:00','11:00','14:00','16:00','18:00'];
 function ordKindUpd(){
   var b=document.querySelector('#ordKind .chip.active'); if(!b)return;
   document.getElementById('ordRxWrap').style.display=(b.dataset.k==='A')?'block':'none';
-  document.getElementById('ordPayLabel').textContent=(b.dataset.pay==='선결제')?'앱 선결제 (데모)':'매장 결제 (잡아두기)';
+  document.getElementById('ordPayLabel').textContent=(b.dataset.pay==='보증금')?('방문 예약 + 노쇼 보증금 ₩'+ORD_DEPOSIT.toLocaleString('ko-KR')+' (방문 시 차감/환불)'):'매장 결제 (잡아두기)';
 }
 function ordPick(name){var el=document.getElementById('ordItem'); if(el){el.value=name; document.getElementById('ordCard').scrollIntoView({behavior:'smooth'});}}
 function ordConfirm(){
@@ -712,13 +745,13 @@ function ordConfirm(){
   var store=document.getElementById('ordStore').value, date=document.getElementById('ordDate').value, time=document.getElementById('ordTime').value;
   if(!item){toast('제품을 입력해주세요');return;}
   if(!date||!time){toast('픽업 날짜·시간을 골라주세요');return;}
-  var payType=(pay==='선결제')?'선결제':'매장결제';
-  fetch('/api/pickups',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:store,customerId:1,name:'양지근',kind:k,items:item,rx:rx,date:date,time:time,payType:payType,amount:0,deposit:0})})
+  var isDep=(pay==='보증금'); var payType=isDep?'보증금':'매장결제'; var deposit=isDep?ORD_DEPOSIT:0;
+  fetch('/api/pickups',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:store,customerId:1,name:'양지근',kind:k,items:item,rx:rx,date:date,time:time,payType:payType,amount:0,deposit:deposit})})
     .then(function(r){return r.json();}).then(function(j){
       if(!j.ok){toast('주문 실패');return;}
       var msg=document.getElementById('ordMsg'); msg.className='bookmsg show';
-      msg.textContent='✓ '+store+' '+date+' '+time+' · '+item+(payType==='선결제'?' · 선결제(데모) 완료':' · 매장에 잡아둠')+' — 매장에 전달됐어요.';
-      toast(payType==='선결제'?'주문 접수 (선결제 데모)':'매장에 잡아두기 완료');
+      msg.textContent='✓ '+store+' '+date+' '+time+' · '+item+(payType==='보증금'?(' · 보증금 ₩'+ORD_DEPOSIT.toLocaleString('ko-KR')+' 결제(방문 시 차감/환불)'):' · 매장에 잡아둠')+' — 매장에 전달됐어요. 결제는 방문 시 매장에서.';
+      toast(payType==='보증금'?'예약 + 보증금 접수 — 결제는 매장에서':'매장에 잡아두기 완료');
     }).catch(function(){toast('네트워크 오류');});
 }
 

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>로그인 · BETTERVISION OS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{width:100%;max-width:380px}
+.login-card .mark{font-family:var(--sans);font-weight:500;font-size:20px;letter-spacing:.02em;color:var(--ink)}
+.login-card h2{font-size:26px;font-weight:300;letter-spacing:-.5px;margin:18px 0 6px;color:var(--ink)}
+.login-card .lginput{width:100%;font-family:var(--kr);font-size:16px;border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:10px;background:#fff;color:var(--ink)}
+.login-card .lgmsg{font-size:14px;color:var(--bad);margin-top:10px;min-height:18px}
+.login-card .lghint{font-size:13px;color:var(--muted);margin-top:16px;line-height:1.6;border-top:1px solid var(--line2);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="card pad login-card">
+    <span class="mark">BETTER<b>VISION</b><sup style="font-size:10px;color:var(--muted)">™</sup></span>
+    <h2>로그인</h2>
+    <div class="label">가맹점·본부 시스템 접근</div>
+    <input id="u" class="lginput" placeholder="아이디" autocomplete="username">
+    <input id="p" class="lginput" type="password" placeholder="비밀번호" autocomplete="current-password">
+    <button class="btn" style="width:100%;margin-top:14px" onclick="doLogin()">로그인</button>
+    <div class="lgmsg" id="msg"></div>
+    <div class="lghint">데모 계정<br>· 본부: <b>hq</b> / admin<br>· 성수점: <b>seongsu</b> / 1234<br>· 홍대점: <b>hongdae</b> / 1234 · 판교점: <b>pangyo</b> / 1234</div>
+  </div>
+</div>
+<script src="/assets/app.js"></script>
+<script>
+function qp(k){return new URLSearchParams(location.search).get(k);}
+function doLogin(){
+  var u=document.getElementById('u').value.trim(), p=document.getElementById('p').value;
+  if(!u||!p){document.getElementById('msg').textContent='아이디·비밀번호를 입력하세요';return;}
+  fetch('/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:u,pass:p})})
+    .then(function(r){return r.json();}).then(function(j){
+      if(!j.ok){document.getElementById('msg').textContent=j.error||'로그인 실패';return;}
+      var next=qp('next'); if(!next){ next = (j.role==='hq')?'hq.html':'store.html'; }
+      location.href=next;
+    }).catch(function(){document.getElementById('msg').textContent='네트워크 오류';});
+}
+document.getElementById('p').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+</script>
+</body>
+</html>

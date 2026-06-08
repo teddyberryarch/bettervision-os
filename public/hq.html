@@ -61,6 +61,12 @@
 </style>
 </head>
 <body>
+<script>
+/* 진입 인증 체크 (AUTH_ON일 때만 동작) */
+fetch('/api/me').then(function(r){return r.json();}).then(function(j){
+  if(j&&j.authOn&&!j.user){ var pg=location.pathname.split('/').pop()||'index.html'; location.href='login.html?next='+encodeURIComponent(pg); }
+}).catch(function(){});
+</script>
 <div class="topbar"><div class="topbar-in">
   <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag">OS</span></div>
   <div class="nav-links">
@@ -453,6 +459,15 @@
   <span><a href="index.html">← 홈</a></span>
 </div>
 
+<script>
+window.__bvGuide={title:'가맹본부 가이드',sub:'데이터·납품·시스템 통제 = 본부의 힘.',points:[
+{sel:'#dashGMV',t:'전사 대시보드',d:'실 GMV·지점 랭킹·PB 침투율 한눈에.'},
+{sel:'#pbHQ',t:'PB 마진 관리',d:'렌즈·콘택트 PB가 본부 수익의 실체.'},
+{sel:'#belongSel',t:'고객 데이터 귀속',d:'이사·이탈해도 측정·처방·이력은 본부에 남아요.'},
+{sel:'#logiBox',t:'공급·물류 자동화',d:'전 지점 발주를 품목별 통합 출고.'},
+{sel:'#frRetail',t:'신규 가맹 시뮬레이터',d:'상권·평수로 매출·회수기간 즉시 계산.'}
+]};
+</script>
 <script src="/assets/app.js"></script>
 <script>
 const stores=[['성수점',92,'4.8천'],['홍대점',78,'4.1천'],['판교점',64,'3.4천'],['강남점',58,'3.0천'],['부산서면',44,'2.3천']];

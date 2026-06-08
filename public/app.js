@@ -12,20 +12,72 @@ function toast(msg){
   t.textContent=msg;t.style.opacity='1';clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.style.opacity='0';},2000);
 }
 
-/* ===== 공통 예약 모듈 (화면 내 저장 — 새로고침 시 리셋. 나중에 서버로 교체) =====
-   window.BVBooking: 매장×날짜×시간 슬롯 정원(2명/30분) 관리 + 예약 목록 */
+/* ===== 공통 예약 모듈 (서버 API 사용) ===== */
 window.BVBooking = (function(){
-  var CAP = 2;                       // 30분당 정원
+  var CAP = 2;
   var SLOTS = ['10:00','10:30','11:00','11:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30'];
   var STORES = ['성수점','홍대점','판교점'];
-  var bookings = [];                 // {store,date,time,name,phone,ts}
-  function key(s,d,t){ return s+'|'+d+'|'+t; }
-  function count(s,d,t){ return bookings.filter(function(b){return b.store===s&&b.date===d&&b.time===t;}).length; }
-  function left(s,d,t){ return CAP - count(s,d,t); }
-  function isFull(s,d,t){ return left(s,d,t) <= 0; }
-  function add(b){ if(isFull(b.store,b.date,b.time)) return false; b.ts=Date.now(); bookings.push(b); return true; }
-  function listFor(s,d){ return bookings.filter(function(b){return b.store===s&&(!d||b.date===d);}).sort(function(a,b){return a.time<b.time?-1:1;}); }
-  function all(){ return bookings.slice(); }
+  var cache = {};                          // 'store|date' -> [rows]
+  function k(s,d){ return s+'|'+d; }
   function todayISO(){ var d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
-  return {CAP:CAP, SLOTS:SLOTS, STORES:STORES, count:count, left:left, isFull:isFull, add:add, listFor:listFor, all:all, todayISO:todayISO};
+  function load(store,date){
+    return fetch('/api/bookings?store='+encodeURIComponent(store)+'&date='+encodeURIComponent(date))
+      .then(function(r){return r.json();})
+      .then(function(j){ cache[k(store,date)] = (j&&j.bookings)||[]; return cache[k(store,date)]; })
+      .catch(function(){ cache[k(store,date)] = cache[k(store,date)]||[]; return cache[k(store,date)]; });
+  }
+  function loadAll(date){
+    return Promise.all(STORES.map(function(s){return load(s,date);}))
+      .then(function(){ var out=[]; STORES.forEach(function(s){out=out.concat(cache[k(s,date)]||[]);}); return out; });
+  }
+  function rows(store,date){ return cache[k(store,date)]||[]; }
+  function count(store,date,time){ return rows(store,date).filter(function(b){return b.time===time;}).length; }
+  function left(store,date,time){ return CAP - count(store,date,time); }
+  function isFull(store,date,time){ return left(store,date,time) <= 0; }
+  function add(b){
+    return fetch('/api/bookings',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)})
+      .then(function(r){return r.json().then(function(j){return {status:r.status,j:j};});})
+      .then(function(o){ if(o.j&&o.j.ok){ return load(b.store,b.date).then(function(){return {ok:true};}); }
+        return {ok:false,error:(o.j&&o.j.error)||'예약 실패'}; })
+      .catch(function(){ return {ok:false,error:'네트워크 오류'}; });
+  }
+  return {CAP:CAP, SLOTS:SLOTS, STORES:STORES, load:load, loadAll:loadAll, rows:rows,
+          listFor:rows, count:count, left:left, isFull:isFull, add:add, todayISO:todayISO};
+})();
+
+/* ===== 온보딩/설명 가이드 ===== */
+window.BVGuide = (function(){
+  function build(){
+    var g = window.__bvGuide;
+    if(!g || !g.points || !g.points.length) return;
+    var btn = document.createElement('button');
+    btn.className = 'bvg-btn'; btn.type='button'; btn.textContent = 'ⓘ 설명';
+    var panel = document.createElement('div');
+    panel.className = 'bvg-panel';
+    panel.innerHTML =
+      '<button class="bvg-close" type="button" aria-label="닫기">×</button>'+
+      '<div class="bvg-h">'+(g.title||'이 화면 가이드')+'</div>'+
+      '<div class="bvg-sub">'+(g.sub||'항목을 누르면 해당 위치로 이동해 강조해요.')+'</div>'+
+      g.points.map(function(p,i){
+        return '<div class="bvg-item" data-sel="'+(p.sel||'')+'" data-click="'+(p.click||'')+'">'+
+          '<div class="bvg-n">'+(i+1)+'</div><div><div class="bvg-t">'+p.t+'</div><div class="bvg-d">'+p.d+'</div></div></div>';
+      }).join('');
+    document.body.appendChild(btn);
+    document.body.appendChild(panel);
+    btn.addEventListener('click', function(){ panel.classList.toggle('on'); });
+    panel.querySelector('.bvg-close').addEventListener('click', function(){ panel.classList.remove('on'); });
+    panel.addEventListener('click', function(e){
+      var it = e.target.closest('.bvg-item'); if(!it) return;
+      if(it.dataset.click){ var c=document.querySelector(it.dataset.click); if(c) c.click(); }
+      var sel = it.dataset.sel;
+      setTimeout(function(){
+        if(!sel) return; var el=document.querySelector(sel); if(!el) return;
+        el.scrollIntoView({behavior:'smooth', block:'center'});
+        el.classList.remove('bvg-flash'); void el.offsetWidth; el.classList.add('bvg-flash');
+      }, 200);
+    });
+  }
+  if(document.readyState!=='loading') setTimeout(build,0);
+  else document.addEventListener('DOMContentLoaded', build);
+  return {};
 })();
