@@ -320,40 +320,38 @@ function toggleRun(el){el.classList.toggle('done');
   const done=document.querySelectorAll('#runlist .runitem.done').length;
   document.getElementById('runcount').textContent=`${done} / ${items.length} 완료`;}
 
-/* ===== 가맹점 예약 접수 ===== */
+/* ===== 가맹점 예약 접수 (서버 API) ===== */
 (function(){
-  // 데모 샘플 예약 심기
-  var d=BVBooking.todayISO();
-  [['성수점',d,'11:00','김민지'],['성수점',d,'11:00','이정훈'],['성수점',d,'14:00','박서연'],
-   ['홍대점',d,'15:00','최우진'],['성수점',d,'16:30','정하늘']].forEach(function(x){
-     BVBooking.add({store:x[0],date:x[1],time:x[2],name:x[3],phone:''});});
-  // 셀렉트 채우기
   var ss=document.getElementById('stBkStore'); if(!ss)return;
   ss.innerHTML=BVBooking.STORES.map(function(s){return '<option>'+s+'</option>';}).join('');
-  document.getElementById('stBkDate').value=d;
+  document.getElementById('stBkDate').value=BVBooking.todayISO();
   document.getElementById('stTime').innerHTML=BVBooking.SLOTS.map(function(t){return '<option>'+t+'</option>';}).join('');
   ss.addEventListener('change',stRender); document.getElementById('stBkDate').addEventListener('change',stRender);
   stRender();
 })();
 function stRender(){
   var store=document.getElementById('stBkStore').value, date=document.getElementById('stBkDate').value;
-  document.getElementById('stSlots').innerHTML=BVBooking.SLOTS.map(function(t){
-    var c=BVBooking.count(store,date,t), full=c>=BVBooking.CAP, pct=Math.round(c/BVBooking.CAP*100);
-    return '<div class="slotrow"><span class="st">'+t+'</span><div class="sbar"><div class="sfill'+(full?' full':'')+'" style="width:'+pct+'%"></div></div><span class="sct">'+c+' / '+BVBooking.CAP+(full?' 마감':'')+'</span></div>';
-  }).join('');
-  var list=BVBooking.listFor(store,date);
-  document.getElementById('stBkCount').textContent='· '+list.length+'건';
-  document.getElementById('stBkList').innerHTML = list.length? list.map(function(b){
-    return '<div class="bklist-row"><span>'+b.time+' · '+b.name+'</span><span class="muted">'+(b.phone||'앱 예약')+'</span></div>';
-  }).join('') : '<div class="muted" style="font-size:14px">예약 없음</div>';
+  document.getElementById('stSlots').innerHTML='<div class="muted" style="font-size:14px">불러오는 중…</div>';
+  BVBooking.load(store,date).then(function(){
+    document.getElementById('stSlots').innerHTML=BVBooking.SLOTS.map(function(t){
+      var c=BVBooking.count(store,date,t), full=c>=BVBooking.CAP, pct=Math.round(c/BVBooking.CAP*100);
+      return '<div class="slotrow"><span class="st">'+t+'</span><div class="sbar"><div class="sfill'+(full?' full':'')+'" style="width:'+pct+'%"></div></div><span class="sct">'+c+' / '+BVBooking.CAP+(full?' 마감':'')+'</span></div>';
+    }).join('');
+    var list=BVBooking.listFor(store,date);
+    document.getElementById('stBkCount').textContent='· '+list.length+'건';
+    document.getElementById('stBkList').innerHTML = list.length? list.map(function(b){
+      return '<div class="bklist-row"><span>'+b.time+' · '+b.name+'</span><span class="muted">'+(b.phone||'앱 예약')+'</span></div>';
+    }).join('') : '<div class="muted" style="font-size:14px">예약 없음</div>';
+  });
 }
 function stAdd(){
   var store=document.getElementById('stBkStore').value, date=document.getElementById('stBkDate').value,
       time=document.getElementById('stTime').value, name=document.getElementById('stName').value.trim();
   if(!name){toast('이름을 입력해주세요');return;}
-  var ok=BVBooking.add({store:store,date:date,time:time,name:name,phone:'전화'});
-  if(!ok){toast(time+' 슬롯은 마감됐어요 (2/2)');return;}
-  document.getElementById('stName').value=''; toast(name+'님 '+time+' 예약 추가'); stRender();
+  BVBooking.add({store:store,date:date,time:time,name:name,phone:'전화'}).then(function(res){
+    if(!res.ok){toast(res.error||'추가 실패');return;}
+    document.getElementById('stName').value=''; toast(name+'님 '+time+' 예약 추가'); stRender();
+  });
 }
 
 /* ===== 가맹점 POS + 부품재고 ===== */

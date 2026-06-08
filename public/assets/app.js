@@ -11,3 +11,36 @@ function toast(msg){
   if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;z-index:99;opacity:0;transition:.2s';document.body.appendChild(t);}
   t.textContent=msg;t.style.opacity='1';clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.style.opacity='0';},2000);
 }
+
+/* ===== 공통 예약 모듈 (서버 API 사용) ===== */
+window.BVBooking = (function(){
+  var CAP = 2;
+  var SLOTS = ['10:00','10:30','11:00','11:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30'];
+  var STORES = ['성수점','홍대점','판교점'];
+  var cache = {};                          // 'store|date' -> [rows]
+  function k(s,d){ return s+'|'+d; }
+  function todayISO(){ var d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+  function load(store,date){
+    return fetch('/api/bookings?store='+encodeURIComponent(store)+'&date='+encodeURIComponent(date))
+      .then(function(r){return r.json();})
+      .then(function(j){ cache[k(store,date)] = (j&&j.bookings)||[]; return cache[k(store,date)]; })
+      .catch(function(){ cache[k(store,date)] = cache[k(store,date)]||[]; return cache[k(store,date)]; });
+  }
+  function loadAll(date){
+    return Promise.all(STORES.map(function(s){return load(s,date);}))
+      .then(function(){ var out=[]; STORES.forEach(function(s){out=out.concat(cache[k(s,date)]||[]);}); return out; });
+  }
+  function rows(store,date){ return cache[k(store,date)]||[]; }
+  function count(store,date,time){ return rows(store,date).filter(function(b){return b.time===time;}).length; }
+  function left(store,date,time){ return CAP - count(store,date,time); }
+  function isFull(store,date,time){ return left(store,date,time) <= 0; }
+  function add(b){
+    return fetch('/api/bookings',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)})
+      .then(function(r){return r.json().then(function(j){return {status:r.status,j:j};});})
+      .then(function(o){ if(o.j&&o.j.ok){ return load(b.store,b.date).then(function(){return {ok:true};}); }
+        return {ok:false,error:(o.j&&o.j.error)||'예약 실패'}; })
+      .catch(function(){ return {ok:false,error:'네트워크 오류'}; });
+  }
+  return {CAP:CAP, SLOTS:SLOTS, STORES:STORES, load:load, loadAll:loadAll, rows:rows,
+          listFor:rows, count:count, left:left, isFull:isFull, add:add, todayISO:todayISO};
+})();

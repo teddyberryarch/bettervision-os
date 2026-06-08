@@ -16,6 +16,10 @@
 .hqbk-row .tr{flex:1;height:10px;background:var(--surface);border-radius:9999px;overflow:hidden}
 .hqbk-row .tf{height:100%;background:var(--ink);border-radius:9999px}
 .hqbk-row .vv{width:96px;text-align:right;color:var(--muted)}
+.mcellin{width:100%;height:46px;border:1px solid var(--line);border-radius:8px;text-align:center;font-size:15px;font-weight:600;color:var(--ink);background:#fff;font-family:inherit;-moz-appearance:textfield}
+.mcellin:focus{outline:2px solid var(--ink);border-color:var(--ink)}
+.mcellin.hot{outline:2px solid var(--ink);background:#f5f5f5}
+#mxTotal{width:110px;font-family:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -204,7 +208,12 @@
       <div class="eyebrow">프론트 × 템플 수요 매트릭스 (전국)</div>
       <div class="label" style="margin-bottom:12px">셀=조합 수요(조립 믹스용), 가장자리 %=프론트·템플 각각의 생산 비중. 프론트·템플을 따로 만드니 이 %로 생산 수량을 나눈다.</div>
       <div id="ftMatrix"></div>
-      <div class="note"><b>생산 예측.</b> 프론트 = F1 20% · <b>F2 54%</b> · F3 26%, 템플 = T1 26% · <b>T2 51%</b> · T3 23%. 총수요 × 이 비중으로 부품 생산량 산출(예: 월 1,000개 → F2 540개 / T2 510개). 최다 조합 F2×T2.</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap">
+        <span class="label">월 총 생산량</span>
+        <input type="number" id="mxTotal" value="1000" min="0" step="100" oninput="mxRecalc()">
+        <span class="label">개</span>
+      </div>
+      <div class="note" id="prodOut"></div>
     </div>
     <div class="card pad">
       <div class="eyebrow">사용자 데이터 (전국 고객)</div>
@@ -266,29 +275,39 @@ document.getElementById('trend').innerHTML=sales.map((s,i)=>{
   let d='';if(i>0){const ch=((s[1]-sales[i-1][1])/sales[i-1][1]*100);d=`<div class="tdelta ${ch>=0?'up':'down'}">${ch>=0?'▲':'▼'}${Math.abs(ch).toFixed(0)}%</div>`;}
   return `<div class="tcol"><div class="tbar ${i===sales.length-1?'now':''}" style="height:${(s[1]/smax*100).toFixed(0)}%"></div><div class="tcap">${s[0]}</div>${d}</div>`;}).join('');
 
-/* front × temple matrix */
-(function(){
-  const cols=['T1','T2','T3'], rows=['F1','F2','F3'];
-  const data=[[14,22,8],[30,62,26],[12,28,16]];
-  const mx=62, gt='grid-template-columns:38px repeat(3,1fr) 60px';
-  const total=data.flat().reduce((a,b)=>a+b,0);
-  const rowSum=data.map(r=>r.reduce((a,b)=>a+b,0));
-  const colSum=cols.map((_,ci)=>data.reduce((a,r)=>a+r[ci],0));
-  const pct=x=>Math.round(x/total*100)+'%';
-  const mp='display:flex;align-items:center;justify-content:center;height:46px;border-radius:8px;font-size:14px;font-weight:600;color:#111111;background:#f5f5f5';
-  let h='';
-  h+=`<div class="mhead" style="${gt}"><div class="mcorner">F\\T</div>`+cols.map(c=>`<div class="mlab">${c}</div>`).join('')+`<div class="mlab" style="font-weight:600;color:#111111">프론트%</div></div>`;
-  rows.forEach((r,ri)=>{
-    h+=`<div class="mrowg" style="${gt}"><div class="mlab row">${r}</div>`;
-    data[ri].forEach((v)=>{const op=(0.10+0.85*v/mx).toFixed(2);const hot=(v===mx);
-      h+=`<div class="mcell${hot?' hot':''}" style="background:rgba(17,17,17,${op});color:${op>0.55?'#fff':'#111111'}">${v}</div>`;});
-    h+=`<div style="${mp}">${pct(rowSum[ri])}</div></div>`;
+/* front × temple matrix (편집형) */
+var MX_COLS=['T1','T2','T3'], MX_ROWS=['F1','F2','F3'];
+var MX=[[14,22,8],[30,62,26],[12,28,16]];
+function mxRender(){
+  var gt='grid-template-columns:38px repeat(3,1fr) 60px';
+  var mp='display:flex;align-items:center;justify-content:center;height:46px;border-radius:8px;font-size:14px;font-weight:600;color:#111111;background:#f5f5f5';
+  var h='<div class="mhead" style="'+gt+'"><div class="mcorner">F/T</div>'+MX_COLS.map(function(c){return '<div class="mlab">'+c+'</div>';}).join('')+'<div class="mlab" style="font-weight:600;color:#111111">프론트%</div></div>';
+  MX_ROWS.forEach(function(r,ri){
+    h+='<div class="mrowg" style="'+gt+'"><div class="mlab row">'+r+'</div>';
+    MX[ri].forEach(function(v,ci){ h+='<input class="mcellin" type="number" min="0" value="'+v+'" data-r="'+ri+'" data-c="'+ci+'" oninput="mxRecalc()">'; });
+    h+='<div style="'+mp+'" id="frow'+ri+'"></div></div>';
   });
-  h+=`<div class="mrowg" style="${gt}"><div class="mlab row" style="font-weight:600;color:#111111">템플%</div>`+
-     colSum.map(c=>`<div style="${mp}">${pct(c)}</div>`).join('')+
-     `<div style="${mp};background:#111111;color:#fff">100%</div></div>`;
+  h+='<div class="mrowg" style="'+gt+'"><div class="mlab row" style="font-weight:600;color:#111111">템플%</div>'+
+     MX_COLS.map(function(_,ci){return '<div style="'+mp+'" id="tcol'+ci+'"></div>';}).join('')+
+     '<div style="'+mp+';background:#111111;color:#fff">100%</div></div>';
   document.getElementById('ftMatrix').innerHTML=h;
-})();
+  mxRecalc();
+}
+function mxRecalc(){
+  document.querySelectorAll('#ftMatrix .mcellin').forEach(function(inp){ MX[+inp.dataset.r][+inp.dataset.c]=+inp.value||0; });
+  var total=0, rowSum=[0,0,0], colSum=[0,0,0], mx=0;
+  MX.forEach(function(row,ri){ row.forEach(function(v,ci){ total+=v; rowSum[ri]+=v; colSum[ci]+=v; if(v>mx)mx=v; }); });
+  function pct(x){ return total? Math.round(x/total*100)+'%' : '0%'; }
+  MX_ROWS.forEach(function(_,ri){ var el=document.getElementById('frow'+ri); if(el)el.textContent=pct(rowSum[ri]); });
+  MX_COLS.forEach(function(_,ci){ var el=document.getElementById('tcol'+ci); if(el)el.textContent=pct(colSum[ci]); });
+  document.querySelectorAll('#ftMatrix .mcellin').forEach(function(inp){ inp.classList.toggle('hot', (+inp.value===mx && mx>0)); });
+  var tq=document.getElementById('mxTotal'); var totalQ=tq?(+tq.value||0):0;
+  var fLines=MX_ROWS.map(function(r,ri){ return r+' '+(total?Math.round(totalQ*rowSum[ri]/total):0)+'개'; }).join(' · ');
+  var tLines=MX_COLS.map(function(c,ci){ return c+' '+(total?Math.round(totalQ*colSum[ci]/total):0)+'개'; }).join(' · ');
+  var out=document.getElementById('prodOut');
+  if(out) out.innerHTML='<b>생산 예측.</b> 총 '+totalQ.toLocaleString('ko-KR')+'개 기준 — 프론트: '+fLines+' / 템플: '+tLines+'. 셀 수요를 바꾸면 비중·생산량이 자동 갱신돼요.';
+}
+mxRender();
 /* demographics */
 const ages=[['10대',4],['20대',26],['30대',31],['40대',22],['50대',12],['60+',5]];
 document.getElementById('ageBars').innerHTML=ages.map(a=>`<div class="demo-row"><span class="label">${a[0]}</span><div class="demo-track"><div class="demo-fill" style="width:${(a[1]/31*100).toFixed(0)}%"></div></div><span class="muted" style="text-align:right">${a[1]}%</span></div>`).join('');
@@ -330,19 +349,17 @@ function storeDetail(i){const s=live[i];const hmax=Math.max(...s.hours);
    ${s.stock.map(k=>`<div class="stockrow"><span>${k[0]}</span><span class="pill ${k[2]==='ok'?'good':k[2]==='bad'?'bad':'warn'}">${k[1]}</span></div>`).join('')}`;}
 storeDetail(0);
 
-/* ===== 전 매장 예약 현황 (오늘) ===== */
+/* ===== 전 매장 예약 현황 (오늘, 서버 API) ===== */
 (function(){
-  var d=BVBooking.todayISO();
-  [['성수점',d,'11:00','김민지'],['성수점',d,'11:00','이정훈'],['성수점',d,'14:00','박서연'],
-   ['성수점',d,'16:30','정하늘'],['홍대점',d,'15:00','최우진'],['홍대점',d,'11:00','한지우'],
-   ['판교점',d,'10:30','오세훈'],['판교점',d,'14:30','윤서아'],['판교점',d,'15:00','강민석']
-  ].forEach(function(x){BVBooking.add({store:x[0],date:x[1],time:x[2],name:x[3],phone:''});});
   var box=document.getElementById('hqBook'); if(!box)return;
-  var capTotal=BVBooking.SLOTS.length*BVBooking.CAP;
-  box.innerHTML=BVBooking.STORES.map(function(st){
-    var booked=BVBooking.listFor(st,d).length, pct=Math.round(booked/capTotal*100);
-    return '<div class="hqbk-row"><span class="nm">'+st+'</span><div class="tr"><div class="tf" style="width:'+pct+'%"></div></div><span class="vv">'+booked+' / '+capTotal+'건 ('+pct+'%)</span></div>';
-  }).join('');
+  var d=BVBooking.todayISO(), capTotal=BVBooking.SLOTS.length*BVBooking.CAP;
+  box.innerHTML='<div class="muted" style="font-size:14px">불러오는 중…</div>';
+  BVBooking.loadAll(d).then(function(){
+    box.innerHTML=BVBooking.STORES.map(function(st){
+      var booked=BVBooking.listFor(st,d).length, pct=Math.round(booked/capTotal*100);
+      return '<div class="hqbk-row"><span class="nm">'+st+'</span><div class="tr"><div class="tf" style="width:'+pct+'%"></div></div><span class="vv">'+booked+' / '+capTotal+'건 ('+pct+'%)</span></div>';
+    }).join('');
+  });
 })();
 </script>
 </body>

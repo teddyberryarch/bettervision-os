@@ -134,12 +134,15 @@
               <h4>얼굴 측정 <span class="phaseflag">Phase 1 · 핵심</span></h4>
               <div class="label" style="margin:6px 0 0">카메라로 자동 측정하거나, 아래 슬라이더로 직접 조절해요. 값이 바뀌면 사이즈·추천이 바로 갱신됩니다.</div>
               <div class="scanwrap" id="scanwrap">
+                <video id="camVid" playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"></video>
                 <div class="face"></div>
                 <div class="scanline"></div>
                 <div class="dotpd l"></div><div class="dotpd r"></div>
                 <div class="scanstat" id="scanstat">카메라를 정면으로 바라보세요</div>
               </div>
-              <button class="btn" style="width:100%;margin-top:12px" id="scanbtn" onclick="runScan()">카메라로 자동 측정</button>
+              <button class="btn" style="width:100%;margin-top:12px" id="scanbtn" onclick="measureCamera()">카메라로 측정</button>
+              <button class="btn small ghost" style="width:100%;margin-top:6px" onclick="runDemo()">데모값 넣기</button>
+              <div class="label" style="margin-top:6px;font-size:13px">카메라 권한 허용 필요 · 측정은 추정치(조명·각도 영향). 관자 길이는 정면 측정이 어려워 추정값이니 슬라이더로 조절하세요.</div>
 
               <div class="divider"></div>
               <div class="label" style="margin-bottom:8px">측정값 — 직접 조절 가능</div>
@@ -253,6 +256,51 @@
 </div>
 
 <script src="/assets/app.js"></script>
+<script type="module">
+import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
+let landmarker=null;
+(async function init(){
+  try{
+    const fs=await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
+    landmarker=await FaceLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",delegate:"GPU"},runningMode:"VIDEO",numFaces:1});
+    window.__bvFaceReady=true;
+  }catch(e){ window.__bvFaceReady=false; console.warn("FaceLandmarker init fail",e); }
+})();
+function D(a,b,W,H){return Math.hypot((a.x-b.x)*W,(a.y-b.y)*H);}
+window.bvFaceMeasure=async function(onDone,onErr,onStat){
+  if(!landmarker){ onErr&&onErr("모델 로딩 전이에요. 잠시 후 다시."); return; }
+  let stream;
+  try{ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:640,height:480}}); }
+  catch(e){ onErr&&onErr("카메라 권한이 필요해요."); return; }
+  const vid=document.getElementById("camVid");
+  vid.srcObject=stream; vid.style.display="block";
+  try{ await vid.play(); }catch(e){}
+  onStat&&onStat("얼굴을 화면 중앙에 맞춰주세요…");
+  const samples=[]; const t0=performance.now();
+  await new Promise(function(res){
+    function loop(){
+      const now=performance.now(); const W=vid.videoWidth||640, H=vid.videoHeight||480;
+      let r=null; try{ r=landmarker.detectForVideo(vid, now); }catch(e){}
+      if(r && r.faceLandmarks && r.faceLandmarks[0]){
+        const L=r.faceLandmarks[0];
+        const irisPx=D(L[469],L[471],W,H);
+        const pdPx=D(L[468],L[473],W,H);
+        const fwPx=D(L[234],L[454],W,H);
+        if(irisPx>2){ const sc=11.7/irisPx; samples.push({pd:pdPx*sc, fw:fwPx*sc}); }
+        onStat&&onStat("측정 중… "+samples.length);
+      }
+      if(now-t0<2600 && samples.length<45){ requestAnimationFrame(loop); } else { res(); }
+    }
+    requestAnimationFrame(loop);
+  });
+  stream.getTracks().forEach(function(t){t.stop();}); vid.style.display="none"; vid.srcObject=null;
+  if(!samples.length){ onErr&&onErr("얼굴을 못 잡았어요. 조명을 밝게 하고 다시."); return; }
+  function med(a){ a.sort(function(x,y){return x-y;}); return a[Math.floor(a.length/2)]; }
+  const pd=med(samples.map(function(s){return s.pd;}));
+  const fw=med(samples.map(function(s){return s.fw;}));
+  onDone&&onDone({pd:Math.round(pd*10)/10, faceWidth:Math.round(fw)});
+};
+</script>
 <script>
 /* phone tabs */
 document.getElementById('ptabs').addEventListener('click',function(e){var t=e.target.closest('.ptab');if(!t)return;
@@ -297,17 +345,30 @@ function renderRecs(F,T,nose){
   document.getElementById('recList').innerHTML = html || '<div class="rd" style="color:var(--muted)">맞는 프레임이 없어요. 측정값을 조절해 보세요.</div>';
 }
 /* 카메라 자동 측정(데모): 애니메이션 후 측정값 채우고 재계산 */
-function runScan(){var w=document.getElementById('scanwrap'),st=document.getElementById('scanstat'),btn=document.getElementById('scanbtn');
-  w.classList.remove('done');w.classList.add('scanning');btn.disabled=true;btn.textContent='측정 중…';
-  st.textContent='얼굴 윤곽 인식 중…';
-  setTimeout(function(){st.textContent='동공 간 거리(PD) 측정 중…';},700);
-  setTimeout(function(){st.textContent='안면 폭·코높이 산출 중…';},1500);
-  setTimeout(function(){
-    document.getElementById('inW').value=142; document.getElementById('inL').value=143; document.getElementById('inN').value=0;
+function measureCamera(){
+  var btn=document.getElementById('scanbtn'), w=document.getElementById('scanwrap'), st=document.getElementById('scanstat');
+  if(!window.bvFaceMeasure || !window.__bvFaceReady){ toast('카메라 모듈 로딩 중 — 데모값으로 진행'); runDemo(); return; }
+  w.classList.remove('done'); w.classList.add('scanning'); btn.disabled=true; btn.textContent='측정 중…';
+  window.bvFaceMeasure(function(res){
+    var fw=Math.max(120,Math.min(155,res.faceWidth));
+    document.getElementById('inW').value=fw;
+    document.getElementById('inL').value=Math.max(130,Math.min(155,Math.round(fw*0.98+4)));
+    document.getElementById('inN').value=0;
     var sz=recompute();
-    w.classList.remove('scanning');w.classList.add('done');
-    st.textContent='측정 완료 · '+sz; btn.disabled=false; btn.textContent='다시 측정';
-  },2400);}
+    w.classList.remove('scanning'); w.classList.add('done');
+    st.textContent='측정 완료 · PD '+res.pd+'mm · '+sz+' (관자=추정)';
+    btn.disabled=false; btn.textContent='다시 측정';
+  }, function(err){
+    w.classList.remove('scanning'); btn.disabled=false; btn.textContent='카메라로 측정';
+    st.textContent=err; toast(err);
+  }, function(stat){ st.textContent=stat; });
+}
+function runDemo(){
+  document.getElementById('inW').value=142; document.getElementById('inL').value=143; document.getElementById('inN').value=0;
+  var sz=recompute();
+  var w=document.getElementById('scanwrap'), st=document.getElementById('scanstat');
+  w.classList.add('done'); st.textContent='데모 측정값 · '+sz;
+}
 recompute();
 /* eye-health timeline */
 (function(){var c=document.getElementById('tlChart');if(!c)return;
@@ -327,11 +388,14 @@ function bkStoreVal(){var a=document.querySelector('#bkStore .chip.active');retu
 function bkRenderSlots(){
   var store=bkStoreVal(), date=document.getElementById('bkDate').value, box=document.getElementById('bkTime');
   if(!store||!date){box.innerHTML='<div class="rd" style="color:var(--muted)">매장·날짜를 먼저 골라주세요</div>';return;}
-  box.innerHTML=BVBooking.SLOTS.map(function(t){
-    var left=BVBooking.left(store,date,t), full=left<=0;
-    return '<button class="chip slot'+(full?' full':'')+'" data-v="'+t+'"'+(full?' disabled':'')+'>'+t+
-      '<span class="seat">'+(full?'마감':left+'자리')+'</span></button>';
-  }).join('');
+  box.innerHTML='<div class="rd" style="color:var(--muted)">불러오는 중…</div>';
+  BVBooking.load(store,date).then(function(){
+    box.innerHTML=BVBooking.SLOTS.map(function(t){
+      var left=BVBooking.left(store,date,t), full=left<=0;
+      return '<button class="chip slot'+(full?' full':'')+'" data-v="'+t+'"'+(full?' disabled':'')+'>'+t+
+        '<span class="seat">'+(full?'마감':left+'자리')+'</span></button>';
+    }).join('');
+  });
 }
 document.getElementById('bkStore').addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;
   this.querySelectorAll('.chip').forEach(function(x){x.classList.remove('active');});b.classList.add('active');bkRenderSlots();});
@@ -345,11 +409,12 @@ function book(){
       msg=document.getElementById('bookMsg');
   if(!store||!date||!time){toast('매장·날짜·시간을 모두 골라주세요');return;}
   if(!name){toast('이름을 입력해주세요');return;}
-  var ok=BVBooking.add({store:store,date:date,time:time,name:name,phone:phone});
-  if(!ok){toast('방금 마감됐어요. 다른 시간을 골라주세요');bkRenderSlots();return;}
-  msg.className='bookmsg show';
-  msg.textContent='✓ '+store+' · '+date+' '+time+' · '+name+'님 예약 완료 — 매장에 전달됐어요.';
-  document.getElementById('bkName').value=''; document.getElementById('bkPhone').value=''; bkRenderSlots();
+  BVBooking.add({store:store,date:date,time:time,name:name,phone:phone}).then(function(res){
+    if(!res.ok){ toast(res.error||'예약 실패'); bkRenderSlots(); return; }
+    msg.className='bookmsg show';
+    msg.textContent='✓ '+store+' · '+date+' '+time+' · '+name+'님 예약 완료 — 매장에 전달됐어요.';
+    document.getElementById('bkName').value=''; document.getElementById('bkPhone').value=''; bkRenderSlots();
+  });
 }
 bkRenderSlots();
 

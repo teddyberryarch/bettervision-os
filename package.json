@@ -1,12 +1,9 @@
 {
   "name": "bettervision-web",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "BETTERVISION OS 멀티페이지 웹앱 (정적)",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "engines": {
-    "node": ">=18"
-  }
+  "description": "BETTERVISION OS — 정적 + 예약 API(PostgreSQL)",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "pg": "^8.13.1" },
+  "engines": { "node": ">=18" }
 }
