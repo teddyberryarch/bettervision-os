@@ -94,6 +94,7 @@ async function init(){
     size TEXT, face TEXT, pd TEXT, rx TEXT, nose TEXT,
     seg TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   await pool.query(`ALTER TABLE sales ADD COLUMN IF NOT EXISTS customer_id INT`);
+  await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS deadline TEXT`);
   await pool.query(`CREATE TABLE IF NOT EXISTS pickups(
     id SERIAL PRIMARY KEY, store TEXT, customer_id INT, name TEXT, phone TEXT,
     kind TEXT,            -- A(도수) / B(비도수) / C(소모품)
@@ -287,8 +288,26 @@ async function createOrder(store, sku, name, cat, qty){
   if(ready){const r=await pool.query("INSERT INTO orders(store,sku,name,cat,qty,status) VALUES($1,$2,$3,$4,$5,'대기') RETURNING id,store,sku,name,cat,qty,status",[store,sku,name,cat,qty]);return r.rows[0];}
   const row={id:mem.orders.length+1,store,sku,name,cat,qty,status:'대기'};mem.orders.push(row);return row;
 }
+async function pushOrder(store, sku, name, cat, qty, deadline){
+  // 본부 → 가맹점 발주 푸시 (가맹 응답 대기)
+  if(ready){const r=await pool.query("INSERT INTO orders(store,sku,name,cat,qty,status,deadline) VALUES($1,$2,$3,$4,$5,'푸시대기',$6) RETURNING id",[store,sku,name,cat,qty,deadline||null]);return r.rows[0].id;}
+  const id=mem.orders.length+1; mem.orders.push({id:id,store:store,sku:sku,name:name,cat:cat,qty:qty,status:'푸시대기',deadline:deadline||null}); return id;
+}
+async function respondPush(id, accept){
+  // 가맹점 응답: 승인 -> '승인'(입고대기), 거절 -> '취소'
+  var to = accept? '승인' : '취소';
+  if(ready){ await pool.query("UPDATE orders SET status=$2, updated_at=now() WHERE id=$1 AND status='푸시대기'",[id,to]); return {ok:true}; }
+  var o=mem.orders.find(function(x){return x.id===id;}); if(o&&o.status==='푸시대기')o.status=to; return {ok:true};
+}
+async function autoConfirmPushes(){
+  // 마감 지난 푸시대기 -> 자동 승인(본부안대로)
+  var nowISO=new Date().toISOString();
+  if(ready){ const r=await pool.query("UPDATE orders SET status='승인', updated_at=now() WHERE status='푸시대기' AND deadline IS NOT NULL AND deadline <= $1 RETURNING id",[nowISO]); return r.rowCount; }
+  var n=0; mem.orders.forEach(function(o){ if(o.status==='푸시대기'&&o.deadline&&o.deadline<=nowISO){o.status='승인';n++;} }); return n;
+}
 async function listOrders(store, status){
-  if(ready){const r=await pool.query('SELECT id,store,sku,name,cat,qty,status FROM orders WHERE ($1::text IS NULL OR store=$1) AND ($2::text IS NULL OR status=$2) ORDER BY id DESC',[store||null,status||null]);return r.rows;}
+  await autoConfirmPushes();
+  if(ready){const r=await pool.query('SELECT id,store,sku,name,cat,qty,status,deadline FROM orders WHERE ($1::text IS NULL OR store=$1) AND ($2::text IS NULL OR status=$2) ORDER BY id DESC',[store||null,status||null]);return r.rows;}
   return mem.orders.filter(o=>(!store||o.store===store)&&(!status||o.status===status)).slice().reverse();
 }
 async function updateOrder(id, status){
@@ -456,7 +475,7 @@ async function logout(token){
   else { var u=mem.users.find(function(x){return x.token===token;}); if(u)u.token=null; }
 }
 
-module.exports={ init, STORES, CATALOG, refundSale, recentSales, createOrder, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+module.exports={ init, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,

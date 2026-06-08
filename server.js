@@ -136,6 +136,17 @@ async function api(req, res, url){
     if(req.method==='GET' && url.pathname==='/api/orders'){
       return send(res,200,{ok:true, orders:await db.listOrders(url.searchParams.get('store'), url.searchParams.get('status'))});
     }
+    // POST /api/orders/push {store,sku,name,cat,qty,deadline} -> 본부가 가맹점에 발주 푸시
+    if(req.method==='POST' && url.pathname==='/api/orders/push'){
+      const b=await body(req);
+      if(!b.store||!b.sku||!b.qty) return send(res,400,{ok:false,error:'필수값 누락'});
+      const id=await db.pushOrder(b.store,b.sku,b.name||b.sku,b.cat||'',b.qty,b.deadline||null);
+      return send(res,201,{ok:true, id:id});
+    }
+    // POST /api/orders/respond {id,accept} -> 가맹점 푸시 응답(승인/거절)
+    if(req.method==='POST' && url.pathname==='/api/orders/respond'){
+      const b=await body(req); return send(res,200, await db.respondPush(b.id, !!b.accept));
+    }
     // POST /api/orders {store,sku,name,cat,qty} -> 발주 생성(대기)
     if(req.method==='POST' && url.pathname==='/api/orders'){
       const b=await body(req);
