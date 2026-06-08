@@ -1,7 +1,7 @@
 // PostgreSQL 래퍼. DATABASE_URL 없으면 메모리 폴백.
 // 테이블: bookings(예약), inventory(지점×SKU 재고), sales(결제 라인)
 let pool=null, ready=false;
-const mem={ bookings:[], inventory:[], sales:[], orders:[], customers:[], pickups:[], users:[] };
+const mem={ bookings:[], inventory:[], sales:[], orders:[], customers:[], pickups:[], users:[], policy:{} };
 try{
   if(process.env.DATABASE_URL){
     const { Pool } = require('pg');
@@ -57,14 +57,20 @@ function skuId(base,s){
   return (map[base]||'GN')+'-'+s;
 }
 const CATALOG=buildCatalog();
+// 본부 가격 정책 기본 할인 한도(%) — PB(렌즈·콘택트)는 마진 보호 위해 낮게
+const DEFAULT_DISC={ '렌즈':5, '콘택트':5, '테':15, '선글라스':15, '액세서리':10 };
+// 멤버십: 누적 구매액 기준 등급, 등급별 적립률(재구매 lock-in)
+function tierOf(spend){ if(spend>=3000000)return 'VIP'; if(spend>=1000000)return '골드'; if(spend>=300000)return '실버'; return '웰컴'; }
+function rateOf(tier){ return tier==='VIP'?0.10:tier==='골드'?0.07:tier==='실버'?0.05:0.03; }
+function nextTier(spend){ if(spend<300000)return {name:'실버',need:300000-spend}; if(spend<1000000)return {name:'골드',need:1000000-spend}; if(spend<3000000)return {name:'VIP',need:3000000-spend}; return null; }
 const SEED_CUSTOMERS=[
-  {name:'양지근',phone:'010-2480-1001',store:'성수점',size:'F2×T2',face:'142mm / 낮은코',pd:'63.5mm',rx:'OD -3.25 / OS -3.50',nose:'낮음',seg:'단골'},
-  {name:'김서연',phone:'010-3391-2210',store:'성수점',size:'F1×T1',face:'131mm / 표준',pd:'60.0mm',rx:'OD -1.75 / OS -2.00',nose:'표준',seg:'단골'},
-  {name:'박도현',phone:'010-7782-5503',store:'홍대점',size:'F3×T2',face:'149mm / 높은코',pd:'66.0mm',rx:'OD -4.50 / OS -4.25',nose:'높음',seg:'신규'},
-  {name:'이수민',phone:'010-5519-8834',store:'성수점',size:'F2×T1',face:'138mm / 표준',pd:'62.0mm',rx:'OD -2.25 / OS -2.25',nose:'표준',seg:'재방문'},
-  {name:'정하준',phone:'010-6640-1199',store:'판교점',size:'F2×T2',face:'143mm / 낮은코',pd:'64.0mm',rx:'OD -3.00 / OS -2.75',nose:'낮음',seg:'단골'},
-  {name:'최우진',phone:'010-2231-7788',store:'홍대점',size:'F2×T3',face:'145mm / 표준',pd:'65.0mm',rx:'OD -2.50 / OS -2.50',nose:'표준',seg:'재방문'},
-  {name:'한지우',phone:'010-9982-3344',store:'판교점',size:'F1×T2',face:'133mm / 낮은코',pd:'59.5mm',rx:'OD -1.25 / OS -1.50',nose:'낮음',seg:'신규'}
+  {name:'양지근',phone:'010-2480-1001',store:'성수점',size:'F2×T2',face:'142mm / 낮은코',pd:'63.5mm',rx:'OD -3.25 / OS -3.50',nose:'낮음',seg:'단골',points:18500},
+  {name:'김서연',phone:'010-3391-2210',store:'성수점',size:'F1×T1',face:'131mm / 표준',pd:'60.0mm',rx:'OD -1.75 / OS -2.00',nose:'표준',seg:'단골',points:9200},
+  {name:'박도현',phone:'010-7782-5503',store:'홍대점',size:'F3×T2',face:'149mm / 높은코',pd:'66.0mm',rx:'OD -4.50 / OS -4.25',nose:'높음',seg:'신규',points:1200},
+  {name:'이수민',phone:'010-5519-8834',store:'성수점',size:'F2×T1',face:'138mm / 표준',pd:'62.0mm',rx:'OD -2.25 / OS -2.25',nose:'표준',seg:'재방문',points:5400},
+  {name:'정하준',phone:'010-6640-1199',store:'판교점',size:'F2×T2',face:'143mm / 낮은코',pd:'64.0mm',rx:'OD -3.00 / OS -2.75',nose:'낮음',seg:'단골',points:22100},
+  {name:'최우진',phone:'010-2231-7788',store:'홍대점',size:'F2×T3',face:'145mm / 표준',pd:'65.0mm',rx:'OD -2.50 / OS -2.50',nose:'표준',seg:'재방문',points:3300},
+  {name:'한지우',phone:'010-9982-3344',store:'판교점',size:'F1×T2',face:'133mm / 낮은코',pd:'59.5mm',rx:'OD -1.25 / OS -1.50',nose:'낮음',seg:'신규',points:800}
 ];
 
 function seedStock(sku, store){
@@ -92,7 +98,8 @@ async function init(){
   await pool.query(`CREATE TABLE IF NOT EXISTS customers(
     id SERIAL PRIMARY KEY, name TEXT, phone TEXT, store TEXT,
     size TEXT, face TEXT, pd TEXT, rx TEXT, nose TEXT,
-    seg TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
+    seg TEXT, points INT DEFAULT 0, created_at TIMESTAMPTZ DEFAULT now())`);
+  await pool.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS points INT DEFAULT 0`);
   await pool.query(`ALTER TABLE sales ADD COLUMN IF NOT EXISTS customer_id INT`);
   await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS deadline TEXT`);
   await pool.query(`CREATE TABLE IF NOT EXISTS pickups(
@@ -107,8 +114,8 @@ async function init(){
     created_at TIMESTAMPTZ DEFAULT now())`);
   const cc=await pool.query('SELECT COUNT(*)::int AS c FROM customers');
   if(cc.rows[0].c===0){ for(const c of SEED_CUSTOMERS){
-    await pool.query('INSERT INTO customers(name,phone,store,size,face,pd,rx,nose,seg) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)',
-      [c.name,c.phone,c.store,c.size,c.face,c.pd,c.rx,c.nose,c.seg]); } }
+    await pool.query('INSERT INTO customers(name,phone,store,size,face,pd,rx,nose,seg,points) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
+      [c.name,c.phone,c.store,c.size,c.face,c.pd,c.rx,c.nose,c.seg,c.points||0]); } }
   // 재고 시드: 비어있을 때만
   const c=await pool.query('SELECT COUNT(*)::int AS c FROM inventory'); 
   if(c.rows[0].c===0){
@@ -130,6 +137,10 @@ async function init(){
   const uc=await pool.query('SELECT COUNT(*)::int AS c FROM users');
   if(uc.rows[0].c===0){ for(const u of SEED_USERS){
     await pool.query('INSERT INTO users(username,pass,role,store,token) VALUES($1,$2,$3,$4,NULL)',[u.username,u.pass,u.role,u.store||null]); } }
+  await pool.query(`CREATE TABLE IF NOT EXISTS price_policy(sku TEXT PRIMARY KEY, list_price INT, max_disc INT)`);
+  const pc=await pool.query('SELECT COUNT(*)::int AS c FROM price_policy');
+  if(pc.rows[0].c===0){ for(const it of CATALOG){
+    await pool.query('INSERT INTO price_policy(sku,list_price,max_disc) VALUES($1,$2,$3)',[it.sku,it.price,(DEFAULT_DISC[it.cat]!=null?DEFAULT_DISC[it.cat]:10)]); } }
   ready=true;
 }
 // ---- 데모 히스토리 생성기 (최근 30일 매출 + 발주/픽업) ----
@@ -177,6 +188,7 @@ function genHistory(){
 }
 function seedMem(){
   SEED_USERS.forEach(function(u,i){ mem.users.push({id:i+1,username:u.username,pass:u.pass,role:u.role,store:u.store||null,token:null}); });
+  CATALOG.forEach(function(it){ mem.policy[it.sku]={list_price:it.price, max_disc:(DEFAULT_DISC[it.cat]!=null?DEFAULT_DISC[it.cat]:10)}; });
   SEED_CUSTOMERS.forEach(function(c,i){ mem.customers.push(Object.assign({id:i+1},c)); });
   STORES.forEach(function(st){ CATALOG.forEach(function(it){
     mem.inventory.push({store:st,sku:it.sku,name:it.name,cat:it.cat,price:it.price,medical:it.medical,stock:seedStock(it.sku,st),sold:0});
@@ -216,7 +228,24 @@ async function restock(store, threshold, add){
 }
 
 // ---- sales (결제 = 여러 라인 + 재고 차감) ----
-async function recordSale(store, date, method, lines, customerId){
+async function _policyMap(){
+  if(ready){ const r=await pool.query('SELECT sku,list_price,max_disc FROM price_policy'); var m={}; r.rows.forEach(function(x){m[x.sku]={list_price:x.list_price,max_disc:x.max_disc};}); return m; }
+  return mem.policy;
+}
+async function listPricePolicy(){
+  const m=await _policyMap();
+  return CATALOG.map(function(it){ var pp=m[it.sku]||{list_price:it.price,max_disc:10}; return {sku:it.sku,name:it.name,cat:it.cat,list_price:pp.list_price,max_disc:pp.max_disc}; });
+}
+async function setPricePolicy(sku, list_price, max_disc){
+  list_price=Math.max(0,Math.round(+list_price||0)); max_disc=Math.min(90,Math.max(0,Math.round(+max_disc||0)));
+  if(ready){ await pool.query('INSERT INTO price_policy(sku,list_price,max_disc) VALUES($1,$2,$3) ON CONFLICT(sku) DO UPDATE SET list_price=$2,max_disc=$3',[sku,list_price,max_disc]); }
+  else { mem.policy[sku]={list_price:list_price,max_disc:max_disc}; }
+  return {ok:true, sku:sku, list_price:list_price, max_disc:max_disc};
+}
+async function recordSale(store, date, method, lines, customerId, redeem){
+  // 본부 가격 정책 검증: 단가가 (권장가 × (1-할인한도)) 미만이면 거절
+  const pol=await _policyMap();
+  for(const ln of lines){ var pp=pol[ln.sku]; if(pp){ var unit=ln.qty>0?ln.amount/ln.qty:0; var floor=pp.list_price*(1-(pp.max_disc||0)/100); if(unit < floor-1){ return {ok:false, error:ln.name+' — 본부 할인 한도('+(pp.max_disc||0)+'%) 초과'}; } } }
   // lines: [{sku,name,cat,qty,amount,medical}]
   if(ready){
     const client=await pool.connect();
@@ -232,7 +261,7 @@ async function recordSale(store, date, method, lines, customerId){
           [store,date,ln.sku,ln.name,ln.cat,ln.qty,ln.amount,ln.medical,method,customerId||null]);
       }
       await client.query('COMMIT');
-      return {ok:true};
+      return await _applyPoints(store,customerId,lines,redeem);
     }catch(e){ await client.query('ROLLBACK'); return {ok:false,error:'결제 처리 오류'}; }
     finally{ client.release(); }
   }
@@ -240,7 +269,20 @@ async function recordSale(store, date, method, lines, customerId){
   for(const ln of lines){ const it=mem.inventory.find(i=>i.store===store&&i.sku===ln.sku); if(!it||it.stock<ln.qty)return{ok:false,error:'재고 부족: '+ln.name}; }
   for(const ln of lines){ const it=mem.inventory.find(i=>i.store===store&&i.sku===ln.sku); it.stock-=ln.qty; it.sold+=ln.qty;
     mem.sales.push({store,date,sku:ln.sku,name:ln.name,cat:ln.cat,qty:ln.qty,amount:ln.amount,medical:ln.medical,method,customer_id:customerId||null}); }
-  return {ok:true};
+  return await _applyPoints(store,customerId,lines,redeem);
+}
+async function _applyPoints(store, customerId, lines, redeem){
+  if(!customerId) return {ok:true};
+  var total=lines.reduce(function(a,l){return a+l.amount;},0);
+  var info=await getCustomer(customerId); if(!info) return {ok:true};
+  var bal=info.points||0;
+  var use=Math.max(0, Math.min(Math.round(+redeem||0), bal, total));
+  var rate=rateOf(info.tier);
+  var earned=Math.round((total-use)*rate);
+  var newBal=bal-use+earned;
+  if(ready){ await pool.query('UPDATE customers SET points=$2 WHERE id=$1',[customerId,newBal]); }
+  else { var c=mem.customers.find(x=>x.id==customerId); if(c)c.points=newBal; }
+  return {ok:true, tier:info.tier, earned:earned, used:use, points:newBal, earnRate:Math.round(rate*100)};
 }
 async function salesSummary(store, date){
   // 반환: {total, byCat:{cat:{qty,amt}}}
@@ -277,6 +319,30 @@ async function refundSale(store, date, method, lines){
     mem.sales.push({store,date,sku:ln.sku,name:ln.name,cat:ln.cat,qty:-ln.qty,amount:-ln.amount,medical:ln.medical,method:method+'환불'}); }
   return {ok:true};
 }
+async function activityFeed(limit){
+  limit=limit||16;
+  var items=[];
+  function won(n){return '₩'+(n||0).toLocaleString('ko-KR');}
+  if(ready){
+    var sv=await pool.query("SELECT store,name,amount,method,EXTRACT(EPOCH FROM created_at)*1000 AS ts FROM sales WHERE amount>0 ORDER BY id DESC LIMIT 14");
+    sv.rows.forEach(function(r){ items.push({ts:+r.ts||0, icon:'CARD', store:r.store, text:r.name+' '+won(r.amount)+' 결제 ('+(r.method||'카드')+')'}); });
+    var ov=await pool.query("SELECT store,name,qty,status,EXTRACT(EPOCH FROM COALESCE(updated_at,created_at))*1000 AS ts FROM orders ORDER BY id DESC LIMIT 8");
+    ov.rows.forEach(function(r){ items.push({ts:+r.ts||0, icon:'BOX', store:r.store, text:'발주 '+r.status+' · '+r.name+' x'+r.qty}); });
+    var pv=await pool.query("SELECT store,name,kind,status,EXTRACT(EPOCH FROM created_at)*1000 AS ts FROM pickups ORDER BY id DESC LIMIT 6");
+    pv.rows.forEach(function(r){ items.push({ts:+r.ts||0, icon:'BAG', store:r.store, text:'픽업 '+(r.status||'예약')+' · '+r.name}); });
+    var lv=await pool.query("SELECT store,name,stock FROM inventory WHERE stock<=5 ORDER BY stock LIMIT 5");
+    lv.rows.forEach(function(r){ items.push({ts:Date.now(), icon:'WARN', store:r.store, text:'재고 부족 · '+r.name+' '+r.stock+'개'}); });
+  } else {
+    var base=Date.now();
+    mem.sales.filter(function(s){return s.amount>0;}).slice(-14).reverse().forEach(function(r,i){ items.push({ts:base-i*45000, icon:'CARD', store:r.store, text:r.name+' '+won(r.amount)+' 결제 ('+(r.method||'카드')+')'}); });
+    mem.orders.slice(-8).reverse().forEach(function(r,i){ items.push({ts:base-i*120000, icon:'BOX', store:r.store, text:'발주 '+r.status+' · '+r.name+' x'+r.qty}); });
+    mem.pickups.slice(-6).reverse().forEach(function(r,i){ items.push({ts:base-i*200000, icon:'BAG', store:r.store, text:'픽업 '+(r.status||'예약')+' · '+r.name}); });
+    mem.inventory.filter(function(i){return i.stock<=5;}).slice(0,5).forEach(function(r){ items.push({ts:base, icon:'WARN', store:r.store, text:'재고 부족 · '+r.name+' '+r.stock+'개'}); });
+  }
+  items.sort(function(a,b){return b.ts-a.ts;});
+  return items.slice(0,limit);
+}
+
 async function recentSales(store, limit){
   // 최근 결제 라인 (환불 대상 선택용)
   if(ready){const r=await pool.query('SELECT id,date,sku,name,cat,qty,amount,method FROM sales WHERE store=$1 AND qty>0 ORDER BY id DESC LIMIT $2',[store,limit||20]);return r.rows;}
@@ -333,12 +399,21 @@ async function lowStock(store, threshold){
 
 // ---- customers ----
 async function listCustomers(store, seg){
-  if(ready){const r=await pool.query('SELECT id,name,phone,store,size,face,pd,rx,nose,seg FROM customers WHERE ($1::text IS NULL OR store=$1) AND ($2::text IS NULL OR seg=$2) ORDER BY name',[store||null,seg||null]);return r.rows;}
+  if(ready){const r=await pool.query('SELECT id,name,phone,store,size,face,pd,rx,nose,seg,points FROM customers WHERE ($1::text IS NULL OR store=$1) AND ($2::text IS NULL OR seg=$2) ORDER BY name',[store||null,seg||null]);return r.rows;}
   return mem.customers.filter(c=>(!store||c.store===store)&&(!seg||c.seg===seg));
 }
 async function getCustomer(id){
-  if(ready){const r=await pool.query('SELECT id,name,phone,store,size,face,pd,rx,nose,seg FROM customers WHERE id=$1',[id]);return r.rows[0]||null;}
-  return mem.customers.find(c=>c.id==id)||null;
+  var c;
+  if(ready){const r=await pool.query('SELECT id,name,phone,store,size,face,pd,rx,nose,seg,points FROM customers WHERE id=$1',[id]);c=r.rows[0]||null;}
+  else { c=mem.customers.find(x=>x.id==id)||null; }
+  if(!c) return null;
+  var spend=await customerSpend(id);
+  var tier=tierOf(spend), nt=nextTier(spend);
+  return Object.assign({}, c, {points:c.points||0, spend:spend, tier:tier, earnRate:Math.round(rateOf(tier)*100), nextTier:nt});
+}
+async function customerSpend(id){
+  if(ready){const r=await pool.query('SELECT COALESCE(SUM(amount),0)::int AS s FROM sales WHERE customer_id=$1 AND amount>0',[id]);return r.rows[0].s;}
+  return mem.sales.filter(s=>s.customer_id==id&&s.amount>0).reduce((a,s)=>a+s.amount,0);
 }
 async function customerHistory(id){
   // 그 고객의 구매 이력 (sales)
@@ -391,6 +466,37 @@ async function salesRange(from, to){
   return _agg(Object.keys(m).map(function(k){return m[k];}));
 }
 
+async function forecastAll(){
+  // 지점별 30일 판매속도 -> 다음 주(7일) 수요 예측 + 권장 푸시량(약 2주치 보충)
+  var today=new Date(), from=new Date(today.getTime()-30*864e5);
+  var f=from.toISOString().slice(0,10), t=today.toISOString().slice(0,10);
+  var out=[];
+  for(const store of STORES){
+    var inv=[], sold={};
+    if(ready){
+      var iv=await pool.query('SELECT sku,name,cat,stock FROM inventory WHERE store=$1',[store]); inv=iv.rows;
+      var sv=await pool.query('SELECT sku, SUM(qty)::int AS q FROM sales WHERE store=$1 AND qty>0 AND date BETWEEN $2 AND $3 GROUP BY sku',[store,f,t]);
+      sv.rows.forEach(function(r){sold[r.sku]=r.q;});
+    } else {
+      inv=mem.inventory.filter(function(i){return i.store===store;}).map(function(i){return {sku:i.sku,name:i.name,cat:i.cat,stock:i.stock};});
+      mem.sales.filter(function(x){return x.store===store&&x.qty>0&&x.date>=f&&x.date<=t;}).forEach(function(x){sold[x.sku]=(sold[x.sku]||0)+x.qty;});
+    }
+    var items=[];
+    inv.forEach(function(it){
+      var s30=sold[it.sku]||0, rate=s30/30;
+      if(rate<=0) return;
+      var week=Math.round(rate*7*10)/10;            // 다음 주 예상 판매량
+      var cover=Math.ceil(rate*28);                  // 약 4주치 목표 재고(데모)
+      var push=Math.max(0, cover-it.stock);          // 권장 푸시량
+      var daysLeft=rate>0?Math.floor(it.stock/rate):null;
+      items.push({sku:it.sku,name:it.name,cat:it.cat,stock:it.stock,week:week,daysLeft:daysLeft,push:push,rate:rate});
+    });
+    items.sort(function(a,b){ if((b.push>0)!=(a.push>0)) return (b.push>0?1:0)-(a.push>0?1:0); return b.rate-a.rate; });
+    out.push({store:store, items:items.slice(0,6)});
+  }
+  return out;
+}
+
 async function restockSuggest(store){
   // 재고 + 최근 30일 판매속도 → 권장 발주
   var today=new Date(); var from=new Date(today.getTime()-30*864e5);
@@ -432,6 +538,32 @@ async function pbMargin(from, to){
   });
   var stores=Object.keys(byStore).map(function(s){var o=byStore[s];return {store:s,retail:o.retail,hq:o.hq,pbShare:o.retail?Math.round(o.pb/o.retail*100):0};}).sort(function(a,b){return b.hq-a.hq;});
   return {totalRetail:totalRetail, totalHQ:totalHQ, stores:stores, byCat:byCat, rates:HQ_RATE};
+}
+
+async function analytics(from, to){
+  var rows;
+  if(ready){const r=await pool.query('SELECT sku,name,cat,SUM(qty)::int AS qty,SUM(amount)::int AS amt FROM sales WHERE date BETWEEN $1 AND $2 AND amount>0 GROUP BY sku,name,cat',[from,to]);rows=r.rows;}
+  else{ var m={}; mem.sales.filter(s=>s.date>=from&&s.date<=to&&s.amount>0).forEach(function(s){var k=s.sku;m[k]=m[k]||{sku:s.sku,name:s.name,cat:s.cat,qty:0,amt:0};m[k].qty+=s.qty;m[k].amt+=s.amount;}); rows=Object.keys(m).map(function(k){return m[k];}); }
+  var sizeMap={S:{qty:0,amt:0},M:{qty:0,amt:0},L:{qty:0,amt:0}};
+  var designMap={}, catMap={};
+  rows.forEach(function(r){
+    catMap[r.cat]=catMap[r.cat]||{qty:0,amt:0}; catMap[r.cat].qty+=r.qty; catMap[r.cat].amt+=r.amt;
+    if(r.cat==='테'||r.cat==='선글라스'){
+      var parts=String(r.sku).split('-'); var sz=parts[1];
+      if(sizeMap[sz]){ sizeMap[sz].qty+=r.qty; sizeMap[sz].amt+=r.amt; }
+      var base=r.name.replace(/ [SML]$/,'');
+      designMap[base]=designMap[base]||{qty:0,amt:0}; designMap[base].qty+=r.qty; designMap[base].amt+=r.amt;
+    }
+  });
+  var sizes=['S','M','L'].map(function(z){return {size:z, qty:sizeMap[z].qty, amt:sizeMap[z].amt};});
+  var frameQty=sizes.reduce(function(a,x){return a+x.qty;},0)||1;
+  sizes.forEach(function(x){x.share=Math.round(x.qty/frameQty*100);});
+  var designs=Object.keys(designMap).map(function(d){return {name:d, qty:designMap[d].qty, amt:designMap[d].amt};}).sort(function(a,b){return b.qty-a.qty;}).slice(0,6);
+  var totAmt=Object.keys(catMap).reduce(function(a,c){return a+catMap[c].amt;},0)||1;
+  var catMix=Object.keys(catMap).map(function(c){return {cat:c, qty:catMap[c].qty, amt:catMap[c].amt, share:Math.round(catMap[c].amt/totAmt*100)};}).sort(function(a,b){return b.amt-a.amt;});
+  // 상권/지점별 PB 침투율
+  var pb=await pbMargin(from,to);
+  return {sizes:sizes, designs:designs, catMix:catMix, stores:pb.stores};
 }
 
 async function settlement(store, from, to){
@@ -480,5 +612,5 @@ module.exports={ init, STORES, CATALOG, refundSale, recentSales, createOrder, pu
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,
   getInventory, getStock, restock,
-  recordSale, salesSummary, salesDaily,
+  recordSale, salesSummary, salesDaily, listPricePolicy, setPricePolicy, analytics, forecastAll, activityFeed,
   get ready(){return ready;} };

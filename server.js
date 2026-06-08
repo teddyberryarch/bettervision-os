@@ -124,7 +124,7 @@ async function api(req, res, url){
     if(req.method==='POST' && url.pathname==='/api/sales'){
       const b=await body(req);
       if(!b.store||!b.date||!b.lines||!b.lines.length) return send(res,400,{ok:false,error:'필수값 누락'});
-      const r=await db.recordSale(b.store, b.date, b.method||'카드', b.lines, b.customerId);
+      const r=await db.recordSale(b.store, b.date, b.method||'카드', b.lines, b.customerId, b.redeem);
       return send(res, r.ok?201:409, r);
     }
     // GET /api/sales/summary?store=&date= -> {total,byCat}
@@ -135,6 +135,30 @@ async function api(req, res, url){
     // GET /api/orders?store=&status= -> 발주 목록
     if(req.method==='GET' && url.pathname==='/api/orders'){
       return send(res,200,{ok:true, orders:await db.listOrders(url.searchParams.get('store'), url.searchParams.get('status'))});
+    }
+    // GET /api/activity -> 전 지점 실시간 활동 피드
+    if(req.method==='GET' && url.pathname==='/api/activity'){
+      return send(res,200,{ok:true, feed:await db.activityFeed(16)});
+    }
+    // GET /api/forecast -> 지점별 수요 예측 + 권장 푸시
+    if(req.method==='GET' && url.pathname==='/api/forecast'){
+      return send(res,200,{ok:true, stores:await db.forecastAll()});
+    }
+    // GET /api/analytics?from=&to= -> 본부 분석 리포트
+    if(req.method==='GET' && url.pathname==='/api/analytics'){
+      const from=url.searchParams.get('from'), to=url.searchParams.get('to');
+      return send(res,200,{ok:true, ...(await db.analytics(from,to))});
+    }
+    // GET /api/price-policy -> 본부 가격 정책 목록
+    if(req.method==='GET' && url.pathname==='/api/price-policy'){
+      return send(res,200,{ok:true, policy:await db.listPricePolicy()});
+    }
+    // POST /api/price-policy {sku,list_price,max_disc} -> 본부 정책 수정
+    if(req.method==='POST' && url.pathname==='/api/price-policy'){
+      if(AUTH_ON){ const u=await db.userByToken(getCookie(req,'bv_token')); if(u && u.role!=='hq') return send(res,403,{ok:false,error:'본부 전용이에요'}); }
+      const b=await body(req);
+      if(!b.sku) return send(res,400,{ok:false,error:'sku 필요'});
+      return send(res,200, await db.setPricePolicy(b.sku, b.list_price, b.max_disc));
     }
     // POST /api/orders/push {store,sku,name,cat,qty,deadline} -> 본부가 가맹점에 발주 푸시
     if(req.method==='POST' && url.pathname==='/api/orders/push'){
