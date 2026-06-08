@@ -35,6 +35,25 @@ async function api(req, res, url){
       const row=await db.addBooking(b);
       return send(res,201,{ok:true, booking:row});
     }
+    // GET /api/customers?store=&seg= -> 고객 목록
+    if(req.method==='GET' && url.pathname==='/api/customers'){
+      return send(res,200,{ok:true, customers:await db.listCustomers(url.searchParams.get('store'), url.searchParams.get('seg'))});
+    }
+    // GET /api/customer?id= -> 고객 1명 + 구매이력
+    if(req.method==='GET' && url.pathname==='/api/customer'){
+      const id=url.searchParams.get('id'); const c=await db.getCustomer(id);
+      if(!c) return send(res,404,{ok:false,error:'고객 없음'});
+      return send(res,200,{ok:true, customer:c, history:await db.customerHistory(id)});
+    }
+    // POST /api/customers {name,phone,store,...} -> 추가
+    if(req.method==='POST' && url.pathname==='/api/customers'){
+      const b=await body(req); if(!b.name) return send(res,400,{ok:false,error:'이름 필요'});
+      return send(res,201,{ok:true, id:await db.addCustomer(b)});
+    }
+    // GET /api/segcounts?store= -> 마케팅 세그먼트 집계
+    if(req.method==='GET' && url.pathname==='/api/segcounts'){
+      return send(res,200,{ok:true, counts:await db.segCounts(url.searchParams.get('store'))});
+    }
     // GET /api/catalog -> SKU 목록(공통)
     if(req.method==='GET' && url.pathname==='/api/catalog'){
       return send(res,200,{ok:true, stores:db.STORES, catalog:db.CATALOG});
@@ -53,13 +72,44 @@ async function api(req, res, url){
     if(req.method==='POST' && url.pathname==='/api/sales'){
       const b=await body(req);
       if(!b.store||!b.date||!b.lines||!b.lines.length) return send(res,400,{ok:false,error:'필수값 누락'});
-      const r=await db.recordSale(b.store, b.date, b.method||'카드', b.lines);
+      const r=await db.recordSale(b.store, b.date, b.method||'카드', b.lines, b.customerId);
       return send(res, r.ok?201:409, r);
     }
     // GET /api/sales/summary?store=&date= -> {total,byCat}
     if(req.method==='GET' && url.pathname==='/api/sales/summary'){
       const store=url.searchParams.get('store'), date=url.searchParams.get('date');
       return send(res,200,{ok:true, summary:await db.salesSummary(store,date)});
+    }
+    // GET /api/orders?store=&status= -> 발주 목록
+    if(req.method==='GET' && url.pathname==='/api/orders'){
+      return send(res,200,{ok:true, orders:await db.listOrders(url.searchParams.get('store'), url.searchParams.get('status'))});
+    }
+    // POST /api/orders {store,sku,name,cat,qty} -> 발주 생성(대기)
+    if(req.method==='POST' && url.pathname==='/api/orders'){
+      const b=await body(req);
+      if(!b.store||!b.sku||!b.qty) return send(res,400,{ok:false,error:'필수값 누락'});
+      return send(res,201,{ok:true, order:await db.createOrder(b.store,b.sku,b.name||b.sku,b.cat||'',b.qty)});
+    }
+    // POST /api/orders/status {id,status} -> 승인/입고완료 (입고 시 재고 증가)
+    if(req.method==='POST' && url.pathname==='/api/orders/status'){
+      const b=await body(req); const r=await db.updateOrder(b.id, b.status);
+      return send(res, r.ok?200:404, r);
+    }
+    // GET /api/lowstock?store=&threshold= -> 발주 추천
+    if(req.method==='GET' && url.pathname==='/api/lowstock'){
+      return send(res,200,{ok:true, items:await db.lowStock(url.searchParams.get('store'), +(url.searchParams.get('threshold')||5))});
+    }
+    // POST /api/refund {store,date,method,lines}
+    if(req.method==='POST' && url.pathname==='/api/refund'){
+      const b=await body(req);
+      if(!b.store||!b.date||!b.lines||!b.lines.length) return send(res,400,{ok:false,error:'필수값 누락'});
+      const r=await db.refundSale(b.store, b.date, b.method||'카드', b.lines);
+      return send(res, r.ok?201:409, r);
+    }
+    // GET /api/sales/recent?store= -> 최근 결제(환불 대상)
+    if(req.method==='GET' && url.pathname==='/api/sales/recent'){
+      const store=url.searchParams.get('store');
+      return send(res,200,{ok:true, sales:await db.recentSales(store, 20)});
     }
     // GET /api/sales/daily?store=&from=&to= -> 일별 매출
     if(req.method==='GET' && url.pathname==='/api/sales/daily'){
