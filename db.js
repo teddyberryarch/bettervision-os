@@ -262,6 +262,10 @@ async function addCustomer(c){
   if(ready){const r=await pool.query('INSERT INTO customers(name,phone,store,size,face,pd,rx,nose,seg) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',[c.name,c.phone||'',c.store||'',c.size||'',c.face||'',c.pd||'',c.rx||'',c.nose||'',c.seg||'신규']);return r.rows[0].id;}
   const id=mem.customers.length+1; mem.customers.push(Object.assign({id:id},c)); return id;
 }
+async function moveCustomer(id, toStore){
+  if(ready){await pool.query('UPDATE customers SET store=$2 WHERE id=$1',[id,toStore]); return {ok:true};}
+  var c=mem.customers.find(function(x){return x.id==id;}); if(c)c.store=toStore; return {ok:true};
+}
 async function segCounts(store){
   // 마케팅 세그먼트 집계
   const segs=['단골','재방문','신규'];
@@ -300,9 +304,71 @@ async function salesRange(from, to){
   return _agg(Object.keys(m).map(function(k){return m[k];}));
 }
 
-module.exports={ init, STORES, CATALOG, refundSale, recentSales, createOrder, listOrders, updateOrder, lowStock, salesRange,
+async function restockSuggest(store){
+  // 재고 + 최근 30일 판매속도 → 권장 발주
+  var today=new Date(); var from=new Date(today.getTime()-30*864e5);
+  var f=from.toISOString().slice(0,10), t=today.toISOString().slice(0,10);
+  var inv=[], sold={};
+  if(ready){
+    var iv=await pool.query('SELECT sku,name,cat,stock FROM inventory WHERE store=$1',[store]); inv=iv.rows;
+    var sv=await pool.query('SELECT sku, SUM(qty)::int AS q FROM sales WHERE store=$1 AND qty>0 AND date BETWEEN $2 AND $3 GROUP BY sku',[store,f,t]);
+    sv.rows.forEach(function(r){sold[r.sku]=r.q;});
+  } else {
+    inv=mem.inventory.filter(function(i){return i.store===store;}).map(function(i){return {sku:i.sku,name:i.name,cat:i.cat,stock:i.stock};});
+    mem.sales.filter(function(x){return x.store===store&&x.qty>0&&x.date>=f&&x.date<=t;}).forEach(function(x){sold[x.sku]=(sold[x.sku]||0)+x.qty;});
+  }
+  var out=[];
+  inv.forEach(function(it){
+    var s30=sold[it.sku]||0, rate=s30/30, target=21;
+    var suggest=Math.max(0, Math.ceil(rate*target)-it.stock);
+    var daysLeft= rate>0? Math.floor(it.stock/rate): null;
+    if(suggest>0 || it.stock<=5){ out.push({sku:it.sku,name:it.name,cat:it.cat,stock:it.stock,sold30:s30,daysLeft:daysLeft,suggest:Math.max(suggest, it.stock<=5?15:0)}); }
+  });
+  out.sort(function(a,b){var da=a.daysLeft==null?9999:a.daysLeft, dbb=b.daysLeft==null?9999:b.daysLeft; return da-dbb;});
+  return out;
+}
+
+// 본부 공급마진율(데모) — 렌즈·콘택트 PB가 핵심, 테는 미끼(낮음)
+var HQ_RATE={ '렌즈':0.55, '콘택트':0.42, '테':0.12, '선글라스':0.15, '액세서리':0.20 };
+async function pbMargin(from, to){
+  var rows;
+  if(ready){const r=await pool.query('SELECT store, cat, SUM(amount)::int AS amt FROM sales WHERE date BETWEEN $1 AND $2 AND amount>0 GROUP BY store,cat',[from,to]);rows=r.rows;}
+  else{ var m={}; mem.sales.filter(s=>s.date>=from&&s.date<=to&&s.amount>0).forEach(function(s){var k=s.store+'|'+s.cat;m[k]=m[k]||{store:s.store,cat:s.cat,amt:0};m[k].amt+=s.amount;}); rows=Object.keys(m).map(function(k){return m[k];}); }
+  var totalRetail=0, totalHQ=0, byStore={}, byCat={};
+  rows.forEach(function(r){
+    var rate=HQ_RATE[r.cat]!=null?HQ_RATE[r.cat]:0.1; var hq=Math.round(r.amt*rate);
+    totalRetail+=r.amt; totalHQ+=hq;
+    byStore[r.store]=byStore[r.store]||{retail:0,hq:0,pb:0};
+    byStore[r.store].retail+=r.amt; byStore[r.store].hq+=hq;
+    if(r.cat==='렌즈'||r.cat==='콘택트') byStore[r.store].pb+=r.amt;
+    byCat[r.cat]=byCat[r.cat]||{retail:0,hq:0}; byCat[r.cat].retail+=r.amt; byCat[r.cat].hq+=hq;
+  });
+  var stores=Object.keys(byStore).map(function(s){var o=byStore[s];return {store:s,retail:o.retail,hq:o.hq,pbShare:o.retail?Math.round(o.pb/o.retail*100):0};}).sort(function(a,b){return b.hq-a.hq;});
+  return {totalRetail:totalRetail, totalHQ:totalHQ, stores:stores, byCat:byCat, rates:HQ_RATE};
+}
+
+async function settlement(store, from, to){
+  // 결제수단별·의료비공제·환불 집계 (세무 리포트용)
+  var rows;
+  if(ready){const r=await pool.query('SELECT method, medical, SUM(amount)::int AS amt, SUM(qty)::int AS qty FROM sales WHERE store=$1 AND date BETWEEN $2 AND $3 GROUP BY method,medical',[store,from,to]);rows=r.rows;}
+  else{ var m={}; mem.sales.filter(s=>s.store===store&&s.date>=from&&s.date<=to).forEach(function(s){var k=(s.method||'카드')+'|'+(s.medical?1:0); m[k]=m[k]||{method:s.method||'카드',medical:!!s.medical,amt:0,qty:0}; m[k].amt+=s.amount; m[k].qty+=s.qty;}); rows=Object.keys(m).map(function(k){return m[k];}); }
+  var gross=0, refunds=0, medical=0, byMethod={};
+  rows.forEach(function(r){
+    var meth=(r.method||'카드').replace('환불','');
+    if((r.method||'').indexOf('환불')>=0){ refunds+=Math.abs(r.amt); }
+    gross+=r.amt;
+    if(r.medical) medical+=r.amt;
+    byMethod[meth]=(byMethod[meth]||0)+r.amt;
+  });
+  var net=gross; // gross already nets refunds(음수 포함)
+  var vat=Math.round(net/11); // 부가세 추정(공급가의 10% = 합계/11)
+  var methods=Object.keys(byMethod).map(function(k){return {method:k,amt:byMethod[k]};}).sort(function(a,b){return b.amt-a.amt;});
+  return {net:net, refunds:refunds, medical:medical, vat:vat, methods:methods};
+}
+
+module.exports={ init, STORES, CATALOG, refundSale, recentSales, createOrder, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement,
   createPickup, listPickups, updatePickup,
-  listCustomers, getCustomer, customerHistory, addCustomer, segCounts,
+  listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,
   getInventory, getStock, restock,
   recordSale, salesSummary, salesDaily,

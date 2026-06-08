@@ -59,6 +59,11 @@ async function api(req, res, url){
       if(!c) return send(res,404,{ok:false,error:'고객 없음'});
       return send(res,200,{ok:true, customer:c, history:await db.customerHistory(id)});
     }
+    // POST /api/customers/move {id,toStore} -> 고객 소속 지점 변경(데이터 귀속 데모)
+    if(req.method==='POST' && url.pathname==='/api/customers/move'){
+      const b=await body(req); if(!b.id||!b.toStore) return send(res,400,{ok:false,error:'필수값 누락'});
+      return send(res,200, await db.moveCustomer(b.id, b.toStore));
+    }
     // POST /api/customers {name,phone,store,...} -> 추가
     if(req.method==='POST' && url.pathname==='/api/customers'){
       const b=await body(req); if(!b.name) return send(res,400,{ok:false,error:'이름 필요'});
@@ -109,6 +114,11 @@ async function api(req, res, url){
       const b=await body(req); const r=await db.updateOrder(b.id, b.status);
       return send(res, r.ok?200:404, r);
     }
+    // GET /api/restock-suggest?store= -> 자동 발주 제안(재고+판매속도)
+    if(req.method==='GET' && url.pathname==='/api/restock-suggest'){
+      const store=url.searchParams.get('store'); if(!store) return send(res,400,{ok:false,error:'store 필요'});
+      return send(res,200,{ok:true, items:await db.restockSuggest(store)});
+    }
     // GET /api/lowstock?store=&threshold= -> 발주 추천
     if(req.method==='GET' && url.pathname==='/api/lowstock'){
       return send(res,200,{ok:true, items:await db.lowStock(url.searchParams.get('store'), +(url.searchParams.get('threshold')||5))});
@@ -124,6 +134,17 @@ async function api(req, res, url){
     if(req.method==='GET' && url.pathname==='/api/sales/recent'){
       const store=url.searchParams.get('store');
       return send(res,200,{ok:true, sales:await db.recentSales(store, 20)});
+    }
+    // GET /api/pb-margin?from=&to= -> 본부 PB 마진 집계
+    if(req.method==='GET' && url.pathname==='/api/pb-margin'){
+      const r=await db.pbMargin(url.searchParams.get('from'), url.searchParams.get('to'));
+      return send(res,200,Object.assign({ok:true}, r));
+    }
+    // GET /api/settlement?store=&from=&to= -> 정산·세무 리포트
+    if(req.method==='GET' && url.pathname==='/api/settlement'){
+      const store=url.searchParams.get('store'); if(!store) return send(res,400,{ok:false,error:'store 필요'});
+      const r=await db.settlement(store, url.searchParams.get('from'), url.searchParams.get('to'));
+      return send(res,200,Object.assign({ok:true},r));
     }
     // GET /api/sales/range?from=&to= -> 기간 전지점/카테고리 집계 (대시보드)
     if(req.method==='GET' && url.pathname==='/api/sales/range'){
