@@ -22,28 +22,268 @@
 </div></div>
 
 <div class="wrap">
+<section class="view" id="store">
   <div class="lead">
     <div>
       <div class="eyebrow">Franchise · 가맹점</div>
-      <h2>가맹점</h2>
-      <div class="sub">이 페이지는 껍데기예요. 아래 구성 예정 항목을 하나씩 실제 화면으로 채워갑니다.</div>
+      <h2>고객 관리(CRM) · 운영(ERP) · 재무를 한 시스템에서</h2>
+      <div class="sub">고객은 CRM으로 묶고, 재고·발주·POS는 운영으로 자동화하고, 돈(손익·현금흐름·세무)은 재무 탭이 알아서 정리한다. "돈 계산 약한 사장"도 숫자를 안 놓치게.</div>
+    </div>
+    <span class="pill good">● 본사 실시간 동기화</span>
+  </div>
+
+  <div class="card pad ctlcard" style="margin-bottom:18px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="eyebrow" style="margin:0">오늘 할 일 — 본부가 내려준 순서대로</div>
+      <div class="label" id="runcount">2 / 5 완료</div>
+    </div>
+    <div class="label" style="margin:6px 0 4px">생각할 필요 없이 위에서부터. 본부 지정 항목은 그대로 실행만.</div>
+    <div id="runlist">
+      <div class="runitem done" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">어제 매출 마감 확인</div></div>
+      <div class="runitem done" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">재고 부족 2품목 본부 발주 승인</div><span class="frombhq">본부 지정</span></div>
+      <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">재방문 권장 고객 4명 카톡 발송</div><span class="frombhq">원클릭</span></div>
+      <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">신규 프로모션 'F2 가을 컬러' 매대 세팅 + 사진 인증</div><span class="frombhq">본부 지정</span></div>
+      <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">안경사·일반인 오늘 스케줄 확인</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="eyebrow" style="margin:0 0 2px">원클릭 마케팅 <span class="locktag">본부 제작 · 우리 동네용 자동 변환</span></div>
+    <div class="mkbtns">
+      <button class="btn small" onclick="toast('성수점 단골 대상 카톡 발송 (프로토타입)')">카톡 단골 발송</button>
+      <button class="btn small ghost" onclick="toast('인스타 스토리 게시 (프로토타입)')">SNS 게시</button>
+      <button class="btn small ghost" onclick="toast('동네 전단 PDF 생성 (프로토타입)')">동네 전단</button>
     </div>
   </div>
 
-  <div class="card pad">
-    <div class="eyebrow">구성 예정 <span class="tagwip">준비 중</span></div>
-    <div class="shell">
-      <div class="st">가맹점 화면에 들어갈 섹션</div>
-      <ul><li>고객 CRM — 4대 워크플로우 · 고객 목록 · 상세</li><li>운영 ERP — 효율 지표 · 부품 재고(프론트/템플/렌즈) · POS</li><li>재무 — 손익(P&L) · 현금흐름 · 손익분기 · 세무 캘린더</li><li>인력·채용 — 안경사 인재풀 · 일반인 직무 인증</li><li>오늘 할 일(Daily Run) · 원클릭 마케팅</li></ul>
-    </div>
-    <a class="backlink" href="index.html">← 홈으로</a>
+  <div class="subtabs" id="subtabs" style="max-width:680px">
+    <div class="subtab active" data-t="crm">고객 CRM</div>
+    <div class="subtab" data-t="erp">운영 ERP · POS</div>
+    <div class="subtab" data-t="fin">재무</div>
+    <div class="subtab" data-t="hr">인력 · 채용</div>
   </div>
+
+  <!-- CRM -->
+  <div class="stab active" id="t-crm">
+    <div class="flow4">
+      <div class="flowcard"><div class="no">01</div><div class="fn">도수 변화 리콜</div><div class="fg">검사일·연령·도수패턴으로 재방문 자동 알림.</div></div>
+      <div class="flowcard"><div class="no">02</div><div class="fn">발주 자동화</div><div class="fg">지역·연령·계절 데이터로 발주 추천.</div></div>
+      <div class="flowcard"><div class="no">03</div><div class="fn">피팅 추천</div><div class="fg">프론트·템플+얼굴로 프레임·도수·코높이 자동 산출.</div></div>
+      <div class="flowcard"><div class="no">04</div><div class="fn">네트워크 귀속</div><div class="fg">이사 가도 타 가맹점서 이력 승계.</div></div>
+    </div>
+    <div class="store-grid">
+      <div class="card pad">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="label">고객 목록 · 성수점</div><div class="label">오늘 재방문 예약 <b style="color:var(--ink)">4</b></div>
+        </div>
+        <table class="tbl" id="custTable"><thead><tr><th>고객</th><th>사이즈</th><th>최근 방문</th><th>재구매 주기</th><th>상태</th></tr></thead><tbody></tbody></table>
+        <div class="sync">● 모든 변경이 본사 클라우드·고객 앱과 실시간 동기화</div>
+      </div>
+      <div class="card pad detail" id="detail"></div>
+    </div>
+  </div>
+
+  <!-- ERP + POS -->
+  <div class="stab" id="t-erp">
+    <div class="eyebrow">효율 지표 — 도입 전 → 후 (성수점)</div>
+    <div class="eff">
+      <div class="effcard"><div class="el">안경사 1인 일 처리</div><div class="ev">18<small> 건/일</small></div><div class="eb"><s>11건</s>▲ 64%</div></div>
+      <div class="effcard"><div class="el">평균 피팅 시간</div><div class="ev">6<small> 분</small></div><div class="eb"><s>12분</s>▼ 50%</div></div>
+      <div class="effcard"><div class="el">발주·재고 잡무</div><div class="ev">0<small> 시간/주</small></div><div class="eb"><s>주 4시간</s>자동화</div></div>
+      <div class="effcard"><div class="el">재방문 마케팅 인력</div><div class="ev">0<small> 명</small></div><div class="eb">카톡 자동</div></div>
+    </div>
+
+    <div class="pos-grid">
+      <!-- POS -->
+      <div class="card pad">
+        <div class="eyebrow">POS · 결제</div>
+        <div class="locktag" style="display:inline-block;margin-bottom:8px">가격 = 본부 지정가 · 매장 수정 잠김 🔒</div>
+        <div class="label" style="margin-bottom:8px">고객 <b style="color:var(--ink)">양지근</b> · F2×T2 · 자동 연결됨</div>
+        <div class="posline"><span>로마 클래식 ACE-02 (F2×T2)</span><span>189,000</span></div>
+        <div class="posline"><span>알도 R 렌즈 1.60</span><span>120,000</span></div>
+        <div class="posline"><span>멤버십 첫 달</span><span>0</span></div>
+        <div class="postotal"><span class="muted" style="font-size:16px">합계</span><span class="kfig">₩309,000</span></div>
+        <div class="posbtns">
+          <button class="btn small" onclick="toast('카드 결제 승인 (PG 연동·프로토타입)')">카드</button>
+          <button class="btn small ghost" onclick="toast('현금영수증 발행 (프로토타입)')">현금</button>
+          <button class="btn small ghost" onclick="toast('간편결제 (프로토타입)')">간편결제</button>
+        </div>
+        <div class="optbox" style="margin-top:14px"><b>POS 전략.</b> 결제 처리는 PG(토스페이먼츠 등)·스마트단말 임대로, <b>POS 소프트웨어는 BETTERVISION 자체</b>. 거래·고객 데이터가 본사에 귀속(원칙①). 시력보정 안경은 <b>의료비 세액공제(연 50만원)용 영수증 자동 발급</b>.</div>
+      </div>
+
+      <!-- 재고/발주 -->
+      <div class="grid">
+        <div class="card pad">
+          <div class="eyebrow">부품 재고 — 프론트 · 템플 · 렌즈 분리</div>
+          <div class="label" style="margin-bottom:6px">완성품이 아니라 부품으로 보유 → 조립은 판매 시점. 810 조합을 다 쌓지 않아도 됨.</div>
+          <div class="parts3">
+            <div class="partcol"><div class="ph">프론트</div>
+              <div class="pr"><span>F1</span><span>8</span></div><div class="pr"><span>F2</span><span>12</span></div><div class="pr warn"><span>F3</span><span>3</span></div></div>
+            <div class="partcol"><div class="ph">템플</div>
+              <div class="pr"><span>T1</span><span>9</span></div><div class="pr warn"><span>T2</span><span>5</span></div><div class="pr"><span>오디오</span><span>7</span></div></div>
+            <div class="partcol"><div class="ph">렌즈</div>
+              <div class="pr"><span>알도R 1.60</span><span>18</span></div><div class="pr warn"><span>누진</span><span>3</span></div></div>
+          </div>
+          <div class="divider"></div>
+          <div class="label" style="margin-bottom:4px">조립 가능 수량 (병목 부품 기준)</div>
+          <div class="asm"><span>F2 × T2</span><span><b>5</b> 세트 <span class="locktag">병목: 템플 T2</span></span></div>
+          <div class="asm"><span>F2 × T1</span><span><b>9</b> 세트</span></div>
+          <div class="asm"><span>F1 × T1</span><span><b>8</b> 세트</span></div>
+          <button class="btn" style="margin-top:14px;width:100%" onclick="toast('부족 부품만 발주: 템플 T2 +15, F3 +12, 누진렌즈 +10 (프로토타입)')">부족 부품만 본사 발주</button>
+        </div>
+        <div class="card pad">
+          <div class="eyebrow">안경사법 운영 구조</div>
+          <div class="optbox" style="margin-top:0"><b>매장당 안경사 1명</b>(시력검사·조제 책임) + 일반인 다수(응대·예약·POS·진열·치수 보조). 안경사를 알바로 대체하는 건 불법 — 대신 <b>AI 자동 피팅이 안경사 1인 처리량을 키운다.</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINANCE -->
+  <div class="stab" id="t-fin">
+    <div class="eyebrow">이번 달 재무 한눈에 · 성수점</div>
+    <div class="fin-kpis">
+      <div class="card pad fk"><div class="label">매출</div><div class="big">₩4,800<small>만</small></div><div class="sub">▲ 12% 전월</div></div>
+      <div class="card pad fk"><div class="label">영업이익</div><div class="big">₩980<small>만</small></div><div class="sub">이익률 20%</div></div>
+      <div class="card pad fk"><div class="label">예상 현금잔액(월말)</div><div class="big">₩1,640<small>만</small></div><div class="sub">입금·지출 반영</div></div>
+      <div class="card pad fk"><div class="label">손익분기 달성률</div><div class="big">151<small>%</small></div><div class="sub">본전 넘김 ✓</div></div>
+    </div>
+
+    <div class="hq-grid" style="margin-top:18px">
+      <!-- P&L -->
+      <div class="card pad">
+        <div class="eyebrow">손익(P&amp;L) — 이번 달</div>
+        <div class="pl-row"><span>매출</span><span>₩48,000,000</span></div>
+        <div class="pl-row"><span class="muted">− 매출원가(본사 매입·완제품)</span><span class="neg">−19,200,000</span></div>
+        <div class="pl-row sum"><span>매출총이익</span><span>₩28,800,000</span></div>
+        <div class="help">매출총이익 = 매출 − 물건 떼온 값. 여기서 고정비를 뺍니다.</div>
+        <div class="pl-row"><span class="muted">− 임대료</span><span class="neg">−6,500,000</span></div>
+        <div class="pl-row"><span class="muted">− 인건비 (안경사1+알바2)</span><span class="neg">−9,800,000</span></div>
+        <div class="pl-row"><span class="muted">− CRM/ERP 구독(본사)</span><span class="neg">−300,000</span></div>
+        <div class="pl-row"><span class="muted">− 기타(공과금·카드수수료·소모품)</span><span class="neg">−2,400,000</span></div>
+        <div class="pl-row sum"><span>영업이익</span><span>₩9,800,000</span></div>
+        <div class="help">영업이익 = 실제로 내 손에 남는 돈(세금 전). 이익률 20%.</div>
+      </div>
+
+      <!-- 현금흐름 + BEP -->
+      <div class="grid">
+        <div class="card pad">
+          <div class="eyebrow">현금흐름 — 들어올 돈 / 나갈 돈</div>
+          <div class="cash-row"><span>카드 매출 입금 예정 (T+2)</span><span style="color:var(--good)">+₩31,400,000</span></div>
+          <div class="cash-row"><span>본사 발주 대금 (자동 출금 5일)</span><span class="neg">−₩19,200,000</span></div>
+          <div class="cash-row"><span>임대료 (25일)</span><span class="neg">−₩6,500,000</span></div>
+          <div class="cash-row"><span>급여 (10일)</span><span class="neg">−₩9,800,000</span></div>
+          <div class="cash-row" style="border-bottom:0"><span style="font-weight:500">월말 예상 현금잔액</span><span style="font-weight:500">₩16,400,000</span></div>
+          <div class="help">이익이 나도 '돈 들어오는 날 ≠ 나가는 날'이라 현금이 빌 수 있어요. 그걸 미리 보여줍니다.</div>
+        </div>
+        <div class="card pad">
+          <div class="eyebrow">손익분기(BEP) — 이만큼은 팔아야 본전</div>
+          <div class="bep"><span class="bn">₩31,700,000</span><span class="muted">/ 월</span></div>
+          <div class="bepbar"><div class="bepfill" style="width:66%"></div></div>
+          <div class="bepmark">현재 매출 4,800만 = 본전(3,170만)의 151% · 안전</div>
+          <div class="help">BEP = 월 고정비(약 1,900만) ÷ 마진율(60%). 이 밑으로 떨어지면 적자 신호.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hq-grid">
+      <div class="card pad">
+        <div class="eyebrow">세무 캘린더 — 자동 알림</div>
+        <div class="cal-row"><span>부가가치세 예정신고</span><span class="muted">7/25 · D-48</span></div>
+        <div class="cal-row"><span>원천세 신고·납부 (직원 급여)</span><span class="muted">매월 10일</span></div>
+        <div class="cal-row"><span>종합소득세 신고</span><span class="muted">내년 5월</span></div>
+        <div class="cal-row" style="border-bottom:0"><span>현금영수증 의무발행</span><span class="pill good">자동 ✓</span></div>
+        <div class="help">신고·납부 날짜를 놓치면 가산세. POS 데이터로 자동 집계·알림.</div>
+      </div>
+      <div class="card pad">
+        <div class="eyebrow">본사 정산 내역 (자동)</div>
+        <div class="cash-row"><span>발주 대금 (완제품·렌즈)</span><span>₩19,200,000</span></div>
+        <div class="cash-row"><span>CRM/ERP 구독료</span><span>₩300,000</span></div>
+        <div class="cash-row" style="border-bottom:0"><span>가맹비 (분할 납부)</span><span>₩500,000</span></div>
+        <div class="note" style="margin-top:14px;font-size:15px"><b>가맹점 입장.</b> 돈 계산·세무·정산을 시스템이 다 해줘서 "장사에만 집중". 이게 간판을 버리고 들어오는 당근 — 동시에 본부엔 정산·구독·발주가 매출로 잡힌다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HR / 채용 -->
+  <div class="stab" id="t-hr">
+    <div class="eff" style="grid-template-columns:repeat(3,1fr)">
+      <div class="effcard"><div class="el">인건비 중 안경사 비중</div><div class="ev">45<small> %</small></div><div class="eb"><s>70%</s>일반인 전환·AI 보조</div></div>
+      <div class="effcard"><div class="el">안경사 1인당 일반인 보조</div><div class="ev">3<small> 명</small></div><div class="eb">처리량 64%↑</div></div>
+      <div class="effcard"><div class="el">채용 소요일 (안경사)</div><div class="ev">9<small> 일</small></div><div class="eb"><s>40일+</s>본부 인재풀 매칭</div></div>
+    </div>
+
+    <div class="store-grid">
+      <div class="card pad">
+        <div class="eyebrow">안경사 채용 — 본부 인재풀 매칭</div>
+        <div class="label" style="margin-bottom:8px">안경사 구인 채널이 아이옵트 정도뿐인 문제를 본부가 해결 — 본부가 안경사 풀을 운영·검증하고 가맹점에 매칭.</div>
+        <div class="rec"><div><div class="rn">안경사 A · 경력 6년</div><div class="rd">성동/광진 · 즉시 가능 · 누진·조제 강점</div></div><button class="btn small" onclick="toast('면접 요청 전송 (프로토타입)')">매칭 요청</button></div>
+        <div class="rec"><div><div class="rn">안경사 B · 경력 3년</div><div class="rd">마포 · 2주 후 · 검안 강점</div></div><button class="btn small" onclick="toast('면접 요청 전송 (프로토타입)')">매칭 요청</button></div>
+        <div class="rec"><div><div class="rn">안경사 C · 경력 11년 (점장급)</div><div class="rd">강남 · 협의 · 매장관리 경험</div></div><button class="btn small ghost" onclick="toast('프로필 열람 (프로토타입)')">프로필</button></div>
+        <div class="optbox" style="margin-top:14px"><b>본부 가치.</b> 채용 공고·검증·계약을 본부가 대행 → 가맹점은 면접만. 안경사 풀이 본부 자산이 될수록 가맹 유인↑.</div>
+      </div>
+
+      <div class="card pad">
+        <div class="eyebrow">일반인 직무 프로그램 — 안경사 의존 줄이기</div>
+        <div class="label" style="margin-bottom:6px">안경사법 안에서 일반인이 할 수 있는 일을 교육·인증해 최대한 활용. AI 피팅 보조가 일반인 처리 범위를 넓힌다.</div>
+        <div class="split">
+          <div class="sc"><div class="st">안경사 전담 (법적 필수)</div>
+            <div class="si"><b>시력검사 · 굴절검사</b></div>
+            <div class="si"><b>렌즈 조제 · 가공</b></div>
+            <div class="si"><b>최종 피팅 책임</b></div>
+          </div>
+          <div class="sc"><div class="st">인증 일반인 가능 (+AI 보조)</div>
+            <div class="si">응대 · 예약 · POS 결제</div>
+            <div class="si">치수 측정 보조 · AR 피팅 안내</div>
+            <div class="si">진열 · 재고 · 발주 입력</div>
+            <div class="si">안경집·세척액 등 일반상품 판매</div>
+          </div>
+        </div>
+        <div class="rec" style="margin-top:10px"><div><div class="rn">BV 일반인 직무 인증 (온라인)</div><div class="rd">4개 모듈 · 수료 시 인증 발급</div></div><button class="btn small" onclick="toast('직무 교육 모듈 시작 (프로토타입)')">교육 시작</button></div>
+        <div class="optbox" style="margin-top:12px"><b>구조.</b> 매장당 <b>안경사 1명 + 인증 일반인 다수</b>. AI 자동 피팅으로 안경사는 검안·조제에 집중, 나머지는 일반인이 → 인건비·구인난 동시 완화.</div>
+      </div>
+    </div>
+  </div>
+</section>
 </div>
 
 <div class="foot">
-  <span>BETTERVISION OS · 가맹점 · 껍데기 v0.1</span>
-  <span>세부 페이지는 하나씩 추가됩니다</span>
+  <span>BETTERVISION OS · 가맹점 · 더미 데이터</span>
+  <span><a href="index.html">← 홈</a></span>
 </div>
+
 <script src="/assets/app.js"></script>
+<script>
+/* store subtabs */
+document.getElementById('subtabs').addEventListener('click',e=>{const t=e.target.closest('.subtab');if(!t)return;
+  document.querySelectorAll('.subtab').forEach(x=>x.classList.remove('active'));t.classList.add('active');
+  document.querySelectorAll('.stab').forEach(s=>s.classList.remove('active'));document.getElementById('t-'+t.dataset.t).classList.add('active');});
+const customers=[
+  {n:'양지근',sz:'F2×T2',last:'2024.12',cyc:'12개월',st:'due',stt:'재방문 권장',pd:'63.5mm',face:'142mm / 낮은코',rx:'OD -3.25 / OS -3.50',ltv:'76만',hist:[['로마 클래식','2024.12 · 30만'],['알도 R 렌즈','2024.12'],['멤버십','월 9,900']],next:'2025.12 (렌즈교체)'},
+  {n:'김서연',sz:'F1×T1',last:'2025.03',cyc:'8개월',st:'ok',stt:'안정',pd:'60.0mm',face:'131mm / 표준',rx:'OD -1.75 / OS -2.00',ltv:'52만',hist:[['Lindberg 협업','2025.03'],['누진 렌즈','2025.03']],next:'2025.11'},
+  {n:'박도현',sz:'F3×T2',last:'2025.05',cyc:'신규',st:'new',stt:'신규·앱측정',pd:'66.0mm',face:'149mm / 높은코',rx:'OD -4.50 / OS -4.25',ltv:'24만',hist:[['NORM 오디오 템플','2025.05 · 24만']],next:'2025.09'},
+  {n:'이수민',sz:'F2×T1',last:'2025.01',cyc:'10개월',st:'due',stt:'재방문 권장',pd:'62.0mm',face:'138mm / 표준',rx:'OD -2.25 / OS -2.25',ltv:'41만',hist:[['로마 클래식','2025.01']],next:'2025.11'},
+  {n:'정하준',sz:'F2×T2',last:'2025.04',cyc:'9개월',st:'ok',stt:'안정',pd:'64.0mm',face:'143mm / 낮은코',rx:'OD -3.00 / OS -2.75',ltv:'63만',hist:[['선글라스','2025.04'],['알도 R 렌즈','2025.04']],next:'2026.01'}];
+const dotName={due:'재방문',ok:'안정',new:'신규'};
+const tb=document.querySelector('#custTable tbody');
+customers.forEach((c,i)=>{const tr=document.createElement('tr');tr.dataset.i=i;if(i===0)tr.classList.add('sel');
+  tr.innerHTML=`<td>${c.n}</td><td>${c.sz}</td><td class="muted">${c.last}</td><td class="muted">${c.cyc}</td><td><span class="dot ${c.st}"></span>${c.stt}</td>`;
+  tr.onclick=()=>{document.querySelectorAll('#custTable tr').forEach(r=>r.classList.remove('sel'));tr.classList.add('sel');detail(i);};tb.appendChild(tr);});
+function detail(i){const c=customers[i];document.getElementById('detail').innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="nm">${c.n}</div><div class="label">사이즈 ${c.sz} · ${c.stt}</div></div><span class="pill ${c.st==='due'?'warn':c.st==='new'?'':'good'}">${dotName[c.st]}</span></div>
+  <div class="divider"></div>
+  <div class="kv"><span class="label">동공 간 거리(PD)</span><span>${c.pd}</span></div>
+  <div class="kv"><span class="label">얼굴 측정값</span><span>${c.face}</span></div>
+  <div class="kv"><span class="label">최근 처방</span><span>${c.rx}</span></div>
+  <div class="kv"><span class="label">재구매 주기</span><span>${c.cyc}</span></div>
+  <div class="kv"><span class="label">고객 LTV (5년)</span><span>${c.ltv}</span></div>
+  <div class="kv"><span class="label">다음 재방문</span><span>${c.next}</span></div>
+  <div class="label" style="margin:14px 0 6px">구매 이력</div>
+  ${c.hist.map(h=>`<div class="hist"><span>${h[0]}</span><span class="muted">${h[1]}</span></div>`).join('')}
+  <div style="display:flex;gap:10px;margin-top:16px"><button class="btn small" onclick="toast('${c.n}님 재방문 카톡 발송 (프로토타입)')">카톡 발송</button><button class="btn small ghost" onclick="toast('기록 추가 (프로토타입)')">기록 추가</button></div>`;}
+detail(0);
+function toggleRun(el){el.classList.toggle('done');
+  const items=document.querySelectorAll('#runlist .runitem');
+  const done=document.querySelectorAll('#runlist .runitem.done').length;
+  document.getElementById('runcount').textContent=`${done} / ${items.length} 완료`;}
+</script>
 </body>
 </html>
