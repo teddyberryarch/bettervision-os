@@ -61,6 +61,40 @@
 .pushbox{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;background:var(--surface)}
 .pushgrid{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .pushgrid .hqsel{flex:0 1 auto}
+.pprow{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+.pprow:last-child{border-bottom:0}
+.pprow .ppn{flex:1 1 140px;font-size:14px;color:var(--ink)}
+.pprow .ppf{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted)}
+.pprow input{width:96px;text-align:right;font-family:var(--kr);font-size:14px;border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.pprow input.disc{width:56px}
+.anagrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.anagrid{grid-template-columns:1fr}}
+.anabox{border:1px solid var(--line);border-radius:12px;padding:14px}
+.anah{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px}
+.anah .label{font-weight:400}
+.abar{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:13px}
+.abar .al{width:62px;color:var(--muted);flex:none}
+.abar .at{flex:1;height:8px;background:var(--surface);border-radius:4px;overflow:hidden}
+.abar .at i{display:block;height:100%;background:var(--ink);border-radius:4px}
+.abar .av{width:54px;text-align:right;color:var(--ink);flex:none}
+.fcstore{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+.fcstore .fch{display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600;color:var(--ink);margin-bottom:8px}
+.fcrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid var(--line2);font-size:13px;flex-wrap:wrap}
+.fcrow:first-of-type{border-top:0}
+.fcrow .fcn{flex:1 1 130px;color:var(--ink)}
+.fcrow .fcm{color:var(--muted);font-size:12px}
+.fcrow .fcpush{font-weight:600;color:var(--ink)}
+.fcrow .ok{color:var(--good);font-weight:400}
+.feedbox{max-height:280px;overflow-y:auto;border:1px solid var(--line);border-radius:12px}
+.feedrow{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line2);font-size:13px}
+.feedrow:last-child{border-bottom:0}
+.feedrow .fi{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex:none;background:var(--surface)}
+.feedrow .fi.WARN{background:#fbeaea}.feedrow .fi.CARD{background:#eaf2ec}.feedrow .fi.BOX{background:#eef0f4}.feedrow .fi.BAG{background:#f3eee8}
+.feedrow .fs{font-weight:600;color:var(--ink);flex:none}
+.feedrow .ft{color:var(--muted);flex:1}
+.feedrow .fm{color:var(--faint);font-size:12px;flex:none}
+@keyframes feedin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.feedrow.new{animation:feedin .4s ease}
 </style>
 </head>
 <body>
@@ -114,6 +148,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
         <div id="dashCat"></div>
       </div>
     </div>
+    <div class="eyebrow" style="margin:18px 0 8px">전 지점 실시간 활동 <span class="livedot">LIVE</span> <span class="label" style="font-weight:400">· 관제</span></div>
+    <div id="feedBox" class="feedbox"></div>
   </div>
 
   <!-- 지점별 관리 (서버 API — 지점이 판 게 본부에 실시간 반영) -->
@@ -176,6 +212,61 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <button class="btn small" onclick="belongMove()">이 지점으로 이동</button>
     </div>
     <div id="belongCard" style="margin-top:14px"></div>
+  </div>
+
+  <!-- 수요 예측 -> 푸시 발주 -->
+  <div class="card pad" style="margin-bottom:6px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div class="eyebrow">수요 예측 → 푸시 발주 🔮 <span class="label" style="font-weight:400">· 본부가 알아서 밀어줌</span></div>
+      <select id="fcDl" class="hqsel">
+        <option value="tmw18">내일 18:00 마감</option>
+        <option value="today18">오늘 18:00 마감</option>
+        <option value="h3">3시간 후 마감</option>
+      </select>
+    </div>
+    <div class="label" style="font-size:13px;margin:8px 0 12px">최근 30일 판매 속도로 다음 주 수요를 예측 → 부족분을 가맹점에 푸시. 사장님은 승인만, 무응답은 자동 확정.</div>
+    <div id="fcBox"></div>
+    <button class="btn" id="fcAllBtn" style="width:100%;margin-top:12px;display:none" onclick="fcPushAll()">권장 물량 전 지점 일괄 푸시</button>
+  </div>
+
+  <!-- 본부 분석 리포트 -->
+  <div class="card pad" style="margin-bottom:6px">
+    <div class="eyebrow">본부 분석 리포트 <span class="livedot">LIVE</span> <span class="label" style="font-weight:400">· 데이터로 생산·소싱 결정</span></div>
+    <div class="label" style="font-size:13px;margin:8px 0 12px">최근 30일. 어떤 사이즈·디자인이 팔리는지(생산 발주), 어느 상권이 PB가 강한지(소싱·마케팅 배분)를 본부가 한눈에.</div>
+    <div class="anagrid">
+      <div class="anabox">
+        <div class="anah">프레임 사이즈 분포 <span class="label">· 생산 비중 결정</span></div>
+        <div id="anaSize"></div>
+      </div>
+      <div class="anabox">
+        <div class="anah">카테고리 매출 믹스</div>
+        <div id="anaCat"></div>
+      </div>
+      <div class="anabox">
+        <div class="anah">잘 나가는 디자인 TOP</div>
+        <div id="anaDesign"></div>
+      </div>
+      <div class="anabox">
+        <div class="anah">상권별 PB 침투율 <span class="label">· 높을수록 본부 마진↑</span></div>
+        <div id="anaPb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 가격 정책 본부 통제 -->
+  <div class="card pad" style="margin-bottom:6px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div class="eyebrow">가격 정책 통제 · 본부 <span class="label" style="font-weight:400">· 권장가·할인 한도를 전 지점에 강제</span></div>
+      <select id="ppCat" class="hqsel" onchange="ppLoad()">
+        <option value="렌즈">렌즈</option>
+        <option value="콘택트">콘택트</option>
+        <option value="테">테</option>
+        <option value="선글라스">선글라스</option>
+        <option value="액세서리">액세서리</option>
+      </select>
+    </div>
+    <div class="label" style="font-size:13px;margin:8px 0 6px">권장가를 바꾸면 가맹점 POS 가격이 즉시 바뀌고, 할인 한도를 넘는 판매는 시스템이 막아요. PB(렌즈·콘택트)는 마진 보호로 한도를 낮게.</div>
+    <div id="ppBox"></div>
   </div>
 
   <!-- 공급·물류 자동화 -->
@@ -842,6 +933,102 @@ function pushSend(){
       if(window.hqOrdLoad)window.hqOrdLoad();
     });
 }
+
+/* ===== 가격 정책 통제 ===== */
+var PP_ALL=[];
+(function(){ if(document.getElementById('ppBox')) fetch('/api/price-policy').then(function(r){return r.json();}).then(function(j){ PP_ALL=j.policy||[]; ppLoad(); }); })();
+function ppLoad(){
+  var cat=document.getElementById('ppCat').value;
+  var rows=PP_ALL.filter(function(p){return p.cat===cat;});
+  document.getElementById('ppBox').innerHTML = rows.map(function(p){
+    return '<div class="pprow"><span class="ppn">'+p.name+'</span>'+
+      '<span class="ppf">권장가 ₩<input type="number" id="pl_'+p.sku+'" value="'+p.list_price+'" min="0"></span>'+
+      '<span class="ppf">할인한도 <input class="disc" type="number" id="pd_'+p.sku+'" value="'+p.max_disc+'" min="0" max="90">%</span>'+
+      '<button class="btn small" onclick="ppSave(\''+p.sku+'\')">적용</button></div>';
+  }).join('');
+}
+function ppSave(sku){
+  var lp=+document.getElementById('pl_'+sku).value||0, md=+document.getElementById('pd_'+sku).value||0;
+  fetch('/api/price-policy',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({sku:sku,list_price:lp,max_disc:md})})
+    .then(function(r){return r.json();}).then(function(j){
+      if(!j.ok){toast(j.error||'적용 실패');return;}
+      var i=PP_ALL.findIndex(function(x){return x.sku===sku;}); if(i>=0){PP_ALL[i].list_price=j.list_price;PP_ALL[i].max_disc=j.max_disc;}
+      toast(sku+' 정책 적용 — 전 지점 반영');
+    });
+}
+
+/* ===== 본부 분석 리포트 ===== */
+(function(){ if(!document.getElementById('anaSize'))return;
+  var to=new Date(), from=new Date(to.getTime()-29*864e5);
+  function iso(d){return d.toISOString().slice(0,10);}
+  fetch('/api/analytics?from='+iso(from)+'&to='+iso(to)).then(function(r){return r.json();}).then(function(d){
+    function bar(label,pct,val){return '<div class="abar"><span class="al">'+label+'</span><span class="at"><i style="width:'+pct+'%"></i></span><span class="av">'+val+'</span></div>';}
+    var sz=d.sizes||[]; document.getElementById('anaSize').innerHTML=sz.map(function(x){return bar(x.size,x.share,x.qty+'개');}).join('');
+    var cm=d.catMix||[]; document.getElementById('anaCat').innerHTML=cm.map(function(x){return bar(x.cat,x.share,x.share+'%');}).join('');
+    var dz=d.designs||[]; var mx=Math.max.apply(null,dz.map(function(x){return x.qty;}).concat([1]));
+    document.getElementById('anaDesign').innerHTML=dz.map(function(x){return bar(x.name.replace('로마 ',''),Math.round(x.qty/mx*100),x.qty+'개');}).join('');
+    var st=d.stores||[]; document.getElementById('anaPb').innerHTML=st.map(function(x){return bar(x.store.replace('점',''),x.pbShare,x.pbShare+'%');}).join('');
+  });
+})();
+
+/* ===== 수요 예측 -> 푸시 ===== */
+var FC=[];
+(function(){ if(document.getElementById('fcBox')) fcLoad(); })();
+function fcLoad(){
+  fetch('/api/forecast').then(function(r){return r.json();}).then(function(j){
+    FC=j.stores||[]; var any=false;
+    document.getElementById('fcBox').innerHTML = FC.map(function(st){
+      var rows=st.items.map(function(i){
+        var dl = i.daysLeft!=null? (i.daysLeft+'일분') : '-';
+        var act = i.push>0? ('<span class="fcpush">+'+i.push+' 푸시</span>') : '<span class="ok">재고 충분</span>';
+        if(i.push>0)any=true;
+        return '<div class="fcrow"><span class="fcn">'+i.name+'</span><span class="fcm">주 '+i.week+'개 · 재고 '+i.stock+'('+dl+')</span>'+act+'</div>';
+      }).join('');
+      var pc=st.items.filter(function(i){return i.push>0;}).length;
+      return '<div class="fcstore"><div class="fch"><span>'+st.store+'</span>'+
+        (pc>0?'<button class="btn small" onclick="fcPushStore(\''+st.store+'\')">이 지점 푸시 ('+pc+')</button>':'<span class="label">푸시 불필요</span>')+
+        '</div>'+rows+'</div>';
+    }).join('');
+    document.getElementById('fcAllBtn').style.display = any? 'block':'none';
+  });
+}
+function _fcDlISO(){
+  var k=document.getElementById('fcDl').value, d=new Date();
+  if(k==='today18'){d.setHours(18,0,0,0);} else if(k==='tmw18'){d.setDate(d.getDate()+1);d.setHours(18,0,0,0);} else {d=new Date(Date.now()+3*3600*1000);}
+  return d.toISOString();
+}
+function _pushItems(list){
+  var dl=_fcDlISO();
+  return Promise.all(list.map(function(x){
+    return fetch('/api/orders/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:x.store,sku:x.sku,name:x.name,cat:x.cat,qty:x.push,deadline:dl})});
+  }));
+}
+function fcPushStore(store){
+  var st=FC.find(function(s){return s.store===store;}); if(!st)return;
+  var list=st.items.filter(function(i){return i.push>0;}).map(function(i){return Object.assign({store:store},i);});
+  if(!list.length){toast('푸시할 품목이 없어요');return;}
+  _pushItems(list).then(function(){ toast(store+' '+list.length+'종 푸시 발송 — 가맹 응답 대기'); if(window.hqOrdLoad)window.hqOrdLoad(); });
+}
+function fcPushAll(){
+  var list=[]; FC.forEach(function(st){ st.items.filter(function(i){return i.push>0;}).forEach(function(i){ list.push(Object.assign({store:st.store},i)); }); });
+  if(!list.length){toast('푸시할 품목이 없어요');return;}
+  _pushItems(list).then(function(){ toast('전 지점 '+list.length+'건 일괄 푸시 — 가맹 응답 대기'); if(window.hqOrdLoad)window.hqOrdLoad(); });
+}
+
+/* ===== 전 지점 실시간 활동 피드 ===== */
+var ICON={CARD:'₩',BOX:'▤',BAG:'⌂',WARN:'!'};
+function feedAgo(ts){ var d=Math.max(0,Date.now()-ts); var m=Math.floor(d/60000); if(m<1)return '방금'; if(m<60)return m+'분 전'; var h=Math.floor(m/60); if(h<24)return h+'시간 전'; return Math.floor(h/24)+'일 전'; }
+function feedLoad(){
+  var box=document.getElementById('feedBox'); if(!box)return;
+  fetch('/api/activity').then(function(r){return r.json();}).then(function(j){
+    var f=j.feed||[];
+    box.innerHTML=f.map(function(x){
+      return '<div class="feedrow"><span class="fi '+x.icon+'">'+(ICON[x.icon]||'•')+'</span>'+
+        '<span class="fs">'+x.store+'</span><span class="ft">'+x.text+'</span><span class="fm">'+feedAgo(x.ts)+'</span></div>';
+    }).join('') || '<div class="muted" style="padding:14px;font-size:14px">활동 없음</div>';
+  });
+}
+(function(){ if(document.getElementById('feedBox')){ feedLoad(); setInterval(feedLoad, 8000); } })();
 </script>
 </body>
 </html>
