@@ -35,6 +35,37 @@ async function api(req, res, url){
       const row=await db.addBooking(b);
       return send(res,201,{ok:true, booking:row});
     }
+    // GET /api/catalog -> SKU 목록(공통)
+    if(req.method==='GET' && url.pathname==='/api/catalog'){
+      return send(res,200,{ok:true, stores:db.STORES, catalog:db.CATALOG});
+    }
+    // GET /api/inventory?store= -> 지점 재고
+    if(req.method==='GET' && url.pathname==='/api/inventory'){
+      const store=url.searchParams.get('store'); if(!store) return send(res,400,{ok:false,error:'store 필요'});
+      return send(res,200,{ok:true, store:store, items:await db.getInventory(store)});
+    }
+    // POST /api/inventory/restock {store,threshold,add}
+    if(req.method==='POST' && url.pathname==='/api/inventory/restock'){
+      const b=await body(req); const n=await db.restock(b.store, b.threshold||5, b.add||15);
+      return send(res,200,{ok:true, restocked:n});
+    }
+    // POST /api/sales {store,date,method,lines:[{sku,name,cat,qty,amount,medical}]}
+    if(req.method==='POST' && url.pathname==='/api/sales'){
+      const b=await body(req);
+      if(!b.store||!b.date||!b.lines||!b.lines.length) return send(res,400,{ok:false,error:'필수값 누락'});
+      const r=await db.recordSale(b.store, b.date, b.method||'카드', b.lines);
+      return send(res, r.ok?201:409, r);
+    }
+    // GET /api/sales/summary?store=&date= -> {total,byCat}
+    if(req.method==='GET' && url.pathname==='/api/sales/summary'){
+      const store=url.searchParams.get('store'), date=url.searchParams.get('date');
+      return send(res,200,{ok:true, summary:await db.salesSummary(store,date)});
+    }
+    // GET /api/sales/daily?store=&from=&to= -> 일별 매출
+    if(req.method==='GET' && url.pathname==='/api/sales/daily'){
+      const store=url.searchParams.get('store')||null, from=url.searchParams.get('from'), to=url.searchParams.get('to');
+      return send(res,200,{ok:true, days:await db.salesDaily(store,from,to)});
+    }
     return send(res,404,{ok:false,error:'not found'});
   }catch(e){ console.error(e); return send(res,500,{ok:false,error:'server error'}); }
 }
