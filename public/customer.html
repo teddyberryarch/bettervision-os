@@ -21,6 +21,20 @@
 .rtag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:9999px;padding:1px 7px;margin-left:4px}
 .rmatch{font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap}
 .rmatch.best{color:var(--good)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-family:inherit;font-size:14px;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;transition:.12s}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.finput{width:100%;font-family:inherit;font-size:15px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff}
+.bookmsg{display:none;margin-top:10px;background:var(--good-soft);color:var(--good);border-radius:8px;padding:10px 12px;font-size:14px;font-weight:500}
+.bookmsg.show{display:block}
+.cartrow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid var(--line2)}
+.cartrow:first-child{border-top:0}
+.cartrow .cn{font-size:15px;color:var(--ink)}.cartrow .cp{font-size:13px;color:var(--muted)}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:#fff;font-size:16px;line-height:1;cursor:pointer;color:var(--ink)}
+.stepper .q{min-width:18px;text-align:center;font-size:15px}
+.cart-total{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:16px;color:var(--ink)}
+.cart-total b{font-weight:700}
 </style>
 </head>
 <body>
@@ -87,12 +101,25 @@
             </div>
             <div class="appcard">
               <h4>매장 방문 예약 <span class="pill">검안 · 픽업</span></h4>
-              <div class="label" style="margin:6px 0 10px">대기 없이 — 시간 골라 예약하면 매장에 자동 전달.</div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <button class="btn small ghost" onclick="toast('성수점 · 오늘 16:00 예약 (프로토타입)')">오늘 16:00</button>
-                <button class="btn small ghost" onclick="toast('성수점 · 내일 11:00 예약 (프로토타입)')">내일 11:00</button>
-                <button class="btn small" onclick="toast('예약 시간 선택 (프로토타입)')">다른 시간</button>
+              <div class="label" style="margin:6px 0 10px">매장·날짜·시간을 고르면 예약이 잡혀요.</div>
+              <div class="label" style="margin-bottom:5px">매장</div>
+              <div class="chips" id="bkStore">
+                <button class="chip active" data-v="성수점">성수점</button>
+                <button class="chip" data-v="홍대점">홍대점</button>
+                <button class="chip" data-v="판교점">판교점</button>
               </div>
+              <div class="label" style="margin:11px 0 5px">날짜</div>
+              <input type="date" id="bkDate" class="finput">
+              <div class="label" style="margin:11px 0 5px">시간</div>
+              <div class="chips" id="bkTime">
+                <button class="chip" data-v="10:00">10:00</button>
+                <button class="chip" data-v="11:00">11:00</button>
+                <button class="chip" data-v="14:00">14:00</button>
+                <button class="chip" data-v="16:00">16:00</button>
+                <button class="chip" data-v="18:00">18:00</button>
+              </div>
+              <button class="btn" style="width:100%;margin-top:13px" onclick="book()">예약하기</button>
+              <div id="bookMsg" class="bookmsg"></div>
             </div>
 
             <div class="kakao">
@@ -159,7 +186,13 @@
                 <div class="cd">소모품 · 권장 6개월</div>
                 <div class="cyctrack"><div class="cycfill" style="width:80%;background:var(--warn)"></div></div>
               </div>
-              <div class="reorder" style="border-top:1px solid var(--line2);margin-top:8px;padding-top:12px"><div><div class="ri">내 F2×T2 규격으로 한 번에</div><div class="rs">규격 저장됨 · 호환품 안 맞음</div></div><button class="btn small" onclick="toast('렌즈+이어팁 재주문 (프로토타입)')">원클릭 재주문</button></div>
+              <div style="border-top:1px solid var(--line2);margin-top:8px;padding-top:12px">
+                <div class="ri">내 F2×T2 규격 소모품 재주문</div>
+                <div class="rs" style="margin-bottom:8px">규격 저장됨 · 호환품은 안 맞음</div>
+                <div id="cartList"></div>
+                <div class="cart-total"><span>합계</span><b id="cartTotal">₩0</b></div>
+                <button class="btn small" style="width:100%;margin-top:10px" onclick="reorder()">원클릭 재주문</button>
+              </div>
             </div>
 
             <div class="appcard">
@@ -287,6 +320,47 @@ recompute();
     s+='<text x="'+pts[i][0].toFixed(1)+'" y="'+(pts[i][1]-9).toFixed(1)+'" font-size="13" fill="#111111" text-anchor="middle">'+d[1].toFixed(2)+'</text>';
     s+='<text x="'+pts[i][0].toFixed(1)+'" y="'+(H-6)+'" font-size="13" fill="#6b7280" text-anchor="middle">'+d[0]+'</text>';});
   c.innerHTML=s+'</svg>';})();
+
+/* ===== 방문 예약 ===== */
+(function(){var d=new Date();var iso=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  var el=document.getElementById('bkDate'); if(el){el.value=iso; el.min=iso;}})();
+['bkStore','bkTime'].forEach(function(id){var g=document.getElementById(id); if(!g)return;
+  g.addEventListener('click',function(e){var b=e.target.closest('.chip'); if(!b)return;
+    g.querySelectorAll('.chip').forEach(function(x){x.classList.remove('active');}); b.classList.add('active');});});
+function book(){
+  var st=document.querySelector('#bkStore .chip.active'),
+      tm=document.querySelector('#bkTime .chip.active'),
+      dt=document.getElementById('bkDate').value,
+      msg=document.getElementById('bookMsg');
+  if(!st||!dt||!tm){toast('매장·날짜·시간을 모두 골라주세요'); return;}
+  var txt=st.dataset.v+' · '+dt+' '+tm.dataset.v+' 예약 완료 — 매장에 전달됐어요.';
+  msg.textContent='✓ '+txt; msg.classList.add('show'); toast('예약 완료 (프로토타입)');
+}
+
+/* ===== 소모품 재주문 장바구니 ===== */
+var CART=[
+  {n:'알도 R 렌즈 (좌우)', price:120000, q:1},
+  {n:'오디오 이어팁',       price:18000,  q:1},
+  {n:'코받침 세트',         price:6000,   q:0}
+];
+function won(n){return '₩'+n.toLocaleString('ko-KR');}
+function renderCart(){
+  var box=document.getElementById('cartList'); if(!box)return;
+  box.innerHTML=CART.map(function(it,i){
+    return '<div class="cartrow"><div><div class="cn">'+it.n+'</div><div class="cp">'+won(it.price)+'</div></div>'+
+      '<div class="stepper"><button onclick="cartQty('+i+',-1)">−</button><span class="q" id="q'+i+'">'+it.q+'</span><button onclick="cartQty('+i+',1)">+</button></div></div>';
+  }).join('');
+  var total=CART.reduce(function(a,it){return a+it.price*it.q;},0);
+  document.getElementById('cartTotal').textContent=won(total);
+}
+function cartQty(i,d){CART[i].q=Math.max(0,CART[i].q+d); renderCart();}
+function reorder(){
+  var total=CART.reduce(function(a,it){return a+it.price*it.q;},0);
+  var cnt=CART.reduce(function(a,it){return a+it.q;},0);
+  if(cnt===0){toast('수량을 1개 이상 골라주세요'); return;}
+  toast('재주문 '+cnt+'개 · '+won(total)+' 접수 (프로토타입)');
+}
+renderCart();
 </script>
 </body>
 </html>
