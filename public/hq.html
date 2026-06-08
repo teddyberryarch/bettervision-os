@@ -20,6 +20,14 @@
 .mcellin:focus{outline:2px solid var(--ink);border-color:var(--ink)}
 .mcellin.hot{outline:2px solid var(--ink);background:#f5f5f5}
 #mxTotal{width:110px;font-family:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink)}
+.hqsel{font-family:inherit;font-size:15px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:#fff}
+.hqcat-cat{margin-bottom:8px}.hqcat-cat .ph{font-size:13px;color:var(--muted);font-weight:600;margin:4px 0 2px}
+.allstore-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.allstore-row:last-child{border-bottom:0}
+.allstore-row .nm{width:64px;color:var(--ink)}
+.allstore-row .tr{flex:1;height:10px;background:var(--surface);border-radius:9999px;overflow:hidden}
+.allstore-row .tf{height:100%;background:var(--ink);border-radius:9999px}
+.allstore-row .vv{width:110px;text-align:right;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -42,6 +50,30 @@
       <div class="sub">두 불변원칙 — ① 데이터 본부 소유 ② 납품 본부 독점. 본부 수익은 안경 판매가 아니라 공급마진·가맹비·구독에서 걷는다.</div>
     </div>
   </div>
+
+  <!-- 지점별 관리 (서버 API — 지점이 판 게 본부에 실시간 반영) -->
+  <div class="card pad" style="margin-bottom:6px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div class="eyebrow">지점별 관리 <span class="livedot">LIVE</span> <span class="label" style="font-weight:400">· 본부가 전 지점 데이터를 직접 조회</span></div>
+      <select id="hqStore" class="hqsel"></select>
+    </div>
+    <div class="hq-grid l" style="margin-top:12px">
+      <div>
+        <div class="label" style="margin-bottom:4px">오늘 매출 (선택 지점)</div>
+        <div class="big kfig" id="hqStoreToday">₩0</div>
+        <div class="eyebrow" style="margin:14px 0 6px">카테고리별 판매 (오늘)</div>
+        <div id="hqStoreCat"></div>
+      </div>
+      <div>
+        <div class="label" style="margin-bottom:6px">재고 요약 (선택 지점)</div>
+        <div id="hqStoreInv"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="eyebrow" style="margin-bottom:8px">전 지점 오늘 매출 비교</div>
+    <div id="hqAllStores"></div>
+  </div>
+
   <div class="kpis">
     <div class="card pad kpi"><div class="label">이번 달 GMV</div><div class="big kfig">₩4.82<small>억</small></div><div class="delta up">▲ 12.4% 전월</div></div>
     <div class="card pad kpi"><div class="label">활성 가맹점</div><div class="big kfig">14<small>개점</small></div><div class="delta up">▲ 2개점 신규</div></div>
@@ -360,6 +392,43 @@ storeDetail(0);
       return '<div class="hqbk-row"><span class="nm">'+st+'</span><div class="tr"><div class="tf" style="width:'+pct+'%"></div></div><span class="vv">'+booked+' / '+capTotal+'건 ('+pct+'%)</span></div>';
     }).join('');
   });
+})();
+
+/* ===== 본부: 지점별 관리 (서버 API) ===== */
+(function(){
+  var sel=document.getElementById('hqStore'); if(!sel)return;
+  function won(n){return '₩'+n.toLocaleString('ko-KR');}
+  function dnow(){var d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);}
+  var CATORDER=['테','렌즈','선글라스','콘택트','액세서리'], STORES=['성수점','홍대점','판교점'], LOWAT=5;
+  STORES.forEach(function(s){var o=document.createElement('option');o.textContent=s;sel.appendChild(o);});
+
+  function loadStore(){
+    var store=sel.value, d=dnow();
+    fetch('/api/sales/summary?store='+encodeURIComponent(store)+'&date='+d).then(function(r){return r.json();}).then(function(j){
+      var by=(j.summary&&j.summary.byCat)||{}, total=(j.summary&&j.summary.total)||0;
+      document.getElementById('hqStoreToday').textContent=won(total);
+      document.getElementById('hqStoreCat').innerHTML=CATORDER.map(function(c){var v=by[c]||{qty:0,amt:0};
+        return '<div class="pl-row"><span>'+c+' <span class="muted">'+v.qty+'개</span></span><span>'+won(v.amt)+'</span></div>';}).join('');
+    });
+    fetch('/api/inventory?store='+encodeURIComponent(store)).then(function(r){return r.json();}).then(function(j){
+      var byCat={}; (j.items||[]).forEach(function(it){(byCat[it.cat]=byCat[it.cat]||[]).push(it);});
+      document.getElementById('hqStoreInv').innerHTML=CATORDER.filter(function(c){return byCat[c];}).map(function(c){
+        var arr=byCat[c], sum=arr.reduce(function(a,x){return a+x.stock;},0), low=arr.filter(function(x){return x.stock<=LOWAT;}).length;
+        return '<div class="hqcat-cat"><div class="ph">'+c+'</div><div class="pl-row"><span class="muted">총 재고</span><span>'+sum+'개'+(low?(' · 부족 '+low+'종 ⚠'):'')+'</span></div></div>';
+      }).join('');
+    });
+  }
+  function loadAll(){
+    var d=dnow();
+    Promise.all(STORES.map(function(s){return fetch('/api/sales/summary?store='+encodeURIComponent(s)+'&date='+d).then(function(r){return r.json();}).then(function(j){return {store:s,total:(j.summary&&j.summary.total)||0};});}))
+    .then(function(arr){
+      var max=Math.max(1,Math.max.apply(null,arr.map(function(a){return a.total;})));
+      document.getElementById('hqAllStores').innerHTML=arr.map(function(a){var pct=Math.round(a.total/max*100);
+        return '<div class="allstore-row"><span class="nm">'+a.store+'</span><div class="tr"><div class="tf" style="width:'+pct+'%"></div></div><span class="vv">'+won(a.total)+'</span></div>';}).join('');
+    });
+  }
+  sel.addEventListener('change',loadStore);
+  loadStore(); loadAll();
 })();
 </script>
 </body>

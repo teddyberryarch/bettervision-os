@@ -25,6 +25,10 @@
 #posCatalog .chip{font-size:13px;padding:7px 11px}
 .posline .qwrap{display:flex;align-items:center;gap:9px}
 .posline .qbtn{border:1px solid var(--line);background:#fff;border-radius:6px;width:24px;height:24px;cursor:pointer;font-size:15px;color:var(--ink);line-height:1}
+.poscat{margin-bottom:8px}
+.poscat-h{font-size:13px;color:var(--muted);font-weight:600;margin:6px 0 4px}
+.invcat{margin-bottom:8px}
+.invcat .ph{font-size:13px;color:var(--muted);font-weight:600;margin:4px 0 2px}
 </style>
 </head>
 <body>
@@ -115,12 +119,15 @@
         <div class="eyebrow">POS · 결제</div>
         <div class="locktag" style="display:inline-block;margin-bottom:8px">가격 = 본부 지정가 · 매장 수정 잠김 🔒</div>
         <div class="label" style="margin-bottom:8px">고객 <b style="color:var(--ink)">양지근</b> · F2×T2 · 자동 연결됨</div>
+        <div class="label" style="margin:4px 0 5px">지점 선택 (본부가 전 지점 관리)</div>
+        <select id="posStore" class="finput2" style="width:100%;margin-bottom:10px"></select>
         <div class="label" style="margin:4px 0 6px">상품 담기</div>
         <div id="posCatalog"></div>
         <div class="divider"></div>
         <div id="posLines"></div>
         <div class="postotal"><span class="muted" style="font-size:16px">합계</span><span class="kfig" id="posTotal">₩0</span></div>
         <div class="label" id="posMedical" style="margin-top:2px"></div>
+        <div class="label" style="margin-top:6px">오늘 매출 <b id="posToday" style="color:var(--ink)">₩0</b></div>
         <div class="posbtns">
           <button class="btn small" onclick="posPay('카드')">카드 결제</button>
           <button class="btn small ghost" onclick="posPay('현금')">현금영수증</button>
@@ -132,13 +139,13 @@
       <!-- 재고/발주 -->
       <div class="grid">
         <div class="card pad">
-          <div class="eyebrow">부품 재고 — 프론트 · 템플 · 렌즈 분리</div>
-          <div class="label" style="margin-bottom:6px">완성품이 아니라 부품으로 보유 → 조립은 판매 시점. 810 조합을 다 쌓지 않아도 됨.</div>
-          <div class="parts3" id="partsBox"></div>
+          <div class="eyebrow">카테고리별 재고</div>
+          <div class="label" style="margin-bottom:8px">테 · 렌즈 · 선글라스 · 콘택트 · 액세서리 — 판매되면 자동 차감, 부족분은 본사 발주.</div>
+          <div id="invBox"></div>
           <div class="divider"></div>
-          <div class="label" style="margin-bottom:4px">조립 가능 수량 (병목 부품 기준)</div>
-          <div id="asmBox"></div>
-          <button class="btn" style="margin-top:14px;width:100%" onclick="restock()">부족 부품만 본사 발주</button>
+          <div class="eyebrow" style="margin-bottom:6px">카테고리별 판매 (오늘)</div>
+          <div id="catSales"></div>
+          <button class="btn" style="margin-top:14px;width:100%" onclick="restock()">재고 부족분 본사 발주</button>
         </div>
         <div class="card pad">
           <div class="eyebrow">안경사법 운영 구조</div>
@@ -355,67 +362,78 @@ function stAdd(){
 }
 
 /* ===== 가맹점 POS + 부품재고 ===== */
-var PARTS={front:{F1:8,F2:12,F3:3}, temple:{T1:9,T2:5,'오디오':7}, lens:{'알도R 1.60':18,'누진':3}};
-var CATALOG=[
-  {id:'rome', n:'로마 클래식 (F2×T2)', price:189000, uses:{front:'F2',temple:'T2'}, medical:false},
-  {id:'lens', n:'알도 R 렌즈 1.60',    price:120000, uses:{lens:'알도R 1.60'}, medical:true},
-  {id:'prog', n:'누진 렌즈',           price:160000, uses:{lens:'누진'},        medical:true},
-  {id:'mem',  n:'멤버십 첫 달',        price:0,      uses:{},                   medical:false},
-  {id:'tip',  n:'오디오 이어팁',       price:18000,  uses:{},                   medical:false}
-];
-var posCart={};
+/* ===== 운영: 지점 재고 + POS (서버 API 연동) ===== */
+var INVMAP={}, CATORDER=['테','렌즈','선글라스','콘택트','액세서리'], posCart={}, LOWAT=5;
 function won(n){return '₩'+n.toLocaleString('ko-KR');}
-function catById(id){for(var i=0;i<CATALOG.length;i++)if(CATALOG[i].id===id)return CATALOG[i];}
-function renderCatalog(){document.getElementById('posCatalog').innerHTML=CATALOG.map(function(it){
-  return '<button class="chip" onclick="posAdd(\''+it.id+'\')">+ '+it.n+'</button>';}).join('');}
-function posAdd(id){posCart[id]=(posCart[id]||0)+1;renderPos();}
-function posQty(id,d){posCart[id]=Math.max(0,(posCart[id]||0)+d);if(posCart[id]===0)delete posCart[id];renderPos();}
-function posClear(){posCart={};renderPos();}
+function dnow(){var d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);}
+function curStore(){return document.getElementById('posStore').value;}
+function cats(){return CATORDER.filter(function(c){return INVMAP[c]&&INVMAP[c].length;});}
+function skuFind(sku){for(var c in INVMAP){var a=INVMAP[c];for(var i=0;i<a.length;i++)if(a[i].sku===sku)return a[i];}return null;}
+function loadInventory(){
+  return fetch('/api/inventory?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
+    INVMAP={}; (j.items||[]).forEach(function(it){ (INVMAP[it.cat]=INVMAP[it.cat]||[]).push(it); });
+    renderCatalog(); renderInv();
+  });
+}
+function loadSummary(){
+  return fetch('/api/sales/summary?store='+encodeURIComponent(curStore())+'&date='+dnow()).then(function(r){return r.json();}).then(function(j){
+    var by=(j.summary&&j.summary.byCat)||{}, total=(j.summary&&j.summary.total)||0;
+    var rows=cats().map(function(cat){var v=by[cat]||{qty:0,amt:0};return '<div class="pl-row"><span>'+cat+' <span class="muted">'+v.qty+'개</span></span><span>'+won(v.amt)+'</span></div>';}).join('');
+    document.getElementById('catSales').innerHTML = rows || '<div class="muted" style="font-size:14px">오늘 판매 없음</div>';
+    document.getElementById('posToday').textContent=won(total);
+  });
+}
+function renderCatalog(){
+  document.getElementById('posCatalog').innerHTML=cats().map(function(cat){
+    return '<div class="poscat"><div class="poscat-h">'+cat+'</div>'+INVMAP[cat].map(function(it){
+      var out=it.stock<=0;
+      return '<button class="chip"'+(out?' disabled':'')+' onclick="posAdd(\''+it.sku+'\')">+ '+it.name+' <span class="muted">'+won(it.price)+(out?' · 품절':'')+'</span></button>';
+    }).join('')+'</div>';
+  }).join('');
+}
+function posAdd(sku){if(!skuFind(sku))return; posCart[sku]=(posCart[sku]||0)+1; renderPos();}
+function posQty(sku,d){posCart[sku]=Math.max(0,(posCart[sku]||0)+d); if(posCart[sku]===0)delete posCart[sku]; renderPos();}
+function posClear(){posCart={}; renderPos();}
 function renderPos(){
-  var ids=Object.keys(posCart);
-  document.getElementById('posLines').innerHTML = ids.length? ids.map(function(id){var it=catById(id),q=posCart[id];
-    return '<div class="posline"><span>'+it.n+' <span class="muted">'+won(it.price)+'</span></span>'+
-      '<span class="qwrap"><button class="qbtn" onclick="posQty(\''+id+'\',-1)">−</button>'+q+
-      '<button class="qbtn" onclick="posQty(\''+id+'\',1)">+</button></span></div>';}).join('')
+  var skus=Object.keys(posCart);
+  document.getElementById('posLines').innerHTML = skus.length? skus.map(function(sku){var it=skuFind(sku), q=posCart[sku];
+    return '<div class="posline"><span>'+it.name+' <span class="muted">'+won(it.price)+'</span></span>'+
+      '<span class="qwrap"><button class="qbtn" onclick="posQty(\''+sku+'\',-1)">−</button>'+q+
+      '<button class="qbtn" onclick="posQty(\''+sku+'\',1)">+</button></span></div>';}).join('')
     : '<div class="muted" style="font-size:14px;padding:6px 0">상품을 담아주세요</div>';
-  var total=ids.reduce(function(a,id){return a+catById(id).price*posCart[id];},0);
-  var med=ids.reduce(function(a,id){var it=catById(id);return a+(it.medical?it.price*posCart[id]:0);},0);
+  var total=skus.reduce(function(a,sku){return a+skuFind(sku).price*posCart[sku];},0);
+  var med=skus.reduce(function(a,sku){var it=skuFind(sku);return a+(it.medical?it.price*posCart[sku]:0);},0);
   document.getElementById('posTotal').textContent=won(total);
   document.getElementById('posMedical').textContent = med>0? ('의료비 세액공제 대상 '+won(med)+' · 영수증 자동 발급') : '';
 }
 function posPay(method){
-  var ids=Object.keys(posCart); if(!ids.length){toast('담은 상품이 없어요');return;}
-  var need={front:{},temple:{},lens:{}};
-  ids.forEach(function(id){var it=catById(id),q=posCart[id];
-    ['front','temple','lens'].forEach(function(cat){ if(it.uses[cat]) need[cat][it.uses[cat]]=(need[cat][it.uses[cat]]||0)+q; });});
-  var short=[];
-  ['front','temple','lens'].forEach(function(cat){for(var k in need[cat]){ if((PARTS[cat][k]||0)<need[cat][k]) short.push(k); }});
-  if(short.length){toast('부품 부족: '+short.join(', ')+' — 발주가 필요해요');return;}
-  ['front','temple','lens'].forEach(function(cat){for(var k in need[cat]){ PARTS[cat][k]-=need[cat][k]; }});
-  var total=ids.reduce(function(a,id){return a+catById(id).price*posCart[id];},0);
-  var med=ids.reduce(function(a,id){var it=catById(id);return a+(it.medical?it.price*posCart[id]:0);},0);
-  posCart={}; renderPos(); renderParts(); renderAsm();
-  toast(method+' 결제 '+won(total)+' 완료'+(med>0?(' · 공제대상 '+won(med)):'')+' · 재고 차감됨');
+  var skus=Object.keys(posCart); if(!skus.length){toast('담은 상품이 없어요');return;}
+  var lines=skus.map(function(sku){var it=skuFind(sku);return {sku:sku,name:it.name,cat:it.cat,qty:posCart[sku],amount:it.price*posCart[sku],medical:it.medical};});
+  var total=lines.reduce(function(a,l){return a+l.amount;},0);
+  fetch('/api/sales',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:curStore(),date:dnow(),method:method,lines:lines})})
+    .then(function(r){return r.json();}).then(function(res){
+      if(!res.ok){toast(res.error||'결제 실패');return;}
+      posCart={}; renderPos();
+      Promise.all([loadInventory(),loadSummary()]).then(function(){ toast(method+' 결제 '+won(total)+' 완료 · 본부에 반영됨'); });
+    }).catch(function(){toast('네트워크 오류');});
 }
-function renderParts(){
-  function col(title,obj){return '<div class="partcol"><div class="ph">'+title+'</div>'+
-    Object.keys(obj).map(function(k){var v=obj[k];return '<div class="pr'+(v<=5?' warn':'')+'"><span>'+k+'</span><span>'+v+'</span></div>';}).join('')+'</div>';}
-  document.getElementById('partsBox').innerHTML=col('프론트',PARTS.front)+col('템플',PARTS.temple)+col('렌즈',PARTS.lens);
-}
-function renderAsm(){
-  var combos=[['F2','T2'],['F2','T1'],['F1','T1']];
-  document.getElementById('asmBox').innerHTML=combos.map(function(c){
-    var fv=PARTS.front[c[0]]||0, tv=PARTS.temple[c[1]]||0, n=Math.min(fv,tv);
-    var bn=(fv<=tv)?('프론트 '+c[0]):('템플 '+c[1]);
-    return '<div class="asm"><span>'+c[0]+' × '+c[1]+'</span><span><b>'+n+'</b> 세트 <span class="locktag">병목: '+bn+'</span></span></div>';}).join('');
+function renderInv(){
+  document.getElementById('invBox').innerHTML=cats().map(function(cat){
+    var rows=INVMAP[cat].map(function(it){var low=it.stock<=LOWAT;
+      return '<div class="pr'+(low?' warn':'')+'"><span>'+it.name+'</span><span>'+it.stock+(low?' ⚠':'')+'</span></div>';}).join('');
+    return '<div class="invcat"><div class="ph">'+cat+'</div>'+rows+'</div>';
+  }).join('');
 }
 function restock(){
-  var added=[];
-  ['front','temple','lens'].forEach(function(cat){for(var k in PARTS[cat]){ if(PARTS[cat][k]<=5){PARTS[cat][k]+=15;added.push(k);} }});
-  renderParts(); renderAsm();
-  toast(added.length? ('본사 발주: '+added.join(', ')+' 보충(+15) 완료') : '보충할 부족 부품이 없어요');
+  fetch('/api/inventory/restock',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:curStore(),threshold:LOWAT,add:15})})
+    .then(function(r){return r.json();}).then(function(j){ loadInventory(); toast(j.restocked? ('본사 발주: '+j.restocked+'종 보충(+15) 완료'):'보충할 부족 재고가 없어요'); });
 }
-renderCatalog(); renderPos(); renderParts(); renderAsm();
+(function(){
+  var sel=document.getElementById('posStore');
+  ['성수점','홍대점','판교점'].forEach(function(s){var o=document.createElement('option');o.textContent=s;sel.appendChild(o);});
+  sel.addEventListener('change',function(){ posCart={}; renderPos(); loadInventory(); loadSummary(); });
+  loadInventory(); loadSummary();
+})();
 </script>
 </body>
 </html>
