@@ -22,28 +22,205 @@
 </div></div>
 
 <div class="wrap">
+<section class="view active" id="cust">
   <div class="lead">
     <div>
-      <div class="eyebrow">Customer · 고객 앱</div>
-      <h2>고객 앱</h2>
-      <div class="sub">이 페이지는 껍데기예요. 아래 구성 예정 항목을 하나씩 실제 화면으로 채워갑니다.</div>
+      <div class="eyebrow">Customer · 고객</div>
+      <h2>측정하고, 쓰고, 평생 케어받는다</h2>
+      <div class="sub">홈에서 추천·구매, 측정 탭에서 얼굴을 재서 프론트·템플 사이즈 산출, 케어 탭에서 렌즈·테 교체주기와 눈 건강을 관리. Phase 2(오디오)·Phase 3(눈건강 모니터링) 기능이 케어 탭에 얹힌다.</div>
     </div>
   </div>
 
-  <div class="card pad">
-    <div class="eyebrow">구성 예정 <span class="tagwip">준비 중</span></div>
-    <div class="shell">
-      <div class="st">고객 앱 화면에 들어갈 섹션</div>
-      <ul><li>얼굴 측정 → 프론트×템플 사이즈 산출 · AR 가상 피팅</li><li>교체주기(렌즈·테·이어팁) · 원클릭 재주문</li><li>눈 건강 타임라인(도수 변화 그래프)</li><li>오디오 멤버십 · 디지털 보증/AS · 방문 예약 · VIP 포인트</li></ul>
+  <div class="phone-stage">
+    <div class="phone">
+      <div class="screen">
+        <div class="notch"></div>
+        <div class="app-top">
+          <div class="hi">안녕하세요, <b>양지근</b>님</div>
+          <div class="ring">VIP</div>
+        </div>
+        <div class="ptabs" id="ptabs">
+          <div class="ptab active" data-s="home">홈</div>
+          <div class="ptab" data-s="measure">측정</div>
+          <div class="ptab" data-s="care">케어</div>
+        </div>
+        <div class="app-pad">
+
+          <!-- HOME -->
+          <div class="pscreen active" id="s-home">
+            <div class="vip">
+              <div><div class="vt">멤버십 포인트</div><div class="vp">2,480 P</div><div class="vg">GOLD까지 520P · 다음 구매 5% 적립</div></div>
+              <span class="vbadge">VIP · SILVER</span>
+            </div>
+            <div class="appcard ar">
+              <h4>AR 가상 피팅 <span class="pill" style="background:rgba(255,255,255,.14);color:#ffffff">NEW</span></h4>
+              <div class="label" style="margin:8px 0 14px">얼굴에 씌워보고 고르세요. F2×T2에 맞는 810+ 조합만.</div>
+              <button class="btn small" style="background:#ffffff;color:#111111;border-color:#ffffff" onclick="toast('AR 피팅 실행 (프로토타입)')">가상으로 써보기</button>
+            </div>
+            <div class="appcard">
+              <h4>내 사이즈 추천 <span class="label">F2×T2 매칭</span></h4>
+              <div class="frame-row"><div class="frame-th"></div><div class="frame-meta"><div class="n">로마 클래식 ACE-02</div><div class="match">매칭 98%</div></div><div class="label">189,000</div></div>
+              <div class="frame-row"><div class="frame-th b"></div><div class="frame-meta"><div class="n">NORM 오디오 템플</div><div class="match">매칭 95%</div></div><div class="label">240,000</div></div>
+              <div class="frame-row"><div class="frame-th c"></div><div class="frame-meta"><div class="n">Lindberg 협업 라인</div><div class="match">매칭 91%</div></div><div class="label">470,000</div></div>
+            </div>
+            <div class="appcard member">
+              <h4>BETTERVISION 멤버십 <span class="pill" style="background:rgba(255,255,255,.16);color:#ffffff">구독</span></h4>
+              <div class="mrow"><span>펌웨어·신기능 / 청력 리포트</span><span>포함</span></div>
+              <div class="mrow"><span>AS·파손 보험 / 정기검사</span><span>포함</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+                <div><div class="label">월 멤버십</div><div style="font-size:20px" class="kfig">₩9,900<small style="font-size:14px"> / 월</small></div></div>
+                <button class="btn small" style="background:#ffffff;color:#111111;border-color:#ffffff" onclick="toast('첫 달 무료 시작 (프로토타입)')">첫 달 무료</button>
+              </div>
+            </div>
+            <div class="appcard">
+              <h4>매장 방문 예약 <span class="pill">검안 · 픽업</span></h4>
+              <div class="label" style="margin:6px 0 10px">대기 없이 — 시간 골라 예약하면 매장에 자동 전달.</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn small ghost" onclick="toast('성수점 · 오늘 16:00 예약 (프로토타입)')">오늘 16:00</button>
+                <button class="btn small ghost" onclick="toast('성수점 · 내일 11:00 예약 (프로토타입)')">내일 11:00</button>
+                <button class="btn small" onclick="toast('예약 시간 선택 (프로토타입)')">다른 시간</button>
+              </div>
+            </div>
+
+            <div class="kakao">
+              <div class="kh">◗ 카카오톡 알림</div>
+              <div class="kbub">렌즈 교체 권장 시기예요 (+11개월). 성수점 예약하기 →<div class="kt">오늘 09:12 · 도수 리콜 자동</div></div>
+            </div>
+          </div>
+
+          <!-- MEASURE -->
+          <div class="pscreen" id="s-measure">
+            <div class="appcard">
+              <h4>얼굴 측정 <span class="phaseflag">Phase 1 · 핵심</span></h4>
+              <div class="label" style="margin:6px 0 0">카메라로 얼굴을 재서 프론트·템플 사이즈를 산출해요. 안 맞는 테를 빼고 추천하는 출발점.</div>
+              <div class="scanwrap" id="scanwrap">
+                <div class="face"></div>
+                <div class="scanline"></div>
+                <div class="dotpd l"></div><div class="dotpd r"></div>
+                <div class="scanstat" id="scanstat">카메라를 정면으로 바라보세요</div>
+              </div>
+              <button class="btn" style="width:100%;margin-top:12px" id="scanbtn" onclick="runScan()">측정 시작</button>
+              <div class="meas-res" id="measres">
+                <div class="divider"></div>
+                <div class="measure">
+                  <div><div class="label">동공 간 거리(PD)</div><div class="v">63.5 mm</div></div>
+                  <div><div class="label">안면 폭</div><div class="v">142 mm</div></div>
+                  <div><div class="label">코받침 높이</div><div class="v">낮음 (Asian)</div></div>
+                  <div><div class="label">관자 길이</div><div class="v">138 mm</div></div>
+                </div>
+                <div class="divider"></div>
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div><div class="label">AI 사이즈 (프론트 × 템플)</div><div class="sizebadge" style="font-size:32px">F2 × T2</div><div class="label" style="font-size:14px">프론트 2 · 템플 2</div></div>
+                  <button class="btn small" onclick="toast('F2×T2 추천 프레임 보기 (프로토타입)')">맞는 프레임 보기</button>
+                </div>
+              </div>
+            </div>
+            <div class="note" style="font-size:15px">측정값은 본사 클라우드에 저장 → 어느 가맹점에서도 이어서 응대 → 호환 안 되는 타사 프레임은 못 맞춤(렌즈·소모품 재구매의 시작).</div>
+          </div>
+
+          <!-- CARE -->
+          <div class="pscreen" id="s-care">
+            <div class="appcard">
+              <h4>교체 주기 <span class="phaseflag">소모품</span></h4>
+              <div class="cyc">
+                <div class="ct"><span>알도 R 렌즈</span><span style="color:var(--warn)">D-9 · 교체 권장</span></div>
+                <div class="cd">마지막 교체 2024.12 · 권장 12개월</div>
+                <div class="cyctrack"><div class="cycfill" style="width:92%;background:var(--warn)"></div></div>
+              </div>
+              <div class="cyc">
+                <div class="ct"><span>프레임(테)</span><span class="muted">양호</span></div>
+                <div class="cd">힌지·코받침 상태 점검 권장 24개월</div>
+                <div class="cyctrack"><div class="cycfill" style="width:46%;background:var(--good)"></div></div>
+              </div>
+              <div class="cyc">
+                <div class="ct"><span>오디오 이어팁</span><span style="color:var(--warn)">교체 시기</span></div>
+                <div class="cd">소모품 · 권장 6개월</div>
+                <div class="cyctrack"><div class="cycfill" style="width:80%;background:var(--warn)"></div></div>
+              </div>
+              <div class="reorder" style="border-top:1px solid var(--line2);margin-top:8px;padding-top:12px"><div><div class="ri">내 F2×T2 규격으로 한 번에</div><div class="rs">규격 저장됨 · 호환품 안 맞음</div></div><button class="btn small" onclick="toast('렌즈+이어팁 재주문 (프로토타입)')">원클릭 재주문</button></div>
+            </div>
+
+            <div class="appcard">
+              <h4>디지털 보증서 · AS</h4>
+              <div class="kv" style="border-bottom:1px solid var(--line2)"><span class="label">로마 클래식 ACE-02</span><span>보증 D+312 / 730일</span></div>
+              <div class="kv" style="border-bottom:0"><span class="label">멤버십 파손 보험</span><span style="color:var(--good)">적용 중</span></div>
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <button class="btn small" onclick="toast('AS 접수 (프로토타입)')">AS 접수</button>
+                <button class="btn small ghost" onclick="toast('의료비 공제 영수증 다운로드 (프로토타입)')">의료비 영수증</button>
+              </div>
+            </div>
+
+            <div class="appcard">
+              <h4>눈 건강 타임라인 <span class="label">도수 변화</span></h4>
+              <div class="label" style="margin:6px 0 0">내 눈 기록이 다 쌓여요. 떠나면 못 가져가는 기록.</div>
+              <div class="tl-chart" id="tlChart"></div>
+              <div class="label" style="text-align:right;font-size:14px">우안(OD) 구면 추이 · 4회 검안</div>
+            </div>
+
+            <div class="appcard">
+              <h4>오디오 안경 기능 <span class="phaseflag">Phase 2</span></h4>
+              <div class="audiorow"><div class="ai">◑</div><div><b>실시간 번역·받아쓰기</b> — 대화를 자막·기록으로</div></div>
+              <div class="audiorow"><div class="ai">♪</div><div><b>청력 케어 리포트</b> — 볼륨·소음 노출 주간 리포트</div></div>
+              <div class="audiorow"><div class="ai">⌁</div><div><b>음성 비서</b> — 입력=안경, 출력=귀·폰</div></div>
+            </div>
+
+            <div class="appcard">
+              <h4>눈 건강 모니터링 <span class="phaseflag">Phase 3 · 예정</span></h4>
+              <div class="audiorow"><div class="ai">◉</div><div>시선추적으로 <b>도수 변화 조기 감지</b> → 검안 시기 자동 알림</div></div>
+              <div class="audiorow"><div class="ai">⊙</div><div>코받침·다리 센서로 착용 습관·눈 피로 추정</div></div>
+              <div class="label" style="margin-top:8px;font-size:14px">감시가 아니라 "돕는 도구" — 기록하되 투명하게, 돕되 의존시키지 않게.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
-    <a class="backlink" href="index.html">← 홈으로</a>
+
+    <div>
+      <div class="card pad">
+        <div class="eyebrow">고객 여정 = 락인 단계</div>
+        <div class="feat-list">
+          <div class="feat"><div class="ic">①</div><div><div class="ft">측정 — 데이터가 잡힌다</div><div class="fd">얼굴·PD·프론트·템플 사이즈가 본사에 저장. 다른 데선 다시 재야 함.</div></div></div>
+          <div class="feat"><div class="ic">②</div><div><div class="ft">구매 — 통째 판매(객단가)</div><div class="fd">F2×T2 규격 맞춤. 호환 부품이 못 끼는 구조.</div></div></div>
+          <div class="feat"><div class="ic">③</div><div><div class="ft">케어 — 재구매 + 구독</div><div class="fd">렌즈·이어팁 교체주기 + 멤버십. 카톡이 알아서 재방문 유도.</div></div></div>
+          <div class="feat"><div class="ic">④</div><div><div class="ft">눈 건강 — 시간이 쌓일수록 못 떠남</div><div class="fd">도수 타임라인·모니터링. 기록이 곧 전환비용.</div></div></div>
+        </div>
+        <div class="note">측정→구매→케어→눈건강으로 갈수록 전환비용이 커진다. LTV 30만 → 5년 70~80만, 전부 본사 데이터·공급으로 귀속.</div>
+      </div>
+    </div>
   </div>
+</section>
 </div>
 
 <div class="foot">
-  <span>BETTERVISION OS · 고객 앱 · 껍데기 v0.1</span>
-  <span>세부 페이지는 하나씩 추가됩니다</span>
+  <span>BETTERVISION OS · 고객 앱 · 더미 데이터</span>
+  <span><a href="index.html">← 홈</a></span>
 </div>
+
 <script src="/assets/app.js"></script>
+<script>
+/* phone tabs */
+document.getElementById('ptabs').addEventListener('click',function(e){var t=e.target.closest('.ptab');if(!t)return;
+  document.querySelectorAll('.ptab').forEach(function(x){x.classList.remove('active');});t.classList.add('active');
+  document.querySelectorAll('.pscreen').forEach(function(s){s.classList.remove('active');});document.getElementById('s-'+t.dataset.s).classList.add('active');});
+/* measuring flow */
+function runScan(){var w=document.getElementById('scanwrap'),st=document.getElementById('scanstat'),btn=document.getElementById('scanbtn'),res=document.getElementById('measres');
+  res.classList.remove('show');w.classList.remove('done');w.classList.add('scanning');btn.disabled=true;btn.textContent='측정 중…';
+  st.textContent='얼굴 윤곽 인식 중…';
+  setTimeout(function(){st.textContent='동공 간 거리(PD) 측정 중…';},700);
+  setTimeout(function(){st.textContent='안면 폭·코높이 산출 중…';},1500);
+  setTimeout(function(){w.classList.remove('scanning');w.classList.add('done');st.textContent='측정 완료 · F2 × T2';btn.disabled=false;btn.textContent='다시 측정';res.classList.add('show');},2400);}
+/* eye-health timeline */
+(function(){var c=document.getElementById('tlChart');if(!c)return;
+  var od=[['2022',-2.50],['2023',-2.75],['2024',-3.00],['2025',-3.25]];
+  var W=300,H=120,padX=20,padTop=22,padBot=22,vmin=-3.45,vmax=-2.35;
+  var X=function(i){return padX+i*((W-2*padX)/(od.length-1));},Y=function(v){return padTop+(1-((v-vmin)/(vmax-vmin)))*(H-padTop-padBot);};
+  var pts=od.map(function(d,i){return [X(i),Y(d[1])];});var s='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" width="100%" height="120" xmlns="http://www.w3.org/2000/svg">';
+  s+='<polyline points="'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ')+'" fill="none" stroke="#111111" stroke-width="2"/>';
+  od.forEach(function(d,i){s+='<circle cx="'+pts[i][0].toFixed(1)+'" cy="'+pts[i][1].toFixed(1)+'" r="3.5" fill="#111111"/>';
+    s+='<text x="'+pts[i][0].toFixed(1)+'" y="'+(pts[i][1]-9).toFixed(1)+'" font-size="13" fill="#111111" text-anchor="middle">'+d[1].toFixed(2)+'</text>';
+    s+='<text x="'+pts[i][0].toFixed(1)+'" y="'+(H-6)+'" font-size="13" fill="#6b7280" text-anchor="middle">'+d[0]+'</text>';});
+  c.innerHTML=s+'</svg>';})();
+</script>
 </body>
 </html>
