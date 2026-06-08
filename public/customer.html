@@ -41,6 +41,27 @@
 .stepper .q{min-width:18px;text-align:center;font-size:15px}
 .cart-total{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:16px;color:var(--ink)}
 .cart-total b{font-weight:700}
+.csub{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;-webkit-overflow-scrolling:touch}
+.csub .cs{padding:8px 14px;border:1px solid var(--line);border-radius:9999px;font-size:14px;white-space:nowrap;cursor:pointer;color:var(--muted)}
+.csub .cs.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pcard{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+.pcard .pn{font-size:16px;font-weight:600;color:var(--ink)}
+.pcard .pp{font-size:15px;color:var(--ink);margin-top:3px;font-weight:600}
+.pcard .pdc{font-size:14px;color:var(--muted);margin-top:7px;line-height:1.55}
+.pbbadge{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--ink);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:middle}
+.pbnote{border:1px solid var(--ink);border-radius:12px;padding:13px;margin-bottom:12px;background:var(--surface)}
+.pbnote .pt{font-size:15px;font-weight:600;color:var(--ink)}
+.pbnote .pd{font-size:14px;color:var(--muted);margin-top:5px;line-height:1.55}
+.lenstbl{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0 4px}
+.lenstbl th,.lenstbl td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+.lenstbl th{background:var(--surface);font-weight:600;color:var(--ink)}
+.lenstbl td{color:var(--muted)}
+.lenstbl td b{color:var(--ink)}
+.coatrow{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line2);font-size:14px;line-height:1.5}
+.coatrow:last-child{border-bottom:0}
+.coatrow .ci{font-size:20px;flex:none}
+.coatrow b{color:var(--ink)}
+.catsec-h{font-size:15px;font-weight:600;color:var(--ink);margin:16px 0 8px}
 </style>
 </head>
 <body>
@@ -76,6 +97,7 @@
           <div class="ptab active" data-s="home">홈</div>
           <div class="ptab" data-s="measure">측정</div>
           <div class="ptab" data-s="care">케어</div>
+          <div class="ptab" data-s="products">상품</div>
         </div>
         <div class="app-pad">
 
@@ -178,8 +200,34 @@
             <div class="appcard" id="recCard">
               <h4>맞는 프레임 <span class="label" id="recCount" style="font-weight:400"></span></h4>
               <div id="recList" style="margin-top:4px"></div>
+              <button class="btn small ghost" style="width:100%;margin-top:10px" onclick="goProducts()">전체 상품 보기 (테·선글라스·렌즈·콘택트) →</button>
             </div>
 
+            <div class="appcard" id="ordCard">
+              <h4>주문 / 픽업</h4>
+              <div class="label" style="margin:6px 0 8px">도수 제품(안경·콘택트)은 매장 방문이 원칙이에요. 데모에선 선결제로 시연해요. 소모품은 케어 탭에서 바로 구매.</div>
+              <div class="label" style="margin-bottom:4px">주문 유형</div>
+              <div class="chips" id="ordKind">
+                <button class="chip active" data-k="B" data-pay="매장">안경테 (잡아두기)</button>
+                <button class="chip" data-k="A" data-pay="선결제">도수 안경</button>
+                <button class="chip" data-k="A" data-pay="선결제">콘택트렌즈</button>
+              </div>
+              <div class="label" style="margin:11px 0 4px">제품 / 옵션</div>
+              <input type="text" id="ordItem" class="finput" placeholder="예: 로마 클래식 / 알도R 1.60">
+              <div id="ordRxWrap" style="display:none">
+                <div class="label" style="margin:11px 0 4px">도수 (선택)</div>
+                <input type="text" id="ordRx" class="finput" placeholder="OD -3.25 / OS -3.50">
+              </div>
+              <div class="label" style="margin:11px 0 4px">픽업 매장</div>
+              <select id="ordStore" class="finput"></select>
+              <div style="display:flex;gap:6px;margin-top:6px">
+                <input type="date" id="ordDate" class="finput" style="flex:1">
+                <select id="ordTime" class="finput" style="flex:1"></select>
+              </div>
+              <div class="kv" style="margin-top:11px"><span class="label">결제 방식</span><span id="ordPayLabel">매장 결제 (잡아두기)</span></div>
+              <button class="btn" style="width:100%;margin-top:11px" onclick="ordConfirm()">주문 확정</button>
+              <div id="ordMsg" class="bookmsg"></div>
+            </div>
             <div class="note" style="font-size:15px">측정값은 본사 클라우드에 저장 → 어느 가맹점에서도 이어서 응대 → 호환 안 되는 타사 프레임은 못 맞춤(렌즈·소모품 재구매의 시작).</div>
           </div>
 
@@ -240,6 +288,21 @@
               <div class="audiorow"><div class="ai">◉</div><div>시선추적으로 <b>도수 변화 조기 감지</b> → 검안 시기 자동 알림</div></div>
               <div class="audiorow"><div class="ai">⊙</div><div>코받침·다리 센서로 착용 습관·눈 피로 추정</div></div>
               <div class="label" style="margin-top:8px;font-size:14px">감시가 아니라 "돕는 도구" — 기록하되 투명하게, 돕되 의존시키지 않게.</div>
+            </div>
+          </div>
+
+          <div class="pscreen" id="s-products">
+            <div class="appcard">
+              <h4>상품</h4>
+              <div class="label" style="margin:6px 0 12px">카테고리별 제품과 가격이에요. 도수 제품(안경·콘택트)은 매장 방문이 원칙, 측정 탭에서 주문/픽업으로 이어져요.</div>
+              <div class="csub" id="csub">
+                <div class="cs active" data-c="frame">테</div>
+                <div class="cs" data-c="sun">선글라스</div>
+                <div class="cs" data-c="goggle">고글</div>
+                <div class="cs" data-c="lens">렌즈</div>
+                <div class="cs" data-c="contact">콘택트</div>
+              </div>
+              <div id="catBody"></div>
             </div>
           </div>
 
@@ -389,7 +452,8 @@ function renderRecs(faceW,templeLen,nose){
     return '<div class="recrow"><div>'+
       '<div class="rn">'+fr.n+' <span class="rtag">'+fr.line+'</span></div>'+
       '<div class="rd">'+spec+' · 프론트폭 '+x.sc.fw+'mm · '+reasonOf(x.sc.diffF,fr,templeLen)+' · ₩'+fr.price+'</div>'+
-      '</div><div class="rmatch '+g[1]+'">'+g[0]+' '+p+'%</div></div>';
+      '</div><div style="text-align:right"><div class="rmatch '+g[1]+'">'+g[0]+' '+p+'%</div>'+
+      '<button class="btn small ghost" data-n="'+fr.n+'" onclick="ordPick(this.dataset.n)" style="margin-top:6px">주문</button></div></div>';
   }).join('');
   document.getElementById('recList').innerHTML = html || '<div class="rd" style="color:var(--muted)">측정값에 맞는 프레임이 없어요. 값을 조절해 보세요.</div>';
 }
@@ -500,6 +564,112 @@ renderCart();
     set('mySize', c.size); set('myFace', c.face? c.face.split(' / ')[0] : null); set('myPD', c.pd); set('myRx', c.rx);
   }).catch(function(){});
 })();
+
+/* ===== 주문 / 픽업 ===== */
+var ORD_SLOTS=['10:00','11:00','14:00','16:00','18:00'];
+(function(){
+  var st=document.getElementById('ordStore'); if(!st)return;
+  ['성수점','홍대점','판교점'].forEach(function(s){var o=document.createElement('option');o.textContent=s;st.appendChild(o);});
+  document.getElementById('ordTime').innerHTML=ORD_SLOTS.map(function(t){return '<option>'+t+'</option>';}).join('');
+  var d=new Date(); var iso=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  var de=document.getElementById('ordDate'); de.value=iso; de.min=iso;
+  document.getElementById('ordKind').addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;
+    this.querySelectorAll('.chip').forEach(function(x){x.classList.remove('active');});b.classList.add('active');ordKindUpd();});
+  ordKindUpd();
+})();
+function ordKindUpd(){
+  var b=document.querySelector('#ordKind .chip.active'); if(!b)return;
+  document.getElementById('ordRxWrap').style.display=(b.dataset.k==='A')?'block':'none';
+  document.getElementById('ordPayLabel').textContent=(b.dataset.pay==='선결제')?'앱 선결제 (데모)':'매장 결제 (잡아두기)';
+}
+function ordPick(name){var el=document.getElementById('ordItem'); if(el){el.value=name; document.getElementById('ordCard').scrollIntoView({behavior:'smooth'});}}
+function ordConfirm(){
+  var b=document.querySelector('#ordKind .chip.active'), k=b.dataset.k, pay=b.dataset.pay;
+  var item=document.getElementById('ordItem').value.trim(), rx=document.getElementById('ordRx').value.trim();
+  var store=document.getElementById('ordStore').value, date=document.getElementById('ordDate').value, time=document.getElementById('ordTime').value;
+  if(!item){toast('제품을 입력해주세요');return;}
+  if(!date||!time){toast('픽업 날짜·시간을 골라주세요');return;}
+  var payType=(pay==='선결제')?'선결제':'매장결제';
+  fetch('/api/pickups',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:store,customerId:1,name:'양지근',kind:k,items:item,rx:rx,date:date,time:time,payType:payType,amount:0,deposit:0})})
+    .then(function(r){return r.json();}).then(function(j){
+      if(!j.ok){toast('주문 실패');return;}
+      var msg=document.getElementById('ordMsg'); msg.className='bookmsg show';
+      msg.textContent='✓ '+store+' '+date+' '+time+' · '+item+(payType==='선결제'?' · 선결제(데모) 완료':' · 매장에 잡아둠')+' — 매장에 전달됐어요.';
+      toast(payType==='선결제'?'주문 접수 (선결제 데모)':'매장에 잡아두기 완료');
+    }).catch(function(){toast('네트워크 오류');});
+}
+
+/* ===== 상품 카탈로그 ===== */
+var CAT_DATA={
+  frame:[
+    {n:'로마 클래식',pb:true,price:'189,000',desc:'이탈리아 아세테이트. 9사이즈 파라메트릭으로 얼굴폭·관자에 맞춰 고름. 가장 무난한 데일리.'},
+    {n:'로마 슬림',pb:true,price:'189,000',desc:'얇은 림·가벼운 무게. 작은 얼굴·미니멀 취향. F1~F2 사이즈 추천.'},
+    {n:'로마 와이드',pb:true,price:'189,000',desc:'넓은 프론트·또렷한 인상. F2~F3, 광대·얼굴폭 넓은 분께.'},
+    {n:'로마 라운드',pb:true,price:'189,000',desc:'둥근 림·클래식 무드. 각진 얼굴과 대비로 부드럽게.'},
+    {n:'Lindberg 협업',pb:false,price:'390,000',desc:'덴마크 럭셔리 타이업. 무나사 티타늄·초경량. 프리미엄 라인.'}
+  ],
+  sun:[
+    {n:'편광 선글라스',pb:true,price:'230,000',desc:'난반사 차단 편광 렌즈. 운전·수상·설원. 자외선 100% 차단.'},
+    {n:'클립온 선글라스',pb:true,price:'90,000',desc:'안경 위에 자석 탈착. 도수 안경 그대로 선글라스로. 가성비.'}
+  ],
+  goggle:[
+    {n:'NORM 오디오 고글',pb:true,price:'290,000',desc:'오픈이어 오디오 템플 내장. 통화·음악·번역. 자체 브랜드 NORM.'},
+    {n:'스포츠 고글',pb:true,price:'180,000',desc:'러닝·라이딩용 밀착 핏. 김서림 방지·교체 렌즈.'}
+  ]
+};
+var CONTACTS=[
+  {n:'1일용 (30P)',pb:true,price:'35,000',desc:'매일 새 렌즈, 위생 최고·관리 0. 가끔 착용·민감한 눈에 추천.'},
+  {n:'1개월용 (2P)',pb:true,price:'28,000',desc:'한 달 교체, 비용 효율. 매일 세척·보관 필요. 매일 착용자 가성비.'},
+  {n:'난시용 (30P)',pb:true,price:'42,000',desc:'토릭 설계로 난시 축 보정. 시야 안정. 난시 있는 분 전용.'},
+  {n:'컬러 (10P)',pb:true,price:'30,000',desc:'자연스러운 홍채 확장·컬러. 도수/무도수. 미용 목적.'}
+];
+var LENS_IDX=[
+  {idx:'1.50',thick:'가장 두꺼움',rec:'약도수 ~ -2.00D',price:'기본 포함',note:'CR-39 표준. 가볍고 저렴하나 도수 높으면 두께 부담.'},
+  {idx:'1.56',thick:'두꺼움',rec:'~ -3.00D',price:'+30,000',note:'가성비 중간 굴절. 무난한 일상 도수.'},
+  {idx:'1.60',thick:'얇음',rec:'-3.00 ~ -4.00D',price:'+60,000',note:'가장 보편적 추천. 두께·무게·가격 균형 최적.'},
+  {idx:'1.67',thick:'더 얇음',rec:'-4.00 ~ -6.00D',price:'+100,000',note:'고도수. 렌즈 두께 확 줄어 인상·착용감 개선.'},
+  {idx:'1.74',thick:'가장 얇음',rec:'-6.00D 이상',price:'+160,000',note:'초고도수 전용. 가장 얇고 가볍지만 최고가.'}
+];
+var COATINGS=[
+  {i:'🔵',n:'블루라이트(청광) 차단',d:'디지털 기기 청색광 완화. 눈 피로·수면 영향 줄임. 사무직·학생 추천.'},
+  {i:'🌗',n:'변색(포토크로믹)',d:'실내 투명 → 야외 햇빛에 자동으로 짙어짐. 안경+선글라스 하나로.'},
+  {i:'👓',n:'누진(다초점)',d:'한 렌즈에 원·근거리. 노안·원근 동시 교정. 40대+ 추천.'},
+  {i:'✨',n:'발수·반사방지 멀티코팅',d:'기본 적용. 김서림·물방울·빛반사 줄여 시야 또렷. 내구성↑.'}
+];
+
+function pbBadge(pb){return pb?'<span class="pbbadge">PB</span>':'';}
+function pcard(it){return '<div class="pcard"><div class="pn">'+it.n+pbBadge(it.pb)+'</div><div class="pp">₩'+it.price+'</div><div class="pdc">'+it.desc+'</div></div>';}
+function pbIntro(txt){return '<div class="pbnote"><div class="pt">BETTERVISION LAB · 자체 개발(PB)</div><div class="pd">'+txt+'</div></div>';}
+
+function renderCat(c){
+  var b=document.getElementById('catBody'); if(!b)return;
+  if(c==='lens'){
+    var rows=LENS_IDX.map(function(l){return '<tr><td><b>'+l.idx+'</b></td><td>'+l.thick+'</td><td>'+l.rec+'</td><td>'+l.price+'</td></tr>';}).join('');
+    var coat=COATINGS.map(function(o){return '<div class="coatrow"><span class="ci">'+o.i+'</span><div><b>'+o.n+'</b><br>'+o.d+'</div></div>';}).join('');
+    b.innerHTML=
+      pbIntro('렌즈는 BETTERVISION가 직접 설계·공급하는 자체 렌즈예요. 같은 굴절률·코팅을 합리적인 가격에, 품질은 본사가 책임집니다. 도수에 맞는 굴절률을 골라야 두께·무게가 달라져요.')+
+      '<div class="catsec-h">굴절률(렌즈 두께)별 안내</div>'+
+      '<table class="lenstbl"><thead><tr><th>굴절률</th><th>두께감</th><th>추천 도수</th><th>가격</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+      '<div class="label" style="font-size:13px;margin-top:6px">굴절률이 높을수록 같은 도수에서 더 얇고 가벼워요. 고도수일수록 1.60↑ 권장. 정확한 추천은 측정·검안 후.</div>'+
+      '<div class="catsec-h">기능 코팅</div>'+coat;
+    return;
+  }
+  if(c==='contact'){
+    b.innerHTML=pbIntro('콘택트도 자체 PB로 공급해 가격을 낮췄어요. 도수·BC가 맞아야 하므로 매장 검안 후 구매가 원칙이에요(데모에선 측정 탭에서 주문 가능).')+
+      CONTACTS.map(pcard).join('');
+    return;
+  }
+  b.innerHTML=(CAT_DATA[c]||[]).map(pcard).join('');
+}
+(function(){
+  var cs=document.getElementById('csub'); if(!cs)return;
+  cs.addEventListener('click',function(e){var t=e.target.closest('.cs');if(!t)return;
+    this.querySelectorAll('.cs').forEach(function(x){x.classList.remove('active');});t.classList.add('active');
+    renderCat(t.dataset.c);});
+  renderCat('frame');
+})();
+
+function goProducts(){var t=document.querySelector('.ptab[data-s="products"]'); if(t)t.click(); window.scrollTo({top:0,behavior:'smooth'});}
 </script>
 </body>
 </html>
