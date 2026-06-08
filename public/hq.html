@@ -22,28 +22,300 @@
 </div></div>
 
 <div class="wrap">
+<section class="view" id="hq">
   <div class="lead">
     <div>
       <div class="eyebrow">Headquarters · 가맹본부</div>
-      <h2>가맹본부</h2>
-      <div class="sub">이 페이지는 껍데기예요. 아래 구성 예정 항목을 하나씩 실제 화면으로 채워갑니다.</div>
+      <h2>데이터·납품·시스템을 쥔 본부가 채널을 지배한다</h2>
+      <div class="sub">두 불변원칙 — ① 데이터 본부 소유 ② 납품 본부 독점. 본부 수익은 안경 판매가 아니라 공급마진·가맹비·구독에서 걷는다.</div>
+    </div>
+  </div>
+  <div class="kpis">
+    <div class="card pad kpi"><div class="label">이번 달 GMV</div><div class="big kfig">₩4.82<small>억</small></div><div class="delta up">▲ 12.4% 전월</div></div>
+    <div class="card pad kpi"><div class="label">활성 가맹점</div><div class="big kfig">14<small>개점</small></div><div class="delta up">▲ 2개점 신규</div></div>
+    <div class="card pad kpi weapon"><div class="label">누적 고객 데이터 ⬡</div><div class="big kfig">38,402<small>건</small></div><div class="delta" style="color:#a1a1aa">측정 12,910 · 처방 9,540</div></div>
+    <div class="card pad kpi"><div class="label">고객 1인 LTV (5년)</div><div class="big kfig">₩76<small>만</small></div><div class="delta up">통째 30만 + 재구매</div></div>
+  </div>
+  <!-- 실시간 가맹점 현황 + 드릴다운 -->
+  <div class="card pad" style="margin-top:18px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="eyebrow" style="margin:0">실시간 가맹점 현황 <span class="livedot">LIVE</span></div>
+      <div class="label">행을 누르면 매장 상세(매출·재고)로 드릴다운</div>
+    </div>
+    <table class="tbl" id="liveTable" style="margin-top:12px">
+      <thead><tr><th>가맹점</th><th>상태</th><th>오늘 매출</th><th>방문 / 대기</th><th>재고 경고</th><th>발주</th><th>알림</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="hq-grid l" style="margin-top:18px">
+    <div class="card pad" id="storeDetail"></div>
+    <div class="card pad">
+      <div class="eyebrow">실시간 알림 (전 매장)</div>
+      <div class="stockrow"><span style="color:var(--warn)">● 성수점 — F2 알도 R 렌즈 재고 임박(2)</span><span class="muted">방금</span></div>
+      <div class="stockrow"><span style="color:var(--warn)">● 강남점 — 대기 3명, 인력 부족 신호</span><span class="muted">3분 전</span></div>
+      <div class="stockrow"><span style="color:var(--bad)">● 부산서면 — 재고 3품목 부족, 발주 필요</span><span class="muted">8분 전</span></div>
+      <div class="stockrow"><span style="color:var(--good)">● 홍대점 — 목표 매출 102% 달성</span><span class="muted">12분 전</span></div>
+      <div class="stockrow" style="border-bottom:0"><span class="muted">● 판교점 — 누진렌즈 검수 중</span><span class="muted">21분 전</span></div>
+      <div class="note" style="margin-top:14px"><b>관제.</b> 매출만이 아니라 방문·대기·재고·인력·발주·이상을 전 매장 실시간으로. 문제 매장에 본부가 먼저 조치(발주 푸시·인력 매칭).</div>
     </div>
   </div>
 
-  <div class="card pad">
-    <div class="eyebrow">구성 예정 <span class="tagwip">준비 중</span></div>
-    <div class="shell">
-      <div class="st">가맹본부 화면에 들어갈 섹션</div>
-      <ul><li>실시간 가맹점 현황 + 드릴다운(매출·재고)</li><li>프론트×템플 수요·생산 비중(%) 매트릭스</li><li>매출 추이·등락 · 사용자 데이터(연령·성별)</li><li>브랜드 공급 독점(법적·제도적 잠금)</li><li>중앙 통제 — 가격 잠금·플래노그램·QC·자동발주·이상 탐지</li></ul>
+  <!-- 중앙 통제 (리모컨) -->
+  <div class="card pad ctlcard" style="margin-top:18px">
+    <div class="eyebrow">중앙 통제 (리모컨) — 본부가 전 매장을 원격 제어</div>
+    <div class="hq-grid" style="margin-top:6px">
+      <div>
+        <div class="label" style="margin-bottom:4px">원격 가격 · 프로모션 제어</div>
+        <div class="priolock"><span>로마 클래식 ACE-02</span><span><b>₩189,000</b> <span class="locktag">전 매장 잠금 🔒</span></span></div>
+        <div class="priolock"><span>알도 R 렌즈 1.60</span><span><b>₩120,000</b> <span class="locktag">전 매장 잠금 🔒</span></span></div>
+        <div class="priolock"><span>Lindberg 협업 라인</span><span><b>₩470,000</b> <span class="locktag">전 매장 잠금 🔒</span></span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+          <span class="label">프로모션 'F2 가을 컬러 10%'</span>
+          <button class="btn small" onclick="toast('전 매장 프로모션 즉시 적용 (프로토타입)')">전 매장 푸시</button>
+        </div>
+        <div class="note" style="margin-top:12px;font-size:15px"><b>통제.</b> 가맹점은 가격·할인을 임의로 못 바꾼다 — 마진·브랜드 보호. 본부가 한 번에 전국 동시 변경.</div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2)">
+          <div><div style="font-size:16px">자동 발주 강제 모드</div><div class="label">재고 임계점 도달 시 매장 승인 없이 본부가 자동 발주</div></div>
+          <div class="switch" onclick="this.classList.toggle('off');toast('자동 발주 강제 모드 변경 (프로토타입)')"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2)">
+          <div><div style="font-size:16px">진열(플래노그램) 강제</div><div class="label">이번 주 매대 = 'F2 가을 컬러 전면' 배포 → 매장 사진 인증</div></div>
+          <div class="switch" onclick="this.classList.toggle('off');toast('플래노그램 배포 변경 (프로토타입)')"></div>
+        </div>
+        <div style="padding:9px 0">
+          <div style="font-size:16px;margin-bottom:6px">표준 운영 점수 (QC) — 실행률·응대·청결·후기</div>
+          <div class="qc-row"><span class="label">성수점</span><div class="qc-track"><div class="qc-fill" style="width:94%;background:var(--good)"></div></div><span class="muted" style="text-align:right">94</span></div>
+          <div class="qc-row"><span class="label">홍대점</span><div class="qc-track"><div class="qc-fill" style="width:88%;background:var(--good)"></div></div><span class="muted" style="text-align:right">88</span></div>
+          <div class="qc-row"><span class="label">강남점</span><div class="qc-track"><div class="qc-fill" style="width:82%;background:var(--accent)"></div></div><span class="muted" style="text-align:right">82</span></div>
+          <div class="qc-row"><span class="label">판교점</span><div class="qc-track"><div class="qc-fill" style="width:79%;background:var(--warn)"></div></div><span class="muted" style="text-align:right">79</span></div>
+          <div class="qc-row"><span class="label">부산서면</span><div class="qc-track"><div class="qc-fill" style="width:71%;background:var(--warn)"></div></div><span class="muted" style="text-align:right">71</span></div>
+        </div>
+        <div class="note" style="font-size:15px"><b>연결.</b> QC 점수 → 등급·인센티브·경고로. 낮은 매장은 본부가 원격 피팅 코칭·재교육 투입.</div>
+      </div>
     </div>
-    <a class="backlink" href="index.html">← 홈으로</a>
+    <div class="note" style="margin-top:4px"><b>동전의 양면.</b> 본부엔 '리모컨'(가격·진열·발주·품질 원격 통제), 가맹점엔 '버튼만 누르는 가게'(오늘 할 일·원클릭 마케팅·자동 세팅). 통제가 곧 편함으로 포장된다.</div>
   </div>
+
+  <!-- 부품 ODM · 공급망 + 수요→생산 환산 -->
+  <div class="hq-grid l" style="margin-top:18px">
+    <div class="card pad">
+      <div class="eyebrow">부품 ODM · 공급망 (프론트 / 템플 / 렌즈 분리)</div>
+      <div class="label" style="margin-bottom:6px">완성품이 아니라 부품 단위로 소싱·관리. "Designed &amp; Assembled in Korea".</div>
+      <table class="tbl">
+        <thead><tr><th>부품</th><th>공급사 / 허브</th><th>리드타임</th><th>발주 잔량</th><th>전국 재고</th><th>상태</th></tr></thead>
+        <tbody>
+          <tr style="cursor:default"><td>프론트 (아세테이트)</td><td>대구 · 원저우</td><td>21일</td><td>1,200</td><td>3,400</td><td><span class="pill good">적정</span></td></tr>
+          <tr style="cursor:default"><td>템플 (메탈)</td><td>선전</td><td>18일</td><td>800</td><td>1,100</td><td><span class="pill warn">주의</span></td></tr>
+          <tr style="cursor:default"><td>오디오 템플 (ZhuoHao)</td><td>선전</td><td>30일</td><td>500</td><td>300</td><td><span class="pill bad">부족</span></td></tr>
+          <tr style="cursor:default"><td>렌즈 (알도 R)</td><td>본부 공급</td><td>7일</td><td>5,000</td><td>12,000</td><td><span class="pill good">적정</span></td></tr>
+        </tbody>
+      </table>
+      <div class="note" style="font-size:15px"><b>관리.</b> 프론트·템플 리드타임이 달라(21 vs 30일) 따로 관리해야 결품을 막는다. 오디오 템플 부족 → 선조치 필요.</div>
+    </div>
+    <div class="card pad">
+      <div class="eyebrow">수요 → 생산 발주 환산</div>
+      <div class="label" style="margin-bottom:6px">프론트×템플 수요 매트릭스를 부품 생산 수량으로 자동 환산.</div>
+      <div class="asm"><span>프론트 F2</span><span><b>320</b> ea 추천</span></div>
+      <div class="asm"><span>프론트 F1 / F3</span><span><b>240 / 190</b> ea</span></div>
+      <div class="asm"><span>템플 T2</span><span><b>280</b> ea 추천</span></div>
+      <div class="asm"><span>템플 T1</span><span><b>220</b> ea</span></div>
+      <div class="asm"><span>렌즈 알도 R 1.60</span><span><b>900</b> ea</span></div>
+      <button class="btn" style="margin-top:14px;width:100%" onclick="toast('부품별 생산 발주서 생성 (프로토타입)')">생산 발주서 생성</button>
+    </div>
+  </div>
+
+  <!-- 전 매장 그리드 + 이상 탐지 -->
+  <div class="card pad" style="margin-top:18px">
+    <div class="eyebrow">전 매장 그리드 — 관제 한 판</div>
+    <div class="sgrid">
+      <div class="scard"><div class="sn">성수점 <span class="pill good">정상</span></div><div class="sm"><span class="label">오늘 매출</span><span class="mv">₩412만</span></div><div class="sm"><span class="label">QC</span><span class="mv">94</span></div><div class="sm"><span class="label">재고 경고</span><span class="mv">2품목</span></div><div class="sm"><span class="label">알림</span><span class="mv">F2 렌즈 임박</span></div></div>
+      <div class="scard"><div class="sn">홍대점 <span class="pill good">정상</span></div><div class="sm"><span class="label">오늘 매출</span><span class="mv">₩388만</span></div><div class="sm"><span class="label">QC</span><span class="mv">88</span></div><div class="sm"><span class="label">재고 경고</span><span class="mv">0</span></div><div class="sm"><span class="label">알림</span><span class="mv">목표 102%</span></div></div>
+      <div class="scard flag"><div class="sn">판교점 <span class="pill warn">주의</span></div><div class="sm"><span class="label">오늘 매출</span><span class="mv">₩256만</span></div><div class="sm"><span class="label">QC</span><span class="mv supplywarn">79 ▼</span></div><div class="sm"><span class="label">재고 경고</span><span class="mv">1품목</span></div><div class="sm"><span class="label">알림</span><span class="mv">플래노그램 미인증</span></div></div>
+      <div class="scard flag"><div class="sn">강남점 <span class="pill bad">위반</span></div><div class="sm"><span class="label">오늘 매출</span><span class="mv">₩301만</span></div><div class="sm"><span class="label">QC</span><span class="mv">82</span></div><div class="sm"><span class="label">재고 경고</span><span class="mv">0</span></div><div class="sm"><span class="label">알림</span><span class="mv supplybad">임의 할인 시도</span></div></div>
+      <div class="scard flag"><div class="sn">부산서면 <span class="pill bad">위반</span></div><div class="sm"><span class="label">오늘 매출</span><span class="mv">₩188만</span></div><div class="sm"><span class="label">QC</span><span class="mv">71</span></div><div class="sm"><span class="label">재고 경고</span><span class="mv">3품목</span></div><div class="sm"><span class="label">알림</span><span class="mv supplybad">미경유 거래 의심</span></div></div>
+      <div class="scard"><div class="sn">예비 슬롯 <span class="pill">출점 대기</span></div><div class="sm"><span class="label">상태</span><span class="mv">계약 진행</span></div><div class="sm"><span class="label">입지</span><span class="mv">성수 2호</span></div><div class="sm"><span class="label">오픈</span><span class="mv">D-40</span></div><div class="sm"><span class="label">유형</span><span class="mv">신규 가맹</span></div></div>
+    </div>
+  </div>
+
+  <div class="hq-grid l" style="margin-top:18px">
+    <div class="card pad">
+      <div class="eyebrow">이상 · 계약 위반 탐지 (자동)</div>
+      <div class="flagrow"><span class="supplybad">● 강남점 — POS에서 본부 지정가 변경(임의 할인) 시도</span><span class="pill bad">차단됨</span></div>
+      <div class="flagrow"><span class="supplybad">● 부산서면 — 판매 기록과 본부 출고 불일치(미경유 매입 의심)</span><span class="pill warn">조사</span></div>
+      <div class="flagrow"><span class="supplywarn">● 판교점 — QC 94→79 급락, 플래노그램 2주 미인증</span><span class="pill warn">경고</span></div>
+      <div class="flagrow"><span class="muted">● 미경유 품목 결제 차단 자동 작동 중</span><span class="pill good">정상</span></div>
+      <div class="note" style="margin-top:14px"><b>실효.</b> 임의 할인·미경유 거래는 POS/정산 데이터 불일치로 자동 탐지·차단·경고. 데이터가 본부에 있으니 숨길 수 없다.</div>
+    </div>
+    <div class="card pad">
+      <div class="eyebrow">본부 조치 (원클릭)</div>
+      <div class="feat-list" style="margin-top:4px">
+        <div class="feat"><div class="ic">⚑</div><div><div class="ft">위반 매장에 경고 발송</div><div class="fd">계약 조항 근거 자동 통지 + 시정 기한.</div></div></div>
+        <div class="feat"><div class="ic">◉</div><div><div class="ft">원격 피팅 코칭 투입</div><div class="fd">QC 낮은 매장에 본부 베테랑 원격 지도.</div></div></div>
+        <div class="feat"><div class="ic">⟳</div><div><div class="ft">자동 발주 강제 전환</div><div class="fd">결품 위험 매장은 본부 자동 발주 모드로.</div></div></div>
+      </div>
+      <button class="btn" style="margin-top:14px;width:100%" onclick="toast('위반 3건 일괄 조치 (프로토타입)')">탐지 건 일괄 조치</button>
+    </div>
+  </div>
+
+  <!-- 매출 추이 + 등락 -->
+  <div class="hq-grid l">
+    <div class="card pad">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <div class="eyebrow">월 매출 추이 · 등락 (전국 GMV)</div>
+        <div class="label">최근 8개월 · 단위 억원</div>
+      </div>
+      <div class="trend" id="trend"></div>
+      <div class="note"><b>등락 읽기.</b> 1~2월 비수기 하락(▼) 후 3월부터 5개월 연속 상승(▲). 변동은 계절·신규 출점 영향 — 추세는 우상향.</div>
+    </div>
+    <div class="card pad">
+      <div class="eyebrow">본부 수익 — 세 겹</div>
+      <div style="display:flex;height:34px;border-radius:8px;overflow:hidden;margin:6px 0 14px;border:1px solid var(--line)">
+        <div style="width:52%;background:var(--ink);color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:15px">제품공급 52%</div>
+        <div style="width:30%;background:#6b7280;color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:15px">가맹비 30%</div>
+        <div style="width:18%;background:#e5e7eb;color:#111111;display:flex;align-items:center;justify-content:center;font-size:15px">구독 18%</div>
+      </div>
+      <div class="feat-list">
+        <div class="feat"><div class="ic" style="background:var(--ink);color:#ffffff">¹</div><div><div class="ft">제품 공급 마진</div><div class="fd">테·다리·렌즈(알도 R) ODM 독점 — 성숙기 메인.</div></div></div>
+        <div class="feat"><div class="ic">²</div><div><div class="ft">가맹비·가입비</div><div class="fd">초기 셋업비 회수 — 성숙기 비중↓.</div></div></div>
+        <div class="feat"><div class="ic">³</div><div><div class="ft">CRM/ERP 구독</div><div class="fd">무료 락인 → 유료 전환.</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 프론트×템플 매트릭스 + 사용자 데이터 -->
+  <div class="hq-grid">
+    <div class="card pad">
+      <div class="eyebrow">프론트 × 템플 수요 매트릭스 (전국)</div>
+      <div class="label" style="margin-bottom:12px">셀=조합 수요(조립 믹스용), 가장자리 %=프론트·템플 각각의 생산 비중. 프론트·템플을 따로 만드니 이 %로 생산 수량을 나눈다.</div>
+      <div id="ftMatrix"></div>
+      <div class="note"><b>생산 예측.</b> 프론트 = F1 20% · <b>F2 54%</b> · F3 26%, 템플 = T1 26% · <b>T2 51%</b> · T3 23%. 총수요 × 이 비중으로 부품 생산량 산출(예: 월 1,000개 → F2 540개 / T2 510개). 최다 조합 F2×T2.</div>
+    </div>
+    <div class="card pad">
+      <div class="eyebrow">사용자 데이터 (전국 고객)</div>
+      <div class="label" style="margin-bottom:6px">연령대 분포</div>
+      <div id="ageBars"></div>
+      <div class="label" style="margin:14px 0 2px">성별</div>
+      <div class="gender"><div class="gm" style="width:54%">남 54%</div><div class="gf" style="width:46%">여 46%</div></div>
+      <div class="note" style="margin-top:14px"><b>활용.</b> 30·40대 남성이 핵심(재구매율 최고). 입지·제품·마케팅을 데이터로 결정 — 다비치엔 없는 연결된 고객 데이터.</div>
+    </div>
+  </div>
+
+  <!-- 브랜드·공급 관리 -->
+  <div class="card pad" style="margin-top:18px">
+    <div class="eyebrow">브랜드 · 공급 관리 — 전 품목 본부 독점</div>
+    <div class="label" style="margin-bottom:6px">PB부터 명품(린드버그 등)까지 전부 본부가 공급. 가맹점 임의 매입은 법적·제도적으로 차단.</div>
+    <table class="tbl">
+      <thead><tr><th>브랜드 / 라인</th><th>포지션</th><th>공급가(본부→가맹)</th><th>권장 소비자가</th><th>공급 경로</th></tr></thead>
+      <tbody>
+        <tr style="cursor:default"><td>BETTERVISION 로마 클래식 (PB)</td><td>자체 PB</td><td>60,000</td><td>189,000</td><td><span class="pill good">본부 독점</span></td></tr>
+        <tr style="cursor:default"><td>NORM 오디오 템플</td><td>자체 오디오</td><td>120,000</td><td>240,000</td><td><span class="pill good">본부 독점</span></td></tr>
+        <tr style="cursor:default"><td>Lindberg 협업 라인</td><td>명품 (본부보다 고가)</td><td>290,000</td><td>470,000</td><td><span class="pill good">본부 총판 독점</span></td></tr>
+        <tr style="cursor:default"><td>명품 C 라인 (수입)</td><td>명품</td><td>340,000</td><td>590,000</td><td><span class="pill good">본부 총판 독점</span></td></tr>
+        <tr style="cursor:default"><td>(예) 가맹점 임의 매입 시도</td><td>병행수입</td><td>—</td><td>—</td><td><span class="pill bad">시스템 차단</span></td></tr>
+      </tbody>
+    </table>
+    <div class="hq-grid" style="margin-top:14px">
+      <div class="optbox" style="margin-top:0"><b>법적 잠금.</b> ① 가맹계약서 '전 품목 본부 독점 공급' 조항(위반 시 해지·위약금). ② 명품은 본부가 <b>국내 공식 총판/유통권</b> 확보 → 가맹점 정식 매입 경로 없음(병행수입은 정품보증·AS 불가).</div>
+      <div class="optbox" style="margin-top:0"><b>제도적 잠금.</b> POS/CRM에서 <b>본부 미경유 품목은 등록·판매·정산·AS 불가</b>. 임의로 떼와도 시스템에서 팔 수도, 보증도, 정산도 안 됨 → 사실상 불가능(법보다 강한 실효 차단).</div>
+    </div>
+  </div>
+
+  <div class="hq-grid l" style="margin-top:18px">
+    <div class="card pad"><div class="eyebrow">가맹점별 매출</div><div id="hqBars"></div></div>
+    <div class="card pad">
+      <div class="eyebrow">본부의 무기 (Lock-in)</div>
+      <div class="feat-list" style="margin-top:4px">
+        <div class="feat"><div class="ic">⬡</div><div><div class="ft">데이터 소유권 = 본사</div><div class="fd">고객·측정·처방·구매 본사 귀속. 반출 불가 → 직거래 차단.</div></div></div>
+        <div class="feat"><div class="ic">▤</div><div><div class="ft">납품 독점</div><div class="fd">PB·명품 전 품목 본부 공급. 임의 매입 시스템 차단.</div></div></div>
+        <div class="feat"><div class="ic">◷</div><div><div class="ft">시스템 의존</div><div class="fd">CRM·발주·POS·재무·인력·알림이 매장 운영 기본값.</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><b>왜 핵심 무기인가.</b> 가맹점은 "고객을 기억하고 재방문을 부르고 돈 계산까지 해주는 시스템" 때문에 가입한다. 쓸수록 데이터·공급이 본사에 묶인다. 이 데이터·채널이 쌓이면 메타·삼성 등 빅테크의 한국 진입 시 협상할 '한국 파트너(룩소티카 포지션)' 자산이 된다.</div>
+</section>
 </div>
 
 <div class="foot">
-  <span>BETTERVISION OS · 가맹본부 · 껍데기 v0.1</span>
-  <span>세부 페이지는 하나씩 추가됩니다</span>
+  <span>BETTERVISION OS · 가맹본부 · 더미 데이터</span>
+  <span><a href="index.html">← 홈</a></span>
 </div>
+
 <script src="/assets/app.js"></script>
+<script>
+const stores=[['성수점',92,'4.8천'],['홍대점',78,'4.1천'],['판교점',64,'3.4천'],['강남점',58,'3.0천'],['부산서면',44,'2.3천']];
+document.getElementById('hqBars').innerHTML=stores.map((s,i)=>`<div class="bar-row"><span>${s[0]}</span><div class="bar-track"><div class="bar-fill ${i===0?'ink':''}" style="width:${s[1]}%"></div></div><span class="muted" style="text-align:right">₩${s[2]}만</span></div>`).join('');
+const sales=[['25.11',3.8],['25.12',4.1],['26.01',3.6],['26.02',3.3],['26.03',3.9],['26.04',4.3],['26.05',4.6],['26.06',4.82]];
+const smax=Math.max(...sales.map(s=>s[1]));
+document.getElementById('trend').innerHTML=sales.map((s,i)=>{
+  let d='';if(i>0){const ch=((s[1]-sales[i-1][1])/sales[i-1][1]*100);d=`<div class="tdelta ${ch>=0?'up':'down'}">${ch>=0?'▲':'▼'}${Math.abs(ch).toFixed(0)}%</div>`;}
+  return `<div class="tcol"><div class="tbar ${i===sales.length-1?'now':''}" style="height:${(s[1]/smax*100).toFixed(0)}%"></div><div class="tcap">${s[0]}</div>${d}</div>`;}).join('');
+
+/* front × temple matrix */
+(function(){
+  const cols=['T1','T2','T3'], rows=['F1','F2','F3'];
+  const data=[[14,22,8],[30,62,26],[12,28,16]];
+  const mx=62, gt='grid-template-columns:38px repeat(3,1fr) 60px';
+  const total=data.flat().reduce((a,b)=>a+b,0);
+  const rowSum=data.map(r=>r.reduce((a,b)=>a+b,0));
+  const colSum=cols.map((_,ci)=>data.reduce((a,r)=>a+r[ci],0));
+  const pct=x=>Math.round(x/total*100)+'%';
+  const mp='display:flex;align-items:center;justify-content:center;height:46px;border-radius:8px;font-size:14px;font-weight:600;color:#111111;background:#f5f5f5';
+  let h='';
+  h+=`<div class="mhead" style="${gt}"><div class="mcorner">F\\T</div>`+cols.map(c=>`<div class="mlab">${c}</div>`).join('')+`<div class="mlab" style="font-weight:600;color:#111111">프론트%</div></div>`;
+  rows.forEach((r,ri)=>{
+    h+=`<div class="mrowg" style="${gt}"><div class="mlab row">${r}</div>`;
+    data[ri].forEach((v)=>{const op=(0.10+0.85*v/mx).toFixed(2);const hot=(v===mx);
+      h+=`<div class="mcell${hot?' hot':''}" style="background:rgba(17,17,17,${op});color:${op>0.55?'#fff':'#111111'}">${v}</div>`;});
+    h+=`<div style="${mp}">${pct(rowSum[ri])}</div></div>`;
+  });
+  h+=`<div class="mrowg" style="${gt}"><div class="mlab row" style="font-weight:600;color:#111111">템플%</div>`+
+     colSum.map(c=>`<div style="${mp}">${pct(c)}</div>`).join('')+
+     `<div style="${mp};background:#111111;color:#fff">100%</div></div>`;
+  document.getElementById('ftMatrix').innerHTML=h;
+})();
+/* demographics */
+const ages=[['10대',4],['20대',26],['30대',31],['40대',22],['50대',12],['60+',5]];
+document.getElementById('ageBars').innerHTML=ages.map(a=>`<div class="demo-row"><span class="label">${a[0]}</span><div class="demo-track"><div class="demo-fill" style="width:${(a[1]/31*100).toFixed(0)}%"></div></div><span class="muted" style="text-align:right">${a[1]}%</span></div>`).join('');
+const live=[
+  {n:'성수점',st:'영업중',sales:412,visit:38,wait:2,warn:2,order:'대기 1',alert:'F2 렌즈 임박',avg:'10.8만',staff:'안경사 1 · 일반인 3',
+   hours:[20,35,52,66,80,72,90,60],top:[['알도 R 렌즈','22건'],['로마 클래식 ACE-02','18건'],['NORM 오디오 템플','6건']],
+   stock:[['F2 알도 R 렌즈','재고 2 · 임박','warn'],['로마 클래식 ACE-02','재고 2 · 임박','warn'],['NORM 오디오 템플','재고 5 · 적정','ok'],['Lindberg 협업','재고 7 · 적정','ok']]},
+  {n:'홍대점',st:'영업중',sales:388,visit:31,wait:1,warn:0,order:'-',alert:'목표 102%',avg:'12.5만',staff:'안경사 1 · 일반인 2',
+   hours:[18,30,44,58,70,66,78,52],top:[['NORM 오디오 템플','14건'],['로마 클래식','11건'],['선글라스','9건']],
+   stock:[['NORM 오디오 템플','재고 12 · 적정','ok'],['로마 클래식','재고 9 · 적정','ok'],['알도 R 렌즈','재고 20 · 적정','ok']]},
+  {n:'판교점',st:'영업중',sales:256,visit:19,wait:0,warn:1,order:'검수 중',alert:'누진렌즈 검수',avg:'13.5만',staff:'안경사 1 · 일반인 2',
+   hours:[12,20,30,38,44,40,48,30],top:[['Lindberg 협업','7건'],['누진 렌즈','9건'],['로마 클래식','6건']],
+   stock:[['누진 렌즈','재고 3 · 부족','warn'],['Lindberg 협업','재고 5 · 적정','ok'],['로마 클래식','재고 14 · 적정','ok']]},
+  {n:'강남점',st:'영업중',sales:301,visit:24,wait:3,warn:0,order:'-',alert:'대기 3 · 인력',avg:'12.5만',staff:'안경사 1 · 일반인 1',
+   hours:[14,26,38,50,58,54,62,40],top:[['명품 C 라인','5건'],['로마 클래식','10건'],['알도 R 렌즈','12건']],
+   stock:[['명품 C 라인','재고 4 · 적정','ok'],['로마 클래식','재고 11 · 적정','ok'],['알도 R 렌즈','재고 16 · 적정','ok']]},
+  {n:'부산서면',st:'영업중',sales:188,visit:12,wait:0,warn:3,order:'발주 대기',alert:'재고 3품목 부족',avg:'15.7만',staff:'안경사 1 · 일반인 1',
+   hours:[8,14,22,28,34,30,38,24],top:[['로마 클래식','6건'],['알도 R 렌즈','7건'],['선글라스','3건']],
+   stock:[['로마 클래식 ACE-02','재고 1 · 부족','warn'],['알도 R 렌즈','재고 2 · 부족','warn'],['NORM 오디오 템플','재고 0 · 품절','bad'],['선글라스','재고 6 · 적정','ok']]}];
+const ltb=document.querySelector('#liveTable tbody');
+live.forEach((s,i)=>{const tr=document.createElement('tr');if(i===0)tr.classList.add('sel');
+  const warnCell=s.warn>0?`<span class="pill warn">${s.warn}품목</span>`:`<span class="muted">0</span>`;
+  tr.innerHTML=`<td>${s.n}</td><td><span class="statuson">${s.st}</span></td><td>₩${s.sales}만</td><td class="muted">${s.visit} / ${s.wait}</td><td>${warnCell}</td><td class="muted">${s.order}</td><td class="muted">${s.alert||'–'}</td>`;
+  tr.onclick=()=>{document.querySelectorAll('#liveTable tr').forEach(r=>r.classList.remove('sel'));tr.classList.add('sel');storeDetail(i);};
+  ltb.appendChild(tr);});
+function storeDetail(i){const s=live[i];const hmax=Math.max(...s.hours);
+  const hrs=['10','11','12','13','14','15','16','17'];
+  document.getElementById('storeDetail').innerHTML=`
+   <div class="sd-head"><div><div class="eyebrow" style="margin:0">매장 상세 · 드릴다운</div><div class="nm" style="font-family:var(--serif);font-size:26px">${s.n}</div><div class="statuson">${s.st} · ${s.staff}</div></div>
+     <button class="btn small" onclick="toast('${s.n} 발주 푸시 전송 (프로토타입)')">발주 푸시</button></div>
+   <div class="sd-kpis"><div class="k"><div class="l">오늘 매출</div><div class="v">₩${s.sales}만</div></div><div class="k"><div class="l">방문 / 대기</div><div class="v">${s.visit} / ${s.wait}</div></div><div class="k"><div class="l">객단가</div><div class="v">${s.avg}</div></div></div>
+   <div class="label">시간대별 매출 (10–17시)</div>
+   <div class="hours">${s.hours.map((h,j)=>`<div class="hbar ${h===hmax?'now':''}" style="height:${(h/hmax*100).toFixed(0)}%"></div>`).join('')}</div>
+   <div class="hlab">${hrs.map(x=>`<span>${x}</span>`).join('')}</div>
+   <div class="divider"></div>
+   <div class="label" style="margin-bottom:2px">오늘 판매 상위 품목</div>
+   ${s.top.map(t=>`<div class="itemrow"><span>${t[0]}</span><span class="muted">${t[1]}</span></div>`).join('')}
+   <div class="label" style="margin:12px 0 2px">재고 상세</div>
+   ${s.stock.map(k=>`<div class="stockrow"><span>${k[0]}</span><span class="pill ${k[2]==='ok'?'good':k[2]==='bad'?'bad':'warn'}">${k[1]}</span></div>`).join('')}`;}
+storeDetail(0);
+</script>
 </body>
 </html>
