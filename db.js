@@ -1,7 +1,7 @@
 // PostgreSQL 래퍼. DATABASE_URL 없으면 메모리 폴백.
 // 테이블: bookings(예약), inventory(지점×SKU 재고), sales(결제 라인)
 let pool=null, ready=false;
-const mem={ bookings:[], inventory:[], sales:[], orders:[], customers:[], pickups:[] };
+const mem={ bookings:[], inventory:[], sales:[], orders:[], customers:[], pickups:[], users:[] };
 try{
   if(process.env.DATABASE_URL){
     const { Pool } = require('pg');
@@ -11,6 +11,13 @@ try{
 }catch(e){ console.warn('pg 모듈 없음 — 메모리 폴백'); }
 
 const STORES=['성수점','홍대점','판교점'];
+// 데모 계정 (실제 운영 시 비번 해시·변경 필수). 본부 마스터 = hq/admin
+const SEED_USERS=[
+  {username:'hq', pass:'admin', role:'hq', store:null},
+  {username:'seongsu', pass:'1234', role:'store', store:'성수점'},
+  {username:'hongdae', pass:'1234', role:'store', store:'홍대점'},
+  {username:'pangyo',  pass:'1234', role:'store', store:'판교점'}
+];
 
 // ---- 30종 SKU 카탈로그 (디자인 × 사이즈) ----
 const DESIGNS=[
@@ -109,13 +116,74 @@ async function init(){
         [st,it.sku,it.name,it.cat,it.price,it.medical,seedStock(it.sku,st)]);
     }}
   }
+  // 매출 히스토리 시드: 비어있을 때만
+  const sc=await pool.query('SELECT COUNT(*)::int AS c FROM sales');
+  if(sc.rows[0].c===0){
+    const h=genHistory();
+    for(const x of h.sales){ await pool.query('INSERT INTO sales(store,date,sku,name,cat,qty,amount,medical,method,customer_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',[x.store,x.date,x.sku,x.name,x.cat,x.qty,x.amount,x.medical,x.method,x.customer_id]); }
+    for(const o of h.orders){ await pool.query('INSERT INTO orders(store,sku,name,cat,qty,status) VALUES($1,$2,$3,$4,$5,$6)',[o.store,o.sku,o.name,o.cat,o.qty,o.status]); }
+    for(const pk of h.pickups){ await pool.query('INSERT INTO pickups(store,customer_id,name,phone,kind,items,rx,date,time,pay_type,amount,deposit,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',[pk.store,pk.customer_id,pk.name,pk.phone,pk.kind,pk.items,pk.rx,pk.date,pk.time,pk.payType,pk.amount,pk.deposit,pk.status]); }
+  }
+  await pool.query(`CREATE TABLE IF NOT EXISTS users(
+    id SERIAL PRIMARY KEY, username TEXT UNIQUE, pass TEXT, role TEXT, store TEXT, token TEXT)`);
+  const uc=await pool.query('SELECT COUNT(*)::int AS c FROM users');
+  if(uc.rows[0].c===0){ for(const u of SEED_USERS){
+    await pool.query('INSERT INTO users(username,pass,role,store,token) VALUES($1,$2,$3,$4,NULL)',[u.username,u.pass,u.role,u.store||null]); } }
   ready=true;
 }
+// ---- 데모 히스토리 생성기 (최근 30일 매출 + 발주/픽업) ----
+function genHistory(){
+  function pad(n){return (n<10?'0':'')+n;}
+  function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+  function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+  var byCat={};
+  CATALOG.forEach(function(it){ (byCat[it.cat]=byCat[it.cat]||[]).push(it); });
+  var catWeights=[['렌즈',30],['콘택트',18],['테',28],['선글라스',14],['액세서리',10]];
+  var wsum=catWeights.reduce(function(a,c){return a+c[1];},0);
+  function pickCat(){ var r=Math.random()*wsum, acc=0; for(var i=0;i<catWeights.length;i++){acc+=catWeights[i][1]; if(r<acc)return catWeights[i][0];} return '테'; }
+  var storeVol={'성수점':[3,5],'홍대점':[2,4],'판교점':[1,3]};
+  var sales=[], orders=[], pickups=[];
+  var today=new Date();
+  for(var d=29; d>=0; d--){
+    var dt=new Date(today.getTime()-d*864e5);
+    var iso=dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());
+    var dow=dt.getDay(); var weekendBoost=(dow===0||dow===6)?1.4:1;
+    STORES.forEach(function(st){
+      var vr=storeVol[st]||[1,3]; var tx=Math.round(rnd(vr[0],vr[1])*weekendBoost);
+      for(var t=0;t<tx;t++){
+        var lines=rnd(1,2); var method=Math.random()<0.7?'카드':'현금';
+        var cid=Math.random()<0.5?rnd(1,SEED_CUSTOMERS.length):null;
+        for(var l=0;l<lines;l++){
+          var cat=pickCat(); var pool=byCat[cat]; if(!pool||!pool.length)continue;
+          var it=pick(pool); var qty=(cat==='콘택트'||cat==='액세서리')?rnd(1,3):1;
+          sales.push({store:st,date:iso,sku:it.sku,name:it.name,cat:it.cat,qty:qty,amount:it.price*qty,medical:!!it.medical,method:method,customer_id:cid});
+        }
+      }
+    });
+  }
+  // 발주 샘플 (혼합 상태)
+  var od=[['성수점','X1','알도R 1.60 렌즈','렌즈',15,'대기'],['홍대점','X2','누진 렌즈','렌즈',15,'대기'],
+          ['판교점','CL-M','로마 클래식 M','테',10,'승인'],['성수점','X5','1일용 콘택트(30P)','콘택트',20,'승인'],
+          ['홍대점','SP-M','편광 선글라스 M','선글라스',8,'입고완료']];
+  od.forEach(function(o){ orders.push({store:o[0],sku:o[1],name:o[2],cat:o[3],qty:o[4],status:o[5]}); });
+  // 픽업 샘플
+  function pad2(n){return (n<10?'0':'')+n;}
+  var tmw=new Date(today.getTime()+864e5); var tiso=tmw.getFullYear()+'-'+pad2(tmw.getMonth()+1)+'-'+pad2(tmw.getDate());
+  pickups.push({store:'성수점',customer_id:1,name:'양지근',phone:'010-2480-1001',kind:'A',items:'로마 ACE-02 + 알도R 1.60',rx:'OD -3.25 / OS -3.50',date:tiso,time:'14:00',payType:'보증금',amount:0,deposit:10000,status:'예약'});
+  pickups.push({store:'홍대점',customer_id:3,name:'박도현',phone:'010-7782-5503',kind:'C',items:'안경 케이스 + 클리너',rx:'',date:tiso,time:'11:00',payType:'온라인',amount:21000,deposit:0,status:'예약'});
+  pickups.push({store:'판교점',customer_id:5,name:'정하준',phone:'010-6640-1199',kind:'A',items:'콘택트 1개월용',rx:'OD -3.00 / OS -2.75',date:tiso,time:'16:00',payType:'보증금',amount:0,deposit:10000,status:'방문완료'});
+  return {sales:sales, orders:orders, pickups:pickups};
+}
 function seedMem(){
+  SEED_USERS.forEach(function(u,i){ mem.users.push({id:i+1,username:u.username,pass:u.pass,role:u.role,store:u.store||null,token:null}); });
   SEED_CUSTOMERS.forEach(function(c,i){ mem.customers.push(Object.assign({id:i+1},c)); });
   STORES.forEach(function(st){ CATALOG.forEach(function(it){
     mem.inventory.push({store:st,sku:it.sku,name:it.name,cat:it.cat,price:it.price,medical:it.medical,stock:seedStock(it.sku,st),sold:0});
   });});
+  var h=genHistory();
+  h.sales.forEach(function(x){ mem.sales.push(x); });
+  h.orders.forEach(function(o,i){ mem.orders.push(Object.assign({id:i+1},o)); });
+  h.pickups.forEach(function(pk,i){ mem.pickups.push(Object.assign({id:i+1,status:pk.status},pk)); });
 }
 
 // ---- bookings ----
@@ -366,7 +434,29 @@ async function settlement(store, from, to){
   return {net:net, refunds:refunds, medical:medical, vat:vat, methods:methods};
 }
 
-module.exports={ init, STORES, CATALOG, refundSale, recentSales, createOrder, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement,
+function _genToken(){ return 'tk_'+Math.random().toString(36).slice(2)+Date.now().toString(36); }
+async function login(username, pass){
+  let u;
+  if(ready){const r=await pool.query('SELECT id,username,pass,role,store FROM users WHERE username=$1',[username]); u=r.rows[0];}
+  else { u=mem.users.find(function(x){return x.username===username;}); }
+  if(!u || u.pass!==pass) return {ok:false,error:'아이디 또는 비밀번호가 틀렸어요'};
+  var token=_genToken();
+  if(ready){ await pool.query('UPDATE users SET token=$2 WHERE id=$1',[u.id,token]); }
+  else { var mu=mem.users.find(function(x){return x.id===u.id;}); if(mu)mu.token=token; }
+  return {ok:true, token:token, role:u.role, store:u.store||null, username:u.username};
+}
+async function userByToken(token){
+  if(!token) return null;
+  if(ready){const r=await pool.query('SELECT username,role,store FROM users WHERE token=$1',[token]); return r.rows[0]||null;}
+  var u=mem.users.find(function(x){return x.token===token;}); return u? {username:u.username,role:u.role,store:u.store||null}:null;
+}
+async function logout(token){
+  if(!token) return;
+  if(ready){ await pool.query('UPDATE users SET token=NULL WHERE token=$1',[token]); }
+  else { var u=mem.users.find(function(x){return x.token===token;}); if(u)u.token=null; }
+}
+
+module.exports={ init, STORES, CATALOG, refundSale, recentSales, createOrder, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,

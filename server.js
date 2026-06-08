@@ -15,11 +15,44 @@ const TYPES = {
 };
 const CAP = 2; // 30분당 정원
 
-function send(res, code, obj){ res.writeHead(code, {'content-type':'application/json; charset=utf-8'}); res.end(JSON.stringify(obj)); }
+function send(res, code, obj, extraHeaders){ var h={'content-type':'application/json; charset=utf-8'}; if(extraHeaders)for(var k in extraHeaders)h[k]=extraHeaders[k]; res.writeHead(code, h); res.end(JSON.stringify(obj)); }
+const AUTH_ON = process.env.AUTH_ON === 'true';
+function getCookie(req,name){ var c=req.headers.cookie||''; var m=c.match(new RegExp('(?:^|; )'+name+'=([^;]+)')); return m?decodeURIComponent(m[1]):null; }
 function body(req){ return new Promise(function(resolve){ let d=''; req.on('data',function(c){d+=c;}); req.on('end',function(){ try{resolve(d?JSON.parse(d):{});}catch(e){resolve({});} }); }); }
 
 async function api(req, res, url){
   try{
+    // ===== 인증 게이트 (AUTH_ON일 때만) =====
+    // 로그인/세션
+    if(req.method==='POST' && url.pathname==='/api/login'){
+      const b=await body(req); const r=await db.login(b.username, b.pass);
+      if(!r.ok) return send(res,401,r);
+      return send(res,200,{ok:true,role:r.role,store:r.store,username:r.username},
+        {'Set-Cookie':'bv_token='+r.token+'; Path=/; Max-Age=86400; SameSite=Lax'});
+    }
+    if(req.method==='POST' && url.pathname==='/api/logout'){
+      await db.logout(getCookie(req,'bv_token'));
+      return send(res,200,{ok:true},{'Set-Cookie':'bv_token=; Path=/; Max-Age=0'});
+    }
+    if(req.method==='GET' && url.pathname==='/api/me'){
+      const u=await db.userByToken(getCookie(req,'bv_token'));
+      return send(res,200,{ok:true, authOn:AUTH_ON, user:u||null});
+    }
+    if(AUTH_ON){
+      const PUBLIC=['/api/login','/api/logout','/api/me','/api/catalog','/api/bookings','/api/pickups','/api/customer'];
+      const isPublic = PUBLIC.some(function(pp){ return url.pathname===pp; });
+      // /api/customer (단건) 공개, /api/customers (목록)은 보호
+      if(!isPublic){
+        const u=await db.userByToken(getCookie(req,'bv_token'));
+        if(!u) return send(res,401,{ok:false,error:'로그인이 필요해요'});
+        if(u.role==='store'){
+          const HQ_ONLY=['/api/sales/range','/api/pb-margin','/api/orders/status','/api/customers/move'];
+          if(HQ_ONLY.indexOf(url.pathname)>=0) return send(res,403,{ok:false,error:'본부 전용이에요'});
+          const qs=url.searchParams.get('store');
+          if(qs && qs!==u.store) return send(res,403,{ok:false,error:'다른 지점 데이터는 볼 수 없어요'});
+        }
+      }
+    }
     // GET /api/bookings?store=&date=  -> 목록
     if(req.method==='GET' && url.pathname==='/api/bookings'){
       const store=url.searchParams.get('store'), date=url.searchParams.get('date');
