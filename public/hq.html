@@ -9,6 +9,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<style>
+.hqbk-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.hqbk-row:last-child{border-bottom:0}
+.hqbk-row .nm{width:64px;color:var(--ink)}
+.hqbk-row .tr{flex:1;height:10px;background:var(--surface);border-radius:9999px;overflow:hidden}
+.hqbk-row .tf{height:100%;background:var(--ink);border-radius:9999px}
+.hqbk-row .vv{width:96px;text-align:right;color:var(--muted)}
+</style>
 </head>
 <body>
 <div class="topbar"><div class="topbar-in">
@@ -50,6 +58,11 @@
 
   <div class="hq-grid l" style="margin-top:18px">
     <div class="card pad" id="storeDetail"></div>
+    <div class="card pad">
+      <div class="eyebrow">전 매장 예약 현황 (오늘) <span class="livedot">LIVE</span></div>
+      <div class="label" style="margin:6px 0 10px">30분당 정원 2명 기준. (데모: 샘플 예약)</div>
+      <div id="hqBook"></div>
+    </div>
     <div class="card pad">
       <div class="eyebrow">실시간 알림 (전 매장)</div>
       <div class="stockrow"><span style="color:var(--warn)">● 성수점 — F2 알도 R 렌즈 재고 임박(2)</span><span class="muted">방금</span></div>
@@ -316,6 +329,21 @@ function storeDetail(i){const s=live[i];const hmax=Math.max(...s.hours);
    <div class="label" style="margin:12px 0 2px">재고 상세</div>
    ${s.stock.map(k=>`<div class="stockrow"><span>${k[0]}</span><span class="pill ${k[2]==='ok'?'good':k[2]==='bad'?'bad':'warn'}">${k[1]}</span></div>`).join('')}`;}
 storeDetail(0);
+
+/* ===== 전 매장 예약 현황 (오늘) ===== */
+(function(){
+  var d=BVBooking.todayISO();
+  [['성수점',d,'11:00','김민지'],['성수점',d,'11:00','이정훈'],['성수점',d,'14:00','박서연'],
+   ['성수점',d,'16:30','정하늘'],['홍대점',d,'15:00','최우진'],['홍대점',d,'11:00','한지우'],
+   ['판교점',d,'10:30','오세훈'],['판교점',d,'14:30','윤서아'],['판교점',d,'15:00','강민석']
+  ].forEach(function(x){BVBooking.add({store:x[0],date:x[1],time:x[2],name:x[3],phone:''});});
+  var box=document.getElementById('hqBook'); if(!box)return;
+  var capTotal=BVBooking.SLOTS.length*BVBooking.CAP;
+  box.innerHTML=BVBooking.STORES.map(function(st){
+    var booked=BVBooking.listFor(st,d).length, pct=Math.round(booked/capTotal*100);
+    return '<div class="hqbk-row"><span class="nm">'+st+'</span><div class="tr"><div class="tf" style="width:'+pct+'%"></div></div><span class="vv">'+booked+' / '+capTotal+'건 ('+pct+'%)</span></div>';
+  }).join('');
+})();
 </script>
 </body>
 </html>

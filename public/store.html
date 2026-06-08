@@ -9,6 +9,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<style>
+.finput2{font-family:inherit;font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:#fff}
+.slotrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.slotrow:last-child{border-bottom:0}
+.slotrow .st{width:54px;color:var(--ink)}
+.slotrow .sbar{flex:1;height:10px;background:var(--surface);border-radius:9999px;overflow:hidden}
+.slotrow .sfill{height:100%;background:var(--ink);border-radius:9999px}
+.slotrow .sfill.full{background:var(--bad)}
+.slotrow .sct{width:64px;text-align:right;color:var(--muted)}
+.bklist-row{display:flex;justify-content:space-between;font-size:14px;padding:7px 0;border-bottom:1px solid var(--line2)}
+.bklist-row:last-child{border-bottom:0}
+</style>
 </head>
 <body>
 <div class="topbar"><div class="topbar-in">
@@ -59,6 +71,7 @@
     <div class="subtab" data-t="erp">운영 ERP · POS</div>
     <div class="subtab" data-t="fin">재무</div>
     <div class="subtab" data-t="hr">인력 · 채용</div>
+    <div class="subtab" data-t="book">예약</div>
   </div>
 
   <!-- CRM -->
@@ -242,6 +255,30 @@
       </div>
     </div>
   </div>
+  <!-- 예약 접수 -->
+  <div class="stab" id="t-book">
+    <div class="lead"><div><div class="eyebrow">예약 접수</div><h2 style="font-size:30px">방문 예약 현황</h2>
+      <div class="sub">30분당 정원 2명. 고객 앱·전화 예약이 여기로 모여요. (데모: 샘플 예약 포함)</div></div></div>
+    <div class="store-grid">
+      <div class="card pad">
+        <div class="eyebrow">슬롯 현황</div>
+        <div style="display:flex;gap:8px;margin:10px 0 12px;flex-wrap:wrap">
+          <select id="stBkStore" class="finput2"></select>
+          <input type="date" id="stBkDate" class="finput2">
+        </div>
+        <div id="stSlots"></div>
+      </div>
+      <div class="card pad">
+        <div class="eyebrow">예약 목록 <span id="stBkCount" class="muted" style="font-weight:400"></span></div>
+        <div id="stBkList" style="margin-top:8px"></div>
+        <div class="divider"></div>
+        <div class="eyebrow" style="margin-bottom:6px">전화 / 워크인 예약 추가</div>
+        <input type="text" id="stName" class="finput2" placeholder="이름" style="width:100%;margin-bottom:6px">
+        <select id="stTime" class="finput2" style="width:100%"></select>
+        <button class="btn small" style="width:100%;margin-top:8px" onclick="stAdd()">예약 추가</button>
+      </div>
+    </div>
+  </div>
 </section>
 </div>
 
@@ -284,6 +321,42 @@ function toggleRun(el){el.classList.toggle('done');
   const items=document.querySelectorAll('#runlist .runitem');
   const done=document.querySelectorAll('#runlist .runitem.done').length;
   document.getElementById('runcount').textContent=`${done} / ${items.length} 완료`;}
+
+/* ===== 가맹점 예약 접수 ===== */
+(function(){
+  // 데모 샘플 예약 심기
+  var d=BVBooking.todayISO();
+  [['성수점',d,'11:00','김민지'],['성수점',d,'11:00','이정훈'],['성수점',d,'14:00','박서연'],
+   ['홍대점',d,'15:00','최우진'],['성수점',d,'16:30','정하늘']].forEach(function(x){
+     BVBooking.add({store:x[0],date:x[1],time:x[2],name:x[3],phone:''});});
+  // 셀렉트 채우기
+  var ss=document.getElementById('stBkStore'); if(!ss)return;
+  ss.innerHTML=BVBooking.STORES.map(function(s){return '<option>'+s+'</option>';}).join('');
+  document.getElementById('stBkDate').value=d;
+  document.getElementById('stTime').innerHTML=BVBooking.SLOTS.map(function(t){return '<option>'+t+'</option>';}).join('');
+  ss.addEventListener('change',stRender); document.getElementById('stBkDate').addEventListener('change',stRender);
+  stRender();
+})();
+function stRender(){
+  var store=document.getElementById('stBkStore').value, date=document.getElementById('stBkDate').value;
+  document.getElementById('stSlots').innerHTML=BVBooking.SLOTS.map(function(t){
+    var c=BVBooking.count(store,date,t), full=c>=BVBooking.CAP, pct=Math.round(c/BVBooking.CAP*100);
+    return '<div class="slotrow"><span class="st">'+t+'</span><div class="sbar"><div class="sfill'+(full?' full':'')+'" style="width:'+pct+'%"></div></div><span class="sct">'+c+' / '+BVBooking.CAP+(full?' 마감':'')+'</span></div>';
+  }).join('');
+  var list=BVBooking.listFor(store,date);
+  document.getElementById('stBkCount').textContent='· '+list.length+'건';
+  document.getElementById('stBkList').innerHTML = list.length? list.map(function(b){
+    return '<div class="bklist-row"><span>'+b.time+' · '+b.name+'</span><span class="muted">'+(b.phone||'앱 예약')+'</span></div>';
+  }).join('') : '<div class="muted" style="font-size:14px">예약 없음</div>';
+}
+function stAdd(){
+  var store=document.getElementById('stBkStore').value, date=document.getElementById('stBkDate').value,
+      time=document.getElementById('stTime').value, name=document.getElementById('stName').value.trim();
+  if(!name){toast('이름을 입력해주세요');return;}
+  var ok=BVBooking.add({store:store,date:date,time:time,name:name,phone:'전화'});
+  if(!ok){toast(time+' 슬롯은 마감됐어요 (2/2)');return;}
+  document.getElementById('stName').value=''; toast(name+'님 '+time+' 예약 추가'); stRender();
+}
 </script>
 </body>
 </html>
