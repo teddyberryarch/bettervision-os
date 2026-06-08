@@ -1,7 +1,7 @@
 // PostgreSQL 래퍼. DATABASE_URL 없으면 메모리 폴백.
 // 테이블: bookings(예약), inventory(지점×SKU 재고), sales(결제 라인)
 let pool=null, ready=false;
-const mem={ bookings:[], inventory:[], sales:[], orders:[], customers:[] };
+const mem={ bookings:[], inventory:[], sales:[], orders:[], customers:[], pickups:[] };
 try{
   if(process.env.DATABASE_URL){
     const { Pool } = require('pg');
@@ -87,6 +87,16 @@ async function init(){
     size TEXT, face TEXT, pd TEXT, rx TEXT, nose TEXT,
     seg TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   await pool.query(`ALTER TABLE sales ADD COLUMN IF NOT EXISTS customer_id INT`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS pickups(
+    id SERIAL PRIMARY KEY, store TEXT, customer_id INT, name TEXT, phone TEXT,
+    kind TEXT,            -- A(도수) / B(비도수) / C(소모품)
+    items TEXT,           -- 선택 제품 요약
+    rx TEXT,              -- 도수(A형)
+    date TEXT, time TEXT, -- 픽업 예약
+    pay_type TEXT,        -- 선결제 / 보증금 / 매장결제 / 온라인
+    amount INT DEFAULT 0, deposit INT DEFAULT 0,
+    status TEXT DEFAULT '예약',  -- 예약 / 방문완료 / 구매전환 / 취소
+    created_at TIMESTAMPTZ DEFAULT now())`);
   const cc=await pool.query('SELECT COUNT(*)::int AS c FROM customers');
   if(cc.rows[0].c===0){ for(const c of SEED_CUSTOMERS){
     await pool.query('INSERT INTO customers(name,phone,store,size,face,pd,rx,nose,seg) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)',
@@ -260,7 +270,38 @@ async function segCounts(store){
   return out;
 }
 
-module.exports={ init, STORES, CATALOG, refundSale, recentSales, createOrder, listOrders, updateOrder, lowStock,
+// ---- pickups (고객 주문/픽업 예약) ----
+async function createPickup(o){
+  if(ready){const r=await pool.query(
+    `INSERT INTO pickups(store,customer_id,name,phone,kind,items,rx,date,time,pay_type,amount,deposit,status)
+     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'예약') RETURNING id`,
+    [o.store,o.customerId||null,o.name||'',o.phone||'',o.kind,o.items||'',o.rx||'',o.date||'',o.time||'',o.payType||'',o.amount||0,o.deposit||0]);
+    return r.rows[0].id;}
+  const id=mem.pickups.length+1; mem.pickups.push(Object.assign({id:id,status:'예약'},o)); return id;
+}
+async function listPickups(store, status){
+  if(ready){const r=await pool.query('SELECT id,store,name,phone,kind,items,rx,date,time,pay_type,amount,deposit,status FROM pickups WHERE ($1::text IS NULL OR store=$1) AND ($2::text IS NULL OR status=$2) ORDER BY id DESC',[store||null,status||null]);return r.rows;}
+  return mem.pickups.filter(x=>(!store||x.store===store)&&(!status||x.status===status)).slice().reverse();
+}
+async function updatePickup(id, status){
+  if(ready){await pool.query('UPDATE pickups SET status=$2 WHERE id=$1',[id,status]);return {ok:true};}
+  var x=mem.pickups.find(p=>p.id==id); if(x)x.status=status; return {ok:true};
+}
+
+function _agg(rows){
+  var total=0, byStore={}, byCat={};
+  rows.forEach(function(r){ total+=r.amt; byStore[r.store]=(byStore[r.store]||0)+r.amt; byCat[r.cat]=(byCat[r.cat]||0)+r.amt; });
+  var stores=Object.keys(byStore).map(function(s){return {store:s,amt:byStore[s]};}).sort(function(a,b){return b.amt-a.amt;});
+  return {total:total, stores:stores, byCat:byCat};
+}
+async function salesRange(from, to){
+  if(ready){const r=await pool.query('SELECT store, cat, SUM(amount)::int AS amt, SUM(qty)::int AS qty FROM sales WHERE date BETWEEN $1 AND $2 GROUP BY store,cat',[from,to]);return _agg(r.rows);}
+  var m={}; mem.sales.filter(s=>s.date>=from&&s.date<=to).forEach(function(s){var k=s.store+'|'+s.cat; m[k]=m[k]||{store:s.store,cat:s.cat,amt:0}; m[k].amt+=s.amount;});
+  return _agg(Object.keys(m).map(function(k){return m[k];}));
+}
+
+module.exports={ init, STORES, CATALOG, refundSale, recentSales, createOrder, listOrders, updateOrder, lowStock, salesRange,
+  createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, segCounts,
   listBookings, countSlot, addBooking,
   getInventory, getStock, restock,

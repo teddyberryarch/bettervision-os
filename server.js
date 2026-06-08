@@ -35,6 +35,20 @@ async function api(req, res, url){
       const row=await db.addBooking(b);
       return send(res,201,{ok:true, booking:row});
     }
+    // GET /api/pickups?store=&status= -> 픽업/주문 목록
+    if(req.method==='GET' && url.pathname==='/api/pickups'){
+      return send(res,200,{ok:true, pickups:await db.listPickups(url.searchParams.get('store'), url.searchParams.get('status'))});
+    }
+    // POST /api/pickups {store,kind,items,rx,date,time,payType,amount,deposit,name,phone,customerId}
+    if(req.method==='POST' && url.pathname==='/api/pickups'){
+      const b=await body(req);
+      if(!b.store||!b.kind) return send(res,400,{ok:false,error:'필수값 누락'});
+      return send(res,201,{ok:true, id:await db.createPickup(b)});
+    }
+    // POST /api/pickups/status {id,status}
+    if(req.method==='POST' && url.pathname==='/api/pickups/status'){
+      const b=await body(req); return send(res,200, await db.updatePickup(b.id,b.status));
+    }
     // GET /api/customers?store=&seg= -> 고객 목록
     if(req.method==='GET' && url.pathname==='/api/customers'){
       return send(res,200,{ok:true, customers:await db.listCustomers(url.searchParams.get('store'), url.searchParams.get('seg'))});
@@ -110,6 +124,12 @@ async function api(req, res, url){
     if(req.method==='GET' && url.pathname==='/api/sales/recent'){
       const store=url.searchParams.get('store');
       return send(res,200,{ok:true, sales:await db.recentSales(store, 20)});
+    }
+    // GET /api/sales/range?from=&to= -> 기간 전지점/카테고리 집계 (대시보드)
+    if(req.method==='GET' && url.pathname==='/api/sales/range'){
+      const from=url.searchParams.get('from'), to=url.searchParams.get('to');
+      const r=await db.salesRange(from,to);
+      return send(res,200,{ok:true, total:r.total, stores:r.stores, byCat:r.byCat});
     }
     // GET /api/sales/daily?store=&from=&to= -> 일별 매출
     if(req.method==='GET' && url.pathname==='/api/sales/daily'){
