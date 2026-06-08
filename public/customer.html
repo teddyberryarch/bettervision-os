@@ -77,6 +77,25 @@
 .psp span{color:var(--muted)}.psp b{color:var(--ink);font-weight:600}
 .pchips{display:flex;align-items:center;gap:6px;margin-top:10px}
 .pchip{width:18px;height:18px;border-radius:50%;border:1px solid var(--line);display:inline-block}
+.pcard{position:relative}
+.wishbtn{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:15px;line-height:1;color:var(--muted)}
+.pcard.hero .wishbtn{right:54px}
+.wishbtn.on{color:var(--ink);border-color:var(--ink)}
+.remind-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.remind-row:last-child{border-bottom:0}
+.remind-row .rl{color:var(--ink)}.remind-row .rs{font-size:13px;color:var(--muted)}
+.wish-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.wish-row:last-child{border-bottom:0}
+.wish-row .wp{color:var(--muted);font-size:13px}
+.tryon-stage{position:relative;width:100%;aspect-ratio:4/3;background:#0c0c0c;border-radius:12px;overflow:hidden;margin-top:10px}
+.tryon-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.glass-wrap{position:absolute;left:0;top:0;display:none;will-change:transform;pointer-events:none}
+.glass-wrap svg{display:block;width:100%;height:auto}
+.tryhint{position:absolute;left:0;right:0;bottom:10px;text-align:center;color:#fff;font-size:13px;text-shadow:0 1px 3px rgba(0,0,0,.65)}
+.tryctl{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.tryswatch{display:flex;gap:8px}
+.tryswatch .sw{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer}
+.tryswatch .sw.on{border-color:var(--ink)}
 </style>
 </head>
 <body>
@@ -212,6 +231,30 @@
               </div>
             </div>
 
+            <div class="appcard" id="tryonCard">
+              <h4>가상 피팅 <span class="phaseflag">베타</span></h4>
+              <div class="label" style="margin:6px 0 0">카메라로 얼굴 위에 안경을 얹어봐요. 간이 데모 — 위치·기울기 자동.</div>
+              <div class="tryon-stage" id="tryStage">
+                <video id="tryVid" playsinline muted></video>
+                <div class="glass-wrap" id="glassWrap"></div>
+                <div class="tryhint" id="tryHint">시작을 누르고 정면을 바라보세요</div>
+              </div>
+              <div class="tryctl">
+                <div class="chips" id="tryStyle">
+                  <button class="chip active" data-s="round">라운드</button>
+                  <button class="chip" data-s="square">스퀘어</button>
+                  <button class="chip" data-s="audio">오디오</button>
+                </div>
+                <div class="tryswatch" id="trySwatch">
+                  <span class="sw on" data-c="#1a1a1a" style="background:#1a1a1a"></span>
+                  <span class="sw" data-c="#5b3a29" style="background:#5b3a29"></span>
+                  <span class="sw" data-c="#2b3a4a" style="background:#2b3a4a"></span>
+                </div>
+              </div>
+              <button class="btn" id="tryBtn" style="width:100%;margin-top:10px" onclick="tryToggle()">가상 피팅 시작</button>
+              <div class="label" style="font-size:13px;margin-top:6px">간이 데모 — 실제 제품 정합·렌즈 반사는 추후 본격 AR에서.</div>
+            </div>
+
             <div class="appcard" id="recCard">
               <h4>맞는 프레임 <span class="label" id="recCount" style="font-weight:400"></span></h4>
               <div id="recList" style="margin-top:4px"></div>
@@ -248,6 +291,16 @@
 
           <!-- CARE -->
           <div class="pscreen" id="s-care">
+            <div class="appcard" id="remindCard">
+              <h4>재구매 알림 🔔</h4>
+              <div class="label" style="margin:6px 0 4px">교체 시기가 다가온 항목이에요. 도수 제품은 매장 방문, 소모품은 바로 구매.</div>
+              <div id="remindBox"></div>
+            </div>
+            <div class="appcard" id="wishCard">
+              <h4>위시리스트 <span class="label" id="wishCount" style="font-weight:400"></span></h4>
+              <div class="label" style="margin:6px 0 8px">상품 탭에서 ♡로 담은 관심 제품. 나란히 비교하고 매장에 잡아둘 수 있어요.</div>
+              <div id="wishBox"></div>
+            </div>
             <div class="appcard">
               <h4>교체 주기 <span class="phaseflag">소모품</span></h4>
               <div class="cyc">
@@ -391,6 +444,60 @@ window.bvFaceMeasure=async function(onDone,onErr,onStat){
   const pd=med(samples.map(function(s){return s.pd;}));
   const fw=med(samples.map(function(s){return s.fw;}));
   onDone&&onDone({pd:Math.round(pd*10)/10, faceWidth:Math.round(fw)});
+};
+
+/* ===== 가상 피팅 (간이) ===== */
+window.__tryStyle="round"; window.__tryColor="#1a1a1a";
+let tryStream=null, tryRAF=null;
+function glassSVG(style,color){
+  var st='stroke="'+color+'" stroke-width="3" fill="rgba(0,0,0,0.08)"';
+  var bridge='<path d="M44 22 Q50 18 56 22" stroke="'+color+'" stroke-width="3" fill="none"/>';
+  var temples='<line x1="8" y1="22" x2="0" y2="18" stroke="'+color+'" stroke-width="3"/><line x1="92" y1="22" x2="100" y2="18" stroke="'+color+'" stroke-width="3"/>';
+  var lenses;
+  if(style==='square'){
+    lenses='<rect x="8" y="10" width="34" height="26" rx="7" '+st+'/><rect x="58" y="10" width="34" height="26" rx="7" '+st+'/>';
+  } else if(style==='audio'){
+    lenses='<rect x="8" y="11" width="34" height="24" rx="6" '+st+'/><rect x="58" y="11" width="34" height="24" rx="6" '+st+'/>';
+    temples='<rect x="0" y="19" width="10" height="7" rx="3" fill="'+color+'"/><rect x="90" y="19" width="10" height="7" rx="3" fill="'+color+'"/>';
+  } else {
+    lenses='<ellipse cx="25" cy="23" rx="18" ry="15" '+st+'/><ellipse cx="75" cy="23" rx="18" ry="15" '+st+'/>';
+  }
+  return '<svg viewBox="0 0 100 46" xmlns="http://www.w3.org/2000/svg">'+lenses+bridge+temples+'</svg>';
+}
+function refreshGlass(){ var w=document.getElementById("glassWrap"); if(w) w.innerHTML=glassSVG(window.__tryStyle, window.__tryColor); }
+window.bvTrySetStyle=function(s){ window.__tryStyle=s; refreshGlass(); };
+window.bvTrySetColor=function(c){ window.__tryColor=c; refreshGlass(); };
+window.bvTryStart=async function(onErr){
+  if(!landmarker){ onErr&&onErr("모델 로딩 전이에요. 잠시 후 다시."); return false; }
+  try{ tryStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:640,height:480}}); }
+  catch(e){ onErr&&onErr("카메라 권한이 필요해요."); return false; }
+  var vid=document.getElementById("tryVid"); vid.srcObject=tryStream; try{ await vid.play(); }catch(e){}
+  refreshGlass();
+  var wrap=document.getElementById("glassWrap"), stage=document.getElementById("tryStage"), hint=document.getElementById("tryHint");
+  function loop(){
+    var now=performance.now(); var r=null; try{ r=landmarker.detectForVideo(vid, now); }catch(e){}
+    if(r && r.faceLandmarks && r.faceLandmarks[0]){
+      var L=r.faceLandmarks[0]; var sw=stage.clientWidth, sh=stage.clientHeight;
+      var li=L[468], ri=L[473], ls=L[234], rs=L[454];
+      var lx=(1-li.x)*sw, ly=li.y*sh, rx2=(1-ri.x)*sw, ry=ri.y*sh;
+      var cx=(lx+rx2)/2, cy=(ly+ry)/2;
+      var faceW=Math.abs((rs.x-ls.x))*sw;
+      var gw=faceW*1.06; var gh=gw*0.46;
+      var ang=Math.atan2(ry-ly, rx2-lx)*180/Math.PI;
+      wrap.style.display="block"; wrap.style.width=gw+"px";
+      wrap.style.transformOrigin=(gw/2)+"px "+(gh/2)+"px";
+      wrap.style.transform="translate("+(cx-gw/2)+"px,"+(cy-gh/2)+"px) rotate("+ang+"deg)";
+      hint.style.display="none";
+    } else { hint.style.display="block"; hint.textContent="얼굴을 화면 중앙에 맞춰주세요…"; }
+    tryRAF=requestAnimationFrame(loop);
+  }
+  tryRAF=requestAnimationFrame(loop); return true;
+};
+window.bvTryStop=function(){
+  if(tryRAF){ cancelAnimationFrame(tryRAF); tryRAF=null; }
+  if(tryStream){ tryStream.getTracks().forEach(function(t){t.stop();}); tryStream=null; }
+  var v=document.getElementById("tryVid"); if(v)v.srcObject=null;
+  var w=document.getElementById("glassWrap"); if(w)w.style.display="none";
 };
 </script>
 <script>
@@ -655,11 +762,14 @@ var COATINGS=[
 ];
 
 function pbBadge(pb){return pb?'<span class="pbbadge">PB</span>':'';}
+var WISH=[], WISH_PRICE={};
 function pcard(it){
   var spec = it.spec? '<div class="pspec">'+it.spec.map(function(x){return '<div class="psp"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>';}).join('')+'</div>' : '';
   var col = it.colors? '<div class="pchips">'+it.colors.map(function(c){return '<span class="pchip" style="background:'+c+'"></span>';}).join('')+'<span class="label" style="font-size:13px;margin-left:6px">'+it.colors.length+'컬러</span></div>' : '';
   var tag = it.hero? '<span class="herotag">대표</span>' : '';
-  return '<div class="pcard'+(it.hero?' hero':'')+'">'+tag+'<div class="pn">'+it.n+pbBadge(it.pb)+'</div><div class="pp">₩'+it.price+'</div><div class="pdc">'+it.desc+'</div>'+col+spec+'</div>';
+  var wished = WISH.indexOf(it.n)>=0;
+  var heart = '<button class="wishbtn'+(wished?' on':'')+'" data-n="'+it.n+'" data-p="'+it.price+'" onclick="wishToggle(this)">'+(wished?'♥':'♡')+'</button>';
+  return '<div class="pcard'+(it.hero?' hero':'')+'">'+tag+heart+'<div class="pn">'+it.n+pbBadge(it.pb)+'</div><div class="pp">₩'+it.price+'</div><div class="pdc">'+it.desc+'</div>'+col+spec+'</div>';
 }
 function pbIntro(txt){return '<div class="pbnote"><div class="pt">BETTERVISION LAB · 자체 개발(PB)</div><div class="pd">'+txt+'</div></div>';}
 
@@ -749,6 +859,59 @@ function simOrder(){
 })();
 
 function goProducts(){var t=document.querySelector('.ptab[data-s="products"]'); if(t)t.click(); window.scrollTo({top:0,behavior:'smooth'});}
+
+/* ===== 위시리스트 & 재구매 알림 (세션 메모리) ===== */
+var REMINDERS=[
+  {name:'알도R 1.60 렌즈', kind:'도수', sub:'마지막 교체 2024.12 · 권장 12개월', due:'D-9', go:'매장 방문'},
+  {name:'1일용 콘택트(30P)', kind:'소모품', sub:'30일 주기 · 잔여 약 5일', due:'D-5', go:'바로 구매'},
+  {name:'오디오 이어팁', kind:'소모품', sub:'권장 6개월 경과', due:'교체 권장', go:'바로 구매'}
+];
+function renderRemind(){
+  var b=document.getElementById('remindBox'); if(!b)return;
+  b.innerHTML=REMINDERS.map(function(r){
+    var online=(r.kind==='소모품');
+    return '<div class="remind-row"><div><div class="rl">'+r.name+' <span class="rs">· '+r.kind+'</span></div><div class="rs">'+r.sub+'</div></div>'+
+      '<button class="btn small'+(online?'':' ghost')+'" onclick="remindAct(\''+r.name+'\','+online+')">'+(online?'바로 구매':'방문 예약')+'</button></div>';
+  }).join('');
+}
+function remindAct(name, online){
+  if(online){ toast(name+' 바로 구매 담기 (소모품·온라인 결제 가능)'); }
+  else { toast(name+' 방문 예약으로 연결 (도수 제품은 매장)'); var t=document.querySelector('.ptab[data-s="measure"]'); if(t)t.click(); }
+}
+function wishToggle(btn){
+  var n=btn.dataset.n, p=btn.dataset.p; var i=WISH.indexOf(n);
+  if(i>=0){WISH.splice(i,1); btn.classList.remove('on'); btn.textContent='♡';}
+  else {WISH.push(n); WISH_PRICE[n]=p; btn.classList.add('on'); btn.textContent='♥';}
+  renderWish();
+}
+function renderWish(){
+  var b=document.getElementById('wishBox'); if(!b)return;
+  document.getElementById('wishCount').textContent = WISH.length? (WISH.length+'개'):'';
+  b.innerHTML = WISH.length? WISH.map(function(n){
+    return '<div class="wish-row"><span>'+n+'</span><span class="wp">₩'+(WISH_PRICE[n]||'-')+' <button class="wishbtn on" style="position:static;width:24px;height:24px" onclick="wishRemove(\''+n+'\')">♥</button></span></div>';
+  }).join('') : '<div class="muted" style="font-size:14px">아직 담은 관심 제품이 없어요. 상품 탭에서 ♡를 눌러보세요.</div>';
+}
+function wishRemove(n){var i=WISH.indexOf(n); if(i>=0)WISH.splice(i,1); renderWish(); if(typeof renderCat==='function'){var a=document.querySelector('#csub .cs.active'); if(a)renderCat(a.dataset.c);}}
+(function(){ renderRemind(); renderWish(); })();
+
+/* ===== 가상 피팅 컨트롤 ===== */
+var tryOn=false;
+function tryToggle(){
+  if(!window.bvTryStart){ toast('카메라 모듈 로딩 중 — 잠시 후 다시'); return; }
+  if(!tryOn){
+    window.bvTryStart(function(e){toast(e);}).then(function(ok){ if(ok){tryOn=true; document.getElementById('tryBtn').textContent='정지';} });
+  } else {
+    window.bvTryStop(); tryOn=false; document.getElementById('tryBtn').textContent='가상 피팅 시작';
+  }
+}
+(function(){
+  var st=document.getElementById('tryStyle');
+  if(st) st.addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;this.querySelectorAll('.chip').forEach(function(x){x.classList.remove('active');});b.classList.add('active'); if(window.bvTrySetStyle)window.bvTrySetStyle(b.dataset.s);});
+  var sw=document.getElementById('trySwatch');
+  if(sw) sw.addEventListener('click',function(e){var s=e.target.closest('.sw');if(!s)return;this.querySelectorAll('.sw').forEach(function(x){x.classList.remove('on');});s.classList.add('on'); if(window.bvTrySetColor)window.bvTrySetColor(s.dataset.c);});
+  var pt=document.getElementById('ptabs');
+  if(pt) pt.addEventListener('click',function(e){var t=e.target.closest('.ptab'); if(t&&t.dataset.s!=='measure'&&tryOn){ if(window.bvTryStop)window.bvTryStop(); tryOn=false; var b=document.getElementById('tryBtn'); if(b)b.textContent='가상 피팅 시작'; }});
+})();
 </script>
 </body>
 </html>

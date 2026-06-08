@@ -51,6 +51,13 @@
 .catrow .cfill{height:100%;border-radius:9999px}
 .catrow .cfill.pb{background:var(--ink)}.catrow .cfill.np{background:var(--faint)}
 .catrow .cval{width:104px;text-align:right;color:var(--muted)}
+.frgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:end}
+@media(max-width:680px){.frgrid{grid-template-columns:1fr}}
+.frgrid input[type=range]{accent-color:var(--ink);margin-top:8px}
+.frrow{display:flex;justify-content:space-between;font-size:14px;padding:7px 0;border-bottom:1px solid var(--line2)}
+.frrow:last-child{border-bottom:0}.frrow span:first-child{color:var(--muted)}.frrow b{color:var(--ink);font-weight:600}
+.frrow.tot{border-top:2px solid var(--ink);border-bottom:0;margin-top:4px;padding-top:10px}
+.frrow.tot b{font-size:17px}
 </style>
 </head>
 <body>
@@ -123,6 +130,61 @@
     <div id="hqAllStores"></div>
   </div>
 
+  <!-- PB 마진 관리 -->
+  <div class="card pad" style="margin-bottom:6px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div class="eyebrow">PB 마진 관리 <span class="livedot">LIVE</span> <span class="label" style="font-weight:400">· 본부 수익의 실체</span></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="qbtn" onclick="pbMonth(-1)">‹</button>
+        <span id="pbYM" style="font-size:15px;min-width:96px;text-align:center"></span>
+        <button class="qbtn" onclick="pbMonth(1)">›</button>
+      </div>
+    </div>
+    <div class="dash-top">
+      <div class="dash-kpi pb"><div class="label">이번 달 본부 공급마진 (추정)</div><div class="big kfig" id="pbHQ">₩0</div><div class="label" id="pbHQsub" style="font-size:13px"></div></div>
+      <div class="dash-kpi"><div class="label">전 지점 소매 매출</div><div class="big kfig" id="pbRetail">₩0</div><div class="label" style="font-size:13px">고객이 낸 금액</div></div>
+    </div>
+    <div class="hq-grid l" style="margin-top:16px">
+      <div>
+        <div class="eyebrow" style="margin-bottom:8px">카테고리별 본부 마진</div>
+        <div id="pbCat"></div>
+        <div class="label" style="font-size:12px;margin-top:6px">렌즈·콘택트(PB)는 공급마진율이 높아 본부 수익의 핵심. 테는 낮게(미끼·브랜딩).</div>
+      </div>
+      <div>
+        <div class="eyebrow" style="margin-bottom:8px">지점별 본부 기여 마진 · PB 비중</div>
+        <div id="pbStores"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 고객 데이터 귀속 -->
+  <div class="card pad" style="margin-bottom:6px">
+    <div class="eyebrow">고객 데이터 귀속 · 데이터는 본부 소유 ⬡</div>
+    <div class="label" style="font-size:13px;margin:6px 0 12px">이사·이직으로 다른 가맹점에 가도 측정·처방·구매이력이 그대로 승계돼요. 데이터를 매장이 아니라 본부가 쥐기 때문 — 가맹점이 떠나도 고객·이력은 네트워크에 남아요.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+      <div><div class="label" style="margin-bottom:4px">고객</div><select id="belongSel" class="hqsel" onchange="belongShow()"></select></div>
+      <div><div class="label" style="margin-bottom:4px">지점 이동 (이사 시뮬)</div><select id="belongTo" class="hqsel"></select></div>
+      <button class="btn small" onclick="belongMove()">이 지점으로 이동</button>
+    </div>
+    <div id="belongCard" style="margin-top:14px"></div>
+  </div>
+
+  <!-- 공급·물류 자동화 -->
+  <div class="card pad" style="margin-bottom:6px">
+    <div class="eyebrow">공급·물류 자동화 · 본부 출고센터 🚚</div>
+    <div class="label" style="font-size:13px;margin:6px 0 12px">전 지점 발주를 품목별로 통합해 본부가 한 번에 출고. 납품을 본부가 독점하기 때문에 가능 — 규모의 경제·재고 효율.</div>
+    <div class="dash-top">
+      <div class="dash-kpi"><div class="label">출고 대기 (대기+배송중)</div><div class="big kfig" id="logiCount">0건</div></div>
+      <div class="dash-kpi"><div class="label">총 출고 수량</div><div class="big kfig" id="logiQty">0개</div></div>
+    </div>
+    <div class="eyebrow" style="margin:16px 0 8px">품목별 통합 출고</div>
+    <div id="logiBox"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn small" onclick="logiApproveAll()">대기 일괄 승인 (출고 준비)</button>
+      <button class="btn small ghost" onclick="logiReceiveAll()">배송분 일괄 입고완료</button>
+    </div>
+  </div>
+
   <!-- 발주 관리 (본부 승인/입고) -->
   <div class="card pad" style="margin-bottom:6px">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
@@ -135,6 +197,37 @@
       </select>
     </div>
     <div id="hqOrders" style="margin-top:12px"></div>
+  </div>
+
+  <!-- 신규 가맹 시뮬레이터 -->
+  <div class="card pad" style="margin-bottom:6px">
+    <div class="eyebrow">신규 가맹 시뮬레이터 · 영업 도구</div>
+    <div class="label" style="font-size:13px;margin:6px 0 12px">상권·입지·평수를 넣으면 예상 매출·본부 마진·가맹점 수익·회수기간을 즉시 계산. 가맹 영업 미팅용 (데모 추정).</div>
+    <div class="frgrid">
+      <div><div class="label" style="margin-bottom:4px">상권 유형</div>
+        <select id="frTrade" class="hqsel" style="width:100%" onchange="frCalc()">
+          <option value="hot">핫플(홍대·성수)</option>
+          <option value="office">오피스 상권</option>
+          <option value="resi" selected>주거 상권</option>
+          <option value="road">로드샵</option>
+        </select></div>
+      <div><div class="label" style="margin-bottom:4px">입지 등급</div>
+        <select id="frLoc" class="hqsel" style="width:100%" onchange="frCalc()">
+          <option value="A">A급 (핵심 동선)</option>
+          <option value="B" selected>B급 (양호)</option>
+          <option value="C">C급 (이면)</option>
+        </select></div>
+      <div><div class="label" style="margin-bottom:4px">매장 평수: <b id="frAreaV">25</b>평</div>
+        <input type="range" id="frArea" min="10" max="60" value="25" oninput="frCalc()" style="width:100%"></div>
+    </div>
+    <div class="dash-top" style="margin-top:16px">
+      <div class="dash-kpi"><div class="label">월 예상 소매 매출</div><div class="big kfig" id="frRetail">₩0</div><div class="label" id="frVisit" style="font-size:13px"></div></div>
+      <div class="dash-kpi pb"><div class="label">월 본부 마진 (공급+가맹비+구독)</div><div class="big kfig" id="frHQ">₩0</div><div class="label" style="font-size:13px">본부 관점 수익</div></div>
+    </div>
+    <div class="hq-grid l" style="margin-top:16px">
+      <div><div class="eyebrow" style="margin-bottom:8px">가맹점 손익 (월)</div><div id="frStoreBox"></div></div>
+      <div><div class="eyebrow" style="margin-bottom:8px">초기 투자 · 회수기간</div><div id="frInvBox"></div></div>
+    </div>
   </div>
 
   <div class="kpis">
@@ -554,6 +647,137 @@ function dashLoad(){
     }).join('')+'<div class="label" style="font-size:12px;margin-top:6px">◆ = PB 마진 핵심(렌즈·콘택트)</div>' : '<div class="muted" style="font-size:14px">매출 데이터 없음</div>';
   });
 }
+
+/* ===== PB 마진 관리 ===== */
+var pbYM;
+(function(){ if(!document.getElementById('pbHQ'))return; var d=new Date(); pbYM={y:d.getFullYear(),m:d.getMonth()}; pbLoad(); })();
+function pbMonth(d){ if(!pbYM)return; pbYM.m+=d; if(pbYM.m<0){pbYM.m=11;pbYM.y--;} if(pbYM.m>11){pbYM.m=0;pbYM.y++;} pbLoad(); }
+function pwon(n){return '₩'+n.toLocaleString('ko-KR');}
+function ppad(n){return (n<10?'0':'')+n;}
+function pbLoad(){
+  var y=pbYM.y,m=pbYM.m; document.getElementById('pbYM').textContent=y+'년 '+(m+1)+'월';
+  var from=y+'-'+ppad(m+1)+'-01', last=new Date(y,m+1,0).getDate(), to=y+'-'+ppad(m+1)+'-'+ppad(last);
+  fetch('/api/pb-margin?from='+from+'&to='+to).then(function(r){return r.json();}).then(function(j){
+    var hq=j.totalHQ||0, retail=j.totalRetail||0, byCat=j.byCat||{}, stores=j.stores||[];
+    document.getElementById('pbHQ').textContent=pwon(hq);
+    document.getElementById('pbHQsub').textContent= retail? ('소매 대비 '+Math.round(hq/retail*100)+'% 본부 귀속') : '';
+    document.getElementById('pbRetail').textContent=pwon(retail);
+    var order=['렌즈','콘택트','테','선글라스','액세서리'];
+    var cmax=Math.max(1, Math.max.apply(null, order.map(function(c){return (byCat[c]&&byCat[c].hq)||0;})));
+    document.getElementById('pbCat').innerHTML=order.filter(function(c){return byCat[c];}).map(function(c){
+      var o=byCat[c], w=Math.round(o.hq/cmax*100), isPB=(c==='렌즈'||c==='콘택트');
+      return '<div class="catrow"><span class="cnm">'+c+(isPB?' ◆':'')+'</span><div class="cbar"><div class="cfill '+(isPB?'pb':'np')+'" style="width:'+w+'%"></div></div><span class="cval">'+pwon(o.hq)+'</span></div>';
+    }).join('') || '<div class="muted" style="font-size:14px">매출 데이터 없음</div>';
+    var smax=Math.max(1, stores.length?stores[0].hq:1);
+    document.getElementById('pbStores').innerHTML= stores.length? stores.map(function(st,i){var w=Math.round(st.hq/smax*100);
+      return '<div class="rankrow"><span class="rnum">'+(i+1)+'</span><span class="rnm">'+st.store+'</span><div class="rbar"><div class="rfill" style="width:'+w+'%"></div></div><span class="rval">'+pwon(st.hq)+' <span class="muted">PB '+st.pbShare+'%</span></span></div>';
+    }).join('') : '<div class="muted" style="font-size:14px">매출 데이터 없음</div>';
+  });
+}
+
+/* ===== 신규 가맹 시뮬레이터 (데모 추정) ===== */
+(function(){ if(document.getElementById('frRetail')) frCalc(); })();
+function frwon(n){return '₩'+Math.round(n).toLocaleString('ko-KR');}
+function frman(n){return '₩'+Math.round(n/10000).toLocaleString('ko-KR')+'만';}
+function frCalc(){
+  if(!document.getElementById('frRetail'))return;
+  var trade=document.getElementById('frTrade').value, loc=document.getElementById('frLoc').value, area=+document.getElementById('frArea').value;
+  document.getElementById('frAreaV').textContent=area;
+  var baseV={hot:70,office:45,resi:35,road:50}[trade];
+  var aov={hot:220000,office:260000,resi:285000,road:240000}[trade];
+  var locS={A:1.3,B:1.0,C:0.72}[loc];
+  var conv=0.18;
+  var dailyVisit=Math.round(baseV*locS*(0.85+area/100));
+  var monthRetail=dailyVisit*30*conv*aov;
+  // 본부 마진: 공급마진(소매의 약 27%) + 가맹비(월 환산 100만) + CRM 구독(월 30만)
+  var hqSupply=monthRetail*0.27, hqFee=1000000, hqSub=300000;
+  var hqTotal=hqSupply+hqFee+hqSub;
+  // 가맹점 손익
+  var rent=area*180000, labor=4000000, etc=monthRetail*0.06;
+  var grossStore=monthRetail*0.45; // 매출총이익(소매-공급원가)
+  var storeProfit=grossStore-rent-labor-etc-hqSub;
+  // 초기 투자
+  var franchiseFee=30000000, interior=area*1100000, deposit=area*600000, stock=15000000;
+  var invest=franchiseFee+interior+deposit+stock;
+  var payback= storeProfit>0? invest/storeProfit : null;
+
+  document.getElementById('frRetail').textContent=frman(monthRetail);
+  document.getElementById('frVisit').textContent='일 방문 '+dailyVisit+'명 · 전환 '+Math.round(conv*100)+'% · 객단가 '+frman(aov);
+  document.getElementById('frHQ').textContent=frman(hqTotal);
+  document.getElementById('frStoreBox').innerHTML=
+    '<div class="frrow"><span>매출총이익</span><b>'+frman(grossStore)+'</b></div>'+
+    '<div class="frrow"><span>임대료(추정)</span><b>-'+frman(rent)+'</b></div>'+
+    '<div class="frrow"><span>인건비</span><b>-'+frman(labor)+'</b></div>'+
+    '<div class="frrow"><span>CRM 구독·기타</span><b>-'+frman(hqSub+etc)+'</b></div>'+
+    '<div class="frrow tot"><span>월 영업이익</span><b>'+frman(storeProfit)+'</b></div>';
+  document.getElementById('frInvBox').innerHTML=
+    '<div class="frrow"><span>가맹비</span><b>'+frman(franchiseFee)+'</b></div>'+
+    '<div class="frrow"><span>인테리어('+area+'평)</span><b>'+frman(interior)+'</b></div>'+
+    '<div class="frrow"><span>보증금</span><b>'+frman(deposit)+'</b></div>'+
+    '<div class="frrow"><span>초도 재고</span><b>'+frman(stock)+'</b></div>'+
+    '<div class="frrow tot"><span>총 투자 / 회수</span><b>'+frman(invest)+' · '+(payback?(payback.toFixed(1)+'개월'):'적자')+'</b></div>';
+}
+
+/* ===== 고객 데이터 귀속 ===== */
+var CUSTALL=[];
+(function(){ if(document.getElementById('belongSel')) belongLoad(); })();
+function belongLoad(keepId){
+  fetch('/api/customers').then(function(r){return r.json();}).then(function(j){
+    CUSTALL=j.customers||[];
+    var sel=document.getElementById('belongSel');
+    sel.innerHTML=CUSTALL.map(function(c){return '<option value="'+c.id+'">'+c.name+' · 현재 '+(c.store||'-')+'</option>';}).join('');
+    if(keepId)sel.value=keepId;
+    var mv=document.getElementById('belongTo');
+    if(!mv.options.length)['성수점','홍대점','판교점'].forEach(function(s){var o=document.createElement('option');o.textContent=s;mv.appendChild(o);});
+    belongShow();
+  });
+}
+function belongShow(){
+  var id=document.getElementById('belongSel').value; if(!id)return;
+  fetch('/api/customer?id='+id).then(function(r){return r.json();}).then(function(j){
+    var c=j.customer||{}, h=j.history||[];
+    var spent=h.reduce(function(a,x){return a+(x.amount||0);},0);
+    document.getElementById('belongCard').innerHTML=
+      '<div class="rankrow" style="border:0;padding:0"><span class="rnum">⬡</span><div><div style="font-size:16px;color:var(--ink);font-weight:600">'+c.name+'</div><div class="label">현재 소속 '+(c.store||'-')+' · '+(c.seg||'')+'</div></div></div>'+
+      '<div class="divider"></div>'+
+      '<div class="frrow"><span>측정(사이즈/PD)</span><b>'+(c.size||'-')+' · '+(c.pd||'-')+'</b></div>'+
+      '<div class="frrow"><span>처방(시력)</span><b>'+(c.rx||'-')+'</b></div>'+
+      '<div class="frrow"><span>구매 이력</span><b>'+h.length+'건 · ₩'+spent.toLocaleString('ko-KR')+'</b></div>'+
+      '<div class="label" style="font-size:12px;margin-top:8px">↑ 지점을 옮겨도 이 기록은 그대로 따라가요 (본부 클라우드 귀속).</div>';
+  });
+}
+function belongMove(){
+  var id=document.getElementById('belongSel').value, to=document.getElementById('belongTo').value;
+  if(!id||!to)return;
+  fetch('/api/customers/move',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:+id,toStore:to})})
+    .then(function(r){return r.json();}).then(function(){ toast(to+'으로 이동 — 이력 그대로 승계됨'); belongLoad(id); });
+}
+
+/* ===== 공급·물류 자동화 (출고센터) ===== */
+(function(){ if(document.getElementById('logiBox')) logiLoad(); })();
+function logiLoad(){
+  if(!document.getElementById('logiBox'))return;
+  fetch('/api/orders').then(function(r){return r.json();}).then(function(j){
+    var os=(j.orders||[]).filter(function(o){return o.status==='대기'||o.status==='승인';});
+    document.getElementById('logiCount').textContent=os.length+'건';
+    document.getElementById('logiQty').textContent=os.reduce(function(a,o){return a+o.qty;},0)+'개';
+    var bySku={};
+    os.forEach(function(o){ bySku[o.sku]=bySku[o.sku]||{name:o.name,total:0,stores:{}}; bySku[o.sku].total+=o.qty; bySku[o.sku].stores[o.store]=(bySku[o.sku].stores[o.store]||0)+o.qty; });
+    var keys=Object.keys(bySku);
+    document.getElementById('logiBox').innerHTML = keys.length? keys.map(function(k){var x=bySku[k];
+      var br=Object.keys(x.stores).map(function(st){return st.replace('점','')+' '+x.stores[st];}).join(' · ');
+      return '<div class="pl-row"><span>'+x.name+' <span class="muted">'+br+'</span></span><b>'+x.total+'개</b></div>';
+    }).join('') : '<div class="muted" style="font-size:14px">출고할 발주가 없어요</div>';
+  });
+}
+function _ordStatusAll(fromStatus, toStatus){
+  return fetch('/api/orders?status='+encodeURIComponent(fromStatus)).then(function(r){return r.json();}).then(function(j){
+    var os=j.orders||[]; if(!os.length)return 0;
+    return Promise.all(os.map(function(o){return fetch('/api/orders/status',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:o.id,status:toStatus})});})).then(function(){return os.length;});
+  });
+}
+function logiApproveAll(){ _ordStatusAll('대기','승인').then(function(n){ toast(n?(n+'건 출고 승인 — 배송 준비'):'대기 발주가 없어요'); logiLoad(); if(window.hqOrdLoad)window.hqOrdLoad(); }); }
+function logiReceiveAll(){ _ordStatusAll('승인','입고완료').then(function(n){ toast(n?(n+'건 입고완료 · 지점 재고 자동 반영'):'배송중 발주가 없어요'); logiLoad(); if(window.hqOrdLoad)window.hqOrdLoad(); }); }
 </script>
 </body>
 </html>

@@ -173,7 +173,11 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
           <div class="divider"></div>
           <div class="eyebrow" style="margin-bottom:6px">카테고리별 판매 (오늘)</div>
           <div id="catSales"></div>
-          <button class="btn" style="margin-top:14px;width:100%" onclick="placeOrders()">재고 부족분 본사 발주</button>
+          <div class="eyebrow" style="margin:16px 0 6px">자동 발주 제안 🤖</div>
+          <div class="label" style="font-size:13px;margin-bottom:6px">재고 + 최근 판매 속도로 시스템이 추천. 사장님은 확인만.</div>
+          <button class="btn small ghost" style="width:100%" onclick="suggestLoad()">제안 보기</button>
+          <div id="sugBox" style="margin-top:8px"></div>
+          <button class="btn ghost" style="margin-top:10px;width:100%" onclick="placeOrders()">재고 부족분 수동 발주</button>
           <div class="eyebrow" style="margin:14px 0 6px">내 발주 현황</div>
           <div id="ordBox"></div>
         </div>
@@ -208,6 +212,22 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
       <div class="cal-head" id="calHead"></div>
       <div class="cal-grid" id="calGrid"></div>
       <div class="label" style="margin-top:10px;font-size:13px">색이 진할수록 매출이 큰 날 · <span id="calSum" class="muted"></span></div>
+    </div>
+
+    <div class="card pad" style="margin-top:18px">
+      <div class="eyebrow">자동 정산 · 세무 리포트 🤖 <span class="label" style="font-weight:400">· 위 지점·월 기준</span></div>
+      <div class="label" style="font-size:13px;margin:6px 0 12px">결제수단별 매출·환불·부가세·의료비 세액공제 대상을 자동 집계. 세무사에게 그대로 전달.</div>
+      <div class="hq-grid">
+        <div>
+          <div class="eyebrow" style="margin-bottom:8px">정산 요약</div>
+          <div id="setSummary"></div>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom:8px">결제수단별</div>
+          <div id="setMethods"></div>
+        </div>
+      </div>
+      <button class="btn small ghost" style="margin-top:12px" onclick="toast('세무 리포트 PDF 내보내기 (데모)')">세무 리포트 내보내기</button>
     </div>
 
     <div class="hq-grid" style="margin-top:18px">
@@ -334,6 +354,12 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
     <div class="lead"><div><div class="eyebrow">매장 마케팅</div><h2 style="font-size:30px">우리 매장 단골 마케팅</h2>
       <div class="sub">본사 캠페인과 별개로, 매장이 직접 단골·재방문 고객에게 카톡·문자를 보냅니다. (데모: 더미 고객·발송 이력)</div></div></div>
 
+    <div class="card pad" style="margin-bottom:16px">
+      <div class="eyebrow">자동 추천 대상 🤖 · 교체주기 도래 단골</div>
+      <div class="label" style="font-size:13px;margin:6px 0 10px">렌즈·콘택트 교체 시기가 다가온 고객을 시스템이 자동으로 찾아요. 사장님은 발송만 누르면 끝 — 재구매가 곧 본부 PB 마진.</div>
+      <div id="autoMkBox"></div>
+    </div>
+
     <div class="mkt-grid">
       <!-- 작성 -->
       <div class="card pad">
@@ -391,7 +417,7 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
 document.getElementById('subtabs').addEventListener('click',e=>{const t=e.target.closest('.subtab');if(!t)return;
   document.querySelectorAll('.subtab').forEach(x=>x.classList.remove('active'));t.classList.add('active');
   document.querySelectorAll('.stab').forEach(s=>s.classList.remove('active'));document.getElementById('t-'+t.dataset.t).classList.add('active');});
-var CRM_LIST=[];
+var CRM_LIST=[], CRM_CUR=null;
 function dotName(st){return st==='재방문'?'재방문':st==='신규'?'신규':'안정';}
 (function(){
   var sel=document.getElementById('crmStore'); if(!sel)return;
@@ -415,7 +441,7 @@ function crmSel(i){
   var tr=document.querySelector('#custTable tr[data-i="'+i+'"]'); if(tr)tr.classList.add('sel');
   var c=CRM_LIST[i]; if(!c)return;
   fetch('/api/customer?id='+c.id).then(function(r){return r.json();}).then(function(j){
-    var cust=j.customer||c, hist=j.history||[];
+    var cust=j.customer||c, hist=j.history||[]; CRM_CUR=cust;
     var histHtml = hist.length? hist.map(function(h){return '<div class="hist"><span>'+h.name+' <span class="muted">×'+h.qty+'</span></span><span class="muted">'+h.date+' · '+('₩'+h.amount.toLocaleString('ko-KR'))+'</span></div>';}).join('')
       : '<div class="muted" style="font-size:14px">구매 이력 없음 (POS에서 이 고객으로 결제하면 쌓여요)</div>';
     document.getElementById('detail').innerHTML=
@@ -428,7 +454,7 @@ function crmSel(i){
       '<div class="kv"><span class="label">얼굴 측정값</span><span>'+(cust.face||'-')+'</span></div>'+
       '<div class="kv"><span class="label">최근 처방(시력)</span><span>'+(cust.rx||'-')+'</span></div>'+
       '<div class="label" style="margin:14px 0 6px">구매 이력 (매장·본사 전용)</div>'+histHtml+
-      '<div style="display:flex;gap:10px;margin-top:16px"><button class="btn small" onclick="toast(\''+cust.name+'님 재방문 카톡 발송 (프로토타입)\')">카톡 발송</button></div>';
+      '<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><button class="btn small" onclick="autoQuote()">검안 기반 자동 견적</button><button class="btn small ghost" onclick="toast(\''+cust.name+'님 재방문 카톡 발송 (프로토타입)\')">카톡 발송</button></div><div id="autoQuote" style="margin-top:12px"></div>';
   });
 }
 function toggleRun(el){el.classList.toggle('done');
@@ -648,6 +674,7 @@ function finLoad(){
       finDaily={}; (j.days||[]).forEach(function(row){ finDaily[row.date]=row.amt; });
       finRenderGrid();
     }).catch(function(){ finDaily={}; finRenderGrid(); });
+  settleLoad(from, to);
 }
 function finRenderGrid(){
   var y=finYM.y, m=finYM.m, first=new Date(y,m,1).getDay(), last=new Date(y,m+1,0).getDate();
@@ -686,6 +713,88 @@ function rfDo(i){
       toast(s.name+' 환불 완료 · 재고 복구·매출 차감');
       rfLoad(); loadInventory(); loadSummary(); if(typeof finLoad==='function'){try{finLoad();}catch(e){}}
     }).catch(function(){toast('네트워크 오류');});
+}
+
+/* ===== 자동 발주 제안 ===== */
+var SUG=[];
+function suggestLoad(){
+  fetch('/api/restock-suggest?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
+    SUG=j.items||[];
+    if(!SUG.length){document.getElementById('sugBox').innerHTML='<div class="muted" style="font-size:14px;padding:6px 0">지금은 발주 제안이 없어요 (재고 충분)</div>';return;}
+    document.getElementById('sugBox').innerHTML=SUG.map(function(it,i){
+      var dl=(it.daysLeft==null)?'판매 데이터 적음':(it.daysLeft+'일 내 소진 예상');
+      var urg=(it.daysLeft!=null&&it.daysLeft<=7)||it.stock<=5;
+      return '<div class="pl-row"><span>'+(urg?'🔴 ':'')+it.name+' <span class="muted">재고 '+it.stock+' · 30일 '+it.sold30+'개 · '+dl+'</span></span>'+
+        '<span><b>+'+it.suggest+'</b> <button class="btn small" onclick="suggestOrder('+i+')">발주</button></span></div>';
+    }).join('')+'<button class="btn" style="width:100%;margin-top:10px" onclick="suggestOrderAll()">전체 제안 한 번에 발주</button>';
+  }).catch(function(){toast('제안 불러오기 실패');});
+}
+function _placeOne(it){return fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:curStore(),sku:it.sku,name:it.name,cat:it.cat,qty:it.suggest})}).then(function(r){return r.json();});}
+function suggestOrder(i){var it=SUG[i]; if(!it)return; _placeOne(it).then(function(){toast(it.name+' '+it.suggest+'개 발주 요청(대기)'); ordRender();});}
+function suggestOrderAll(){if(!SUG.length)return; Promise.all(SUG.map(_placeOne)).then(function(){toast(SUG.length+'종 자동 발주 요청(대기) — 본부 승인 대기'); ordRender(); document.getElementById('sugBox').innerHTML='';});}
+
+/* ===== 단골 자동 마케팅 (교체주기 도래) ===== */
+var AUTO_MK=[];
+function _mkToday(){var d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);}
+function autoMkLoad(){
+  var box=document.getElementById('autoMkBox'); if(!box)return;
+  fetch('/api/customers?seg=재방문').then(function(r){return r.json();}).then(function(j){
+    AUTO_MK=j.customers||[];
+    box.innerHTML = AUTO_MK.length? AUTO_MK.map(function(c,i){
+      return '<div class="pl-row"><span>🔔 '+c.name+' <span class="muted">'+(c.store||'')+' · '+(c.size||'')+' · 교체주기 도래</span></span><button class="btn small" onclick="autoMkSend('+i+')">카톡 예약</button></div>';
+    }).join('')+'<button class="btn" style="width:100%;margin-top:10px" onclick="autoMkSendAll()">전체 자동 카톡 예약 발송</button>'
+     : '<div class="muted" style="font-size:14px">지금 교체주기 도래 고객이 없어요</div>';
+  }).catch(function(){box.innerHTML='<div class="muted" style="font-size:14px">불러오기 실패</div>';});
+}
+function autoMkSend(i){var c=AUTO_MK[i]; if(!c)return;
+  MK_LOG.unshift({date:_mkToday(),seg:'교체주기 자동('+c.name+')',ch:'카카오',sent:1,open:1,visit:0,coupon:'렌즈 교체 10% 할인'});
+  mkRenderKpis(); mkRenderLog(); toast(c.name+'님 교체 안내 카톡 예약 발송 (데모)');
+}
+function autoMkSendAll(){ if(!AUTO_MK.length)return;
+  var n=AUTO_MK.length;
+  MK_LOG.unshift({date:_mkToday(),seg:'교체주기 자동 일괄',ch:'카카오',sent:n,open:Math.round(n*0.72),visit:Math.round(n*0.22),coupon:'렌즈 교체 10% 할인'});
+  mkRenderKpis(); mkRenderLog(); toast(n+'명 교체주기 자동 카톡 예약 발송 완료 (데모)');
+}
+(function(){ if(document.getElementById('autoMkBox')) autoMkLoad(); })();
+
+/* ===== 검안 기반 자동 견적 ===== */
+function _rxMax(rx){ // "OD -3.25 / OS -3.50" -> 3.50
+  if(!rx)return 0; var nums=(rx.match(/-?\d+(\.\d+)?/g)||[]).map(function(x){return Math.abs(parseFloat(x));});
+  return nums.length? Math.max.apply(null,nums):0;
+}
+function _idxByRx(d){ if(d<=2)return {idx:'1.50',p:50000}; if(d<=3)return {idx:'1.56',p:80000}; if(d<=4)return {idx:'1.60',p:110000}; if(d<=6)return {idx:'1.67',p:150000}; return {idx:'1.74',p:210000}; }
+function autoQuote(){
+  var c=CRM_CUR; if(!c){toast('고객을 먼저 선택하세요');return;}
+  var d=_rxMax(c.rx); var lens=_idxByRx(d);
+  var sizeF=(c.size||'F2×T2').split('×')[0]||'F2';
+  var frameName='로마 ACE-02 ('+sizeF+')', framePrice=189000;
+  var coat=20000; // 멀티코팅 기본(가정), 고도수면 박막 권장 문구
+  var total=framePrice+lens.p+coat;
+  var hi=d>=4;
+  document.getElementById('autoQuote').innerHTML=
+    '<div class="optbox"><b>자동 견적 (검안 기반).</b> 처방 최대 '+d.toFixed(2)+'D → 굴절률 '+lens.idx+' 추천'+(hi?' · 고도수라 얇은 렌즈 권장':'')+'. 사이즈 '+(c.size||'-')+' → '+frameName+'.</div>'+
+    '<div class="pl-row"><span>테 — '+frameName+'</span><span>₩'+framePrice.toLocaleString('ko-KR')+'</span></div>'+
+    '<div class="pl-row"><span>렌즈 — '+lens.idx+' (PB)</span><span>₩'+lens.p.toLocaleString('ko-KR')+'</span></div>'+
+    '<div class="pl-row"><span>멀티코팅</span><span>₩'+coat.toLocaleString('ko-KR')+'</span></div>'+
+    '<div class="pl-row" style="border-top:2px solid var(--ink);margin-top:4px;padding-top:8px"><b>예상 견적</b><b>₩'+total.toLocaleString('ko-KR')+'</b></div>'+
+    '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn small" onclick="toast(\''+c.name+'님 견적서 발행·POS 담기 (데모)\')">견적서 발행 · POS 담기</button></div>'+
+    '<div class="label" style="font-size:13px;margin-top:6px">검안·측정 데이터가 이미 있어 응대 1분 — 사장님은 확인·조제만.</div>';
+}
+
+/* ===== 자동 정산·세무 리포트 ===== */
+function settleLoad(from, to){
+  if(!document.getElementById('setSummary'))return;
+  fetch('/api/settlement?store='+encodeURIComponent(finStoreVal())+'&from='+from+'&to='+to).then(function(r){return r.json();}).then(function(j){
+    var won=function(n){return '₩'+(n||0).toLocaleString('ko-KR');};
+    document.getElementById('setSummary').innerHTML=
+      '<div class="pl-row"><span>순매출 (환불 차감 후)</span><b>'+won(j.net)+'</b></div>'+
+      '<div class="pl-row"><span>환불 합계</span><span>-'+won(j.refunds)+'</span></div>'+
+      '<div class="pl-row"><span>부가세 추정 (10%)</span><span>'+won(j.vat)+'</span></div>'+
+      '<div class="pl-row"><span>의료비 세액공제 대상</span><b>'+won(j.medical)+'</b></div>';
+    var ms=j.methods||[];
+    document.getElementById('setMethods').innerHTML = ms.length? ms.map(function(m){return '<div class="pl-row"><span>'+m.method+'</span><span>'+won(m.amt)+'</span></div>';}).join('')
+      : '<div class="muted" style="font-size:14px">해당 월 매출 없음</div>';
+  }).catch(function(){});
 }
 </script>
 </body>
