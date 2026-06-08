@@ -9,6 +9,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<style>
+.mfield{margin:10px 0}
+.mlabrow{display:flex;justify-content:space-between;font-size:14px;color:var(--ink);margin-bottom:5px}
+.mlabrow b{font-weight:600}
+#s-measure input[type=range]{width:100%;accent-color:#111111;height:22px}
+.recrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line2)}
+.recrow:first-of-type{border-top:0}
+.recrow .rn{font-size:15px;color:var(--ink)}
+.recrow .rd{font-size:13px;color:var(--muted);margin-top:2px}
+.rtag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:9999px;padding:1px 7px;margin-left:4px}
+.rmatch{font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap}
+.rmatch.best{color:var(--good)}
+</style>
 </head>
 <body>
 <div class="topbar"><div class="topbar-in">
@@ -92,29 +105,38 @@
           <div class="pscreen" id="s-measure">
             <div class="appcard">
               <h4>얼굴 측정 <span class="phaseflag">Phase 1 · 핵심</span></h4>
-              <div class="label" style="margin:6px 0 0">카메라로 얼굴을 재서 프론트·템플 사이즈를 산출해요. 안 맞는 테를 빼고 추천하는 출발점.</div>
+              <div class="label" style="margin:6px 0 0">카메라로 자동 측정하거나, 아래 슬라이더로 직접 조절해요. 값이 바뀌면 사이즈·추천이 바로 갱신됩니다.</div>
               <div class="scanwrap" id="scanwrap">
                 <div class="face"></div>
                 <div class="scanline"></div>
                 <div class="dotpd l"></div><div class="dotpd r"></div>
                 <div class="scanstat" id="scanstat">카메라를 정면으로 바라보세요</div>
               </div>
-              <button class="btn" style="width:100%;margin-top:12px" id="scanbtn" onclick="runScan()">측정 시작</button>
-              <div class="meas-res" id="measres">
-                <div class="divider"></div>
-                <div class="measure">
-                  <div><div class="label">동공 간 거리(PD)</div><div class="v">63.5 mm</div></div>
-                  <div><div class="label">안면 폭</div><div class="v">142 mm</div></div>
-                  <div><div class="label">코받침 높이</div><div class="v">낮음 (Asian)</div></div>
-                  <div><div class="label">관자 길이</div><div class="v">138 mm</div></div>
-                </div>
-                <div class="divider"></div>
-                <div style="display:flex;align-items:center;justify-content:space-between">
-                  <div><div class="label">AI 사이즈 (프론트 × 템플)</div><div class="sizebadge" style="font-size:32px">F2 × T2</div><div class="label" style="font-size:14px">프론트 2 · 템플 2</div></div>
-                  <button class="btn small" onclick="toast('F2×T2 추천 프레임 보기 (프로토타입)')">맞는 프레임 보기</button>
-                </div>
+              <button class="btn" style="width:100%;margin-top:12px" id="scanbtn" onclick="runScan()">카메라로 자동 측정</button>
+
+              <div class="divider"></div>
+              <div class="label" style="margin-bottom:8px">측정값 — 직접 조절 가능</div>
+              <div class="mfield"><div class="mlabrow"><span>안면 폭</span><b id="vW">142 mm</b></div>
+                <input type="range" id="inW" min="120" max="155" value="142" oninput="recompute()"></div>
+              <div class="mfield"><div class="mlabrow"><span>관자(템플) 길이</span><b id="vL">143 mm</b></div>
+                <input type="range" id="inL" min="130" max="155" value="143" oninput="recompute()"></div>
+              <div class="mfield"><div class="mlabrow"><span>코받침 높이</span><b id="vN">낮음</b></div>
+                <input type="range" id="inN" min="0" max="2" value="0" oninput="recompute()"></div>
+
+              <div class="divider"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div><div class="label">AI 사이즈 (프론트 × 템플)</div>
+                  <div class="sizebadge" id="sizeBadge">F2 × T2</div>
+                  <div class="label" id="sizeSub" style="font-size:14px">안면 142 · 관자 143 · 낮은 코</div></div>
+                <button class="btn small" onclick="document.getElementById('recCard').scrollIntoView({behavior:'smooth'})">맞는 프레임 보기</button>
               </div>
             </div>
+
+            <div class="appcard" id="recCard">
+              <h4>맞는 프레임 <span class="label" id="recCount" style="font-weight:400"></span></h4>
+              <div id="recList" style="margin-top:4px"></div>
+            </div>
+
             <div class="note" style="font-size:15px">측정값은 본사 클라우드에 저장 → 어느 가맹점에서도 이어서 응대 → 호환 안 되는 타사 프레임은 못 맞춤(렌즈·소모품 재구매의 시작).</div>
           </div>
 
@@ -204,12 +226,56 @@ document.getElementById('ptabs').addEventListener('click',function(e){var t=e.ta
   document.querySelectorAll('.ptab').forEach(function(x){x.classList.remove('active');});t.classList.add('active');
   document.querySelectorAll('.pscreen').forEach(function(s){s.classList.remove('active');});document.getElementById('s-'+t.dataset.s).classList.add('active');});
 /* measuring flow */
-function runScan(){var w=document.getElementById('scanwrap'),st=document.getElementById('scanstat'),btn=document.getElementById('scanbtn'),res=document.getElementById('measres');
-  res.classList.remove('show');w.classList.remove('done');w.classList.add('scanning');btn.disabled=true;btn.textContent='측정 중…';
+/* ===== 사이즈 판정 구간값 (임시 — 나중에 여기 숫자만 교체) ===== */
+var SIZE_CFG={ front:[['F1',130],['F2',144],['F3',9999]], temple:[['T1',138],['T2',147],['T3',9999]] };
+var NOSE=['낮음','표준','높음'];
+var FRAMES=[
+  {n:'로마 클래식', line:'PB',   f:'F2', t:'T2', nose:'낮음', price:'189,000'},
+  {n:'로마 와이드', line:'PB',   f:'F3', t:'T2', nose:'표준', price:'189,000'},
+  {n:'로마 슬림',   line:'PB',   f:'F1', t:'T1', nose:'낮음', price:'189,000'},
+  {n:'로마 컴팩트', line:'PB',   f:'F1', t:'T2', nose:'낮음', price:'189,000'},
+  {n:'NORM 오디오 템플', line:'오디오', f:'F2', t:'T3', nose:'표준', price:'240,000'},
+  {n:'Lindberg 협업',    line:'명품',   f:'F2', t:'T2', nose:'높음', price:'470,000'}
+];
+function frontOf(w){for(var i=0;i<SIZE_CFG.front.length;i++){if(w<=SIZE_CFG.front[i][1])return SIZE_CFG.front[i][0];}}
+function templeOf(l){for(var i=0;i<SIZE_CFG.temple.length;i++){if(l<=SIZE_CFG.temple[i][1])return SIZE_CFG.temple[i][0];}}
+function recompute(){
+  var w=+document.getElementById('inW').value, l=+document.getElementById('inL').value, n=+document.getElementById('inN').value;
+  document.getElementById('vW').textContent=w+' mm';
+  document.getElementById('vL').textContent=l+' mm';
+  document.getElementById('vN').textContent=NOSE[n];
+  var F=frontOf(w), T=templeOf(l);
+  document.getElementById('sizeBadge').textContent=F+' × '+T;
+  document.getElementById('sizeSub').textContent='안면 '+w+' · 관자 '+l+' · '+NOSE[n]+' 코';
+  renderRecs(F,T,NOSE[n]);
+  return F+' × '+T;
+}
+function renderRecs(F,T,nose){
+  var scored=FRAMES.map(function(fr){var sc=0; if(fr.f===F)sc+=2; if(fr.t===T)sc+=2; if(fr.nose===nose)sc+=1; return {fr:fr,sc:sc};})
+    .filter(function(x){return x.sc>=2;})
+    .sort(function(a,b){return b.sc-a.sc;});
+  document.getElementById('recCount').textContent='· '+scored.length+'개';
+  var html=scored.map(function(x){
+    var fr=x.fr, exact=(fr.f===F && fr.t===T), pct=Math.round(x.sc/5*100);
+    return '<div class="recrow"><div><div class="rn">'+fr.n+' <span class="rtag">'+fr.line+'</span></div>'+
+           '<div class="rd">'+fr.f+' × '+fr.t+' · '+fr.nose+' 코 · ₩'+fr.price+'</div></div>'+
+           '<div class="rmatch '+(exact?'best':'')+'">'+(exact?'딱 맞음':'적합')+' '+pct+'%</div></div>';
+  }).join('');
+  document.getElementById('recList').innerHTML = html || '<div class="rd" style="color:var(--muted)">맞는 프레임이 없어요. 측정값을 조절해 보세요.</div>';
+}
+/* 카메라 자동 측정(데모): 애니메이션 후 측정값 채우고 재계산 */
+function runScan(){var w=document.getElementById('scanwrap'),st=document.getElementById('scanstat'),btn=document.getElementById('scanbtn');
+  w.classList.remove('done');w.classList.add('scanning');btn.disabled=true;btn.textContent='측정 중…';
   st.textContent='얼굴 윤곽 인식 중…';
   setTimeout(function(){st.textContent='동공 간 거리(PD) 측정 중…';},700);
   setTimeout(function(){st.textContent='안면 폭·코높이 산출 중…';},1500);
-  setTimeout(function(){w.classList.remove('scanning');w.classList.add('done');st.textContent='측정 완료 · F2 × T2';btn.disabled=false;btn.textContent='다시 측정';res.classList.add('show');},2400);}
+  setTimeout(function(){
+    document.getElementById('inW').value=142; document.getElementById('inL').value=143; document.getElementById('inN').value=0;
+    var sz=recompute();
+    w.classList.remove('scanning');w.classList.add('done');
+    st.textContent='측정 완료 · '+sz; btn.disabled=false; btn.textContent='다시 측정';
+  },2400);}
+recompute();
 /* eye-health timeline */
 (function(){var c=document.getElementById('tlChart');if(!c)return;
   var od=[['2022',-2.50],['2023',-2.75],['2024',-3.00],['2025',-3.25]];
