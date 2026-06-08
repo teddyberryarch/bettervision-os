@@ -49,6 +49,11 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
 .cal-cell .v{font-size:12px;font-weight:600;color:var(--ink);text-align:right}
 .cal-cell.today{outline:2px solid var(--ink)}
 @media(max-width:640px){.cal-cell{min-height:44px}.cal-cell .v{font-size:11px}}
+.pushrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+.pushrow:last-child{border-bottom:0}
+.pushrow .pn{font-size:14px;color:var(--ink)}
+.pushrow .pdl{font-size:12px;color:var(--warn);margin-top:2px}
+.pushrow .pacts{display:flex;gap:6px}
 </style>
 </head>
 <body>
@@ -184,6 +189,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <button class="btn small ghost" style="width:100%" onclick="suggestLoad()">제안 보기</button>
           <div id="sugBox" style="margin-top:8px"></div>
           <button class="btn ghost" style="margin-top:10px;width:100%" onclick="placeOrders()">재고 부족분 수동 발주</button>
+          <div class="eyebrow" style="margin:14px 0 6px">본부 발주 제안 🔔 <span class="label" style="font-weight:400">· 승인하면 발주 확정</span></div>
+          <div id="pushBox"></div>
           <div class="eyebrow" style="margin:14px 0 6px">내 발주 현황</div>
           <div id="ordBox"></div>
         </div>
@@ -587,11 +594,35 @@ function placeOrders(){
     .then(function(){ toast(items.length+'종 발주 요청(대기) — 본부 승인 대기'); ordRender(); });
   }).catch(function(){toast('발주 요청 실패');});
 }
+function _dlText(iso){
+  if(!iso) return '';
+  var d=new Date(iso), now=new Date(), diff=d-now;
+  if(diff<=0) return '마감 지남';
+  var h=Math.floor(diff/3600000), m=Math.floor((diff%3600000)/60000);
+  return '마감까지 '+(h>0?h+'시간 ':'')+m+'분';
+}
+function pushRender(){
+  fetch('/api/orders?store='+encodeURIComponent(curStore())+'&status='+encodeURIComponent('푸시대기')).then(function(r){return r.json();}).then(function(j){
+    var ps=j.orders||[];
+    document.getElementById('pushBox').innerHTML = ps.length? ps.map(function(o){
+      return '<div class="pushrow"><div class="pri"><div class="pn">'+o.name+' <span class="muted">×'+o.qty+'</span></div><div class="pdl">'+_dlText(o.deadline)+' · 무응답 시 자동 발주</div></div>'+
+        '<div class="pacts"><button class="btn small" onclick="pushRespond('+o.id+',true)">승인</button>'+
+        '<button class="btn small ghost" onclick="pushRespond('+o.id+',false)">거절</button></div></div>';
+    }).join('') : '<div class="muted" style="font-size:14px">본부에서 내려온 발주 제안이 없어요</div>';
+  });
+}
+function pushRespond(id, accept){
+  fetch('/api/orders/respond',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:id,accept:accept})})
+    .then(function(r){return r.json();}).then(function(){
+      toast(accept?'발주 승인 — 입고 대기':'발주 거절');
+      pushRender(); ordRender();
+    });
+}
 function ordRender(){
   fetch('/api/orders?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
-    var os=j.orders||[];
+    var os=(j.orders||[]).filter(function(o){return o.status!=='푸시대기';});
     document.getElementById('ordBox').innerHTML = os.length? os.map(function(o){
-      var cls=o.status==='입고완료'?'good':o.status==='승인'?'warn':'';
+      var cls=o.status==='입고완료'?'good':o.status==='승인'?'warn':o.status==='취소'?'bad':'';
       return '<div class="pl-row"><span>'+o.name+' <span class="muted">×'+o.qty+'</span></span><span class="pill '+cls+'">'+o.status+'</span></div>';
     }).join('') : '<div class="muted" style="font-size:14px">발주 없음</div>';
   });
@@ -599,8 +630,8 @@ function ordRender(){
 (function(){
   var sel=document.getElementById('posStore');
   ['성수점','홍대점','판교점'].forEach(function(s){var o=document.createElement('option');o.textContent=s;sel.appendChild(o);});
-  sel.addEventListener('change',function(){ posCart={}; renderPos(); loadInventory(); loadSummary(); ordRender(); loadPosCustomers(); });
-  loadInventory(); loadSummary(); ordRender(); loadPosCustomers();
+  sel.addEventListener('change',function(){ posCart={}; renderPos(); loadInventory(); loadSummary(); ordRender(); pushRender(); loadPosCustomers(); });
+  loadInventory(); loadSummary(); ordRender(); pushRender(); loadPosCustomers();
 })();
 
 /* ===== 매장 마케팅 (데모: 더미 세그먼트·이력) ===== */

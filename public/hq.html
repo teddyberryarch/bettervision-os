@@ -58,6 +58,9 @@
 .frrow:last-child{border-bottom:0}.frrow span:first-child{color:var(--muted)}.frrow b{color:var(--ink);font-weight:600}
 .frrow.tot{border-top:2px solid var(--ink);border-bottom:0;margin-top:4px;padding-top:10px}
 .frrow.tot b{font-size:17px}
+.pushbox{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;background:var(--surface)}
+.pushgrid{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pushgrid .hqsel{flex:0 1 auto}
 </style>
 </head>
 <body>
@@ -197,10 +200,26 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="eyebrow">발주 관리 <span class="label" style="font-weight:400">· 지점 발주를 본부가 승인·입고 처리</span></div>
       <select id="ordFilter" class="hqsel">
         <option value="">전체 상태</option>
+        <option value="푸시대기">푸시대기(가맹 응답)</option>
         <option value="대기">대기</option>
-        <option value="승인">승인</option>
+        <option value="승인">승인(입고대기)</option>
         <option value="입고완료">입고완료</option>
       </select>
+    </div>
+    <div class="pushbox">
+      <div class="eyebrow" style="margin-bottom:8px">지점에 발주 푸시 🔔 <span class="label" style="font-weight:400">· 본부 주도 — 가맹점은 승인만</span></div>
+      <div class="pushgrid">
+        <select id="pushStore" class="hqsel"></select>
+        <select id="pushSku" class="hqsel"></select>
+        <input id="pushQty" class="hqsel" type="number" value="15" min="1" style="width:80px">
+        <select id="pushDl" class="hqsel">
+          <option value="today18">오늘 18:00 마감</option>
+          <option value="tmw18">내일 18:00 마감</option>
+          <option value="h3">3시간 후 마감</option>
+        </select>
+        <button class="btn small" onclick="pushSend()">푸시 발송</button>
+      </div>
+      <div class="label" style="font-size:12px;margin-top:6px">마감까지 가맹점이 응답 안 하면 본부안대로 자동 확정돼요.</div>
     </div>
     <div id="hqOrders" style="margin-top:12px"></div>
   </div>
@@ -793,6 +812,36 @@ function _ordStatusAll(fromStatus, toStatus){
 }
 function logiApproveAll(){ _ordStatusAll('대기','승인').then(function(n){ toast(n?(n+'건 출고 승인 — 배송 준비'):'대기 발주가 없어요'); logiLoad(); if(window.hqOrdLoad)window.hqOrdLoad(); }); }
 function logiReceiveAll(){ _ordStatusAll('승인','입고완료').then(function(n){ toast(n?(n+'건 입고완료 · 지점 재고 자동 반영'):'배송중 발주가 없어요'); logiLoad(); if(window.hqOrdLoad)window.hqOrdLoad(); }); }
+
+/* ===== 본부 발주 푸시 ===== */
+(function(){
+  var ss=document.getElementById('pushStore'); if(!ss)return;
+  ['성수점','홍대점','판교점'].forEach(function(s){var o=document.createElement('option');o.textContent=s;ss.appendChild(o);});
+  fetch('/api/catalog').then(function(r){return r.json();}).then(function(j){
+    var cat=(j.catalog||[]).filter(function(c){return c.cat==='렌즈'||c.cat==='콘택트'||c.cat==='테'||c.cat==='선글라스'||c.cat==='액세서리';});
+    var sel=document.getElementById('pushSku');
+    sel.innerHTML=cat.map(function(c){return '<option value="'+c.sku+'" data-name="'+c.name+'" data-cat="'+c.cat+'">'+c.name+'</option>';}).join('');
+  });
+})();
+function _dlISO(kind){
+  var d=new Date();
+  if(kind==='today18'){ d.setHours(18,0,0,0); }
+  else if(kind==='tmw18'){ d.setDate(d.getDate()+1); d.setHours(18,0,0,0); }
+  else { d=new Date(Date.now()+3*3600*1000); }
+  return d.toISOString();
+}
+function pushSend(){
+  var store=document.getElementById('pushStore').value;
+  var opt=document.getElementById('pushSku').selectedOptions[0]; if(!opt){toast('품목을 선택하세요');return;}
+  var qty=+document.getElementById('pushQty').value||1;
+  var dl=_dlISO(document.getElementById('pushDl').value);
+  fetch('/api/orders/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:store,sku:opt.value,name:opt.dataset.name,cat:opt.dataset.cat,qty:qty,deadline:dl})})
+    .then(function(r){return r.json();}).then(function(j){
+      if(!j.ok){toast('푸시 실패');return;}
+      toast(store+'에 '+opt.dataset.name+' '+qty+'개 발주 푸시 — 가맹 응답 대기');
+      if(window.hqOrdLoad)window.hqOrdLoad();
+    });
+}
 </script>
 </body>
 </html>
