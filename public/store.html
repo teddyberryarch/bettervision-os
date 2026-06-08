@@ -40,6 +40,15 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
 .mklog-row:last-child{border-bottom:0}
 .mklog-row .top{display:flex;justify-content:space-between}
 .mklog-row .meta{font-size:13px;color:var(--muted);margin-top:2px}
+.cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+.cal-head span{text-align:center;font-size:13px;color:var(--muted)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:6px}
+.cal-cell{aspect-ratio:1/1;border:1px solid var(--line);border-radius:8px;padding:5px 6px;display:flex;flex-direction:column;justify-content:space-between;min-height:54px}
+.cal-cell.empty{border:0}
+.cal-cell .d{font-size:12px;color:var(--muted)}
+.cal-cell .v{font-size:12px;font-weight:600;color:var(--ink);text-align:right}
+.cal-cell.today{outline:2px solid var(--ink)}
+@media(max-width:640px){.cal-cell{min-height:44px}.cal-cell .v{font-size:11px}}
 </style>
 </head>
 <body>
@@ -106,7 +115,7 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
     <div class="store-grid">
       <div class="card pad">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div class="label">고객 목록 · 성수점</div><div class="label">오늘 재방문 예약 <b style="color:var(--ink)">4</b></div>
+          <div class="label">고객 목록</div><select id="crmStore" class="finput2"></select>
         </div>
         <table class="tbl" id="custTable"><thead><tr><th>고객</th><th>사이즈</th><th>최근 방문</th><th>재구매 주기</th><th>상태</th></tr></thead><tbody></tbody></table>
         <div class="sync">● 모든 변경이 본사 클라우드·고객 앱과 실시간 동기화</div>
@@ -132,7 +141,9 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
         <div class="locktag" style="display:inline-block;margin-bottom:8px">가격 = 본부 지정가 · 매장 수정 잠김 🔒</div>
         <div class="label" style="margin-bottom:8px">고객 <b style="color:var(--ink)">양지근</b> · F2×T2 · 자동 연결됨</div>
         <div class="label" style="margin:4px 0 5px">지점 선택 (본부가 전 지점 관리)</div>
-        <select id="posStore" class="finput2" style="width:100%;margin-bottom:10px"></select>
+        <select id="posStore" class="finput2" style="width:100%;margin-bottom:8px"></select>
+        <div class="label" style="margin:4px 0 5px">고객 (선택 — 구매이력 연결)</div>
+        <select id="posCustomer" class="finput2" style="width:100%;margin-bottom:10px"></select>
         <div class="label" style="margin:4px 0 6px">상품 담기</div>
         <div id="posCatalog"></div>
         <div class="divider"></div>
@@ -146,6 +157,11 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
           <button class="btn small ghost" onclick="posClear()">비우기</button>
         </div>
         <div class="optbox" style="margin-top:14px"><b>POS 전략.</b> 결제 처리는 PG(토스페이먼츠 등)·스마트단말 임대로, <b>POS 소프트웨어는 BETTERVISION 자체</b>. 거래·고객 데이터가 본사에 귀속(원칙①). 시력보정 안경은 <b>의료비 세액공제(연 50만원)용 영수증 자동 발급</b>.</div>
+        <div class="divider"></div>
+        <div class="eyebrow" style="margin-bottom:6px">환불 / 교환</div>
+        <div class="label" style="font-size:13px;margin-bottom:6px">최근 결제를 불러와 환불하면 매출 차감·재고 복구. 교환은 환불 후 재결제로 처리해요.</div>
+        <button class="btn small ghost" style="width:100%" onclick="rfLoad()">최근 결제 불러오기</button>
+        <div id="rfList" style="margin-top:8px"></div>
       </div>
 
       <!-- 재고/발주 -->
@@ -157,7 +173,9 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
           <div class="divider"></div>
           <div class="eyebrow" style="margin-bottom:6px">카테고리별 판매 (오늘)</div>
           <div id="catSales"></div>
-          <button class="btn" style="margin-top:14px;width:100%" onclick="restock()">재고 부족분 본사 발주</button>
+          <button class="btn" style="margin-top:14px;width:100%" onclick="placeOrders()">재고 부족분 본사 발주</button>
+          <div class="eyebrow" style="margin:14px 0 6px">내 발주 현황</div>
+          <div id="ordBox"></div>
         </div>
         <div class="card pad">
           <div class="eyebrow">안경사법 운영 구조</div>
@@ -175,6 +193,21 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
       <div class="card pad fk"><div class="label">영업이익</div><div class="big">₩980<small>만</small></div><div class="sub">이익률 20%</div></div>
       <div class="card pad fk"><div class="label">예상 현금잔액(월말)</div><div class="big">₩1,640<small>만</small></div><div class="sub">입금·지출 반영</div></div>
       <div class="card pad fk"><div class="label">손익분기 달성률</div><div class="big">151<small>%</small></div><div class="sub">본전 넘김 ✓</div></div>
+    </div>
+
+    <div class="card pad" style="margin-top:18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div class="eyebrow">월별 일매출 달력</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="finStore" class="finput2"></select>
+          <button class="qbtn" onclick="finMonth(-1)">‹</button>
+          <span id="finYM" style="font-size:15px;min-width:96px;text-align:center"></span>
+          <button class="qbtn" onclick="finMonth(1)">›</button>
+        </div>
+      </div>
+      <div class="cal-head" id="calHead"></div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="label" style="margin-top:10px;font-size:13px">색이 진할수록 매출이 큰 날 · <span id="calSum" class="muted"></span></div>
     </div>
 
     <div class="hq-grid" style="margin-top:18px">
@@ -358,32 +391,46 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
 document.getElementById('subtabs').addEventListener('click',e=>{const t=e.target.closest('.subtab');if(!t)return;
   document.querySelectorAll('.subtab').forEach(x=>x.classList.remove('active'));t.classList.add('active');
   document.querySelectorAll('.stab').forEach(s=>s.classList.remove('active'));document.getElementById('t-'+t.dataset.t).classList.add('active');});
-const customers=[
-  {n:'양지근',sz:'F2×T2',last:'2024.12',cyc:'12개월',st:'due',stt:'재방문 권장',pd:'63.5mm',face:'142mm / 낮은코',rx:'OD -3.25 / OS -3.50',phone:'010-2480-1001',ltv:'76만',hist:[['로마 클래식','2024.12 · 30만'],['알도 R 렌즈','2024.12'],['멤버십','월 9,900']],next:'2025.12 (렌즈교체)'},
-  {n:'김서연',sz:'F1×T1',last:'2025.03',cyc:'8개월',st:'ok',stt:'안정',pd:'60.0mm',face:'131mm / 표준',rx:'OD -1.75 / OS -2.00',phone:'010-3391-2210',ltv:'52만',hist:[['Lindberg 협업','2025.03'],['누진 렌즈','2025.03']],next:'2025.11'},
-  {n:'박도현',sz:'F3×T2',last:'2025.05',cyc:'신규',st:'new',stt:'신규·앱측정',pd:'66.0mm',face:'149mm / 높은코',rx:'OD -4.50 / OS -4.25',phone:'010-7782-5503',ltv:'24만',hist:[['NORM 오디오 템플','2025.05 · 24만']],next:'2025.09'},
-  {n:'이수민',sz:'F2×T1',last:'2025.01',cyc:'10개월',st:'due',stt:'재방문 권장',pd:'62.0mm',face:'138mm / 표준',rx:'OD -2.25 / OS -2.25',phone:'010-5519-8834',ltv:'41만',hist:[['로마 클래식','2025.01']],next:'2025.11'},
-  {n:'정하준',sz:'F2×T2',last:'2025.04',cyc:'9개월',st:'ok',stt:'안정',pd:'64.0mm',face:'143mm / 낮은코',rx:'OD -3.00 / OS -2.75',phone:'010-6640-1199',ltv:'63만',hist:[['선글라스','2025.04'],['알도 R 렌즈','2025.04']],next:'2026.01'}];
-const dotName={due:'재방문',ok:'안정',new:'신규'};
-const tb=document.querySelector('#custTable tbody');
-customers.forEach((c,i)=>{const tr=document.createElement('tr');tr.dataset.i=i;if(i===0)tr.classList.add('sel');
-  tr.innerHTML=`<td>${c.n}</td><td>${c.sz}</td><td class="muted">${c.last}</td><td class="muted">${c.cyc}</td><td><span class="dot ${c.st}"></span>${c.stt}</td>`;
-  tr.onclick=()=>{document.querySelectorAll('#custTable tr').forEach(r=>r.classList.remove('sel'));tr.classList.add('sel');detail(i);};tb.appendChild(tr);});
-function detail(i){const c=customers[i];document.getElementById('detail').innerHTML=`
-  <div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="nm">${c.n}</div><div class="label">사이즈 ${c.sz} · ${c.stt}</div></div><span class="pill ${c.st==='due'?'warn':c.st==='new'?'':'good'}">${dotName[c.st]}</span></div>
-  <div class="locktag" style="display:inline-block;margin-top:8px">🔒 가맹점·본사 전용 — 상세 처방·연락처 포함</div>
-  <div class="divider"></div>
-  <div class="kv"><span class="label">연락처</span><span>${c.phone}</span></div>
-  <div class="kv"><span class="label">동공 간 거리(PD)</span><span>${c.pd}</span></div>
-  <div class="kv"><span class="label">얼굴 측정값</span><span>${c.face}</span></div>
-  <div class="kv"><span class="label">최근 처방(시력)</span><span>${c.rx}</span></div>
-  <div class="kv"><span class="label">재구매 주기</span><span>${c.cyc}</span></div>
-  <div class="kv"><span class="label">고객 LTV (5년)</span><span>${c.ltv}</span></div>
-  <div class="kv"><span class="label">다음 재방문</span><span>${c.next}</span></div>
-  <div class="label" style="margin:14px 0 6px">구매 이력 (매장·본사 전용)</div>
-  ${c.hist.map(h=>`<div class="hist"><span>${h[0]}</span><span class="muted">${h[1]}</span></div>`).join('')}
-  <div style="display:flex;gap:10px;margin-top:16px"><button class="btn small" onclick="toast('${c.n}님 재방문 카톡 발송 (프로토타입)')">카톡 발송</button><button class="btn small ghost" onclick="toast('기록 추가 (프로토타입)')">기록 추가</button></div>`;}
-detail(0);
+var CRM_LIST=[];
+function dotName(st){return st==='재방문'?'재방문':st==='신규'?'신규':'안정';}
+(function(){
+  var sel=document.getElementById('crmStore'); if(!sel)return;
+  ['성수점','홍대점','판교점'].forEach(function(s){var o=document.createElement('option');o.textContent=s;sel.appendChild(o);});
+  sel.addEventListener('change',crmLoad); crmLoad();
+})();
+function crmLoad(){
+  var store=document.getElementById('crmStore').value;
+  fetch('/api/customers?store='+encodeURIComponent(store)).then(function(r){return r.json();}).then(function(j){
+    CRM_LIST=j.customers||[];
+    var tb=document.querySelector('#custTable tbody');
+    tb.innerHTML=CRM_LIST.map(function(c,i){
+      var dot=c.seg==='재방문'?'due':c.seg==='신규'?'new':'ok';
+      return '<tr data-i="'+i+'"'+(i===0?' class="sel"':'')+' onclick="crmSel('+i+')"><td>'+c.name+'</td><td>'+(c.size||'-')+'</td><td class="muted">'+(c.store||'')+'</td><td class="muted">'+(c.seg||'')+'</td><td><span class="dot '+dot+'"></span>'+(c.seg||'안정')+'</td></tr>';
+    }).join('') || '<tr><td colspan="5" class="muted">고객 없음</td></tr>';
+    if(CRM_LIST.length) crmSel(0); else document.getElementById('detail').innerHTML='<div class="muted">고객을 선택하세요</div>';
+  });
+}
+function crmSel(i){
+  document.querySelectorAll('#custTable tr').forEach(function(r){r.classList.remove('sel');});
+  var tr=document.querySelector('#custTable tr[data-i="'+i+'"]'); if(tr)tr.classList.add('sel');
+  var c=CRM_LIST[i]; if(!c)return;
+  fetch('/api/customer?id='+c.id).then(function(r){return r.json();}).then(function(j){
+    var cust=j.customer||c, hist=j.history||[];
+    var histHtml = hist.length? hist.map(function(h){return '<div class="hist"><span>'+h.name+' <span class="muted">×'+h.qty+'</span></span><span class="muted">'+h.date+' · '+('₩'+h.amount.toLocaleString('ko-KR'))+'</span></div>';}).join('')
+      : '<div class="muted" style="font-size:14px">구매 이력 없음 (POS에서 이 고객으로 결제하면 쌓여요)</div>';
+    document.getElementById('detail').innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="nm">'+cust.name+'</div><div class="label">사이즈 '+(cust.size||'-')+' · '+(cust.seg||'')+'</div></div><span class="pill '+(cust.seg==='재방문'?'warn':cust.seg==='신규'?'':'good')+'">'+(cust.seg||'안정')+'</span></div>'+
+      '<div class="locktag" style="display:inline-block;margin-top:8px">🔒 가맹점·본사 전용 — 상세 처방·연락처 포함</div>'+
+      '<div class="divider"></div>'+
+      '<div class="kv"><span class="label">연락처</span><span>'+(cust.phone||'-')+'</span></div>'+
+      '<div class="kv"><span class="label">소속 지점</span><span>'+(cust.store||'-')+'</span></div>'+
+      '<div class="kv"><span class="label">동공 간 거리(PD)</span><span>'+(cust.pd||'-')+'</span></div>'+
+      '<div class="kv"><span class="label">얼굴 측정값</span><span>'+(cust.face||'-')+'</span></div>'+
+      '<div class="kv"><span class="label">최근 처방(시력)</span><span>'+(cust.rx||'-')+'</span></div>'+
+      '<div class="label" style="margin:14px 0 6px">구매 이력 (매장·본사 전용)</div>'+histHtml+
+      '<div style="display:flex;gap:10px;margin-top:16px"><button class="btn small" onclick="toast(\''+cust.name+'님 재방문 카톡 발송 (프로토타입)\')">카톡 발송</button></div>';
+  });
+}
 function toggleRun(el){el.classList.toggle('done');
   const items=document.querySelectorAll('#runlist .runitem');
   const done=document.querySelectorAll('#runlist .runitem.done').length;
@@ -468,11 +515,18 @@ function renderPos(){
   document.getElementById('posTotal').textContent=won(total);
   document.getElementById('posMedical').textContent = med>0? ('의료비 세액공제 대상 '+won(med)+' · 영수증 자동 발급') : '';
 }
+function loadPosCustomers(){
+  var sel=document.getElementById('posCustomer'); if(!sel)return;
+  fetch('/api/customers?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
+    var cs=j.customers||[];
+    sel.innerHTML='<option value="">비회원</option>'+cs.map(function(c){return '<option value="'+c.id+'">'+c.name+' ('+(c.size||'-')+')</option>';}).join('');
+  });
+}
 function posPay(method){
   var skus=Object.keys(posCart); if(!skus.length){toast('담은 상품이 없어요');return;}
   var lines=skus.map(function(sku){var it=skuFind(sku);return {sku:sku,name:it.name,cat:it.cat,qty:posCart[sku],amount:it.price*posCart[sku],medical:it.medical};});
   var total=lines.reduce(function(a,l){return a+l.amount;},0);
-  fetch('/api/sales',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:curStore(),date:dnow(),method:method,lines:lines})})
+  fetch('/api/sales',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:curStore(),date:dnow(),method:method,customerId:(document.getElementById('posCustomer').value||null),lines:lines})})
     .then(function(r){return r.json();}).then(function(res){
       if(!res.ok){toast(res.error||'결제 실패');return;}
       posCart={}; renderPos();
@@ -486,25 +540,31 @@ function renderInv(){
     return '<div class="invcat"><div class="ph">'+cat+'</div>'+rows+'</div>';
   }).join('');
 }
-function restock(){
-  fetch('/api/inventory/restock',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:curStore(),threshold:LOWAT,add:15})})
-    .then(function(r){return r.json();}).then(function(j){ loadInventory(); toast(j.restocked? ('본사 발주: '+j.restocked+'종 보충(+15) 완료'):'보충할 부족 재고가 없어요'); });
+function placeOrders(){
+  fetch('/api/lowstock?store='+encodeURIComponent(curStore())+'&threshold='+LOWAT).then(function(r){return r.json();}).then(function(j){
+    var items=j.items||[]; if(!items.length){toast('발주할 부족 재고가 없어요');return;}
+    Promise.all(items.map(function(it){return fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:curStore(),sku:it.sku,name:it.name,cat:it.cat,qty:15})}).then(function(r){return r.json();});}))
+    .then(function(){ toast(items.length+'종 발주 요청(대기) — 본부 승인 대기'); ordRender(); });
+  }).catch(function(){toast('발주 요청 실패');});
+}
+function ordRender(){
+  fetch('/api/orders?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
+    var os=j.orders||[];
+    document.getElementById('ordBox').innerHTML = os.length? os.map(function(o){
+      var cls=o.status==='입고완료'?'good':o.status==='승인'?'warn':'';
+      return '<div class="pl-row"><span>'+o.name+' <span class="muted">×'+o.qty+'</span></span><span class="pill '+cls+'">'+o.status+'</span></div>';
+    }).join('') : '<div class="muted" style="font-size:14px">발주 없음</div>';
+  });
 }
 (function(){
   var sel=document.getElementById('posStore');
   ['성수점','홍대점','판교점'].forEach(function(s){var o=document.createElement('option');o.textContent=s;sel.appendChild(o);});
-  sel.addEventListener('change',function(){ posCart={}; renderPos(); loadInventory(); loadSummary(); });
-  loadInventory(); loadSummary();
+  sel.addEventListener('change',function(){ posCart={}; renderPos(); loadInventory(); loadSummary(); ordRender(); loadPosCustomers(); });
+  loadInventory(); loadSummary(); ordRender(); loadPosCustomers();
 })();
 
 /* ===== 매장 마케팅 (데모: 더미 세그먼트·이력) ===== */
-var MK_SEG=[
-  {id:'regular', name:'단골 (3회+ 구매)', n:42},
-  {id:'revisit', name:'재방문 권장 (교체시기)', n:18},
-  {id:'newbie',  name:'신규 (최근 30일)', n:23},
-  {id:'sunglass',name:'선글라스 관심군', n:15},
-  {id:'all',     name:'전체 고객', n:128}
-];
+var MK_SEG=[];
 var MK_LOG=[
   {date:'2026-06-05', seg:'재방문 권장', ch:'카카오', sent:16, open:11, visit:4, coupon:'렌즈 교체 10% 할인'},
   {date:'2026-05-28', seg:'단골', ch:'카카오', sent:40, open:29, visit:9, coupon:'멤버십 첫 달 무료'},
@@ -514,7 +574,12 @@ function mkSegName(id){for(var i=0;i<MK_SEG.length;i++)if(MK_SEG[i].id===id)retu
 function mkChVal(){var a=document.querySelector('#mkCh .chip.active');return a?a.dataset.v:'카카오';}
 (function(){
   var sel=document.getElementById('mkTarget'); if(!sel)return;
-  sel.innerHTML=MK_SEG.map(function(s){return '<option value="'+s.id+'">'+s.name+' · '+s.n+'명</option>';}).join('');
+  fetch('/api/segcounts').then(function(r){return r.json();}).then(function(j){
+    var c=(j.counts)||{};
+    MK_SEG=[{id:'단골',name:'단골',n:c['단골']||0},{id:'재방문',name:'재방문 권장',n:c['재방문']||0},{id:'신규',name:'신규 고객',n:c['신규']||0},{id:'전체',name:'전체 고객',n:c['전체']||0}];
+    sel.innerHTML=MK_SEG.map(function(s){return '<option value="'+s.id+'">'+s.name+' · '+s.n+'명</option>';}).join('');
+    mkCountUpd();
+  });
   sel.addEventListener('change',mkCountUpd);
   document.getElementById('mkCh').addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;
     this.querySelectorAll('.chip').forEach(function(x){x.classList.remove('active');});b.classList.add('active');mkPrevUpd();});
@@ -556,6 +621,71 @@ function mkRenderLog(){
     return '<div class="mklog-row"><div class="top"><span>'+l.seg+' <span class="muted">· '+l.ch+'</span></span><span class="muted">'+l.date+'</span></div>'+
       '<div class="meta">발송 '+l.sent+' · 열람 '+l.open+' · 방문 '+l.visit+(l.coupon?(' · 쿠폰: '+l.coupon):'')+'</div></div>';
   }).join('');
+}
+
+/* ===== 재무: 월별 일매출 달력 (서버 API) ===== */
+var finYM, finDaily={};
+function finWon(n){ if(n>=10000) return Math.round(n/10000)+'만'; return n?(''+Math.round(n/1000)+'천'):''; }
+function finStoreVal(){return document.getElementById('finStore').value;}
+(function(){
+  var sel=document.getElementById('finStore'); if(!sel)return;
+  ['성수점','홍대점','판교점'].forEach(function(s){var o=document.createElement('option');o.textContent=s;sel.appendChild(o);});
+  sel.addEventListener('change',finLoad);
+  var d=new Date(); finYM={y:d.getFullYear(), m:d.getMonth()}; // m: 0-11
+  finRenderHead(); finLoad();
+})();
+function finRenderHead(){
+  document.getElementById('calHead').innerHTML=['일','월','화','수','목','금','토'].map(function(w){return '<span>'+w+'</span>';}).join('');
+}
+function finMonth(d){ finYM.m+=d; if(finYM.m<0){finYM.m=11;finYM.y--;} if(finYM.m>11){finYM.m=0;finYM.y++;} finLoad(); }
+function pad(n){return (n<10?'0':'')+n;}
+function finLoad(){
+  var y=finYM.y, m=finYM.m;
+  document.getElementById('finYM').textContent=y+'년 '+(m+1)+'월';
+  var from=y+'-'+pad(m+1)+'-01', last=new Date(y,m+1,0).getDate(), to=y+'-'+pad(m+1)+'-'+pad(last);
+  fetch('/api/sales/daily?store='+encodeURIComponent(finStoreVal())+'&from='+from+'&to='+to)
+    .then(function(r){return r.json();}).then(function(j){
+      finDaily={}; (j.days||[]).forEach(function(row){ finDaily[row.date]=row.amt; });
+      finRenderGrid();
+    }).catch(function(){ finDaily={}; finRenderGrid(); });
+}
+function finRenderGrid(){
+  var y=finYM.y, m=finYM.m, first=new Date(y,m,1).getDay(), last=new Date(y,m+1,0).getDate();
+  var todayISO=(function(){var d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);})();
+  var max=0; for(var k in finDaily){ if(finDaily[k]>max)max=finDaily[k]; }
+  var total=0; for(var k2 in finDaily){ total+=finDaily[k2]; }
+  var html=''; for(var i=0;i<first;i++){ html+='<div class="cal-cell empty"></div>'; }
+  for(var dnum=1; dnum<=last; dnum++){
+    var iso=y+'-'+pad(m+1)+'-'+pad(dnum), amt=finDaily[iso]||0;
+    var op=max? (0.08+0.80*amt/max).toFixed(2) : 0;
+    var bg = amt? 'background:rgba(17,17,17,'+op+');' : '';
+    var col = (amt && op>0.5)? 'color:#fff':'';
+    html+='<div class="cal-cell'+(iso===todayISO?' today':'')+'" style="'+bg+'"><div class="d" style="'+col+'">'+dnum+'</div><div class="v" style="'+col+'">'+(amt?('₩'+finWon(amt)):'')+'</div></div>';
+  }
+  document.getElementById('calGrid').innerHTML=html;
+  document.getElementById('calSum').textContent='이번 달 합계 ₩'+total.toLocaleString('ko-KR');
+}
+
+/* ===== 환불 / 교환 ===== */
+var RF=[];
+function rfLoad(){
+  fetch('/api/sales/recent?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
+    RF=j.sales||[];
+    document.getElementById('rfList').innerHTML = RF.length? RF.map(function(s,i){
+      return '<div class="posline"><span>'+s.name+' ×'+s.qty+' <span class="muted">'+won(s.amount)+' · '+s.date+'</span></span>'+
+        '<button class="btn small ghost" onclick="rfDo('+i+')">환불</button></div>';
+    }).join('') : '<div class="muted" style="font-size:14px;padding:6px 0">최근 결제가 없어요</div>';
+  }).catch(function(){toast('불러오기 실패');});
+}
+function rfDo(i){
+  var s=RF[i]; if(!s)return;
+  if(!confirm(s.name+' ×'+s.qty+' 환불할까요?')) return;
+  fetch('/api/refund',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:curStore(),date:dnow(),method:s.method||'카드',lines:[{sku:s.sku,name:s.name,cat:s.cat,qty:s.qty,amount:s.amount,medical:false}]})})
+    .then(function(r){return r.json();}).then(function(res){
+      if(!res.ok){toast(res.error||'환불 실패');return;}
+      toast(s.name+' 환불 완료 · 재고 복구·매출 차감');
+      rfLoad(); loadInventory(); loadSummary(); if(typeof finLoad==='function'){try{finLoad();}catch(e){}}
+    }).catch(function(){toast('네트워크 오류');});
 }
 </script>
 </body>

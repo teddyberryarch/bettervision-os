@@ -89,9 +89,9 @@
               <h4>내 안경 정보</h4>
               <div class="label" style="margin:6px 0 10px">측정한 사이즈와 시력만 보여드려요. 상세 처방·구매 이력은 매장에서 확인하실 수 있어요.</div>
               <div class="kv"><span class="label">내 사이즈 (프론트 × 템플)</span><span id="mySize">F2 × T2</span></div>
-              <div class="kv"><span class="label">안면 폭</span><span>142 mm</span></div>
-              <div class="kv"><span class="label">동공 간 거리(PD)</span><span>63.5 mm</span></div>
-              <div class="kv"><span class="label">시력 (도수)</span><span>OD -3.25 / OS -3.50</span></div>
+              <div class="kv"><span class="label">안면 폭</span><span id="myFace">142 mm</span></div>
+              <div class="kv"><span class="label">동공 간 거리(PD)</span><span id="myPD">63.5 mm</span></div>
+              <div class="kv"><span class="label">시력 (도수)</span><span id="myRx">OD -3.25 / OS -3.50</span></div>
               <div class="kv" style="border-bottom:0"><span class="label">난시 / 축</span><span>OD -0.75 ×180 / OS -0.50 ×175</span></div>
               <div class="note" style="font-size:14px;margin-top:10px">처방전·구매 내역·연락처 등 상세 정보는 개인정보 보호를 위해 매장(가맹점)과 본사에서만 관리해요.</div>
             </div>
@@ -491,6 +491,15 @@ function reorder(){
   toast('재주문 '+cnt+'개 · '+won(total)+' 접수 (프로토타입)');
 }
 renderCart();
+
+/* 내 정보(로그인 고객=데모 id 1) — 사이즈·시력만, 구매이력/연락처 제외 */
+(function(){
+  fetch('/api/customer?id=1').then(function(r){return r.json();}).then(function(j){
+    if(!j.ok||!j.customer)return; var c=j.customer;
+    var set=function(id,v){var el=document.getElementById(id); if(el&&v)el.textContent=v;};
+    set('mySize', c.size); set('myFace', c.face? c.face.split(' / ')[0] : null); set('myPD', c.pd); set('myRx', c.rx);
+  }).catch(function(){});
+})();
 </script>
 </body>
 </html>

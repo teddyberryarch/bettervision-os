@@ -28,6 +28,11 @@
 .allstore-row .tr{flex:1;height:10px;background:var(--surface);border-radius:9999px;overflow:hidden}
 .allstore-row .tf{height:100%;background:var(--ink);border-radius:9999px}
 .allstore-row .vv{width:110px;text-align:right;color:var(--muted)}
+.ord-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.ord-row:last-child{border-bottom:0}
+.ord-row .oi{color:var(--ink)}
+.ord-row .om{font-size:13px;color:var(--muted)}
+.ord-row .obtns{display:flex;gap:6px}
 </style>
 </head>
 <body>
@@ -72,6 +77,20 @@
     <div class="divider"></div>
     <div class="eyebrow" style="margin-bottom:8px">전 지점 오늘 매출 비교</div>
     <div id="hqAllStores"></div>
+  </div>
+
+  <!-- 발주 관리 (본부 승인/입고) -->
+  <div class="card pad" style="margin-bottom:6px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div class="eyebrow">발주 관리 <span class="label" style="font-weight:400">· 지점 발주를 본부가 승인·입고 처리</span></div>
+      <select id="ordFilter" class="hqsel">
+        <option value="">전체 상태</option>
+        <option value="대기">대기</option>
+        <option value="승인">승인</option>
+        <option value="입고완료">입고완료</option>
+      </select>
+    </div>
+    <div id="hqOrders" style="margin-top:12px"></div>
   </div>
 
   <div class="kpis">
@@ -430,6 +449,35 @@ storeDetail(0);
   sel.addEventListener('change',loadStore);
   loadStore(); loadAll();
 })();
+
+/* ===== 본부: 발주 관리 ===== */
+(function(){
+  var f=document.getElementById('ordFilter'); if(!f)return;
+  f.addEventListener('change',hqOrdLoad);
+  window.hqOrdLoad=hqOrdLoad; hqOrdLoad();
+  function hqOrdLoad(){
+    var st=document.getElementById('ordFilter').value;
+    fetch('/api/orders'+(st?('?status='+encodeURIComponent(st)):'')).then(function(r){return r.json();}).then(function(j){
+      var os=j.orders||[];
+      document.getElementById('hqOrders').innerHTML = os.length? os.map(function(o){
+        var cls=o.status==='입고완료'?'good':o.status==='승인'?'warn':'';
+        var btns='';
+        if(o.status==='대기') btns='<button class="btn small" onclick="hqOrdAct('+o.id+',\'승인\')">승인</button>';
+        if(o.status==='승인') btns='<button class="btn small" onclick="hqOrdAct('+o.id+',\'입고완료\')">입고완료</button>';
+        return '<div class="ord-row"><div><div class="oi">'+o.store+' · '+o.name+' <span class="om">×'+o.qty+'</span></div>'+
+          '<div class="om">'+o.cat+'</div></div><div class="obtns"><span class="pill '+cls+'">'+o.status+'</span>'+btns+'</div></div>';
+      }).join('') : '<div class="muted" style="font-size:14px">발주 없음</div>';
+    });
+  }
+})();
+function hqOrdAct(id,status){
+  fetch('/api/orders/status',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:id,status:status})})
+    .then(function(r){return r.json();}).then(function(res){
+      if(!res.ok){toast(res.error||'처리 실패');return;}
+      toast('발주 '+status+(status==='입고완료'?' · 지점 재고 반영':''));
+      if(window.hqOrdLoad)window.hqOrdLoad();
+    });
+}
 </script>
 </body>
 </html>
