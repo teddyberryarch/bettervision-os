@@ -1,0 +1,12 @@
+{
+  "name": "bettervision-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BETTERVISION OS 멀티페이지 웹앱 (정적)",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
