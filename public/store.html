@@ -29,6 +29,17 @@
 .poscat-h{font-size:13px;color:var(--muted);font-weight:600;margin:6px 0 4px}
 .invcat{margin-bottom:8px}
 .invcat .ph{font-size:13px;color:var(--muted);font-weight:600;margin:4px 0 2px}
+.mkt-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.mkt-grid{grid-template-columns:1fr}}
+textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
+.mkt-kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:8px}
+.mkt-kpis .mk{border:1px solid var(--line);border-radius:10px;padding:12px}
+.mkt-kpis .mk .v{font-size:22px;font-weight:600;color:var(--ink)}
+.mkt-kpis .mk .l{font-size:13px;color:var(--muted)}
+.mklog-row{padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.mklog-row:last-child{border-bottom:0}
+.mklog-row .top{display:flex;justify-content:space-between}
+.mklog-row .meta{font-size:13px;color:var(--muted);margin-top:2px}
 </style>
 </head>
 <body>
@@ -81,6 +92,7 @@
     <div class="subtab" data-t="fin">재무</div>
     <div class="subtab" data-t="hr">인력 · 채용</div>
     <div class="subtab" data-t="book">예약</div>
+    <div class="subtab" data-t="mkt">마케팅</div>
   </div>
 
   <!-- CRM -->
@@ -284,6 +296,54 @@
       </div>
     </div>
   </div>
+  <!-- 마케팅 (가맹점 자체) -->
+  <div class="stab" id="t-mkt">
+    <div class="lead"><div><div class="eyebrow">매장 마케팅</div><h2 style="font-size:30px">우리 매장 단골 마케팅</h2>
+      <div class="sub">본사 캠페인과 별개로, 매장이 직접 단골·재방문 고객에게 카톡·문자를 보냅니다. (데모: 더미 고객·발송 이력)</div></div></div>
+
+    <div class="mkt-grid">
+      <!-- 작성 -->
+      <div class="card pad">
+        <div class="eyebrow">메시지 보내기</div>
+        <div class="label" style="margin:8px 0 4px">대상</div>
+        <select id="mkTarget" class="finput2" style="width:100%"></select>
+        <div class="label" id="mkCount" style="margin:6px 0 0;font-size:13px"></div>
+
+        <div class="label" style="margin:11px 0 4px">채널</div>
+        <div class="chips" id="mkCh">
+          <button class="chip active" data-v="카카오">카카오 알림톡</button>
+          <button class="chip" data-v="문자">문자(SMS)</button>
+        </div>
+
+        <div class="label" style="margin:11px 0 4px">쿠폰/프로모션 (선택)</div>
+        <select id="mkCoupon" class="finput2" style="width:100%">
+          <option value="">없음</option>
+          <option value="렌즈 교체 10% 할인">렌즈 교체 10% 할인</option>
+          <option value="선글라스 2만원 할인">선글라스 2만원 할인</option>
+          <option value="멤버십 첫 달 무료">멤버십 첫 달 무료</option>
+          <option value="콘택트 1+1">콘택트 1+1</option>
+        </select>
+
+        <div class="label" style="margin:11px 0 4px">내용</div>
+        <textarea id="mkBody" class="finput2" style="width:100%;min-height:96px;resize:vertical" placeholder="안녕하세요 OO님, 렌즈 교체 시기가 다가왔어요…"></textarea>
+        <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+          <button class="btn small ghost" onclick="mkTemplate('recall')">템플릿: 재방문 권장</button>
+          <button class="btn small ghost" onclick="mkTemplate('promo')">템플릿: 프로모션</button>
+        </div>
+        <button class="btn" style="width:100%;margin-top:12px" onclick="mkSend()">발송</button>
+        <div class="label" style="margin-top:8px;font-size:13px">미리보기: <span id="mkPrev" class="muted"></span></div>
+      </div>
+
+      <!-- 이력·성과 -->
+      <div class="card pad">
+        <div class="eyebrow">발송 성과 (누적)</div>
+        <div class="mkt-kpis" id="mkKpis"></div>
+        <div class="divider"></div>
+        <div class="eyebrow" style="margin-bottom:6px">발송 이력</div>
+        <div id="mkLog"></div>
+      </div>
+    </div>
+  </div>
 </section>
 </div>
 
@@ -434,6 +494,67 @@ function restock(){
   sel.addEventListener('change',function(){ posCart={}; renderPos(); loadInventory(); loadSummary(); });
   loadInventory(); loadSummary();
 })();
+
+/* ===== 매장 마케팅 (데모: 더미 세그먼트·이력) ===== */
+var MK_SEG=[
+  {id:'regular', name:'단골 (3회+ 구매)', n:42},
+  {id:'revisit', name:'재방문 권장 (교체시기)', n:18},
+  {id:'newbie',  name:'신규 (최근 30일)', n:23},
+  {id:'sunglass',name:'선글라스 관심군', n:15},
+  {id:'all',     name:'전체 고객', n:128}
+];
+var MK_LOG=[
+  {date:'2026-06-05', seg:'재방문 권장', ch:'카카오', sent:16, open:11, visit:4, coupon:'렌즈 교체 10% 할인'},
+  {date:'2026-05-28', seg:'단골', ch:'카카오', sent:40, open:29, visit:9, coupon:'멤버십 첫 달 무료'},
+  {date:'2026-05-20', seg:'선글라스 관심군', ch:'문자', sent:14, open:8, visit:3, coupon:'선글라스 2만원 할인'}
+];
+function mkSegName(id){for(var i=0;i<MK_SEG.length;i++)if(MK_SEG[i].id===id)return MK_SEG[i];}
+function mkChVal(){var a=document.querySelector('#mkCh .chip.active');return a?a.dataset.v:'카카오';}
+(function(){
+  var sel=document.getElementById('mkTarget'); if(!sel)return;
+  sel.innerHTML=MK_SEG.map(function(s){return '<option value="'+s.id+'">'+s.name+' · '+s.n+'명</option>';}).join('');
+  sel.addEventListener('change',mkCountUpd);
+  document.getElementById('mkCh').addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;
+    this.querySelectorAll('.chip').forEach(function(x){x.classList.remove('active');});b.classList.add('active');mkPrevUpd();});
+  ['mkBody','mkCoupon'].forEach(function(id){document.getElementById(id).addEventListener('input',mkPrevUpd);});
+  mkCountUpd(); mkRenderKpis(); mkRenderLog();
+})();
+function mkCountUpd(){var s=mkSegName(document.getElementById('mkTarget').value);
+  document.getElementById('mkCount').textContent='대상 '+(s?s.n:0)+'명에게 발송됩니다.'; mkPrevUpd();}
+function mkPrevUpd(){var body=document.getElementById('mkBody').value.trim(), cp=document.getElementById('mkCoupon').value;
+  document.getElementById('mkPrev').textContent=(body||'(내용 없음)')+(cp?(' [쿠폰: '+cp+']'):'')+' · '+mkChVal();}
+function mkTemplate(t){
+  var b=document.getElementById('mkBody');
+  if(t==='recall') b.value='안녕하세요 OO님! 렌즈 교체 시기가 다가왔어요. 이번 주 방문하시면 빠르게 도와드릴게요. 예약은 링크에서 :)';
+  else b.value='OO님만을 위한 이번 달 특별 혜택! 매장 방문 시 사용 가능한 쿠폰을 보내드려요. 자세한 내용은 매장으로 문의주세요.';
+  mkPrevUpd();
+}
+function mkSend(){
+  var seg=mkSegName(document.getElementById('mkTarget').value), body=document.getElementById('mkBody').value.trim();
+  if(!body){toast('내용을 입력해주세요');return;}
+  var ch=mkChVal(), cp=document.getElementById('mkCoupon').value, sent=seg?seg.n:0;
+  var open=Math.round(sent*(0.6+Math.random()*0.15)), visit=Math.round(open*(0.25+Math.random()*0.1));
+  var d=new Date(); var iso=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  MK_LOG.unshift({date:iso, seg:seg?seg.name:'-', ch:ch, sent:sent, open:open, visit:visit, coupon:cp});
+  document.getElementById('mkBody').value=''; mkPrevUpd(); mkRenderKpis(); mkRenderLog();
+  toast(ch+' '+sent+'명 발송 완료 (프로토타입)');
+}
+function mkRenderKpis(){
+  var sent=MK_LOG.reduce(function(a,l){return a+l.sent;},0);
+  var open=MK_LOG.reduce(function(a,l){return a+l.open;},0);
+  var visit=MK_LOG.reduce(function(a,l){return a+l.visit;},0);
+  var orate=sent?Math.round(open/sent*100):0, vrate=sent?Math.round(visit/sent*100):0;
+  document.getElementById('mkKpis').innerHTML=
+    '<div class="mk"><div class="v">'+sent+'</div><div class="l">총 발송</div></div>'+
+    '<div class="mk"><div class="v">'+orate+'%</div><div class="l">열람률</div></div>'+
+    '<div class="mk"><div class="v">'+vrate+'%</div><div class="l">방문 전환</div></div>';
+}
+function mkRenderLog(){
+  document.getElementById('mkLog').innerHTML=MK_LOG.map(function(l){
+    return '<div class="mklog-row"><div class="top"><span>'+l.seg+' <span class="muted">· '+l.ch+'</span></span><span class="muted">'+l.date+'</span></div>'+
+      '<div class="meta">발송 '+l.sent+' · 열람 '+l.open+' · 방문 '+l.visit+(l.coupon?(' · 쿠폰: '+l.coupon):'')+'</div></div>';
+  }).join('');
+}
 </script>
 </body>
 </html>
