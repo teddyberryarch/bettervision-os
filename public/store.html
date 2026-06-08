@@ -359,11 +359,11 @@ document.getElementById('subtabs').addEventListener('click',e=>{const t=e.target
   document.querySelectorAll('.subtab').forEach(x=>x.classList.remove('active'));t.classList.add('active');
   document.querySelectorAll('.stab').forEach(s=>s.classList.remove('active'));document.getElementById('t-'+t.dataset.t).classList.add('active');});
 const customers=[
-  {n:'양지근',sz:'F2×T2',last:'2024.12',cyc:'12개월',st:'due',stt:'재방문 권장',pd:'63.5mm',face:'142mm / 낮은코',rx:'OD -3.25 / OS -3.50',ltv:'76만',hist:[['로마 클래식','2024.12 · 30만'],['알도 R 렌즈','2024.12'],['멤버십','월 9,900']],next:'2025.12 (렌즈교체)'},
-  {n:'김서연',sz:'F1×T1',last:'2025.03',cyc:'8개월',st:'ok',stt:'안정',pd:'60.0mm',face:'131mm / 표준',rx:'OD -1.75 / OS -2.00',ltv:'52만',hist:[['Lindberg 협업','2025.03'],['누진 렌즈','2025.03']],next:'2025.11'},
-  {n:'박도현',sz:'F3×T2',last:'2025.05',cyc:'신규',st:'new',stt:'신규·앱측정',pd:'66.0mm',face:'149mm / 높은코',rx:'OD -4.50 / OS -4.25',ltv:'24만',hist:[['NORM 오디오 템플','2025.05 · 24만']],next:'2025.09'},
-  {n:'이수민',sz:'F2×T1',last:'2025.01',cyc:'10개월',st:'due',stt:'재방문 권장',pd:'62.0mm',face:'138mm / 표준',rx:'OD -2.25 / OS -2.25',ltv:'41만',hist:[['로마 클래식','2025.01']],next:'2025.11'},
-  {n:'정하준',sz:'F2×T2',last:'2025.04',cyc:'9개월',st:'ok',stt:'안정',pd:'64.0mm',face:'143mm / 낮은코',rx:'OD -3.00 / OS -2.75',ltv:'63만',hist:[['선글라스','2025.04'],['알도 R 렌즈','2025.04']],next:'2026.01'}];
+  {n:'양지근',sz:'F2×T2',last:'2024.12',cyc:'12개월',st:'due',stt:'재방문 권장',pd:'63.5mm',face:'142mm / 낮은코',rx:'OD -3.25 / OS -3.50',phone:'010-2480-1001',ltv:'76만',hist:[['로마 클래식','2024.12 · 30만'],['알도 R 렌즈','2024.12'],['멤버십','월 9,900']],next:'2025.12 (렌즈교체)'},
+  {n:'김서연',sz:'F1×T1',last:'2025.03',cyc:'8개월',st:'ok',stt:'안정',pd:'60.0mm',face:'131mm / 표준',rx:'OD -1.75 / OS -2.00',phone:'010-3391-2210',ltv:'52만',hist:[['Lindberg 협업','2025.03'],['누진 렌즈','2025.03']],next:'2025.11'},
+  {n:'박도현',sz:'F3×T2',last:'2025.05',cyc:'신규',st:'new',stt:'신규·앱측정',pd:'66.0mm',face:'149mm / 높은코',rx:'OD -4.50 / OS -4.25',phone:'010-7782-5503',ltv:'24만',hist:[['NORM 오디오 템플','2025.05 · 24만']],next:'2025.09'},
+  {n:'이수민',sz:'F2×T1',last:'2025.01',cyc:'10개월',st:'due',stt:'재방문 권장',pd:'62.0mm',face:'138mm / 표준',rx:'OD -2.25 / OS -2.25',phone:'010-5519-8834',ltv:'41만',hist:[['로마 클래식','2025.01']],next:'2025.11'},
+  {n:'정하준',sz:'F2×T2',last:'2025.04',cyc:'9개월',st:'ok',stt:'안정',pd:'64.0mm',face:'143mm / 낮은코',rx:'OD -3.00 / OS -2.75',phone:'010-6640-1199',ltv:'63만',hist:[['선글라스','2025.04'],['알도 R 렌즈','2025.04']],next:'2026.01'}];
 const dotName={due:'재방문',ok:'안정',new:'신규'};
 const tb=document.querySelector('#custTable tbody');
 customers.forEach((c,i)=>{const tr=document.createElement('tr');tr.dataset.i=i;if(i===0)tr.classList.add('sel');
@@ -371,14 +371,16 @@ customers.forEach((c,i)=>{const tr=document.createElement('tr');tr.dataset.i=i;i
   tr.onclick=()=>{document.querySelectorAll('#custTable tr').forEach(r=>r.classList.remove('sel'));tr.classList.add('sel');detail(i);};tb.appendChild(tr);});
 function detail(i){const c=customers[i];document.getElementById('detail').innerHTML=`
   <div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="nm">${c.n}</div><div class="label">사이즈 ${c.sz} · ${c.stt}</div></div><span class="pill ${c.st==='due'?'warn':c.st==='new'?'':'good'}">${dotName[c.st]}</span></div>
+  <div class="locktag" style="display:inline-block;margin-top:8px">🔒 가맹점·본사 전용 — 상세 처방·연락처 포함</div>
   <div class="divider"></div>
+  <div class="kv"><span class="label">연락처</span><span>${c.phone}</span></div>
   <div class="kv"><span class="label">동공 간 거리(PD)</span><span>${c.pd}</span></div>
   <div class="kv"><span class="label">얼굴 측정값</span><span>${c.face}</span></div>
-  <div class="kv"><span class="label">최근 처방</span><span>${c.rx}</span></div>
+  <div class="kv"><span class="label">최근 처방(시력)</span><span>${c.rx}</span></div>
   <div class="kv"><span class="label">재구매 주기</span><span>${c.cyc}</span></div>
   <div class="kv"><span class="label">고객 LTV (5년)</span><span>${c.ltv}</span></div>
   <div class="kv"><span class="label">다음 재방문</span><span>${c.next}</span></div>
-  <div class="label" style="margin:14px 0 6px">구매 이력</div>
+  <div class="label" style="margin:14px 0 6px">구매 이력 (매장·본사 전용)</div>
   ${c.hist.map(h=>`<div class="hist"><span>${h[0]}</span><span class="muted">${h[1]}</span></div>`).join('')}
   <div style="display:flex;gap:10px;margin-top:16px"><button class="btn small" onclick="toast('${c.n}님 재방문 카톡 발송 (프로토타입)')">카톡 발송</button><button class="btn small ghost" onclick="toast('기록 추가 (프로토타입)')">기록 추가</button></div>`;}
 detail(0);

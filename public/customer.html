@@ -21,6 +21,9 @@
 .rtag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:9999px;padding:1px 7px;margin-left:4px}
 .rmatch{font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap}
 .rmatch.best{color:var(--good)}
+.rmatch.good{color:var(--ink)}
+.rmatch.ok{color:var(--muted)}
+.rmatch.low{color:var(--muted);opacity:.7}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{font-family:inherit;font-size:14px;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;transition:.12s}
 .chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -81,6 +84,16 @@
             <div class="vip">
               <div><div class="vt">멤버십 포인트</div><div class="vp">2,480 P</div><div class="vg">GOLD까지 520P · 다음 구매 5% 적립</div></div>
               <span class="vbadge">VIP · SILVER</span>
+            </div>
+            <div class="appcard">
+              <h4>내 안경 정보</h4>
+              <div class="label" style="margin:6px 0 10px">측정한 사이즈와 시력만 보여드려요. 상세 처방·구매 이력은 매장에서 확인하실 수 있어요.</div>
+              <div class="kv"><span class="label">내 사이즈 (프론트 × 템플)</span><span id="mySize">F2 × T2</span></div>
+              <div class="kv"><span class="label">안면 폭</span><span>142 mm</span></div>
+              <div class="kv"><span class="label">동공 간 거리(PD)</span><span>63.5 mm</span></div>
+              <div class="kv"><span class="label">시력 (도수)</span><span>OD -3.25 / OS -3.50</span></div>
+              <div class="kv" style="border-bottom:0"><span class="label">난시 / 축</span><span>OD -0.75 ×180 / OS -0.50 ×175</span></div>
+              <div class="note" style="font-size:14px;margin-top:10px">처방전·구매 내역·연락처 등 상세 정보는 개인정보 보호를 위해 매장(가맹점)과 본사에서만 관리해요.</div>
             </div>
             <div class="appcard ar">
               <h4>AR 가상 피팅 <span class="pill" style="background:rgba(255,255,255,.14);color:#ffffff">NEW</span></h4>
@@ -307,19 +320,34 @@ document.getElementById('ptabs').addEventListener('click',function(e){var t=e.ta
   document.querySelectorAll('.ptab').forEach(function(x){x.classList.remove('active');});t.classList.add('active');
   document.querySelectorAll('.pscreen').forEach(function(s){s.classList.remove('active');});document.getElementById('s-'+t.dataset.s).classList.add('active');});
 /* measuring flow */
-/* ===== 사이즈 판정 구간값 (임시 — 나중에 여기 숫자만 교체) ===== */
-var SIZE_CFG={ front:[['F1',130],['F2',144],['F3',9999]], temple:[['T1',138],['T2',147],['T3',9999]] };
+/* ===== 사이즈 판정 구간값 (배지용 — 나중에 숫자만 교체) ===== */
+var SIZE_CFG={ front:[['F1',134],['F2',144],['F3',9999]], temple:[['T1',140],['T2',148],['T3',9999]] };
 var NOSE=['낮음','표준','높음'];
-var FRAMES=[
-  {n:'로마 클래식', line:'PB',   f:'F2', t:'T2', nose:'낮음', price:'189,000'},
-  {n:'로마 와이드', line:'PB',   f:'F3', t:'T2', nose:'표준', price:'189,000'},
-  {n:'로마 슬림',   line:'PB',   f:'F1', t:'T1', nose:'낮음', price:'189,000'},
-  {n:'로마 컴팩트', line:'PB',   f:'F1', t:'T2', nose:'낮음', price:'189,000'},
-  {n:'NORM 오디오 템플', line:'오디오', f:'F2', t:'T3', nose:'표준', price:'240,000'},
-  {n:'Lindberg 협업',    line:'명품',   f:'F2', t:'T2', nose:'높음', price:'470,000'}
+
+/* ===== 적합도 튜닝값 (한 곳에서 조절) =====
+   endpiece: 렌즈폭*2+브릿지 에 더해 프론트 전체폭을 만드는 보정(엔드피스+림)
+   idealOffset: 프론트폭 - 안면폭 목표치 (0=딱맞게, +2=살짝 여유)
+   frontW/templeW: mm당 감점, wFront/wTemple/wNose: 가중치, tol: 적정 허용오차(mm) */
+var FIT={ endpiece:18, idealOffset:0, frontW:7, templeW:4, wFront:0.70, wTemple:0.25, wNose:0.05, tol:2 };
+
+/* ===== 본사 프레임 카탈로그 (실제 치수: 렌즈폭 □ 브릿지 - 템플 mm) ===== */
+var CATALOG=[
+  {n:'로마 클래식',   line:'PB',   lens:52, bridge:18, temple:145, nose:'낮음', price:'189,000'},
+  {n:'로마 슬림',     line:'PB',   lens:48, bridge:19, temple:140, nose:'낮음', price:'189,000'},
+  {n:'로마 와이드',   line:'PB',   lens:55, bridge:17, temple:148, nose:'표준', price:'189,000'},
+  {n:'로마 컴팩트',   line:'PB',   lens:50, bridge:18, temple:142, nose:'낮음', price:'189,000'},
+  {n:'로마 라운드',   line:'PB',   lens:47, bridge:21, temple:145, nose:'표준', price:'189,000'},
+  {n:'로마 스퀘어',   line:'PB',   lens:54, bridge:16, temple:147, nose:'표준', price:'189,000'},
+  {n:'로마 스몰',     line:'PB',   lens:45, bridge:17, temple:135, nose:'낮음', price:'159,000'},
+  {n:'NORM 오디오',   line:'오디오', lens:53, bridge:18, temple:150, nose:'표준', price:'240,000'},
+  {n:'NORM 오디오 S', line:'오디오', lens:50, bridge:18, temple:145, nose:'낮음', price:'240,000'},
+  {n:'Lindberg 협업', line:'명품',  lens:51, bridge:19, temple:140, nose:'높음', price:'470,000'}
 ];
+function frontWidthOf(fr){ return fr.lens*2 + fr.bridge + FIT.endpiece; }
+function clamp100(x){ return Math.max(0,Math.min(100,x)); }
 function frontOf(w){for(var i=0;i<SIZE_CFG.front.length;i++){if(w<=SIZE_CFG.front[i][1])return SIZE_CFG.front[i][0];}}
 function templeOf(l){for(var i=0;i<SIZE_CFG.temple.length;i++){if(l<=SIZE_CFG.temple[i][1])return SIZE_CFG.temple[i][0];}}
+
 function recompute(){
   var w=+document.getElementById('inW').value, l=+document.getElementById('inL').value, n=+document.getElementById('inN').value;
   document.getElementById('vW').textContent=w+' mm';
@@ -327,22 +355,43 @@ function recompute(){
   document.getElementById('vN').textContent=NOSE[n];
   var F=frontOf(w), T=templeOf(l);
   document.getElementById('sizeBadge').textContent=F+' × '+T;
-  document.getElementById('sizeSub').textContent='안면 '+w+' · 관자 '+l+' · '+NOSE[n]+' 코';
-  renderRecs(F,T,NOSE[n]);
+  document.getElementById('sizeSub').textContent='안면폭 '+w+'mm · 관자 '+l+'mm · '+NOSE[n]+' 코';
+  renderRecs(w,l,NOSE[n]);
   return F+' × '+T;
 }
-function renderRecs(F,T,nose){
-  var scored=FRAMES.map(function(fr){var sc=0; if(fr.f===F)sc+=2; if(fr.t===T)sc+=2; if(fr.nose===nose)sc+=1; return {fr:fr,sc:sc};})
-    .filter(function(x){return x.sc>=2;})
-    .sort(function(a,b){return b.sc-a.sc;});
-  document.getElementById('recCount').textContent='· '+scored.length+'개';
+
+function scoreFrame(fr,faceW,templeLen,nose){
+  var fw=frontWidthOf(fr);
+  var diffF=fw-(faceW+FIT.idealOffset);
+  var sF=clamp100(100-FIT.frontW*Math.abs(diffF));
+  var sT=clamp100(100-FIT.templeW*Math.abs(fr.temple-templeLen));
+  var sN=(fr.nose===nose)?100:70;
+  var total=Math.round(FIT.wFront*sF+FIT.wTemple*sT+FIT.wNose*sN);
+  return {total:total, fw:fw, diffF:diffF};
+}
+function gradeOf(p){ return p>=90?['딱 맞음','best'] : p>=75?['잘 맞음','good'] : p>=55?['가능','ok'] : ['참고','low']; }
+function reasonOf(diffF, fr, templeLen){
+  var r;
+  if(Math.abs(diffF)<=FIT.tol) r='프론트폭 적정';
+  else if(diffF>FIT.tol) r='프론트폭 약간 큼(+'+Math.round(diffF)+'mm)';
+  else r='프론트폭 약간 작음('+Math.round(diffF)+'mm)';
+  var dt=fr.temple-templeLen;
+  if(Math.abs(dt)>6) r+=(dt>0?' · 다리 김':' · 다리 짧음');
+  return r;
+}
+function renderRecs(faceW,templeLen,nose){
+  var scored=CATALOG.map(function(fr){ var sc=scoreFrame(fr,faceW,templeLen,nose); return {fr:fr,sc:sc}; })
+    .filter(function(x){return x.sc.total>=35;})
+    .sort(function(a,b){return b.sc.total-a.sc.total;});
+  document.getElementById('recCount').textContent='· '+scored.length+'개 (적합도순)';
   var html=scored.map(function(x){
-    var fr=x.fr, exact=(fr.f===F && fr.t===T), pct=Math.round(x.sc/5*100);
-    return '<div class="recrow"><div><div class="rn">'+fr.n+' <span class="rtag">'+fr.line+'</span></div>'+
-           '<div class="rd">'+fr.f+' × '+fr.t+' · '+fr.nose+' 코 · ₩'+fr.price+'</div></div>'+
-           '<div class="rmatch '+(exact?'best':'')+'">'+(exact?'딱 맞음':'적합')+' '+pct+'%</div></div>';
+    var fr=x.fr, p=x.sc.total, g=gradeOf(p), spec=fr.lens+'□'+fr.bridge+'-'+fr.temple;
+    return '<div class="recrow"><div>'+
+      '<div class="rn">'+fr.n+' <span class="rtag">'+fr.line+'</span></div>'+
+      '<div class="rd">'+spec+' · 프론트폭 '+x.sc.fw+'mm · '+reasonOf(x.sc.diffF,fr,templeLen)+' · ₩'+fr.price+'</div>'+
+      '</div><div class="rmatch '+g[1]+'">'+g[0]+' '+p+'%</div></div>';
   }).join('');
-  document.getElementById('recList').innerHTML = html || '<div class="rd" style="color:var(--muted)">맞는 프레임이 없어요. 측정값을 조절해 보세요.</div>';
+  document.getElementById('recList').innerHTML = html || '<div class="rd" style="color:var(--muted)">측정값에 맞는 프레임이 없어요. 값을 조절해 보세요.</div>';
 }
 /* 카메라 자동 측정(데모): 애니메이션 후 측정값 채우고 재계산 */
 function measureCamera(){
