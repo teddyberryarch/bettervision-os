@@ -33,6 +33,24 @@
 .ord-row .oi{color:var(--ink)}
 .ord-row .om{font-size:13px;color:var(--muted)}
 .ord-row .obtns{display:flex;gap:6px}
+.dash-top{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:640px){.dash-top{grid-template-columns:1fr}}
+.dash-kpi{border:1px solid var(--line);border-radius:12px;padding:16px}
+.dash-kpi.pb{border:1.5px solid var(--ink);background:var(--surface)}
+.dash-kpi .big{font-size:30px;margin-top:4px}
+.rankrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.rankrow:last-child{border-bottom:0}
+.rankrow .rnum{width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;flex:none}
+.rankrow .rnm{width:58px;color:var(--ink)}
+.rankrow .rbar{flex:1;height:10px;background:var(--surface);border-radius:9999px;overflow:hidden}
+.rankrow .rfill{height:100%;background:var(--ink);border-radius:9999px}
+.rankrow .rval{width:104px;text-align:right;color:var(--muted)}
+.catrow{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px}
+.catrow .cnm{width:64px;color:var(--ink)}
+.catrow .cbar{flex:1;height:10px;background:var(--surface);border-radius:9999px;overflow:hidden}
+.catrow .cfill{height:100%;border-radius:9999px}
+.catrow .cfill.pb{background:var(--ink)}.catrow .cfill.np{background:var(--faint)}
+.catrow .cval{width:104px;text-align:right;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -53,6 +71,32 @@
       <div class="eyebrow">Headquarters · 가맹본부</div>
       <h2>데이터·납품·시스템을 쥔 본부가 채널을 지배한다</h2>
       <div class="sub">두 불변원칙 — ① 데이터 본부 소유 ② 납품 본부 독점. 본부 수익은 안경 판매가 아니라 공급마진·가맹비·구독에서 걷는다.</div>
+    </div>
+  </div>
+
+  <!-- 전사 대시보드 -->
+  <div class="card pad" style="margin-bottom:6px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div class="eyebrow">전사 대시보드 <span class="livedot">LIVE</span></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="qbtn" onclick="dashMonth(-1)">‹</button>
+        <span id="dashYM" style="font-size:15px;min-width:96px;text-align:center"></span>
+        <button class="qbtn" onclick="dashMonth(1)">›</button>
+      </div>
+    </div>
+    <div class="dash-top">
+      <div class="dash-kpi"><div class="label">이번 달 GMV (전 지점)</div><div class="big kfig" id="dashGMV">₩0</div><div class="label" id="dashGMVsub" style="font-size:13px"></div></div>
+      <div class="dash-kpi pb"><div class="label">PB 침투율 (렌즈·콘택트)</div><div class="big kfig" id="dashPB">0%</div><div class="label" style="font-size:13px">본부 마진 핵심 — 높을수록 본부 수익↑</div></div>
+    </div>
+    <div class="hq-grid l" style="margin-top:16px">
+      <div>
+        <div class="eyebrow" style="margin-bottom:8px">지점 랭킹</div>
+        <div id="dashRank"></div>
+      </div>
+      <div>
+        <div class="eyebrow" style="margin-bottom:8px">카테고리 매출 구성</div>
+        <div id="dashCat"></div>
+      </div>
     </div>
   </div>
 
@@ -477,6 +521,38 @@ function hqOrdAct(id,status){
       toast('발주 '+status+(status==='입고완료'?' · 지점 재고 반영':''));
       if(window.hqOrdLoad)window.hqOrdLoad();
     });
+}
+
+/* ===== 전사 대시보드 ===== */
+var dashYM;
+(function(){ if(!document.getElementById('dashGMV'))return;
+  var d=new Date(); dashYM={y:d.getFullYear(),m:d.getMonth()}; dashLoad();
+})();
+function dashMonth(d){ if(!dashYM)return; dashYM.m+=d; if(dashYM.m<0){dashYM.m=11;dashYM.y--;} if(dashYM.m>11){dashYM.m=0;dashYM.y++;} dashLoad(); }
+function dwon(n){return '₩'+n.toLocaleString('ko-KR');}
+function dpad(n){return (n<10?'0':'')+n;}
+function dashLoad(){
+  var y=dashYM.y,m=dashYM.m;
+  document.getElementById('dashYM').textContent=y+'년 '+(m+1)+'월';
+  var from=y+'-'+dpad(m+1)+'-01', last=new Date(y,m+1,0).getDate(), to=y+'-'+dpad(m+1)+'-'+dpad(last);
+  fetch('/api/sales/range?from='+from+'&to='+to).then(function(r){return r.json();}).then(function(j){
+    var total=j.total||0, stores=j.stores||[], byCat=j.byCat||{};
+    document.getElementById('dashGMV').textContent=dwon(total);
+    document.getElementById('dashGMVsub').textContent=stores.length+'개 지점 · 실 결제 합계';
+    var pb=(byCat['렌즈']||0)+(byCat['콘택트']||0);
+    var pct= total? Math.round(pb/total*100):0;
+    document.getElementById('dashPB').textContent=pct+'%';
+    var max=Math.max(1, stores.length?stores[0].amt:1);
+    document.getElementById('dashRank').innerHTML = stores.length? stores.map(function(s,i){var w=Math.round(s.amt/max*100);
+      return '<div class="rankrow"><span class="rnum">'+(i+1)+'</span><span class="rnm">'+s.store+'</span><div class="rbar"><div class="rfill" style="width:'+w+'%"></div></div><span class="rval">'+dwon(s.amt)+'</span></div>';
+    }).join('') : '<div class="muted" style="font-size:14px">매출 데이터 없음</div>';
+    var order=['렌즈','콘택트','테','선글라스','액세서리'];
+    var cmax=Math.max(1, Math.max.apply(null, order.map(function(c){return byCat[c]||0;})));
+    document.getElementById('dashCat').innerHTML = total? order.filter(function(c){return byCat[c];}).map(function(c){
+      var amt=byCat[c]||0, w=Math.round(amt/cmax*100), isPB=(c==='렌즈'||c==='콘택트');
+      return '<div class="catrow"><span class="cnm">'+c+(isPB?' ◆':'')+'</span><div class="cbar"><div class="cfill '+(isPB?'pb':'np')+'" style="width:'+w+'%"></div></div><span class="cval">'+dwon(amt)+'</span></div>';
+    }).join('')+'<div class="label" style="font-size:12px;margin-top:6px">◆ = PB 마진 핵심(렌즈·콘택트)</div>' : '<div class="muted" style="font-size:14px">매출 데이터 없음</div>';
+  });
 }
 </script>
 </body>

@@ -62,6 +62,21 @@
 .coatrow .ci{font-size:20px;flex:none}
 .coatrow b{color:var(--ink)}
 .catsec-h{font-size:15px;font-weight:600;color:var(--ink);margin:16px 0 8px}
+.simcoat{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);padding:7px 0}
+.simcoat input{width:16px;height:16px}
+.simbreak{margin-top:14px;border-top:1px solid var(--line2);padding-top:10px}
+.sbrow{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);padding:5px 0}
+.sbrow span:last-child{color:var(--ink)}
+.simtotal{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:12px;border-top:2px solid var(--ink)}
+.simtotal span{font-size:15px;color:var(--ink)}
+.simtotal b{font-size:22px;color:var(--ink)}
+.pcard.hero{border:1.5px solid var(--ink);position:relative}
+.herotag{position:absolute;top:12px;right:12px;font-size:11px;font-weight:700;color:#fff;background:var(--ink);border-radius:6px;padding:2px 8px}
+.pspec{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-top:11px;border-top:1px solid var(--line2);padding-top:11px}
+.psp{display:flex;justify-content:space-between;font-size:13px}
+.psp span{color:var(--muted)}.psp b{color:var(--ink);font-weight:600}
+.pchips{display:flex;align-items:center;gap:6px;margin-top:10px}
+.pchip{width:18px;height:18px;border-radius:50%;border:1px solid var(--line);display:inline-block}
 </style>
 </head>
 <body>
@@ -301,6 +316,7 @@
                 <div class="cs" data-c="goggle">고글</div>
                 <div class="cs" data-c="lens">렌즈</div>
                 <div class="cs" data-c="contact">콘택트</div>
+                <div class="cs" data-c="sim">견적</div>
               </div>
               <div id="catBody"></div>
             </div>
@@ -602,6 +618,7 @@ function ordConfirm(){
 /* ===== 상품 카탈로그 ===== */
 var CAT_DATA={
   frame:[
+    {n:'로마 ACE-02',pb:true,price:'189,000',hero:true,desc:'BETTERVISION 대표 모델. 이탈리아 마쭈첼리 아세테이트를 한국에서 조립("Designed & Assembled in Korea"). 9사이즈 파라메트릭으로 얼굴폭·관자에 맞춰 딱.',spec:[['렌즈폭','52mm'],['브릿지','18mm'],['템플','145mm'],['무게','18g'],['힌지','5배럴 스프링'],['사이즈','9종(F1~F3×T1~T3)']],colors:['#1a1a1a','#5b3a29','#c9b8a0']},
     {n:'로마 클래식',pb:true,price:'189,000',desc:'이탈리아 아세테이트. 9사이즈 파라메트릭으로 얼굴폭·관자에 맞춰 고름. 가장 무난한 데일리.'},
     {n:'로마 슬림',pb:true,price:'189,000',desc:'얇은 림·가벼운 무게. 작은 얼굴·미니멀 취향. F1~F2 사이즈 추천.'},
     {n:'로마 와이드',pb:true,price:'189,000',desc:'넓은 프론트·또렷한 인상. F2~F3, 광대·얼굴폭 넓은 분께.'},
@@ -613,7 +630,7 @@ var CAT_DATA={
     {n:'클립온 선글라스',pb:true,price:'90,000',desc:'안경 위에 자석 탈착. 도수 안경 그대로 선글라스로. 가성비.'}
   ],
   goggle:[
-    {n:'NORM 오디오 고글',pb:true,price:'290,000',desc:'오픈이어 오디오 템플 내장. 통화·음악·번역. 자체 브랜드 NORM.'},
+    {n:'NORM G1',pb:true,price:'290,000',hero:true,desc:'자체 브랜드 NORM 대표 모델. 오픈이어 오디오 템플 내장 — 귀를 막지 않고 통화·음악·번역. 무음 연결로 프리미엄 사용감.',spec:[['재생시간','약 7시간'],['블루투스','5.3'],['방수','IPX4 생활방수'],['무게','28g'],['연결음','무음 커스텀'],['BT명','NORM-G1']],colors:['#1a1a1a','#2b3a4a','#e8e4dd']},
     {n:'스포츠 고글',pb:true,price:'180,000',desc:'러닝·라이딩용 밀착 핏. 김서림 방지·교체 렌즈.'}
   ]
 };
@@ -638,7 +655,12 @@ var COATINGS=[
 ];
 
 function pbBadge(pb){return pb?'<span class="pbbadge">PB</span>':'';}
-function pcard(it){return '<div class="pcard"><div class="pn">'+it.n+pbBadge(it.pb)+'</div><div class="pp">₩'+it.price+'</div><div class="pdc">'+it.desc+'</div></div>';}
+function pcard(it){
+  var spec = it.spec? '<div class="pspec">'+it.spec.map(function(x){return '<div class="psp"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>';}).join('')+'</div>' : '';
+  var col = it.colors? '<div class="pchips">'+it.colors.map(function(c){return '<span class="pchip" style="background:'+c+'"></span>';}).join('')+'<span class="label" style="font-size:13px;margin-left:6px">'+it.colors.length+'컬러</span></div>' : '';
+  var tag = it.hero? '<span class="herotag">대표</span>' : '';
+  return '<div class="pcard'+(it.hero?' hero':'')+'">'+tag+'<div class="pn">'+it.n+pbBadge(it.pb)+'</div><div class="pp">₩'+it.price+'</div><div class="pdc">'+it.desc+'</div>'+col+spec+'</div>';
+}
 function pbIntro(txt){return '<div class="pbnote"><div class="pt">BETTERVISION LAB · 자체 개발(PB)</div><div class="pd">'+txt+'</div></div>';}
 
 function renderCat(c){
@@ -648,6 +670,7 @@ function renderCat(c){
     var coat=COATINGS.map(function(o){return '<div class="coatrow"><span class="ci">'+o.i+'</span><div><b>'+o.n+'</b><br>'+o.d+'</div></div>';}).join('');
     b.innerHTML=
       pbIntro('렌즈는 BETTERVISION가 직접 설계·공급하는 자체 렌즈예요. 같은 굴절률·코팅을 합리적인 가격에, 품질은 본사가 책임집니다. 도수에 맞는 굴절률을 골라야 두께·무게가 달라져요.')+
+      pcard({n:'알도R 1.60 (PB)',pb:true,price:'110,000',hero:true,desc:'BETTERVISION 대표 렌즈. 가장 보편적인 1.60 굴절률에 멀티코팅 기본 적용. 두께·무게·가격 균형이 최적이라 대부분의 도수에 추천.',spec:[['굴절률','1.60'],['아베수','42'],['자외선','UV400 차단'],['코팅','멀티코팅 기본'],['옵션','블루라이트·변색'],['추천도수','-3.00~-4.00D']]})+
       '<div class="catsec-h">굴절률(렌즈 두께)별 안내</div>'+
       '<table class="lenstbl"><thead><tr><th>굴절률</th><th>두께감</th><th>추천 도수</th><th>가격</th></tr></thead><tbody>'+rows+'</tbody></table>'+
       '<div class="label" style="font-size:13px;margin-top:6px">굴절률이 높을수록 같은 도수에서 더 얇고 가벼워요. 고도수일수록 1.60↑ 권장. 정확한 추천은 측정·검안 후.</div>'+
@@ -659,7 +682,63 @@ function renderCat(c){
       CONTACTS.map(pcard).join('');
     return;
   }
+  if(c==='sim'){ renderSim(b); return; }
   b.innerHTML=(CAT_DATA[c]||[]).map(pcard).join('');
+}
+
+/* ===== 가격 시뮬레이터 ===== */
+var SIM_FRAMES=[
+  {n:'로마 클래식 (PB)',p:189000},{n:'로마 슬림 (PB)',p:189000},
+  {n:'로마 와이드 (PB)',p:189000},{n:'로마 라운드 (PB)',p:189000},
+  {n:'Lindberg 협업',p:390000},{n:'편광 선글라스 (PB)',p:230000}
+];
+var SIM_LENS=[
+  {n:'1.50 (약도수 ~ -2.00D)',p:50000},{n:'1.56 (~ -3.00D)',p:80000},
+  {n:'1.60 (-3~-4D · 추천)',p:110000},{n:'1.67 (-4~-6D 고도수)',p:150000},
+  {n:'1.74 (-6D↑ 초고도수)',p:210000}
+];
+var SIM_COAT=[
+  {n:'멀티코팅(발수·반사방지)',p:0,base:true},{n:'블루라이트 차단',p:30000},
+  {n:'변색(포토크로믹)',p:60000},{n:'누진(다초점)',p:120000}
+];
+function comma(n){return n.toLocaleString('ko-KR');}
+function renderSim(b){
+  b.innerHTML=
+    '<div class="pbnote"><div class="pt">투명한 견적</div><div class="pd">테 + 렌즈(굴절률) + 코팅을 고르면 최종가가 실시간으로 분해돼요. 안경값이 왜 이런지 숨기지 않아요. 렌즈·코팅은 BETTERVISION 자체(PB)라 합리적이에요.</div></div>'+
+    '<div class="label" style="margin:4px 0 4px">테 선택</div>'+
+    '<select id="simFrame" class="finput" onchange="simCalc()">'+SIM_FRAMES.map(function(f,i){return '<option value="'+f.p+'">'+f.n+' · ₩'+comma(f.p)+'</option>';}).join('')+'</select>'+
+    '<div class="label" style="margin:11px 0 4px">렌즈 굴절률</div>'+
+    '<select id="simLens" class="finput" onchange="simCalc()">'+SIM_LENS.map(function(l,i){return '<option value="'+l.p+'"'+(i===2?' selected':'')+'>'+l.n+' · ₩'+comma(l.p)+'</option>';}).join('')+'</select>'+
+    '<div class="label" style="margin:11px 0 6px">코팅 (복수 선택)</div>'+
+    '<div id="simCoats">'+SIM_COAT.map(function(c,i){return '<label class="simcoat"><input type="checkbox" class="simCoat" value="'+c.p+'" onchange="simCalc()"'+(c.base?' checked disabled':'')+'> '+c.n+(c.p?(' · +₩'+comma(c.p)):' · 기본 포함')+'</label>';}).join('')+'</div>'+
+    '<div class="simbreak" id="simBreak"></div>'+
+    '<div class="simtotal"><span>최종 예상가</span><b id="simTotal">₩0</b></div>'+
+    '<button class="btn" style="width:100%;margin-top:12px" onclick="simOrder()">이 구성으로 주문/예약</button>'+
+    '<div class="label" style="font-size:13px;margin-top:8px">도수 안경은 매장 검안 후 확정돼요. 위 견적은 참고용이며 처방에 따라 달라질 수 있어요.</div>';
+  simCalc();
+}
+function simCalc(){
+  var f=+document.getElementById('simFrame').value, l=+document.getElementById('simLens').value;
+  var coats=[].slice.call(document.querySelectorAll('.simCoat:checked')).map(function(x){return +x.value;});
+  var coatSum=coats.reduce(function(a,b){return a+b;},0);
+  var total=f+l+coatSum;
+  var fn=document.getElementById('simFrame').selectedOptions[0].text.split(' · ')[0];
+  var ln=document.getElementById('simLens').selectedOptions[0].text.split(' · ')[0];
+  document.getElementById('simBreak').innerHTML=
+    '<div class="sbrow"><span>테 — '+fn+'</span><span>₩'+comma(f)+'</span></div>'+
+    '<div class="sbrow"><span>렌즈 — '+ln+'</span><span>₩'+comma(l)+'</span></div>'+
+    '<div class="sbrow"><span>코팅 '+(coatSum?('×'+coats.length):'기본')+'</span><span>₩'+comma(coatSum)+'</span></div>';
+  document.getElementById('simTotal').textContent='₩'+comma(total);
+}
+function simOrder(){
+  var fn=document.getElementById('simFrame').selectedOptions[0].text.split(' · ')[0];
+  var ln=document.getElementById('simLens').selectedOptions[0].text.split(' (')[0];
+  var item=fn+' + 렌즈 '+ln;
+  var t=document.querySelector('.ptab[data-s="measure"]'); if(t)t.click();
+  var k=document.querySelector('#ordKind .chip[data-k="A"]'); if(k){document.querySelectorAll('#ordKind .chip').forEach(function(x){x.classList.remove('active');});k.classList.add('active');if(typeof ordKindUpd==='function')ordKindUpd();}
+  var oi=document.getElementById('ordItem'); if(oi)oi.value=item;
+  var oc=document.getElementById('ordCard'); if(oc)oc.scrollIntoView({behavior:'smooth'});
+  toast('견적 구성을 주문 패널에 담았어요');
 }
 (function(){
   var cs=document.getElementById('csub'); if(!cs)return;
