@@ -26,6 +26,7 @@
     <div class="sub">처방·단안 PD·프레임을 넣으면 편심·정점거리 보정·추천 굴절률·최소블랭크·호환을 결정론적으로 산출. 검안(exam)과 피팅(fit) 사이의 빠진 고리.</div>
   </div><span class="pill good">● 조제 계산기</span></div>
 
+  <div id="rxbanner"></div>
   <div class="card pad sec">
     <div class="ctitle">처방 (좌우)</div>
     <div class="eyehdr">우안 R</div>
@@ -48,6 +49,7 @@
   </div>
 </section></div>
 <div class="foot"><span>BETTERVISION OS · 조제 산출 v0.1</span><span>처방→가공값 자동</span></div>
+<script src="/assets/bv-record.js"></script>
 <script>
 function n(id){var x=parseFloat(document.getElementById(id).value);return isNaN(x)?0:x;}
 function idxRefr(s){var m=Math.abs(s);return m>=4?'1.74':(m>=2?'1.67':'1.60');}
@@ -85,6 +87,8 @@ function calc(){
   html+='<div class="warn" style="background:var(--surface);color:var(--muted)">ED(유효경) '+Math.round(ED*10)/10+'mm · 프레임 기하중심 '+Math.round(geoHalf*10)/10+'mm 기준. 〔확인〕 근사식 — 실가공 데이터로 보정.</div>';
   document.getElementById('out').innerHTML=html;
 }
+var _r=(window.BVRecord&&BVRecord.load)?BVRecord.load():null;
+if(_r&&_r.rx){ var R=_r.rx.R||{},L=_r.rx.L||{}; if(R.S!==undefined&&R.S!=="")document.getElementById("rS").value=R.S; if(R.C!==undefined&&R.C!=="")document.getElementById("rC").value=R.C; if(L.S!==undefined&&L.S!=="")document.getElementById("lS").value=L.S; if(L.C!==undefined&&L.C!=="")document.getElementById("lC").value=L.C; if(_r.pdR)document.getElementById("rPD").value=_r.pdR; if(_r.pdL)document.getElementById("lPD").value=_r.pdL; if(_r.rx.vd)document.getElementById("vd").value=_r.rx.vd; var rb=document.getElementById("rxbanner"); if(rb)rb.innerHTML=BVRecord.banner(_r,"조제"); }
 calc();
 </script>
 </body></html>
