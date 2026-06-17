@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 조제 산출</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);margin:2px 0 4px}.sec .sdesc{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}.fld{flex:1;min-width:84px}.fld label{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:4px}
+.fld input{width:100%;font-size:15px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 8px;background:#fff;text-align:center}
+.eyehdr{font-size:13px;font-weight:700;color:var(--ink);margin:10px 0 4px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}.tbl th,.tbl td{border:1px solid var(--line);padding:8px 10px;text-align:left}.tbl th{background:var(--surface);font-size:13px;color:var(--muted);font-weight:600}.tbl td:first-child{font-weight:600;width:42%}
+.warn{font-size:13px;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:8px 11px;margin:8px 0}
+.ok{font-size:13px;color:var(--good);background:var(--good-soft);border-radius:8px;padding:8px 11px;margin:8px 0}
+</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+  <div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div>
+</div></div>
+<div class="wrap"><section class="view active">
+  <div class="lead"><div>
+    <div class="eyebrow">③B · 처방 → 조제 산출</div>
+    <h2>감으로 넣던 가공값을 자동으로</h2>
+    <div class="sub">처방·단안 PD·프레임을 넣으면 편심·정점거리 보정·추천 굴절률·최소블랭크·호환을 결정론적으로 산출. 검안(exam)과 피팅(fit) 사이의 빠진 고리.</div>
+  </div><span class="pill good">● 조제 계산기</span></div>
+
+  <div class="card pad sec">
+    <div class="ctitle">처방 (좌우)</div>
+    <div class="eyehdr">우안 R</div>
+    <div class="row"><div class="fld"><label>구면 S</label><input id="rS" value="-4.00" oninput="calc()"></div><div class="fld"><label>원주 C</label><input id="rC" value="-0.75" oninput="calc()"></div><div class="fld"><label>단안 PD</label><input id="rPD" value="31.5" oninput="calc()"></div></div>
+    <div class="eyehdr">좌안 L</div>
+    <div class="row"><div class="fld"><label>구면 S</label><input id="lS" value="-4.25" oninput="calc()"></div><div class="fld"><label>원주 C</label><input id="lC" value="-0.50" oninput="calc()"></div><div class="fld"><label>단안 PD</label><input id="lPD" value="31.5" oninput="calc()"></div></div>
+    <div class="ctitle" style="margin-top:14px">프레임 · 조건</div>
+    <div class="row">
+      <div class="fld"><label>렌즈가로 a</label><input id="a" value="52" oninput="calc()"></div>
+      <div class="fld"><label>브리지 DBL</label><input id="dbl" value="18" oninput="calc()"></div>
+      <div class="fld"><label>렌즈세로 B</label><input id="B" value="40" oninput="calc()"></div>
+      <div class="fld"><label>정점거리 VD</label><input id="vd" value="12" oninput="calc()"></div>
+      <div class="fld"><label>블랭크 한계</label><input id="blank" value="70" oninput="calc()"></div>
+    </div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">조제 파라미터 산출</div>
+    <div id="out"></div>
+  </div>
+</section></div>
+<div class="foot"><span>BETTERVISION OS · 조제 산출 v0.1</span><span>처방→가공값 자동</span></div>
+<script>
+function n(id){var x=parseFloat(document.getElementById(id).value);return isNaN(x)?0:x;}
+function idxRefr(s){var m=Math.abs(s);return m>=4?'1.74':(m>=2?'1.67':'1.60');}
+function calc(){
+  var a=n('a'),dbl=n('dbl'),B=n('B'),vd=n('vd'),blank=n('blank');
+  var geoHalf=(a+dbl)/2; // 프레임 중심→렌즈 기하중심(mm)
+  var ED=Math.sqrt(a*a+B*B); // 유효경 근사(대각)
+  function eye(pfx){
+    var S=n(pfx+'S'),C=n(pfx+'C'),PD=n(pfx+'PD');
+    var dec=Math.round((geoHalf-PD)*10)/10; // 편심: + = 안쪽으로 이동
+    var SE=S+C/2; // 등가구면
+    var Fe = (Math.abs(SE)>=4)? Math.round( (SE/(1-((12-vd)/1000)*SE))*100)/100 : null; // 정점보정
+    var prism = Math.round(Math.abs(dec)/10*Math.abs(SE)*100)/100; // 편심 미보정 시 유발 프리즘(Prentice)
+    var MBS = Math.round((ED + 2*Math.abs(dec) + 2)*10)/10; // 최소블랭크
+    var fit = MBS<=blank;
+    // 가장자리 두께 근사(마이너스)
+    var nIdx=parseFloat(idxRefr(SE)), edge = SE<0? Math.round( (Math.abs(SE)*Math.pow(MBS/2/1000,2)/(2*(nIdx-1))*1000)*10)/10 : 0;
+    return {S:S,C:C,SE:Math.round(SE*100)/100,dec:dec,Fe:Fe,prism:prism,MBS:MBS,fit:fit,idx:idxRefr(SE),edge:edge};
+  }
+  var R=eye('r'), L=eye('l');
+  function col(e){return '<td>'+e.v+'</td>';}
+  var rows=[
+   ['등가구면 SE', R.SE+'D', L.SE+'D'],
+   ['편심(OC 이동)', (R.dec>0?'+':'')+R.dec+'mm 안쪽', (L.dec>0?'+':'')+L.dec+'mm 안쪽'],
+   ['정점거리 보정', R.Fe!=null?R.Fe+'D (고도수)':'불필요', L.Fe!=null?L.Fe+'D (고도수)':'불필요'],
+   ['편심 미보정 프리즘', R.prism+'Δ', L.prism+'Δ'],
+   ['추천 굴절률', R.idx, L.idx],
+   ['최소블랭크 MBS', R.MBS+'mm', L.MBS+'mm'],
+   ['예상 가장자리 두께', R.edge+'mm', L.edge+'mm']
+  ];
+  var html='<table class="tbl"><tr><th>항목</th><th>우안 R</th><th>좌안 L</th></tr>'+
+    rows.map(function(x){return '<tr><td>'+x[0]+'</td><td>'+x[1]+'</td><td>'+x[2]+'</td></tr>';}).join('')+'</table>';
+  if(!R.fit||!L.fit) html+='<div class="warn">최소블랭크('+Math.max(R.MBS,L.MBS)+'mm) > 블랭크 한계('+blank+'mm) — 이 프레임/PD로는 가공 불가. 프레임 교체 또는 편심 재검토.</div>';
+  else html+='<div class="ok">가공 가능 — 최소블랭크 한계 내. 편심·정점보정 반영해 발주.</div>';
+  html+='<div class="warn" style="background:var(--surface);color:var(--muted)">ED(유효경) '+Math.round(ED*10)/10+'mm · 프레임 기하중심 '+Math.round(geoHalf*10)/10+'mm 기준. 〔확인〕 근사식 — 실가공 데이터로 보정.</div>';
+  document.getElementById('out').innerHTML=html;
+}
+calc();
+</script>
+</body></html>

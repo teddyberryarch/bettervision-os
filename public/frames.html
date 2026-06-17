@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 타사 DB · 큐레이팅</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);margin:2px 0 4px}
+.sec .sdesc{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.fld{flex:1;min-width:110px}
+.fld label{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px}
+.fld input,.fld select{width:100%;font-size:15px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:#fff}
+.parsed{font-size:13px;color:var(--good);background:var(--good-soft);border-radius:8px;padding:8px 11px;margin:8px 0}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.presets .chip{font-size:13px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+.rank{margin:8px 0}
+.rk{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin:7px 0}
+.rk.pb{border-color:var(--good);background:var(--good-soft)}
+.rk.bad{opacity:.7}
+.rk .pct{font-size:24px;font-weight:700;color:var(--ink);min-width:58px}
+.rk.pb .pct{color:var(--good)}
+.rk .meta{flex:1;font-size:14px}
+.rk .meta .b{font-weight:700}
+.rk .meta .s{font-size:12px;color:var(--muted);margin-top:2px}
+.rk .tagpb{font-size:11px;font-weight:700;color:var(--good);background:#fff;border:1px solid var(--good);border-radius:6px;padding:2px 7px}
+.rk .tagx{font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:6px;padding:2px 7px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+.tbl th,.tbl td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+.tbl th{background:var(--surface);font-size:13px;color:var(--muted);font-weight:600}
+.note{font-size:13px;color:var(--muted);font-style:italic;margin:8px 0}
+.starbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin:10px 0}
+.starbox .h{font-weight:700;color:var(--ink);font-size:15px;margin-bottom:4px}
+.starbox p{font-size:14px;color:var(--ink);line-height:1.55;margin:4px 0}
+</style>
+</head>
+<body>
+<script>
+fetch('/api/me').then(function(r){return r.json();}).then(function(j){
+  if(j&&j.authOn&&!j.user){ var pg=location.pathname.split('/').pop()||'index.html'; location.href='login.html?next='+encodeURIComponent(pg); }
+}).catch(function(){});
+</script>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+  <div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <a href="customer.html">고객 앱</a>
+    <a href="store.html">가맹점</a>
+    <a href="hq.html">가맹본부</a>
+    <a href="flow.html">접객</a>
+    <a href="exam.html">검안</a>
+    <a href="fit.html">피팅</a>
+  </div>
+</div></div>
+
+<div class="wrap">
+<section class="view active">
+  <div class="lead">
+    <div>
+      <div class="eyebrow">② · 타사 안경 DB · 큐레이팅</div>
+      <h2>전 브랜드를 본사 코드로 환산 → 적합도 비교</h2>
+      <div class="sub">진열 타사테 각인을 읽어 DB화하고, 고객 얼굴 코드와 대조해 적합도%. PB 강매가 아니라 <b>"전 브랜드 큐레이션인데 PB가 제일 잘 맞더라"</b> — 가맹 설득의 핵심.</div>
+    </div>
+    <span class="pill good">● 환산엔진 응용 #1</span>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">1 · 각인 읽어 DB 추가</div>
+    <div class="sdesc">각인 "렌즈가로 □ 브리지 − 템플"(예: 54□18-145)만 넣으면 프론트폭·소재 자동 산출. 진열=체험=DB 시드 동시.</div>
+    <div class="row">
+      <div class="fld"><label>각인</label><input id="eng" placeholder="54□18-145" oninput="parseNow()"></div>
+      <div class="fld"><label>브랜드</label><input id="brand" placeholder="브랜드"></div>
+      <div class="fld"><label>모델/색</label><input id="model" placeholder="모델 · 색"></div>
+      <div class="fld"><label>소재</label><select id="mat"></select></div>
+      <div class="fld" style="flex:0"><button class="btn small" onclick="addFrame()">DB 추가</button></div>
+    </div>
+    <div class="parsed" id="parsed">각인을 입력하면 프론트폭 = a×2+DBL 자동 계산.</div>
+    <div class="note">각인 OCR(촬영→AI 판독)은 다음 단계. 지금은 수기. 빠진 안면각·코받침은 매장 실측 2차.</div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">2 · 적합도 매칭 — "젠몬 vs PB"</div>
+    <div class="sdesc">고객 측정값을 넣으면 DB 전체를 적합도순으로. 소재 휨한계 넘으면 "못 맞춤" 솔직히 표시 = PB 전환 무기.</div>
+    <div class="presets">
+      <span style="font-size:13px;color:var(--muted);align-self:center">시나리오:</span>
+      <button class="chip" onclick="faceP(152,160,5)">표준 M·M 고객</button>
+      <button class="chip" onclick="faceP(152,160,18)">안면각 큰 얼굴</button>
+      <button class="chip" onclick="faceP(140,150,5)">작은 얼굴 S·S</button>
+    </div>
+    <div class="row">
+      <div class="fld"><label>얼굴 가로폭(mm)</label><input id="fw" type="number" value="152" oninput="rankNow()"></div>
+      <div class="fld"><label>귀 간격(mm)</label><input id="eg2" type="number" value="160" oninput="rankNow()"></div>
+      <div class="fld"><label>안면각(°)</label><input id="wrap" type="number" value="5" oninput="rankNow()"></div>
+    </div>
+    <div class="rank" id="rank"></div>
+    <div class="starbox">
+      <div class="h">왜 이게 가맹 설득 무기인가</div>
+      <p>PB만 강제하면 사장이 거부. 그러나 "전 브랜드 큐레이션 도구"면 안경 무관심 사장도 진입 — PB는 그중 "제일 잘 맞고 마진 좋은 선택지"로 자연 침투. 고객은 객관 비교라 신뢰, 본사는 타사 거래까지 데이터 귀속.</p>
+    </div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">3 · 소재 → 휨한계 (또 하나의 본사 IP)</div>
+    <div class="sdesc">적합 판정 = 사이즈 매칭 + (고객 안면각이 요구하는 벌림 vs 그 테 소재의 최대 조정범위). 넘으면 "이 테 못 맞춤".</div>
+    <table class="tbl"><tr><th>소재</th><th>최대 벌림 조정폭</th><th>비고</th></tr>
+      <tr><td>티탄</td><td>±8mm</td><td>조정 넓음</td></tr>
+      <tr><td>금속</td><td>±6mm</td><td>넓음</td></tr>
+      <tr><td>TR·울템</td><td>±4mm</td><td>중간</td></tr>
+      <tr><td>경질 아세테이트</td><td>±1mm</td><td>거의 0 — 안면각 큰 얼굴 부적합</td></tr>
+    </table>
+    <div class="note">〔확인〕 초벌 — engine/매뉴얼과 동기. 실측으로 확정.</div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">4 · DB 전체</div>
+    <table class="tbl" id="dbtbl"></table>
+    <div class="note">법적 락업: 타사 큐레이션 라인도 본사 공급(가맹계약 "전품목 본사공급" 조항). 큐레이션 자유 + 공급 독점 양립.</div>
+  </div>
+</section>
+</div>
+
+<div class="foot"><span>BETTERVISION OS · 타사 DB · 큐레이팅 v0.1</span><span>전 브랜드 큐레이션 · PB 자연 침투</span></div>
+
+<script src="/assets/bv-size-engine.js"></script>
+<script src="/assets/bv-frame-db.js"></script>
+<script>
+var DB=window.BVFrameDB, db=DB.seed.slice();
+function matOpts(){var o='';for(var k in DB.MAT){o+='<option value="'+k+'">'+DB.MAT[k].n+'</option>';}return o;}
+document.getElementById('mat').innerHTML=matOpts();
+
+function parseNow(){
+  var p=DB.parseEngraving(document.getElementById('eng').value);
+  document.getElementById('parsed').textContent = p
+    ? ('파싱: 렌즈가로 '+p.a+' · 브리지 '+p.dbl+' · 템플 '+p.temple+'　→ 프론트폭 '+p.frontSpan+'mm')
+    : '각인 형식: 54□18-145 (또는 54-18-145)';
+  return p;
+}
+function addFrame(){
+  var p=parseNow(); if(!p){alert('각인 형식 확인: 54□18-145');return;}
+  db.unshift({brand:document.getElementById('brand').value||'(미입력)', model:document.getElementById('model').value||'-', color:'', eng:document.getElementById('eng').value, material:document.getElementById('mat').value});
+  document.getElementById('eng').value='';document.getElementById('brand').value='';document.getElementById('model').value='';
+  document.getElementById('parsed').textContent='추가됨. DB 전체·매칭에 반영.';
+  renderDB(); rankNow();
+}
+function faceP(fw,eg,w){document.getElementById('fw').value=fw;document.getElementById('eg2').value=eg;document.getElementById('wrap').value=w;rankNow();}
+function rankNow(){
+  var face={faceWidth:+document.getElementById('fw').value, earGap:+document.getElementById('eg2').value, wrap:+document.getElementById('wrap').value};
+  var rows=db.map(function(f){var p=DB.parseEngraving(f.eng)||{frontSpan:null,temple:null};
+    var fr={frontSpan:p.frontSpan,temple:p.temple,material:f.material};
+    var m=DB.match(face,fr); return {f:f,m:m};});
+  rows.sort(function(a,b){return b.m.fit-a.m.fit;});
+  var html=rows.map(function(r){
+    var cls='rk'+(r.f.pb?' pb':'')+(!r.m.splayOK?' bad':'');
+    var tag=r.f.pb?'<span class="tagpb">PB</span>':(!r.m.splayOK?'<span class="tagx">못 맞춤</span>':'');
+    return '<div class="'+cls+'"><div class="pct">'+r.m.fit+'%</div><div class="meta"><span class="b">'+r.f.brand+' '+r.f.model+'</span> '+tag+'<div class="s">'+r.f.eng+' · '+DB.MAT[r.f.material].n+' · 프레임 '+r.m.frameCode+' vs 얼굴 '+r.m.faceCode+' — '+r.m.reason+'</div></div></div>';
+  }).join('');
+  document.getElementById('rank').innerHTML=html;
+}
+function renderDB(){
+  var h='<tr><th>브랜드</th><th>모델</th><th>각인</th><th>프론트폭</th><th>소재</th></tr>';
+  db.forEach(function(f){var p=DB.parseEngraving(f.eng)||{frontSpan:'?'};
+    h+='<tr><td>'+f.brand+(f.pb?' <b style="color:var(--good)">PB</b>':'')+'</td><td>'+f.model+'</td><td>'+f.eng+'</td><td>'+p.frontSpan+'mm</td><td>'+DB.MAT[f.material].n+'</td></tr>';});
+  document.getElementById('dbtbl').innerHTML=h;
+}
+renderDB(); rankNow();
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 추천 · 가상피팅</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);margin:2px 0 4px}
+.sec .sdesc{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.fld{flex:1;min-width:110px}.fld label{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px}
+.fld input,.fld select{width:100%;font-size:15px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:#fff}
+.rk{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin:7px 0;cursor:pointer}
+.rk.pb{border-color:var(--good);background:var(--good-soft)}.rk.sel{box-shadow:inset 0 0 0 2px var(--ink)}
+.rk .pct{font-size:24px;font-weight:700;color:var(--ink);min-width:54px}.rk.pb .pct{color:var(--good)}
+.rk .meta{flex:1;font-size:14px}.rk .meta .b{font-weight:700}.rk .meta .s{font-size:12px;color:var(--muted);margin-top:2px}
+.bars{display:grid;grid-template-columns:88px 1fr 42px;gap:5px 8px;font-size:13px;align-items:center;margin:8px 0}
+.bars .l{color:var(--muted)}.bars .track{height:9px;background:var(--surface);border-radius:9999px;overflow:hidden}
+.bars .fill{height:100%;background:var(--ink);border-radius:9999px}.bars .v{text-align:right;font-weight:600}
+.tryon{border:1px solid var(--line);border-radius:12px;background:#fff;margin:8px 0}.tryon svg{display:block;width:100%;height:auto}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.tabs .chip{font-size:13px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer}
+.note{font-size:13px;color:var(--muted);font-style:italic;margin:8px 0}
+</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+  <div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div>
+</div></div>
+<div class="wrap"><section class="view active">
+  <div class="lead"><div>
+    <div class="eyebrow">⑤ · 추천 · 가상피팅</div>
+    <h2>감이 아니라 6변수 — 객관 추천 + 얼굴 위 미리보기</h2>
+    <div class="sub">측정·검안 데이터로 9사이즈 적합도·얼굴형·트렌드·스타일·용도·이력 6변수를 점수화. "어울리실 것 같아요"가 아니라 "96% + 얼굴형 적합 + 시즌 3위 + 지적 인상".</div>
+  </div><span class="pill good">● 엔진 응용 #2</span></div>
+
+  <div class="card pad sec">
+    <div class="ctitle">1 · 고객 조건</div>
+    <div class="row">
+      <div class="fld"><label>얼굴 가로폭</label><input id="fw" type="number" value="152" oninput="run()"></div>
+      <div class="fld"><label>귀 간격</label><input id="eg" type="number" value="160" oninput="run()"></div>
+      <div class="fld"><label>안면각</label><input id="wr" type="number" value="5" oninput="run()"></div>
+      <div class="fld"><label>얼굴형</label><select id="shape" onchange="run()"><option>계란</option><option>둥근</option><option>각진</option><option>역삼각</option></select></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="fld"><label>원하는 인상(스타일)</label><select id="style" onchange="run()"><option value="지적">지적</option><option value="부드러움">부드러움</option><option value="강함">강함</option><option value="캐주얼">캐주얼</option></select></div>
+      <div class="fld"><label>용도</label><select id="use" onchange="run()"><option>일상</option><option>업무·VDT</option><option>운전</option></select></div>
+    </div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">2 · 추천 순위 (객관 점수)</div>
+    <div class="sdesc">행을 누르면 가상피팅·점수 분해가 바뀐다. PB는 강매가 아니라 "제일 잘 맞아서" 위로 온다.</div>
+    <div id="rank"></div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">3 · 가상피팅 + 점수 분해</div>
+    <div class="tryon" id="tryon"></div>
+    <div class="bars" id="bars"></div>
+    <div class="note" id="reason"></div>
+  </div>
+</section></div>
+<div class="foot"><span>BETTERVISION OS · 추천·가상피팅 v0.1</span><span>6변수 객관화</span></div>
+
+<script src="/assets/bv-size-engine.js"></script>
+<script src="/assets/bv-frame-db.js"></script>
+<script>
+var E=window.BVSizeEngine, DB=window.BVFrameDB;
+var CAT=[
+ {brand:'BETTERVISION',model:'SAGA-01',shape:'스퀘어',style:['지적','강함'],eng:'54□18-145',material:'titan',pb:true,trend:3},
+ {brand:'BETTERVISION',model:'SAGA-04',shape:'보스턴',style:['부드러움','캐주얼'],eng:'52□18-148',material:'metal',pb:true,trend:1},
+ {brand:'BETTERVISION',model:'SAGA-07',shape:'라운드',style:['부드러움','지적'],eng:'50□20-145',material:'titan',pb:true,trend:5},
+ {brand:'젠틀몬스터',model:'MM-001',shape:'스퀘어',style:['강함'],eng:'52□20-145',material:'acet',trend:2},
+ {brand:'톰포드',model:'TF5634',shape:'보스턴',style:['지적'],eng:'54□17-145',material:'acet',trend:4},
+ {brand:'레이밴',model:'RB5154',shape:'스퀘어',style:['캐주얼','강함'],eng:'51□21-140',material:'metal',trend:6}
+];
+var SUIT={'계란':['라운드','스퀘어','보스턴'],'둥근':['스퀘어','보스턴'],'각진':['라운드','보스턴'],'역삼각':['라운드','보스턴']};
+var W={size:.35,shape:.2,trend:.1,style:.2,use:.05,rep:.1};
+var sel=0, scored=[];
+
+function score(c, face, shape, style){
+  var m=DB.match(face,{frontSpan:(DB.parseEngraving(c.eng)||{}).frontSpan,temple:(DB.parseEngraving(c.eng)||{}).temple,material:c.material});
+  var sSize=m.fit;
+  var sShape=(SUIT[shape]||[]).indexOf(c.shape)>=0?100:70;
+  var sTrend=Math.round((7-c.trend)/6*100);
+  var sStyle=c.style.indexOf(style)>=0?100:65;
+  var sUse=80, sRep=c.pb?70:60;
+  var total=Math.round(sSize*W.size+sShape*W.shape+sTrend*W.trend+sStyle*W.style+sUse*W.use+sRep*W.rep);
+  return {c:c,total:total,size:sSize,shape:sShape,trend:sTrend,style:sStyle,use:sUse,rep:sRep,m:m};
+}
+function run(){
+  var face={faceWidth:+v('fw'),earGap:+v('eg'),wrap:+v('wr')};
+  var shape=v('shape'), style=v('style');
+  scored=CAT.map(function(c){return score(c,face,shape,style);}).sort(function(a,b){return b.total-a.total;});
+  sel=0; renderRank(); renderDetail();
+}
+function v(id){return document.getElementById(id).value;}
+function renderRank(){
+  document.getElementById('rank').innerHTML=scored.map(function(r,i){
+    return '<div class="rk'+(r.c.pb?' pb':'')+(i===sel?' sel':'')+'" onclick="pick('+i+')"><div class="pct">'+r.total+'</div><div class="meta"><span class="b">'+r.c.brand+' '+r.c.model+'</span> '+(r.c.pb?'<span style="font-size:11px;color:var(--good);font-weight:700">PB</span>':'')+'<div class="s">'+r.c.shape+' · '+r.c.style.join('/')+' · '+DB.MAT[r.c.material].n+(r.m.splayOK?'':' · 소재 못맞춤')+'</div></div></div>';
+  }).join('');
+}
+function pick(i){sel=i;renderRank();renderDetail();}
+function renderDetail(){
+  var r=scored[sel]; if(!r)return;
+  var face={faceWidth:+v('fw'),earGap:+v('eg')};
+  document.getElementById('tryon').innerHTML=tryonSVG(r.c, face);
+  var rows=[['사이즈 매칭',r.size],['얼굴형',r.shape],['트렌드',r.trend],['스타일',r.style],['용도',r.use],['재구매',r.rep]];
+  document.getElementById('bars').innerHTML=rows.map(function(x){
+    return '<div class="l">'+x[0]+'</div><div class="track"><div class="fill" style="width:'+x[1]+'%"></div></div><div class="v">'+x[1]+'</div>';
+  }).join('');
+  document.getElementById('reason').textContent='근거: '+r.c.model+' — 사이즈 '+r.size+'% + '+(r.shape>=100?'얼굴형 적합':'얼굴형 보통')+' + 시즌 '+r.c.trend+'위 + "'+v('style')+'" '+(r.style>=100?'부합':'보통')+'. '+r.m.reason;
+}
+function tryonSVG(c, face){
+  var p=DB.parseEngraving(c.eng)||{frontSpan:130,a:50,dbl:18};
+  var cx=100, cy=72, fw=Math.max(40,face.faceWidth||150)*0.62, fh=fw*1.28;
+  var gW=(p.frontSpan||130)*0.62, a=(p.a||50)*0.62, dbl=(p.dbl||18)*0.62, lensH=22;
+  var lx=cx-dbl/2-a/2, rx=cx+dbl/2+a/2, ly=cy-2;
+  var shapeRx=(c.shape==='라운드'?a/2:(c.shape==='보스턴'?7:4));
+  var col=c.pb?'#059669':'#0d0d0c';
+  return '<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">'+
+   '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(fw/2)+'" ry="'+(fh/2)+'" fill="#f3efe9" stroke="#cbc7bb" stroke-width="0.8"/>'+
+   '<ellipse cx="'+lx+'" cy="'+ly+'" rx="3.4" ry="2.4" fill="#8a877f"/><ellipse cx="'+rx+'" cy="'+ly+'" rx="3.4" ry="2.4" fill="#8a877f"/>'+
+   '<rect x="'+(lx-a/2)+'" y="'+(ly-lensH/2)+'" width="'+a+'" height="'+lensH+'" rx="'+shapeRx+'" fill="rgba(0,0,0,0.04)" stroke="'+col+'" stroke-width="1.6"/>'+
+   '<rect x="'+(rx-a/2)+'" y="'+(ly-lensH/2)+'" width="'+a+'" height="'+lensH+'" rx="'+shapeRx+'" fill="rgba(0,0,0,0.04)" stroke="'+col+'" stroke-width="1.6"/>'+
+   '<line x1="'+(lx+a/2)+'" y1="'+(ly-3)+'" x2="'+(rx-a/2)+'" y2="'+(ly-3)+'" stroke="'+col+'" stroke-width="1.6"/>'+
+   '<line x1="'+(lx-a/2)+'" y1="'+(ly-lensH/2+3)+'" x2="'+(lx-a/2-16)+'" y2="'+(ly-lensH/2+1)+'" stroke="'+col+'" stroke-width="1.4"/>'+
+   '<line x1="'+(rx+a/2)+'" y1="'+(ly-lensH/2+3)+'" x2="'+(rx+a/2+16)+'" y2="'+(ly-lensH/2+1)+'" stroke="'+col+'" stroke-width="1.4"/>'+
+   '<text x="'+cx+'" y="135" font-size="7" fill="#8a877f" text-anchor="middle" font-family="Inter,Pretendard">'+c.model+' · '+c.shape+' · 프론트폭 '+(p.frontSpan)+'mm</text>'+
+   '</svg>';
+}
+run();
+</script>
+</body></html>

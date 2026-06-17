@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 안면 측정</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>.sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);margin:2px 0 4px}.sec .sdesc{font-size:14px;color:var(--muted);margin-bottom:10px}
+.fld{margin:8px 0}.fld label{display:flex;justify-content:space-between;font-size:14px;color:var(--ink);font-weight:600;margin-bottom:4px}.fld label b{color:var(--ink)}.fld input[type=range]{width:100%}
+.scan{border:1px solid var(--line);border-radius:12px;background:#fff;margin:8px 0}.scan svg{display:block;width:100%;height:auto}
+.bigout{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}.bigout .code{font-size:30px;font-weight:700;color:var(--ink);min-width:74px}.bigout .sm{font-size:13px;color:var(--muted)}
+.links{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.links a{font-size:13px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;text-decoration:none}
+.note{font-size:13px;color:var(--muted);font-style:italic}</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="wrap"><section class="view active">
+<div class="lead"><div><div class="eyebrow">① · 안면 측정 (스캔)</div><h2>한 번 스캔 → 측정 5값 → 9사이즈</h2>
+<div class="sub">아이패드 트루뎁스로 얼굴을 스캔해 PD·얼굴폭·코높이·귀간격·안면각을 한 번에. 측정과 가상피팅이 같은 얼굴 메시에서 나온다. (데모는 슬라이더/자동 스캔)</div></div><span class="pill good">● 엔진 입력원</span></div>
+<div class="card pad sec">
+<div class="ctitle">1 · 측정 (데모)</div>
+<button class="btn small" onclick="autoScan()">자동 스캔 ▷</button>
+<div class="fld" style="margin-top:10px"><label>PD <b id="vPD">63</b>mm</label><input id="PD" type="range" min="54" max="74" step="0.5" value="63" oninput="upd()"></div>
+<div class="fld"><label>얼굴 가로폭 <b id="vFW">152</b>mm</label><input id="FW" type="range" min="132" max="170" step="0.5" value="152" oninput="upd()"></div>
+<div class="fld"><label>코 높이 <b id="vNH">12</b>mm</label><input id="NH" type="range" min="6" max="20" step="0.5" value="12" oninput="upd()"></div>
+<div class="fld"><label>귀 윗부분 간격 <b id="vEG">160</b>mm</label><input id="EG" type="range" min="144" max="180" step="0.5" value="160" oninput="upd()"></div>
+<div class="fld"><label>안면각 <b id="vWR">5</b>°</label><input id="WR" type="range" min="0" max="20" step="0.5" value="5" oninput="upd()"></div>
+</div>
+<div class="card pad sec"><div class="ctitle">2 · 환산 결과</div>
+<div class="scan" id="scan"></div>
+<div class="bigout"><div class="code" id="code">M·M</div><div class="sm" id="sm"></div></div>
+<div class="links"><a href="exam.html">→ 검안</a><a href="recommend.html">→ 추천·가상피팅</a><a href="fit.html">→ 피팅</a></div>
+<div class="note">측정값은 raw 1층 + 본사 코드 2층으로 본부 귀속. 검안·추천·피팅이 이 한 번의 스캔을 공유.</div></div>
+</section></div>
+<div class="foot"><span>BETTERVISION OS · 안면 측정 v0.1</span><span>한 번 스캔, 다 공유</span></div>
+<script src="/assets/bv-size-engine.js"></script>
+<script>
+var E=window.BVSizeEngine;
+function gv(id){return parseFloat(document.getElementById(id).value);}
+function autoScan(){function r(a,b){return Math.round((a+Math.random()*(b-a))*2)/2;}
+ set('PD',r(58,68));set('FW',r(142,160));set('NH',r(9,15));set('EG',r(152,168));set('WR',r(2,12));upd();}
+function set(id,v){document.getElementById(id).value=v;}
+function upd(){
+ ['PD','FW','NH','EG','WR'].forEach(function(k){document.getElementById('v'+k).textContent=gv(k);});
+ var fw=gv('FW'),eg=gv('EG');var r=E.toCode({faceWidth:fw,earGap:eg});
+ document.getElementById('code').textContent=r.code||'—';
+ document.getElementById('sm').innerHTML='적합도 <b>'+r.fit+'%</b> · 프론트 '+r.front+' / 템플 '+r.temple+'<br>PD '+gv('PD')+' · 코 '+gv('NH')+' · 안면각 '+gv('WR')+'°';
+ var cx=100,cy=72,W=fw*0.62,H=W*1.28,pd=gv('PD')*0.62;
+ document.getElementById('scan').innerHTML='<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">'+
+  '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(W/2)+'" ry="'+(H/2)+'" fill="#f3efe9" stroke="#cbc7bb" stroke-width="0.8"/>'+
+  '<ellipse cx="'+(cx-pd/2)+'" cy="'+cy+'" rx="3.2" ry="2.2" fill="#8a877f"/><ellipse cx="'+(cx+pd/2)+'" cy="'+cy+'" rx="3.2" ry="2.2" fill="#8a877f"/>'+
+  '<line x1="'+(cx-pd/2)+'" y1="'+(cy+18)+'" x2="'+(cx+pd/2)+'" y2="'+(cy+18)+'" stroke="#b45309" stroke-width="0.6"/>'+
+  '<text x="'+cx+'" y="'+(cy+24)+'" font-size="6" fill="#b45309" text-anchor="middle" font-family="Inter">PD '+gv('PD')+'</text>'+
+  '<text x="'+cx+'" y="138" font-size="6" fill="#8a877f" text-anchor="middle" font-family="Inter">얼굴폭 '+fw+' · 귀간격 '+eg+' · 9사이즈 '+(r.code||'-')+'</text></svg>';
+}
+upd();
+</script></body></html>

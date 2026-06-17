@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 검안 매뉴얼</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.b-nav{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:56px;background:var(--card);
+  padding:10px 0;z-index:5;border-bottom:1px solid var(--line2);margin-bottom:14px}
+.b-nav a{font-size:13px;font-weight:600;color:var(--ink);background:var(--surface);
+  border:1px solid var(--line);border-radius:8px;padding:7px 11px;text-decoration:none}
+.b-sec{margin-bottom:16px}
+.b-sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);letter-spacing:-.3px;margin:2px 0 4px}
+.b-sec .gw{font-size:12px;color:var(--muted);font-weight:500;margin-left:6px}
+.b-sec p{font-size:14px;line-height:1.6;color:var(--ink);margin:7px 0}
+.io{font-size:13px;color:var(--muted);margin:4px 0 8px}
+.io b{color:var(--ink)}
+.b-flow{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:11px 13px;
+  font-size:14px;font-weight:600;color:var(--ink);text-align:center;margin:10px 0}
+.dft{color:var(--good);font-weight:700;font-size:12px;white-space:nowrap}
+.blk{color:var(--warn);font-weight:800;font-size:12px;letter-spacing:.05em;white-space:nowrap}
+.bvt{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+.bvt th,.bvt td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+.bvt th{background:var(--surface);font-weight:600;font-size:12px;color:var(--muted)}
+.bvt td:first-child{font-weight:600;width:28%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:4px 0 2px}
+.b-li{list-style:none;padding:0;margin:6px 0}
+.b-li li{position:relative;padding-left:16px;font-size:14px;line-height:1.55;margin:6px 0;color:var(--ink)}
+.b-li li::before{content:"·";position:absolute;left:3px;top:-1px;color:var(--ink);font-weight:800;font-size:18px}
+.note{font-size:12px;color:var(--muted);font-style:italic;margin:6px 0}
+</style>
+</head>
+<body>
+<script>
+fetch('/api/me').then(function(r){return r.json();}).then(function(j){
+  if(j&&j.authOn&&!j.user){ var pg=location.pathname.split('/').pop()||'index.html'; location.href='login.html?next='+encodeURIComponent(pg); }
+}).catch(function(){});
+</script>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag">OS</span></div>
+  <div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <a href="customer.html">고객 앱</a>
+    <a href="store.html">가맹점</a>
+    <a href="hq.html">가맹본부</a>
+    <a href="flow.html">접객</a>
+    <a href="exam.html">검안</a>
+    <a href="fit.html">피팅</a>
+  </div>
+</div></div>
+
+<div class="wrap">
+<section class="view active">
+  <div class="lead">
+    <div>
+      <div class="eyebrow">③ · 검안·맞춤·피팅 표준 매뉴얼</div>
+      <h2>검안 → 사이즈 재기 → 조제 → 피팅, 시스템으로 표준화</h2>
+      <div class="sub">앱이 절차를 단계별로 띄우고, 안경사가 따라가면 자동으로 표준 준수. AI가 기준값·이상치를 제시 → 안경사는 확인·확정만. <b>비숙련도 베테랑급 + 숙련자 판단차 제거.</b></div>
+    </div>
+    <span class="pill good">● v0.1 골격 · 누적 빌드</span>
+  </div>
+
+  <div class="b-nav">
+    <a href="#s0">0 전제</a>
+    <a href="#sa">A 검안</a>
+    <a href="#sb">B 조제</a>
+    <a href="#sc">C 피팅</a>
+    <a href="#sd">D 안전·의뢰</a>
+    <a href="#se">E 채울 칸</a>
+  </div>
+
+  <div class="card pad b-sec">
+    <div class="legend">
+      <span><span class="dft">〔확인〕</span> 교과·표준 초벌값 — 임상 검증 후 확정</span>
+      <span><span class="blk">〔＿＿〕</span> 임상·법규로 채울 빈칸</span>
+    </div>
+    <p class="note">각 단계 = 입력원·앱 동작 한 줄 + 변수 표(항목 / 기준·정상범위 / 이상치 → 처리). "→ 의뢰"는 안경사 업무범위를 넘는 소견을 안과로 넘기는 안전장치(D).</p>
+  </div>
+
+  <div class="card pad b-sec" id="s0">
+    <div class="eyebrow">0 · 전제</div>
+    <div class="ctitle">장비값 받기 · 데이터 연결</div>
+    <p>모든 측정값은 raw 1층에 저장 → 본사 기준 코드(2층) 환산. 기존 장비 값은 3가지 길로.</p>
+    <table class="bvt">
+      <tr><th>경로</th><th>방식</th><th>적용</th></tr>
+      <tr><td>① 표준 통신</td><td>자동굴절기·렌즈미터·포롭터 디지털 출력 → 자동 입력</td><td>지원 기기 즉시</td></tr>
+      <tr><td>② 시리얼/USB</td><td>RS-232/USB 원시 데이터, 기기별 파서 1회=영구</td><td>주력 구형</td></tr>
+      <tr><td>③ 촬영+AI</td><td>화면 숫자 촬영 → AI 판독 입력</td><td>데모·초기 즉시</td></tr>
+    </table>
+    <p class="note">전략: 촬영+AI로 빠르게 → 정식 연동. 수기 입력 0이 목표.</p>
+  </div>
+
+  <div class="card pad b-sec" id="sa">
+    <div class="eyebrow">A · 검안 플로우 <span class="gw">측정 강제 · 미완료 시 진행 차단</span></div>
+    <div class="b-flow">문진 → 나안 → 타각식 → 자각식 → 양안균형·양안시 → 처방 확정</div>
+
+    <div class="ctitle" style="font-size:15px;margin-top:14px">A-1 문진 <span class="gw">임상</span></div>
+    <div class="io"><b>입력</b> 안경사 문진 ｜ <b>앱</b> 용도→렌즈·코팅 연결, 위험 소견→의뢰 플래그</div>
+    <table class="bvt">
+      <tr><th>항목</th><th>기준·정상범위</th><th>이상치 → 처리</th></tr>
+      <tr><td>주 용도</td><td>원/근/VDT/운전/실내 선택</td><td>—</td></tr>
+      <tr><td>안질환·수술력</td><td>없음 / 라식·백내장 등</td><td><span class="dft">〔확인〕</span> 안과 수술·질환력 → 처방 보수적, 필요시 의뢰</td></tr>
+      <tr><td>전신질환·약</td><td>당뇨·갑상선 등</td><td><span class="dft">〔확인〕</span> 당뇨(망막)·스테로이드 등 → 시력변동 주의</td></tr>
+      <tr><td>기존 도수·만족도</td><td>렌즈미터 + 불편 청취</td><td>큰 불편 → 원인 추적</td></tr>
+    </table>
+
+    <div class="ctitle" style="font-size:15px;margin-top:14px">A-2 나안 / 현용 시력 <span class="gw">굴절검사</span></div>
+    <table class="bvt">
+      <tr><th>항목</th><th>기준·정상범위</th><th>이상치 → 처리</th></tr>
+      <tr><td>나안시력(원/근)</td><td>좌·우 기록</td><td><span class="dft">〔확인〕</span> 교정 0.8 미만 지속 → 정밀·원인 추적</td></tr>
+      <tr><td>현용 도수</td><td>렌즈미터 S/C/Ax/ADD</td><td>—</td></tr>
+      <tr><td>교정시력 목표</td><td><span class="dft">〔확인〕</span> 1.0 기준</td><td><span class="dft">〔확인〕</span> 최대교정 0.5 미만 → 의뢰</td></tr>
+    </table>
+
+    <div class="ctitle" style="font-size:15px;margin-top:14px">A-3 타각적 굴절검사 <span class="gw">굴절검사</span></div>
+    <div class="io"><b>입력</b> 자동굴절기 (안경사 업무 = 자동굴절기 이용 타각검사로 한정, 수기 타각·약제 검사 제외) ｜ <b>앱</b> 자각식 출발점 자동 세팅</div>
+    <table class="bvt">
+      <tr><th>항목</th><th>기준·정상범위</th><th>이상치 → 처리</th></tr>
+      <tr><td>구면 S</td><td>좌·우 (D)</td><td><span class="dft">〔확인〕</span> |S| ≥ 6.00D → 정밀·고굴절률</td></tr>
+      <tr><td>원주 C</td><td>좌·우 (D)</td><td><span class="dft">〔확인〕</span> |C| ≥ 2.00D → 정밀·축 재확인</td></tr>
+      <tr><td>난시축 Ax</td><td>0~180°</td><td>사축·비대칭 → 확인</td></tr>
+    </table>
+
+    <div class="ctitle" style="font-size:15px;margin-top:14px">A-4 자각적 굴절검사 <span class="gw">굴절검사·교정</span></div>
+    <div class="io"><b>입력</b> 포롭터/시험테 ｜ <b>앱</b> MPMVA·JCC·적녹 순서 강제, 정점거리 보정 자동</div>
+    <table class="bvt">
+      <tr><th>항목</th><th>기준·정상범위</th><th>이상치 → 처리</th></tr>
+      <tr><td>최종 구면(MPMVA)</td><td>최고시력의 최저 마이너스 구면</td><td>과교정 → 경고</td></tr>
+      <tr><td>난시 정밀(JCC)</td><td>축·양 확정</td><td>—</td></tr>
+      <tr><td>정점간거리(VD)</td><td><span class="dft">〔확인〕</span> 12mm 표준</td><td><span class="dft">〔확인〕</span> ±4.00D↑ 환산 필수</td></tr>
+      <tr><td>가입도 ADD</td><td><span class="dft">〔확인〕</span> 연령별 → 아래</td><td>연령 대비 과다 → 재확인</td></tr>
+    </table>
+    <p class="note"><span class="dft">〔확인〕</span> ADD 초안: 40대 +0.75~1.25 / 50대 +1.50~2.00 / 60대+ +2.25~2.50. 작업거리·잔여조절로 미세조정 — 기준 확정 필요.</p>
+
+    <div class="ctitle" style="font-size:15px;margin-top:14px">A-5 양안균형·양안시 <span class="gw">양안시</span></div>
+    <div class="io"><b>입력</b> 포롭터(로터리프리즘·편광) ｜ <b>앱</b> 사위·폭주·억제 자동 판정</div>
+    <table class="bvt">
+      <tr><th>항목</th><th>기준·정상범위</th><th>이상치 → 처리</th></tr>
+      <tr><td>양안 균형</td><td>좌우 조절 균등</td><td>불균형 → 재조정</td></tr>
+      <tr><td>사위(원)</td><td><span class="dft">〔확인〕</span> 정위~외사위 1Δ±2 (Morgan)</td><td><span class="dft">〔확인〕</span> 외사위 >3Δ / 내사위 >1Δ → 프리즘·의뢰</td></tr>
+      <tr><td>사위(근)</td><td><span class="dft">〔확인〕</span> 외사위 3Δ±3 (Morgan)</td><td><span class="dft">〔확인〕</span> 외사위 >6Δ / 내사위 >3Δ → 프리즘·의뢰</td></tr>
+      <tr><td>폭주근점(NPC)</td><td><span class="dft">〔확인〕</span> ~5~10cm</td><td>멀어짐 → 폭주부전 의심</td></tr>
+      <tr><td>조절력(AMP)</td><td><span class="dft">〔확인〕</span> Hofstetter 최소=15−0.25×나이</td><td>저하 → 확인</td></tr>
+      <tr><td>억제·입체시</td><td>워스4점·입체시표 정상</td><td><span class="dft">〔확인〕</span> 항상성 복시·억제 → 의뢰 (간헐은 경과관찰)</td></tr>
+    </table>
+
+    <div class="ctitle" style="font-size:15px;margin-top:14px">A-6 처방 확정 <span class="gw">교정</span></div>
+    <div class="io"><b>앱</b> 체크리스트 미완료 시 확정 차단, 구도수 대비 변화량 경고</div>
+    <table class="bvt">
+      <tr><th>항목</th><th>기준·정상범위</th><th>이상치 → 처리</th></tr>
+      <tr><td>최종 처방</td><td>S/C/Ax/ADD/프리즘/PD 확정</td><td>누락 → 차단</td></tr>
+      <tr><td>구도수 대비 변화</td><td><span class="dft">〔확인〕</span> 구면 ±0.50~0.75D 초과 변화</td><td>급변 → 재확인·적응 안내</td></tr>
+      <tr><td>용도별 분기</td><td>원용/근용/누진/중근용</td><td>—</td></tr>
+    </table>
+  </div>
+
+  <div class="card pad b-sec" id="sb">
+    <div class="eyebrow">B · 처방 → 조제 자동 산출 <span class="gw">감으로 넣던 값을 SW가</span></div>
+    <div class="io"><b>입력</b> 처방 + 측정 5값 + 프레임 박싱값 ｜ <b>앱</b> 가공 파라미터 자동 계산, 호환 불가 시 경고</div>
+    <table class="bvt">
+      <tr><th>항목</th><th>기준·산출식</th><th>이상치 → 처리</th></tr>
+      <tr><td>광학중심(OC)</td><td>단안 PD + 동공높이 → 좌표</td><td>편차 → 재측정</td></tr>
+      <tr><td>정점거리 보정</td><td><span class="dft">〔확인〕</span> Fe=F/(1−d·F), ±4.00D↑</td><td>고도수 미보정 → 경고</td></tr>
+      <tr><td>프리즘</td><td>처방 + 편심(Δ=cm×D)</td><td>한계 초과 → 경고</td></tr>
+      <tr><td>인셋(근/누진)</td><td><span class="dft">〔확인〕</span> 작업거리 기반</td><td>—</td></tr>
+      <tr><td>렌즈 굴절률</td><td><span class="dft">〔확인〕</span> ~±2→1.60 / ±2~4→1.67 / ±4↑→1.74</td><td>미용 고려 상향</td></tr>
+      <tr><td>최소블랭크·유효경</td><td>프레임 a·DBL·PD로 가공 가능성</td><td>불가 → 프레임 교체 경고</td></tr>
+      <tr><td>두께·무게</td><td>도수·굴절률·직경 기반</td><td>과다 → 형태·굴절률 제안</td></tr>
+      <tr><td>박싱 좌표 연결</td><td>a □ DBL − 템플 → 9사이즈·②</td><td>—</td></tr>
+    </table>
+    <p class="note">박싱 좌표가 9사이즈(①)·타사 DB(②)와 같은 2층 코드로 연결되는 지점. 조제값이 곧 데이터 자산.</p>
+  </div>
+
+  <div class="card pad b-sec" id="sc">
+    <div class="eyebrow">C · 피팅 표준화 <span class="gw">조정 강제 · A4 피팅시트 출력</span></div>
+    <div class="io"><b>입력</b> 측정 5값 + 안면각 + 소재 ｜ <b>앱</b> 표준→예비→정밀 3단계, 휜 값·조정 기록 → 본부 DB</div>
+    <table class="bvt">
+      <tr><th>요소</th><th>기준·표준치</th><th>이상치 → 처리</th></tr>
+      <tr><td>다리벌림각</td><td><span class="dft">〔확인〕</span> 목표 템플간격 = 귀윗간격 −15(유연금속)/−10(반강성)mm</td><td>계수 현장 검증</td></tr>
+      <tr><td>판토스코픽 틸트</td><td><span class="dft">〔확인〕</span> 8~12°</td><td><span class="dft">〔확인〕</span> 8~12° 채택 (중앙 10°)</td></tr>
+      <tr><td>정점간거리</td><td><span class="dft">〔확인〕</span> 12mm, 고도수일수록 짧게</td><td>편차 → 코받침·틸트 조정</td></tr>
+      <tr><td>안면각/랩각</td><td><span class="dft">〔확인〕</span> 안면각 5°→BC4 / 10°→BC6 / 15°+→랩 전용</td><td>고도수 왜곡 → 보정</td></tr>
+      <tr><td>코받침</td><td>코 형태 기반, 수직 안착+정점거리</td><td>일체형 브리지 → 조정 한계</td></tr>
+      <tr><td>템플 꺾임·귀뒤</td><td>귀 위치/높이, 수평 유지</td><td>미끄럼 → 재조정</td></tr>
+      <tr><td>소재→최대벌림각</td><td><span class="dft">〔확인〕</span> 티탄±8 / 금속±6 / TR±4 / 경질아세테이트±1 mm</td><td>초과 → "이 테 못 맞춤" 안내</td></tr>
+    </table>
+    <p><b>A4 피팅시트 = 출력물.</b> 각도를 종이에 직접 안 재고 <b>선형값(mm)으로 환산</b>해 잰다. 평면도에 목표 템플간격 두 점 → 거기 닿게 휨. 측면도엔 판토 각도 웨지. <b>50mm 스케일바(가로·세로) 필수</b>, 인쇄 "실제 크기 100%". 역할 3: 휨 지그 + 검증 게이지 + 고객 설명. (구현체 = bv-fitsheet-demo.pdf)</p>
+  </div>
+
+  <div class="card pad b-sec" id="sd">
+    <div class="eyebrow">D · 안전·의뢰 기준 <span class="gw">안경사법 경계 — 매뉴얼의 안전장치</span></div>
+    <p>안경사는 도수 안경·콘택트의 조제·판매·피팅이 업무. 질환의 진단·치료·처방은 안과 영역. 이 경계를 시스템이 자동으로 지킨다 — "이상치 → 의뢰" 트리거가 그 구현.</p>
+    <table class="bvt">
+      <tr><th>트리거</th><th>기준</th><th>처리</th></tr>
+      <tr><td>연령 제한</td><td><b>6세 이하 = 의사 처방 필수</b> (의료기사법 시행령 별표1) — 안경사 단독 조제·판매 불가</td><td>해당 시 → 안과 처방 안내</td></tr>
+      <tr><td>질환 의심</td><td><span class="dft">〔확인〕</span> 급격 시력저하·복시·시야결손·동공부등·충혈통증·번쩍임/날파리(망막)</td><td>진단·치료 금지 → 안과 의뢰</td></tr>
+      <tr><td>교정 불충분</td><td>최대교정에도 목표 미달</td><td>→ 의뢰</td></tr>
+      <tr><td>양안시 이상</td><td>억제·복시·큰 사위</td><td>→ 프리즘 검토/의뢰</td></tr>
+    </table>
+    <p class="note">"데이터 장악"과 "법적 안전"을 동시에. 의뢰조차 기록되면 그것도 본부 데이터.</p>
+  </div>
+
+  <div class="card pad b-sec" id="se">
+    <div class="eyebrow">E · 채울 칸 인덱스 <span class="gw">임상 작업 리스트</span></div>
+    <p>아래만 채우면 v0.1 골격이 v1.0 정본이 된다. <span class="dft">〔확인〕</span>은 검증·확정, <span class="blk">〔＿＿〕</span>은 신규 입력.</p>
+    <ul class="b-li">
+      <li><b>검안 컷값</b> — 나안·교정시력 정밀 기준, 고도수·고난시 주의 컷, 구도수 대비 허용 변화폭.</li>
+      <li><b>양안시 정상범위</b> — 사위(원/근) Morgan 채택 여부, NPC·AMP·AC/A 기준, 억제·복시 의뢰 컷.</li>
+      <li><b>ADD 연령 기준</b> 확정(작업거리 반영).</li>
+      <li><b>조제 계수</b> — 정점거리 보정 적용 컷, 인셋 산출식, 굴절률 선택 기준.</li>
+      <li><b>피팅 계수</b> — 다리벌림각 −15/−10 검증, 판토 8~12 vs 8~15, 안면각→베이스커브 매칭.</li>
+      <li><b>소재→최대벌림각 테이블</b>(②와 공유) 수치.</li>
+      <li><b>안전·의뢰</b> — 6세 이하 법규 확인, 질환 의심 소견 목록 확정.</li>
+    </ul>
+    <p class="note">다음 붙일 것(누적): E 빈칸 임상값 → ④ 콘택트 검안 플로우 → 조제 계산식 상세 → A4 피팅시트 데이터 연동 → 완성 후 핵심만 사업 개요(A)에 녹이기.</p>
+  </div>
+</section>
+</div>
+
+<div class="foot">
+  <span>BETTERVISION OS · 검안 매뉴얼 (③) v0.1</span>
+  <span>표준화 = 편차 제거 + 데이터 귀속</span>
+</div>
+<script src="/assets/app.js"></script>
+</body>
+</html>

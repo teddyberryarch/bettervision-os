@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 9사이즈 환산엔진</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);margin:2px 0 4px}
+.sec .sdesc{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.fld{flex:1;min-width:120px}
+.fld label{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px}
+.fld input{width:100%;font-size:15px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:#fff}
+.fld input[type=range]{padding:0}
+.bigout{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+.bigout .code{font-size:30px;font-weight:700;color:var(--ink);min-width:74px}
+.bigout .sm{font-size:13px;color:var(--muted);line-height:1.5}
+.grid3{display:grid;grid-template-columns:42px 1fr 1fr 1fr;gap:6px;margin:10px 0}
+.grid3 .h{font-size:12px;color:var(--muted);font-weight:600;text-align:center;align-self:center}
+.cell{border:1px solid var(--line);border-radius:10px;padding:10px 6px;text-align:center;min-height:62px;display:flex;flex-direction:column;justify-content:center}
+.cell .c{font-size:14px;font-weight:700;color:var(--ink)}
+.cell .p{font-size:13px;color:var(--muted);margin-top:2px}
+.cell.mode{outline:2px solid var(--good)}
+.cell.here{box-shadow:inset 0 0 0 2px var(--ink)}
+.tunecard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+.note{font-size:13px;color:var(--muted);font-style:italic;margin:8px 0}
+.dump{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--tile);color:#d7d7da;border-radius:10px;padding:14px;white-space:pre-wrap;line-height:1.5;overflow:auto}
+.warnbox{font-size:13px;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:8px 11px;margin:8px 0}
+</style>
+</head>
+<body>
+<script>
+fetch('/api/me').then(function(r){return r.json();}).then(function(j){
+  if(j&&j.authOn&&!j.user){ var pg=location.pathname.split('/').pop()||'index.html'; location.href='login.html?next='+encodeURIComponent(pg); }
+}).catch(function(){});
+</script>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+  <div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <a href="customer.html">고객 앱</a>
+    <a href="store.html">가맹점</a>
+    <a href="hq.html">가맹본부</a>
+    <a href="flow.html">접객</a>
+    <a href="exam.html">검안</a>
+    <a href="fit.html">피팅</a>
+  </div>
+</div></div>
+
+<div class="wrap">
+<section class="view active">
+  <div class="lead">
+    <div>
+      <div class="eyebrow">⑨ · 9사이즈 환산엔진 (본사 핵심 IP)</div>
+      <h2>측정 raw → S/M/L 등급 → 9코드 + 적합도</h2>
+      <div class="sub">측정·추천·피팅·생산이 전부 이 위에 선다. 경계 mm값이 곧 IP — 평균 근처에서 1mm가 분포를 크게 바꾼다. 여기서 경계를 맞춰 <b>M·M이 최빈(재고 효율)</b>이 되게 한다.</div>
+    </div>
+    <span class="pill good">● 코어 · 튜닝 가능</span>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">1 · 단일 측정 테스터</div>
+    <div class="sdesc">한 사람 측정값을 넣으면 등급·코드·적합도가 나온다. 아래 분포표에 위치도 표시.</div>
+    <div class="row">
+      <div class="fld"><label>얼굴 가로폭 (mm) · <b id="fwv">152</b></label><input id="fw" type="range" min="132" max="170" step="0.5" value="152" oninput="upd()"></div>
+      <div class="fld"><label>귀 윗부분 간격 (mm) · <b id="egv">160</b></label><input id="eg" type="range" min="144" max="180" step="0.5" value="160" oninput="upd()"></div>
+    </div>
+    <div class="bigout"><div class="code" id="code">M·M</div><div class="sm" id="codesm"></div></div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">2 · 9사이즈 분포 (수요표)</div>
+    <div class="sdesc">모집단 분포 × 현재 경계 → 9칸 비율. 초록 테두리 = 최빈(목표는 M·M). 검은 테두리 = 위 테스터 위치.</div>
+    <div class="grid3" id="grid"></div>
+    <div id="modeline" class="note"></div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">3 · 경계값 튜너 <span style="font-size:13px;color:var(--warn)">= 본사 IP</span></div>
+    <div class="sdesc">경계 mm와 모집단 평균·표준편차를 바꾸면 분포가 즉시 갱신된다. M·M이 최대가 되도록 맞춘 값이 정본.</div>
+    <div class="tunecard">
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">프론트 폭 경계 (얼굴 가로)</div>
+      <div class="row">
+        <div class="fld"><label>S | M 경계</label><input id="fb0" type="number" step="0.5" oninput="setB()"></div>
+        <div class="fld"><label>M | L 경계</label><input id="fb1" type="number" step="0.5" oninput="setB()"></div>
+        <div class="fld"><label>모집단 평균</label><input id="fm" type="number" step="0.5" oninput="setB()"></div>
+        <div class="fld"><label>표준편차</label><input id="fs" type="number" step="0.1" oninput="setB()"></div>
+      </div>
+    </div>
+    <div class="tunecard">
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">템플 경계 (귀 간격)</div>
+      <div class="row">
+        <div class="fld"><label>S | M 경계</label><input id="tb0" type="number" step="0.5" oninput="setB()"></div>
+        <div class="fld"><label>M | L 경계</label><input id="tb1" type="number" step="0.5" oninput="setB()"></div>
+        <div class="fld"><label>모집단 평균</label><input id="tm" type="number" step="0.5" oninput="setB()"></div>
+        <div class="fld"><label>표준편차</label><input id="ts" type="number" step="0.1" oninput="setB()"></div>
+      </div>
+    </div>
+    <div class="note">현재값은 〔확인〕 초벌(사이즈코리아 추정). 실데이터 쌓이면 만족도 기반으로 경계 자기교정 → 이 화면에서 갱신.</div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">4 · 엔진 설정 출력</div>
+    <div class="sdesc">이 설정이 단일 진실 공급원. 그대로 <code>/assets/bv-size-engine.js</code>의 config로. 측정·추천·피팅이 전부 이걸 호출.</div>
+    <div class="dump" id="dump"></div>
+  </div>
+</section>
+</div>
+
+<div class="foot"><span>BETTERVISION OS · 9사이즈 환산엔진 v0.1</span><span>경계값 = 본사 IP</span></div>
+
+<script src="/assets/bv-size-engine.js"></script>
+<script>
+var E=window.BVSizeEngine, C=E.config;
+function initInputs(){
+  document.getElementById('fb0').value=C.front.bounds[0];
+  document.getElementById('fb1').value=C.front.bounds[1];
+  document.getElementById('fm').value=C.pop.faceWidth.mean;
+  document.getElementById('fs').value=C.pop.faceWidth.sd;
+  document.getElementById('tb0').value=C.temple.bounds[0];
+  document.getElementById('tb1').value=C.temple.bounds[1];
+  document.getElementById('tm').value=C.pop.earGap.mean;
+  document.getElementById('ts').value=C.pop.earGap.sd;
+}
+function setB(){
+  E.setBound('front',0,document.getElementById('fb0').value);
+  E.setBound('front',1,document.getElementById('fb1').value);
+  E.setBound('temple',0,document.getElementById('tb0').value);
+  E.setBound('temple',1,document.getElementById('tb1').value);
+  E.setPop('faceWidth','mean',document.getElementById('fm').value);
+  E.setPop('faceWidth','sd',document.getElementById('fs').value);
+  E.setPop('earGap','mean',document.getElementById('tm').value);
+  E.setPop('earGap','sd',document.getElementById('ts').value);
+  upd();
+}
+function upd(){
+  var fw=parseFloat(document.getElementById('fw').value), eg=parseFloat(document.getElementById('eg').value);
+  document.getElementById('fwv').textContent=fw; document.getElementById('egv').textContent=eg;
+  var r=E.toCode({faceWidth:fw, earGap:eg});
+  document.getElementById('code').textContent=r.code||'—';
+  document.getElementById('codesm').innerHTML='적합도 <b>'+r.fit+'%</b><br>프론트 '+r.front+' ('+r.fitFront+'%) · 템플 '+r.temple+' ('+r.fitTemple+'%)';
+  // 분포 그리드
+  var d=E.cellDist(), L=['S','M','L'];
+  var maxv=0,mi=1,mj=1; for(var i=0;i<3;i++)for(var j=0;j<3;j++)if(d[i][j]>maxv){maxv=d[i][j];mi=i;mj=j;}
+  var hereF=L.indexOf(r.front), hereT=L.indexOf(r.temple);
+  var html='<div class="h"></div><div class="h">템플 S</div><div class="h">템플 M</div><div class="h">템플 L</div>';
+  for(var i=0;i<3;i++){
+    html+='<div class="h">프론트 '+L[i]+'</div>';
+    for(var j=0;j<3;j++){
+      var pct=(d[i][j]*100), op=0.08+0.85*(d[i][j]/(maxv||1));
+      var cls='cell'+((i===mi&&j===mj)?' mode':'')+((i===hereF&&j===hereT)?' here':'');
+      html+='<div class="'+cls+'" style="background:rgba(5,150,105,'+op.toFixed(2)+')"><div class="c">'+L[i]+'·'+L[j]+'</div><div class="p">'+pct.toFixed(1)+'%</div></div>';
+    }
+  }
+  document.getElementById('grid').innerHTML=html;
+  var modePct=(maxv*100).toFixed(1);
+  var ml=document.getElementById('modeline');
+  if(mi===1&&mj===1) ml.innerHTML='✅ 최빈 = M·M ('+modePct+'%) — 재고 효율 기준 충족.';
+  else ml.innerHTML='⚠ 최빈 = '+L[mi]+'·'+L[mj]+' ('+modePct+'%). 경계를 조정해 M·M이 최대가 되게 맞추세요.';
+  // 출력
+  document.getElementById('dump').textContent=JSON.stringify({front:C.front,temple:C.temple,pop:C.pop},null,2);
+}
+initInputs(); upd();
+</script>
+</body>
+</html>

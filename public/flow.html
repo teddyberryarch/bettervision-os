@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 매장 접객 시퀀스</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.branchbar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:6px 0 16px}
+@media(max-width:760px){.branchbar{grid-template-columns:1fr}}
+.branchbar .bc{border:1px solid var(--line);border-radius:12px;padding:12px 13px}
+.branchbar .bc .bt{font-size:14px;font-weight:700;margin-bottom:3px}
+.branchbar .bc .bd{font-size:13px;color:var(--muted);line-height:1.5}
+.branchbar .bc.b1{border-top:3px solid var(--ink)} .branchbar .bc.b1 .bt{color:var(--ink)}
+.branchbar .bc.b2{border-top:3px solid var(--good)} .branchbar .bc.b2 .bt{color:var(--good)}
+.branchbar .bc.b3{border-top:3px solid var(--warn)} .branchbar .bc.b3 .bt{color:var(--warn)}
+.ph{position:relative;border:1px solid var(--line);border-radius:14px;padding:16px 18px 16px 56px;margin:11px 0;background:#fff}
+.ph .no{position:absolute;left:14px;top:16px;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.ph .pt{font-size:18px;font-weight:600;color:var(--ink);letter-spacing:-.3px}
+.ph .tm{font-size:13px;color:var(--muted);font-weight:600;margin-left:8px}
+.ph ul{list-style:none;padding:0;margin:8px 0}
+.ph li{position:relative;padding-left:16px;font-size:14px;line-height:1.55;margin:5px 0;color:var(--ink)}
+.ph li::before{content:"·";position:absolute;left:3px;top:-1px;color:var(--ink);font-weight:800;font-size:18px}
+.ph .tools{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.ph .tool{font-size:12px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:6px 10px;text-decoration:none}
+.ph .tool:hover{border-color:var(--ink)}
+.ph .data{font-size:13px;color:var(--good);background:var(--good-soft);border-radius:8px;padding:7px 10px;margin:7px 0}
+.ph .say{font-size:13px;color:var(--muted);font-style:italic;border-left:3px solid var(--line);padding:3px 0 3px 10px;margin:7px 0}
+.ph .sys{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:11px;font-weight:700;border-radius:6px;padding:3px 8px}
+.tag.ok{background:var(--good-soft);color:var(--good)}
+.tag.todo{background:var(--warn-soft);color:var(--warn)}
+.ph .br{font-size:13px;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:7px 10px;margin:7px 0}
+.smap{margin:10px 0}
+.smap table{width:100%;border-collapse:collapse;font-size:14px}
+.smap th,.smap td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+.smap th{background:var(--surface);font-size:13px;color:var(--muted);font-weight:600}
+.smap td:first-child{font-weight:700;width:34%}
+</style>
+</head>
+<body>
+<script>
+fetch('/api/me').then(function(r){return r.json();}).then(function(j){
+  if(j&&j.authOn&&!j.user){ var pg=location.pathname.split('/').pop()||'index.html'; location.href='login.html?next='+encodeURIComponent(pg); }
+}).catch(function(){});
+</script>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+  <div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <a href="customer.html">고객 앱</a>
+    <a href="store.html">가맹점</a>
+    <a href="hq.html">가맹본부</a>
+    <a href="flow.html">접객</a>
+    <a href="exam.html">검안</a>
+    <a href="fit.html">피팅</a>
+  </div>
+</div></div>
+
+<div class="wrap">
+<section class="view active">
+  <div class="lead">
+    <div>
+      <div class="eyebrow">매장 표준 운영 · 접객 시퀀스</div>
+      <h2>손님이 들어오면 — 이 순서대로</h2>
+      <div class="sub">아무나(안경사 1 + 일반 직원) 따라가면 표준이 되는 매장 접객 절차. 각 단계가 어떤 시스템을 부르는지, 무슨 데이터가 남는지 표시. <b>이게 모든 시스템을 꿰는 한 흐름.</b></div>
+    </div>
+    <span class="pill good">● 운영 런북 v0.1</span>
+  </div>
+
+  <div class="card pad">
+    <div class="eyebrow" style="margin-bottom:6px">입장 유형 3분기 — 시작에서 갈라짐</div>
+    <div class="branchbar">
+      <div class="bc b1"><div class="bt">A · 신규 도수</div><div class="bd">전체 풀코스. 측정→검안→추천→조제→피팅.</div></div>
+      <div class="bc b2"><div class="bt">B · 재방문 재구매</div><div class="bd">구데이터 로드. 측정·검안 opt-out → 바로 추천·주문. (재검 희망 시 1만원, 구매 시 면제)</div></div>
+      <div class="bc b3"><div class="bt">C · 비도수</div><div class="bd">선글라스·스마트안경·저도수 리딩. 검안 스킵, 측정→추천→피팅. 온라인 판매 가능 품목.</div></div>
+    </div>
+  </div>
+
+  <div class="ph">
+    <div class="no">0</div>
+    <div class="pt">접수 · 맞이<span class="tm">~2분</span></div>
+    <ul>
+      <li>신규/재방문 확인(연락처) → CRM 자동 조회. 재방문이면 과거 측정·구매·도수 이력 로드.</li>
+      <li>주 용도 청취(원거리/근거리/VDT/운전) + 위험 소견 간단 문진.</li>
+      <li><b>기존 안경 지참 시</b> → 렌즈미터로 구도수(S/C/Ax/ADD/PD) 읽어 기준값 확보.</li>
+    </ul>
+    <div class="tools"><a class="tool" href="store.html">가맹점 CRM 조회</a></div>
+    <div class="data">데이터: 고객 식별 · 용도 · 구도수(렌즈미터)</div>
+    <div class="say">"이력 불러올게요. 기존 안경도 한번 재볼게요."</div>
+    <div class="sys"><span class="tag ok">CRM ✅</span><span class="tag todo">② 렌즈미터·구도수 🔧</span></div>
+  </div>
+
+  <div class="ph">
+    <div class="no">1</div>
+    <div class="pt">안면 측정<span class="tm">~3분</span></div>
+    <ul>
+      <li>아이패드로 얼굴 스캔 → 측정 5값(PD·얼굴폭·코높이·귀위치·안면각) + 얼굴 메시.</li>
+      <li>측정값이 9사이즈 후보 + 가상피팅용 얼굴 기하로 동시 확보(한 번 스캔, 둘 다).</li>
+    </ul>
+    <div class="tools"><a class="tool" href="customer.html">측정·가상피팅</a></div>
+    <div class="data">데이터: raw 5값 + 메시 + 사진(생체정보 동의) → 본부 귀속</div>
+    <div class="say">"정밀하게 얼굴을 재서 딱 맞는 사이즈를 찾습니다." (신뢰 포인트)</div>
+    <div class="sys"><span class="tag todo">① 안면측정 🔧</span><span class="tag todo">⑨ 9사이즈 환산엔진 🔧</span></div>
+  </div>
+
+  <div class="ph">
+    <div class="no">2</div>
+    <div class="pt">검안<span class="tm">~7분 · 신규/도수만</span></div>
+    <ul>
+      <li>검안 시스템이 절차를 단계별로 띄움 → 따라가면 표준. 문진→나안→타각(자동굴절기)→자각→양안균형→처방.</li>
+      <li>AI가 기준값·이상치 제시, 안경사 확인·확정. 위험 소견·6세 이하 → 안과 의뢰 자동 라우팅.</li>
+    </ul>
+    <div class="tools"><a class="tool" href="exam.html">검안 시스템 열기</a><a class="tool" href="b.html">표준 매뉴얼</a></div>
+    <div class="data">데이터: 처방(S/C/Ax/ADD/PD) · 이상치·의뢰 플래그</div>
+    <div class="say">"검사 결과 이대로 처방 잡을게요." (재방문 단순 재구매면 opt-out)</div>
+    <div class="sys"><span class="tag ok">③A 검안 ✅</span></div>
+  </div>
+
+  <div class="ph">
+    <div class="no">3</div>
+    <div class="pt">추천 · 가상피팅<span class="tm">~7분</span></div>
+    <ul>
+      <li>측정+검안으로 9사이즈 매칭 → 적합도% 순위. 얼굴형·스타일·용도·트렌드·이력 6변수로 객관 추천.</li>
+      <li>타사 진열품까지 적합도 비교("젠몬 78% vs 우리 PB 96%") — 강매 없이 PB가 자연 선택.</li>
+      <li>고른 디자인을 얼굴 메시에 얹어 가상피팅으로 미리 확인.</li>
+    </ul>
+    <div class="tools"><a class="tool" href="customer.html">가상피팅</a></div>
+    <div class="data">데이터: 추천 근거 · 비교 적합도 · 고객 선택</div>
+    <div class="say">"감이 아니라 수치로요 — 이게 96%로 제일 잘 맞아요."</div>
+    <div class="sys"><span class="tag todo">⑤ 추천·가상피팅 🔧</span><span class="tag todo">② 타사 적합도 🔧</span></div>
+  </div>
+
+  <div class="ph">
+    <div class="no">4</div>
+    <div class="pt">견적 · 결정<span class="tm">~5분</span></div>
+    <ul>
+      <li>본부 표준가 자동 적용(권장가·할인한도 강제) → 가격 협상 스트레스 없음.</li>
+      <li>렌즈 옵션(굴절률·코팅)·멤버십 등급·포인트 반영. 도수 제품은 선결제(또는 보증금).</li>
+    </ul>
+    <div class="tools"><a class="tool" href="store.html">POS · 견적</a></div>
+    <div class="data">데이터: 주문 · 결제 · 본부 매출 즉시 반영</div>
+    <div class="say">"가격은 전 매장 동일해요. 포인트 적립됩니다."</div>
+    <div class="sys"><span class="tag ok">가격통제·POS ✅</span></div>
+  </div>
+
+  <div class="ph">
+    <div class="no">5</div>
+    <div class="pt">조제 · 발주<span class="tm">~3분 + 제작 리드</span></div>
+    <ul>
+      <li>처방→조제값 자동 산출: 광학중심·정점거리 보정(고도수)·인셋·굴절률·최소블랭크 호환 체크.</li>
+      <li>프레임 호환 불가 시 경고. 본부로 발주·조립(프론트+템플 모듈). A4 피팅시트 1차 생성.</li>
+    </ul>
+    <div class="tools"><a class="tool" href="fit.html">피팅·A4 산출</a></div>
+    <div class="data">데이터: 조제 파라미터 · 발주 · 박싱 좌표(9사이즈·②)</div>
+    <div class="say">"○일 후 나와요. 그때 정밀 피팅까지 해드릴게요."</div>
+    <div class="sys"><span class="tag todo">③B 조제 산출 🔧</span><span class="tag ok">발주 푸시 ✅</span></div>
+  </div>
+
+  <div class="ph">
+    <div class="no">6</div>
+    <div class="pt">피팅 · 인도<span class="tm">수령일 · ~8분</span></div>
+    <ul>
+      <li>피팅 시스템이 측정값으로 휨 지시 산출(다리벌림각·판토·정점거리·코받침).</li>
+      <li>A4 피팅시트로 1:1 검증(목표 점에 다리 닿게 휨, 판토 웨지, 50mm 스케일바). 착용 확인.</li>
+      <li>휜 값·조정 내역 기록 → 본부 DB(재구매·타매장 재현). A4는 고객에게 "측정 증서"로.</li>
+    </ul>
+    <div class="tools"><a class="tool" href="fit.html">피팅 시스템 · A4</a></div>
+    <div class="data">데이터: 휨 값 · 최종 핏 · 인도 완료</div>
+    <div class="say">"이렇게까지 맞춰드려요." (A4 증서 = 클래식·정밀 신뢰)</div>
+    <div class="sys"><span class="tag ok">③C 피팅·A4 ✅</span></div>
+  </div>
+
+  <div class="ph">
+    <div class="no">7</div>
+    <div class="pt">사후 · 재구매 케어<span class="tm">지속</span></div>
+    <ul>
+      <li>모든 데이터 본부 귀속. 교체주기·도수변화 예측 시 앱이 재방문 알림.</li>
+      <li>재구매 땐 구도수 비교 + 측정·검안 opt-out으로 빠르게. 포인트·등급으로 PB 채널 락인.</li>
+    </ul>
+    <div class="tools"><a class="tool" href="customer.html">고객 앱 · 케어</a></div>
+    <div class="data">데이터: LTV 누적 · 재구매 트리거</div>
+    <div class="say">"렌즈 교체 시기 되면 알려드려요."</div>
+    <div class="sys"><span class="tag ok">CRM·재구매 ✅</span></div>
+  </div>
+
+  <div class="card pad smap">
+    <div class="eyebrow" style="margin-bottom:6px">이 시퀀스가 부르는 시스템 — 만든 것 / 만들 것</div>
+    <table>
+      <tr><th>시스템</th><th>역할(어느 단계)</th><th>상태</th></tr>
+      <tr><td><a href="engine.html" style="color:var(--ink);font-weight:700">⑨ 9사이즈 환산엔진 →</a></td><td>측정 raw→본사 코드. <b>나머지 전부의 토대</b>(1·3·5)</td><td><span class="tag todo">🔧 코어 · 최우선</span></td></tr>
+      <tr><td><a href="measure.html" style="color:var(--ink);font-weight:700">① 안면 측정 →</a></td><td>5값+메시 스캔(1)</td><td><span class="tag todo">🔧</span></td></tr>
+      <tr><td>③A 검안</td><td>굴절·양안시(2)</td><td><span class="tag ok">✅ exam.html</span></td></tr>
+      <tr><td><a href="rx.html" style="color:var(--ink);font-weight:700">③B 조제 산출 →</a></td><td>처방→가공값(5)</td><td><span class="tag todo">🔧</span></td></tr>
+      <tr><td>③C 피팅·A4</td><td>휨 지시·검증(6)</td><td><span class="tag ok">✅ fit.html</span></td></tr>
+      <tr><td><a href="recommend.html" style="color:var(--ink);font-weight:700">⑤ 추천·가상피팅 →</a></td><td>매칭·렌더(3)</td><td><span class="tag todo">🔧</span></td></tr>
+      <tr><td><a href="frames.html" style="color:var(--ink);font-weight:700">② 타사 DB·큐레이팅 →</a></td><td>구도수·적합도(0·3)</td><td><span class="tag todo">🔧 가맹 설득 무기</span></td></tr>
+      <tr><td><a href="lens.html" style="color:var(--ink);font-weight:700">④ 콘택트 측정 →</a></td><td>콘택트 처방</td><td><span class="tag todo">🔧</span></td></tr>
+      <tr><td>OS 운영</td><td>CRM·POS·가격·발주(0·4·5·7)</td><td><span class="tag ok">✅ store/hq</span></td></tr>
+    </table>
+  </div>
+</section>
+</div>
+
+<div class="foot"><span>BETTERVISION OS · 매장 접객 시퀀스 v0.1</span><span>한 흐름 = 모든 시스템의 글루</span></div>
+</body>
+</html>

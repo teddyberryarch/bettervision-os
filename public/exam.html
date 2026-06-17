@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 검안 자동 시스템</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.ex-presets{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
+.ex-presets .chip{font-size:13px;font-weight:600;color:var(--ink);background:var(--surface);
+  border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+.ex-presets .chip:hover{border-color:var(--ink)}
+.prog{display:flex;gap:5px;margin:10px 0 16px}
+.prog .pb{flex:1;height:5px;border-radius:9999px;background:var(--line)}
+.prog .pb.on{background:var(--ink)}
+.prog .pb.done{background:var(--good)}
+.ex-step .eyebrow{margin-bottom:2px}
+.ex-step .stitle{font-size:19px;font-weight:600;color:var(--ink);letter-spacing:-.3px;margin:2px 0 4px}
+.ex-step .sdesc{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:12px}
+.hint{font-size:13px;color:var(--good);background:var(--good-soft);border-radius:8px;padding:8px 11px;margin:8px 0}
+.warn{font-size:13px;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:8px 11px;margin:8px 0}
+.bad{font-size:13px;color:var(--bad);background:var(--bad-soft);border-radius:8px;padding:8px 11px;margin:8px 0}
+.frow{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
+.fld{flex:1;min-width:120px}
+.fld label{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px}
+.fld input,.fld select{width:100%;font-family:var(--kr);font-size:15px;color:var(--ink);
+  border:1px solid var(--line);border-radius:8px;padding:10px 11px;background:#fff}
+.eyegrid{display:grid;grid-template-columns:46px 1fr 1fr 1fr;gap:8px;align-items:center;margin:6px 0}
+.eyegrid .eh{font-size:12px;color:var(--muted);font-weight:600;text-align:center}
+.eyegrid .er{font-size:14px;font-weight:700;color:var(--ink);text-align:center}
+.eyegrid input{width:100%;font-size:15px;text-align:center;border:1px solid var(--line);border-radius:8px;padding:9px 6px;background:#fff;color:var(--ink)}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);margin:7px 0}
+.chk input{width:18px;height:18px}
+.navbtns{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:6px 10px;font-size:14px;margin:8px 0}
+.kv .k{color:var(--muted)} .kv .v{color:var(--ink);font-weight:600}
+.dump{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--tile);color:#d7d7da;
+  border-radius:10px;padding:14px;white-space:pre-wrap;line-height:1.5;margin:10px 0;overflow:auto}
+.flagline{font-size:14px;padding:7px 0;border-bottom:1px solid var(--line2)}
+.flagline:last-child{border-bottom:0}
+.flagline .t{font-weight:600}
+</style>
+</head>
+<body>
+<script>
+fetch('/api/me').then(function(r){return r.json();}).then(function(j){
+  if(j&&j.authOn&&!j.user){ var pg=location.pathname.split('/').pop()||'index.html'; location.href='login.html?next='+encodeURIComponent(pg); }
+}).catch(function(){});
+</script>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag">OS</span></div>
+  <div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <a href="customer.html">고객 앱</a>
+    <a href="store.html">가맹점</a>
+    <a href="hq.html">가맹본부</a>
+    <a href="flow.html">접객</a>
+    <a href="exam.html">검안</a>
+    <a href="fit.html">피팅</a>
+  </div>
+</div></div>
+
+<div class="wrap">
+<section class="view active">
+  <div class="lead">
+    <div>
+      <div class="eyebrow">③ · 검안 자동 시스템</div>
+      <h2>가이드 검안 — 따라가면 표준, 변수는 자동 산출</h2>
+      <div class="sub">생 눈 검안 절차와 가져온 안경(렌즈미터) 측정을 단계별로 안내. 상황에 따라 자동 분기하고, AI가 기준값·이상치를 띄운다. 결과 변수는 조제·피팅·9사이즈로 넘어간다. <b>표준 매뉴얼(b)의 실행 도구판.</b></div>
+    </div>
+    <span class="pill good">● v0.1 프로토타입</span>
+  </div>
+
+  <div class="card pad">
+    <div class="eyebrow" style="margin-bottom:4px">상황 시나리오 가정 — 눌러서 자동 채우기</div>
+    <div class="ex-presets">
+      <button class="chip" onclick="preset('myopia')">초진 · 단순 근시</button>
+      <button class="chip" onclick="preset('presby')">재방문 · 노안</button>
+      <button class="chip" onclick="preset('astig')">난시 + 사위 → 의뢰 분기</button>
+      <button class="chip" onclick="preset('reorder')">기존 안경 지참(렌즈미터)</button>
+      <button class="chip" onclick="resetAll()">초기화</button>
+    </div>
+    <div class="prog" id="prog"></div>
+    <div id="stage" class="ex-step"></div>
+    <div class="navbtns">
+      <button class="btn small ghost" id="backBtn" onclick="back()">← 이전</button>
+      <button class="btn small" id="nextBtn" onclick="next()">다음 →</button>
+    </div>
+  </div>
+</section>
+</div>
+
+<div class="foot">
+  <span>BETTERVISION OS · 검안 자동 시스템 v0.1</span>
+  <span>표준 준수 + 변수 귀속</span>
+</div>
+
+<script>
+var S, idx;
+function blankEye(){return {S:'',C:'',A:'',ADD:'',PD:''};}
+function resetAll(){
+  S={mode:'new',age:'',use:'far',hasGlasses:'no',presby:false,risk:[],
+     lm:{R:blankEye(),L:blankEye()},
+     va:{R:'',L:''},
+     obj:{R:{S:'',C:'',A:''},L:{S:'',C:'',A:''}},
+     subj:{R:{S:'',C:'',A:''},L:{S:'',C:'',A:''},vd:'12'},
+     bino:{pD:'',pN:''}, add:'' };
+  idx=0; render();
+}
+function steps(){
+  var a=['intake'];
+  if(S.hasGlasses==='yes') a.push('lensmeter');
+  a.push('va','objective','subjective','binocular');
+  if(S.presby) a.push('add');
+  a.push('result');
+  return a;
+}
+function cur(){return steps()[idx];}
+function num(v){var n=parseFloat(v);return isNaN(n)?null:n;}
+
+/* ---------- 렌더 ---------- */
+function render(){
+  var st=steps(), id=cur();
+  var prog=st.map(function(s,i){return '<div class="pb '+(i<idx?'done':(i===idx?'on':''))+'"></div>';}).join('');
+  document.getElementById('prog').innerHTML=prog;
+  document.getElementById('stage').innerHTML=view(id);
+  document.getElementById('backBtn').style.visibility = idx===0?'hidden':'visible';
+  document.getElementById('nextBtn').textContent = (id==='result')?'처음으로 ↺':'다음 →';
+  if(id==='result') buildResult();
+}
+function eyeInputs(pfx,obj,withAdd){
+  function row(side,o){
+    return '<div class="eyegrid"><div class="er">'+side+'</div>'+
+      '<input id="'+pfx+'_'+side+'_S" placeholder="S" value="'+(o.S||'')+'">'+
+      '<input id="'+pfx+'_'+side+'_C" placeholder="C" value="'+(o.C||'')+'">'+
+      '<input id="'+pfx+'_'+side+'_A" placeholder="Ax" value="'+(o.A||'')+'"></div>';
+  }
+  var head='<div class="eyegrid"><div></div><div class="eh">구면 S</div><div class="eh">원주 C</div><div class="eh">축 Ax</div></div>';
+  return head+row('R',obj.R)+row('L',obj.L);
+}
+function view(id){
+  if(id==='intake') return ''+
+    '<div class="eyebrow">1 · 문진</div><div class="stitle">기본 정보 · 분기</div>'+
+    '<div class="sdesc">여기서 받은 답으로 이후 단계가 자동으로 갈라진다(렌즈미터·노안·의뢰).</div>'+
+    '<div class="frow">'+
+      '<div class="fld"><label>구분</label><select id="i_mode"><option value="new"'+(S.mode==='new'?' selected':'')+'>초진</option><option value="re"'+(S.mode==='re'?' selected':'')+'>재방문</option></select></div>'+
+      '<div class="fld"><label>나이</label><input id="i_age" type="number" placeholder="예: 45" value="'+S.age+'"></div>'+
+    '</div>'+
+    '<div class="frow">'+
+      '<div class="fld"><label>주 용도</label><select id="i_use"><option value="far"'+(S.use==='far'?' selected':'')+'>원거리</option><option value="near"'+(S.use==='near'?' selected':'')+'>근거리</option><option value="vdt"'+(S.use==='vdt'?' selected':'')+'>VDT·사무</option><option value="drive"'+(S.use==='drive'?' selected':'')+'>운전</option></select></div>'+
+      '<div class="fld"><label>기존 안경 지참</label><select id="i_glass"><option value="no"'+(S.hasGlasses==='no'?' selected':'')+'>없음</option><option value="yes"'+(S.hasGlasses==='yes'?' selected':'')+'>있음 → 렌즈미터</option></select></div>'+
+    '</div>'+
+    '<label class="chk"><input type="checkbox" id="i_presby" '+(S.presby?'checked':'')+'> 노안 교정 필요 (40대+ 자동 체크)</label>'+
+    '<div class="sdesc" style="margin:10px 0 4px">위험 소견 (체크 시 의뢰 플래그)</div>'+
+    chk('r_va','급격한 시력 저하')+chk('r_dip','복시(겹보임)')+chk('r_field','시야 결손')+chk('r_pain','충혈·통증')+chk('r_dm','당뇨 등 전신질환')+
+    '<div class="hint">앱이 용도→렌즈·코팅을 연결하고, 위험 소견은 안과 의뢰로 라우팅한다.</div>';
+
+  if(id==='lensmeter') return ''+
+    '<div class="eyebrow">구도수 · 렌즈미터</div><div class="stitle">가져온 안경 측정</div>'+
+    '<div class="sdesc">기존 안경을 렌즈미터로 읽어 구도수 기준값 확보(재구매·도수 변화 비교의 출발점).</div>'+
+    eyeInputs('lm',S.lm)+
+    '<div class="frow"><div class="fld"><label>PD (mm)</label><input id="lm_PD" placeholder="예: 63" value="'+(S.lm.R.PD||'')+'"></div>'+
+      '<div class="fld"><label>가입도 ADD</label><input id="lm_ADD" placeholder="예: +2.00" value="'+(S.lm.R.ADD||'')+'"></div></div>'+
+    '<div class="hint">렌즈미터 연동 시 자동 입력(③ 장비값 받기 3길). 지금은 수기/촬영AI.</div>';
+
+  if(id==='va') return ''+
+    '<div class="eyebrow">2 · 나안</div><div class="stitle">나안 / 현용 시력</div>'+
+    '<div class="sdesc">교정 전 시력. 이후 타각·자각의 기준선.</div>'+
+    '<div class="frow"><div class="fld"><label>우안(R) 나안시력</label><input id="va_R" placeholder="예: 0.3" value="'+S.va.R+'"></div>'+
+      '<div class="fld"><label>좌안(L) 나안시력</label><input id="va_L" placeholder="예: 0.4" value="'+S.va.L+'"></div></div>';
+
+  if(id==='objective') return ''+
+    '<div class="eyebrow">3 · 타각식</div><div class="stitle">자동굴절기 / 레티노</div>'+
+    '<div class="sdesc">기계가 읽은 값. 자각식의 출발점으로 자동 세팅된다.</div>'+
+    eyeInputs('obj',S.obj)+
+    '<div class="hint">자동굴절기 값을 자각식 시작점으로 가져간다. (값 없으면 비워도 됨)</div>';
+
+  if(id==='subjective'){
+    var hi=highPowerNote();
+    return ''+
+    '<div class="eyebrow">4 · 자각식</div><div class="stitle">포롭터 · 최종 굴절</div>'+
+    '<div class="sdesc">MPMVA(최고시력 최저 마이너스) → 크로스실린더 난시 정밀 → 적녹 균형.</div>'+
+    eyeInputs('subj',S.subj)+
+    '<div class="frow"><div class="fld"><label>정점간거리 VD (mm)</label><input id="subj_vd" value="'+S.subj.vd+'"></div></div>'+
+    '<div class="hint">표준 VD 12mm. ±4.00D 이상이면 조제 단계에서 유효도수 환산.</div>'+ hi;
+  }
+
+  if(id==='binocular'){
+    return ''+
+    '<div class="eyebrow">5 · 양안시</div><div class="stitle">양안균형 · 사위</div>'+
+    '<div class="sdesc">사위는 부호로: 외사위(+) / 내사위(−). 정상범위 밖이면 프리즘·의뢰 분기.</div>'+
+    '<div class="frow"><div class="fld"><label>원거리 사위 (Δ)</label><input id="b_pD" placeholder="예: +1" value="'+S.bino.pD+'"></div>'+
+      '<div class="fld"><label>근거리 사위 (Δ)</label><input id="b_pN" placeholder="예: +3" value="'+S.bino.pN+'"></div></div>'+
+    '<div class="hint">정상(초안·Morgan): 원거리 −1~+3, 근거리 0~+6. 밖이면 경고.</div>'+
+    phoriaNote();
+  }
+
+  if(id==='add'){
+    var sug=addSuggest();
+    return ''+
+    '<div class="eyebrow">6 · 가입도</div><div class="stitle">노안 ADD</div>'+
+    '<div class="sdesc">근용 가입도. 나이 기반 추천을 띄우되 작업거리로 미세조정.</div>'+
+    '<div class="frow"><div class="fld"><label>가입도 ADD</label><input id="a_add" placeholder="예: +1.75" value="'+S.add+'"></div></div>'+
+    (sug?'<div class="hint">나이 '+S.age+'세 추천 ADD: <b>'+sug+'</b> (초안 — 확정 필요)</div>':'');
+  }
+
+  if(id==='result') return '<div class="eyebrow">7 · 처방 확정</div><div class="stitle">변수 산출 — 조제·피팅·9사이즈로 전달</div><div id="resbox"></div>';
+  return '';
+}
+function chk(id,label){return '<label class="chk"><input type="checkbox" id="'+id+'" '+(S.risk.indexOf(id)>=0?'checked':'')+'> '+label+'</label>';}
+
+/* ---------- 라이브 노트 ---------- */
+function highPowerNote(){
+  var m=Math.max(Math.abs(num(g('subj_R_S'))||0),Math.abs(num(g('subj_L_S'))||0));
+  if(m>=4) return '<div class="warn">고도수(|S|≥4.00D) — 정점거리 보정 + 고굴절률 렌즈 권장.</div>';
+  return '';
+}
+function phoriaNote(){
+  var d=num(g('b_pD')), n=num(g('b_pN')), out=[];
+  if(d!==null&&(d<-1||d>3)) out.push('원거리 사위 '+d+'Δ 정상범위 밖');
+  if(n!==null&&(n<0||n>6)) out.push('근거리 사위 '+n+'Δ 정상범위 밖');
+  if(out.length) return '<div class="warn">'+out.join(' · ')+' → 프리즘 검토 또는 안과 의뢰.</div>';
+  return '';
+}
+function addSuggest(){
+  var a=num(S.age); if(a===null) return '';
+  if(a<40) return '없음(노안 아님)';
+  if(a<45) return '+1.00'; if(a<50) return '+1.50'; if(a<55) return '+1.75'; if(a<60) return '+2.00'; return '+2.25';
+}
+function g(id){var e=document.getElementById(id);return e?e.value:'';}
+function gc(id){var e=document.getElementById(id);return e?e.checked:false;}
+
+/* ---------- 수집 ---------- */
+function collect(id){
+  if(id==='intake'){
+    S.mode=g('i_mode'); S.age=g('i_age'); S.use=g('i_use'); S.hasGlasses=g('i_glass');
+    S.presby=gc('i_presby'); 
+    if(!S.presby && num(S.age)!==null && num(S.age)>=40){ S.presby=true; } // 40+ 자동
+    S.risk=['r_va','r_dip','r_field','r_pain','r_dm'].filter(function(k){return gc(k);});
+  } else if(id==='lensmeter'){
+    ['R','L'].forEach(function(s){S.lm[s].S=g('lm_'+s+'_S');S.lm[s].C=g('lm_'+s+'_C');S.lm[s].A=g('lm_'+s+'_A');});
+    S.lm.R.PD=g('lm_PD'); S.lm.R.ADD=g('lm_ADD');
+  } else if(id==='va'){ S.va.R=g('va_R'); S.va.L=g('va_L');
+  } else if(id==='objective'){ ['R','L'].forEach(function(s){S.obj[s].S=g('obj_'+s+'_S');S.obj[s].C=g('obj_'+s+'_C');S.obj[s].A=g('obj_'+s+'_A');});
+  } else if(id==='subjective'){ ['R','L'].forEach(function(s){S.subj[s].S=g('subj_'+s+'_S');S.subj[s].C=g('subj_'+s+'_C');S.subj[s].A=g('subj_'+s+'_A');}); S.subj.vd=g('subj_vd');
+  } else if(id==='binocular'){ S.bino.pD=g('b_pD'); S.bino.pN=g('b_pN');
+  } else if(id==='add'){ S.add=g('a_add'); }
+}
+
+/* ---------- 네비 ---------- */
+function next(){
+  var id=cur();
+  if(id==='result'){ resetAll(); return; }
+  collect(id);
+  if(idx<steps().length-1) idx++;
+  render();
+}
+function back(){ collect(cur()); if(idx>0) idx--; render(); }
+
+/* ---------- 결과 ---------- */
+function flags(){
+  var f=[];
+  if(S.risk.length) f.push({lv:'bad',t:'위험 소견 → 안과 의뢰',d:S.risk.map(rl).join(', ')});
+  var d=num(S.bino.pD), n=num(S.bino.pN);
+  if(d!==null&&(d<-1||d>3)) f.push({lv:'warn',t:'원거리 사위 이상',d:d+'Δ → 프리즘/의뢰'});
+  if(n!==null&&(n<0||n>6)) f.push({lv:'warn',t:'근거리 사위 이상',d:n+'Δ → 프리즘/의뢰'});
+  var m=Math.max(Math.abs(num(S.subj.R.S)||0),Math.abs(num(S.subj.L.S)||0));
+  if(m>=4) f.push({lv:'warn',t:'고도수',d:'|S|≥4.00D → 정점거리 보정 + 고굴절률'});
+  return f;
+}
+function rl(k){return {r_va:'시력저하',r_dip:'복시',r_field:'시야결손',r_pain:'충혈·통증',r_dm:'전신질환'}[k]||k;}
+function idxRefr(){
+  var m=Math.max(Math.abs(num(S.subj.R.S)||0),Math.abs(num(S.subj.L.S)||0));
+  if(m>=4) return '1.74'; if(m>=2) return '1.67'; return '1.60';
+}
+function eyeStr(o){var s=(o.S||'·'),c=(o.C||'·'),a=(o.A||'·');return 'S '+s+' / C '+c+' / Ax '+a;}
+function buildResult(){
+  var fl=flags();
+  var flHtml = fl.length? fl.map(function(f){return '<div class="flagline"><span class="t" style="color:var(--'+f.lv+')">⚑ '+f.t+'</span> — '+f.d+'</div>';}).join('') : '<div class="flagline">이상치 없음 — 표준 범위 내</div>';
+  var bundle={
+    환자:{구분:S.mode==='new'?'초진':'재방문',나이:S.age,용도:S.use,노안:S.presby},
+    구도수_렌즈미터:S.hasGlasses==='yes'?{R:eyeStr(S.lm.R),L:eyeStr(S.lm.L),PD:S.lm.R.PD,ADD:S.lm.R.ADD}:'없음',
+    최종처방:{R:eyeStr(S.subj.R),L:eyeStr(S.subj.L),ADD:S.presby?S.add:'-',VD:S.subj.vd+'mm'},
+    조제:{추천굴절률:idxRefr(),정점거리보정:(Math.max(Math.abs(num(S.subj.R.S)||0),Math.abs(num(S.subj.L.S)||0))>=4)?'필요':'불필요'},
+    양안시:{원거리사위:S.bino.pD,근거리사위:S.bino.pN},
+    플래그:fl.map(function(f){return f.t;})
+  };
+  var html=''+
+    '<div class="kv"><div class="k">구분 / 나이</div><div class="v">'+(S.mode==='new'?'초진':'재방문')+' · '+(S.age||'-')+'세 '+(S.presby?'· 노안':'')+'</div>'+
+      '<div class="k">최종 처방 R</div><div class="v">'+eyeStr(S.subj.R)+'</div>'+
+      '<div class="k">최종 처방 L</div><div class="v">'+eyeStr(S.subj.L)+'</div>'+
+      (S.presby?'<div class="k">가입도 ADD</div><div class="v">'+(S.add||'-')+'</div>':'')+
+      '<div class="k">정점거리 VD</div><div class="v">'+S.subj.vd+'mm</div>'+
+      '<div class="k">추천 굴절률</div><div class="v">'+idxRefr()+'</div>'+
+      (S.hasGlasses==='yes'?'<div class="k">구도수(렌즈미터) R</div><div class="v">'+eyeStr(S.lm.R)+'</div>':'')+
+    '</div>'+
+    '<div class="eyebrow" style="margin:14px 0 4px">이상치 · 의뢰 점검</div>'+flHtml+
+    '<div class="eyebrow" style="margin:16px 0 4px">전달 변수 (조제·피팅·9사이즈)</div>'+
+    '<div class="dump">'+JSON.stringify(bundle,null,2)+'</div>'+
+    '<div class="hint">이 변수 묶음이 조제(굴절률·정점보정), 피팅(A4 시트), 9사이즈 매칭으로 그대로 넘어간다. 모든 값은 raw 1층 + 본사 코드 2층으로 본부 귀속.</div>';
+  document.getElementById('resbox').innerHTML=html;
+}
+
+/* ---------- 시나리오 프리셋 ---------- */
+function preset(kind){
+  resetAll();
+  if(kind==='myopia'){ S.mode='new';S.age='28';S.use='far';S.hasGlasses='no';S.presby=false;
+    S.obj={R:{S:'-2.25',C:'-0.50',A:'180'},L:{S:'-2.00',C:'',A:''}};
+    S.subj={R:{S:'-2.25',C:'-0.50',A:'180'},L:{S:'-2.00',C:'-0.25',A:'175'},vd:'12'};
+    S.va={R:'0.3',L:'0.4'}; S.bino={pD:'+1',pN:'+3'};
+  } else if(kind==='presby'){ S.mode='re';S.age='52';S.use='vdt';S.hasGlasses='yes';S.presby=true;
+    S.lm={R:{S:'-1.50',C:'',A:'',ADD:'+1.75',PD:'64'},L:{S:'-1.25',C:'',A:'',ADD:'',PD:''}};
+    S.obj={R:{S:'-1.50',C:'',A:''},L:{S:'-1.25',C:'',A:''}};
+    S.subj={R:{S:'-1.50',C:'',A:''},L:{S:'-1.25',C:'-0.25',A:'90'},vd:'12'};
+    S.va={R:'0.5',L:'0.6'}; S.add='+1.75'; S.bino={pD:'0',pN:'+4'};
+  } else if(kind==='astig'){ S.mode='new';S.age='35';S.use='drive';S.hasGlasses='no';S.presby=false;
+    S.obj={R:{S:'-1.00',C:'-2.25',A:'10'},L:{S:'-0.75',C:'-2.50',A:'170'}};
+    S.subj={R:{S:'-1.00',C:'-2.25',A:'10'},L:{S:'-0.75',C:'-2.50',A:'170'},vd:'12'};
+    S.va={R:'0.2',L:'0.2'}; S.bino={pD:'+5',pN:'+9'}; S.risk=['r_dip'];
+  } else if(kind==='reorder'){ S.mode='re';S.age='41';S.use='near';S.hasGlasses='yes';S.presby=true;
+    S.lm={R:{S:'-3.00',C:'-0.75',A:'10',ADD:'+1.00',PD:'62'},L:{S:'-3.25',C:'-0.50',A:'170',ADD:'',PD:''}};
+    S.subj={R:{S:'-3.00',C:'-0.75',A:'10'},L:{S:'-3.25',C:'-0.50',A:'170'},vd:'12'};
+    S.obj={R:{S:'-3.00',C:'-0.75',A:'10'},L:{S:'-3.25',C:'-0.50',A:'170'}};
+    S.va={R:'0.15',L:'0.15'}; S.add='+1.00'; S.bino={pD:'+1',pN:'+3'};
+  }
+  idx=0; render();
+}
+resetAll();
+</script>
+</body>
+</html>
