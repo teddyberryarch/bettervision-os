@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 9사이즈 생산비율</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<script src="/assets/bv-size-engine.js"></script>
+<style>
+.grid9{display:grid;grid-template-columns:auto repeat(3,1fr);gap:4px;margin:10px 0;max-width:520px}
+.cellh{font-size:13px;font-weight:700;color:var(--muted);text-align:center;padding:6px}
+.cellr{font-size:13px;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.cell{border-radius:8px;padding:10px 6px;text-align:center;border:1px solid var(--line)}
+.cell .p{font-size:18px;font-weight:700;color:var(--ink)}
+.cell .q{font-size:13px;color:var(--muted);margin-top:2px}
+.cell .c{font-size:11px;color:var(--muted)}
+.sld{margin:12px 0;max-width:520px}
+.sld label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;color:var(--ink);margin-bottom:5px}
+.note{font-size:13px;color:var(--muted);line-height:1.6;margin:8px 0}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0;max-width:520px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}th{background:var(--surface);font-size:13px;color:var(--muted)}
+.k{background:#eef2ff;border-left:3px solid #4f46e5;padding:8px 14px;margin:8px 0;font-size:14px;color:#312e81}
+</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="wrap"><section class="view active">
+<div class="lead"><div><div class="eyebrow">9사이즈 · 생산비율</div><h2>분포를 생산수량·매장 샘플로 환산</h2>
+<div class="sub">엔진 분포(사이즈코리아 튜닝)를 실제 발주·재고 근거로. M·M 최빈 = 재고 효율. 모서리 사이즈는 소량.</div></div><span class="pill good">● 발주·재고 근거</span></div>
+
+<div class="card pad">
+  <div class="sld"><label>총 생산 수량 (1배치) <b id="vB">1,000</b>개</label><input id="B" type="range" min="200" max="5000" step="100" value="1000" oninput="render()"></div>
+  <div class="eyebrow" style="margin:6px 0">9사이즈 분포 → 생산 수량 (프론트 × 템플)</div>
+  <div class="grid9" id="grid"></div>
+  <div class="note">셀 = 분포% · 생산수량. 진한 셀일수록 많이 생산. <b id="modeNote"></b></div>
+</div>
+
+<div class="card pad">
+  <div class="eyebrow" style="margin-bottom:6px">매장 샘플 배치 (진열 ≠ 재고)</div>
+  <table>
+    <tr><th>구분</th><th>배치</th><th>이유</th></tr>
+    <tr><td>대표 모델 1~2개</td><td><b>9사이즈 풀세트</b> (9점)</td><td>"준맞춤 다 된다"를 보여주는 무대</td></tr>
+    <tr><td>나머지 모델</td><td><b>M·M만</b> × 전 색상</td><td>최빈 사이즈로 디자인·색 체험, 실판매는 측정→발주</td></tr>
+    <tr><td>모서리(S·L 등)</td><td>진열 안 함</td><td>소량 수요 → 주문 생산</td></tr>
+  </table>
+  <div class="k">810 카탈로그는 진열 숫자가 아니라 조합 숫자. 매장엔 M·M 대표 + 풀세트 1~2개만. 선반에 810개 안 쌓인다.</div>
+</div>
+
+<div class="card pad">
+  <div class="eyebrow" style="margin-bottom:6px">발주·재고 함의</div>
+  <table id="implTable"><tr><th>등급</th><th>비중</th><th>운영</th></tr></table>
+</div>
+</section></div>
+<div class="foot"><span>BETTERVISION OS · 9사이즈 생산비율 v0.1</span><span>분포가 발주를 정한다</span></div>
+<script>
+var E=window.BVSizeEngine, L=['S','M','L'];
+function shade(p,mx){ var t=p/mx; var a=0.06+t*0.34; return 'rgba(13,13,12,'+a.toFixed(2)+')'; }
+function render(){
+  var B=parseFloat(document.getElementById('B').value);
+  document.getElementById('vB').textContent=B.toLocaleString();
+  var d=E.cellDist(); var mx=0,mi=1,mj=1;
+  for(var i=0;i<3;i++)for(var j=0;j<3;j++){ if(d[i][j]>mx){mx=d[i][j];mi=i;mj=j;} }
+  var g='<div class="cellh"></div>'+L.map(function(x){return '<div class="cellh">템플 '+x+'</div>';}).join('');
+  for(var i2=0;i2<3;i2++){
+    g+='<div class="cellr">프론트 '+L[i2]+'</div>';
+    for(var j2=0;j2<3;j2++){
+      var p=d[i2][j2], qty=Math.round(p*B), isMode=(i2===mi&&j2===mj);
+      g+='<div class="cell" style="background:'+shade(p,mx)+';border-color:'+(isMode?'var(--good)':'var(--line)')+'">'+
+        '<div class="c">'+L[i2]+'·'+L[j2]+'</div><div class="p">'+(p*100).toFixed(1)+'%</div><div class="q">'+qty.toLocaleString()+'개</div></div>';
+    }
+  }
+  document.getElementById('grid').innerHTML=g;
+  document.getElementById('modeNote').textContent='최빈 = '+L[mi]+'·'+L[mj]+' ('+(mx*100).toFixed(1)+'% · '+Math.round(mx*B).toLocaleString()+'개)';
+  // 함의 표: 중심/변/모서리
+  var center=d[1][1], edge=d[0][1]+d[1][0]+d[1][2]+d[2][1], corner=d[0][0]+d[0][2]+d[2][0]+d[2][2];
+  var rows=[['중심 M·M',center,'대량 생산 · 매장 상시 보유 · 자동 발주 임계 높게'],
+            ['변 (M 포함)',edge,'중간 생산 · 대표 모델 위주'],
+            ['모서리 (S·L 등)',corner,'소량 · 주문 생산 · 진열 안 함']];
+  var t='<tr><th>등급</th><th>비중</th><th>운영</th></tr>';
+  rows.forEach(function(r){ t+='<tr><td>'+r[0]+'</td><td>'+(r[1]*100).toFixed(1)+'% ('+Math.round(r[1]*B).toLocaleString()+'개)</td><td>'+r[2]+'</td></tr>'; });
+  document.getElementById('implTable').innerHTML=t;
+}
+render();
+</script>
+</body></html>

@@ -23,7 +23,7 @@ window.BVFrameDB = (function(){
     var fm=(fc.front===gc.front), tm=(fc.temple===gc.temple);
     var size = (fm&&tm)?96 : ((fm||tm)?82:64);
     var reqAdj=Math.round((face.wrap||0)*0.4*10)/10;   // 안면각 → 필요 벌림 mm
-    var matAdj=MAT[frame.material].adj;
+    var matAdj=(MAT[frame.material]||{adj:4}).adj;
     var splayOK = reqAdj<=matAdj;
     var fit = splayOK ? size : Math.max(45, size-18);
     var reason = !splayOK

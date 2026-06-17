@@ -225,13 +225,25 @@ function back(){ collect(cur()); if(idx>0)idx--; render(); }
 function buildSheet(){
   var sp=splayCalc(), sz=sizeCalc();
   function eyeRx(o){return (o&&o.S!==undefined&&o.S!=="")?((o.S||"")+" "+(o.C||"")+" "+(o.A||"")).trim():"—";}
+  function protr(hx,hy,R,inw,tgt){var s='';function pt(d,r){var t=d*Math.PI/180;return [hx+inw*r*Math.cos(t), hy+r*Math.sin(t)];}
+    for(var d=75;d<=110;d+=5){var i=pt(d,R-2.2),o=pt(d,R),l=pt(d,R+3);
+      s+='<line x1="'+i[0].toFixed(1)+'" y1="'+i[1].toFixed(1)+'" x2="'+o[0].toFixed(1)+'" y2="'+o[1].toFixed(1)+'" stroke="#0d0d0c" stroke-width="0.3"/>';
+      s+='<text x="'+l[0].toFixed(1)+'" y="'+(l[1]+0.7).toFixed(1)+'" font-size="1.8" fill="#8a877f" text-anchor="middle">'+d+'</text>';}
+    var z=pt(90,R);s+='<line x1="'+hx+'" y1="'+hy+'" x2="'+z[0].toFixed(1)+'" y2="'+z[1].toFixed(1)+'" stroke="#cbc7bb" stroke-width="0.4" stroke-dasharray="1.5 1.5"/>';
+    var f1=pt(80,R),f2=pt(85,R);s+='<line x1="'+hx+'" y1="'+hy+'" x2="'+f1[0].toFixed(1)+'" y2="'+f1[1].toFixed(1)+'" stroke="#e4e1da" stroke-width="0.6"/><line x1="'+hx+'" y1="'+hy+'" x2="'+f2[0].toFixed(1)+'" y2="'+f2[1].toFixed(1)+'" stroke="#e4e1da" stroke-width="0.6"/>';
+    var t=pt(tgt,R+1.5);s+='<line x1="'+hx+'" y1="'+hy+'" x2="'+t[0].toFixed(1)+'" y2="'+t[1].toFixed(1)+'" stroke="#dc2626" stroke-width="0.9"/>';return s;}
+  function hruler(x0,y0,len){var s='<line x1="'+x0+'" y1="'+y0+'" x2="'+(x0+len)+'" y2="'+y0+'" stroke="#0d0d0c" stroke-width="0.4"/>';
+    for(var m=0;m<=len;m+=5){var h=(m%10===0)?2.4:1.4;s+='<line x1="'+(x0+m)+'" y1="'+y0+'" x2="'+(x0+m)+'" y2="'+(y0+h)+'" stroke="#0d0d0c" stroke-width="0.3"/>';
+      if(m%20===0)s+='<text x="'+(x0+m)+'" y="'+(y0+5)+'" font-size="2" fill="#8a877f" text-anchor="middle">'+m+'</text>';}return s;}
   var target=(sp.target==='—')?138:sp.target;
   var panto=num(F._panto)||10, half=target/2;
   var cx=100, frontW=num(F.frontA)||138, fhalf=frontW/2;
   var pdT=num(F.pd)||63, monoR=num(F.pdR)||pdT/2, monoL=num(F.pdL)||pdT/2, oh=num(F.oh)||22;
   var dbl=18, a=Math.max(40,(frontW-dbl)/2), lensH=40, wrap=num(F.faceWrap)||0;
   var pL=cx-half, pR=cx+half;
-  var lensTop=104, lensBot=lensTop+lensH;
+  var tlen=num(F.templeLen)||145;
+  var splayDeg=Math.round(Math.asin(Math.max(-0.34,Math.min(0.34,(half-fhalf)/tlen)))*180/Math.PI*10)/10;
+  var lensTop=116, lensBot=lensTop+lensH;
   var lLcx=cx-(dbl/2)-(a/2), lRcx=cx+(dbl/2)+(a/2);
   var ocy=lensBot-oh, ocR_x=cx-monoR, ocL_x=cx+monoL;
 
@@ -251,7 +263,24 @@ function buildSheet(){
 '<text x="8" y="12" font-size="6" font-weight="700" fill="#0d0d0c">BETTERVISION · 정밀 측정 · 피팅 시트</text>'+
 '<text x="8" y="19.5" font-size="3.4" fill="#8a877f">고객 '+(F.name||'____')+'\u3000|\u30009사이즈 '+sz.code+'\u3000|\u3000소재 '+MAT[F.material].n+'\u3000|\u3000인쇄: 실제크기 100% · 맞춤 끄기</text>'+
 '<line x1="8" y1="23" x2="192" y2="23" stroke="#e4e1da" stroke-width="0.3"/>'+
-'<text x="8" y="31" font-size="4" font-weight="700" fill="#0d0d0c">① 평면도 (위에서 본 안경) — 실물을 올려 다리를 빨간 점에 맞춰 휜다</text>'+
+'<text x="8" y="30" font-size="4" font-weight="700" fill="#0d0d0c">① 위에서 본 안경 (메인) — 실물을 면이 바닥으로 오게 올리고 읽는다</text>'+
+'<text x="8" y="34.5" font-size="2.6" fill="#8a877f">앞테 폭=룰러 · 다리 벌림각=각도기(힌지) · 빨강=목표 · 다리 뒤 귀곡선은 무시</text>'+
+hruler(cx-80,42,160)+
+'<text x="'+(cx-80)+'" y="40" font-size="2" fill="#8a877f">앞테 폭 룰러 (mm)</text>'+
+'<rect x="'+(lLcx-a/2)+'" y="48" width="'+a+'" height="13" rx="5" fill="none" stroke="#cbc7bb" stroke-width="0.5" stroke-dasharray="2 1.5"/>'+
+'<rect x="'+(lRcx-a/2)+'" y="48" width="'+a+'" height="13" rx="5" fill="none" stroke="#cbc7bb" stroke-width="0.5" stroke-dasharray="2 1.5"/>'+
+'<line x1="'+(lLcx+a/2)+'" y1="54.5" x2="'+(lRcx-a/2)+'" y2="54.5" stroke="#cbc7bb" stroke-width="0.5" stroke-dasharray="2 1.5"/>'+
+'<text x="'+cx+'" y="55.5" font-size="2.3" fill="#cbc7bb" text-anchor="middle">앞테 놓는 자리</text>'+
+'<line x1="'+(cx-frontW/2)+'" y1="41" x2="'+(cx-frontW/2)+'" y2="62" stroke="#dc2626" stroke-width="0.5"/>'+
+'<line x1="'+(cx+frontW/2)+'" y1="41" x2="'+(cx+frontW/2)+'" y2="62" stroke="#dc2626" stroke-width="0.5"/>'+
+'<text x="'+cx+'" y="66.5" font-size="3" font-weight="700" fill="#dc2626" text-anchor="middle">목표 프론트 폭 '+frontW+' mm</text>'+
+'<circle cx="'+(cx-fhalf)+'" cy="60" r="1" fill="#0d0d0c"/><circle cx="'+(cx+fhalf)+'" cy="60" r="1" fill="#0d0d0c"/>'+
+protr(cx-fhalf,60,28,1,95)+
+protr(cx+fhalf,60,28,-1,95)+
+'<line x1="'+(cx-fhalf)+'" y1="60" x2="'+(cx-fhalf+28*Math.cos(95*Math.PI/180)).toFixed(1)+'" y2="'+(60+28*Math.sin(95*Math.PI/180)).toFixed(1)+'" stroke="#0d0d0c" stroke-width="0.8" stroke-dasharray="2 1.5"/>'+
+'<line x1="'+(cx+fhalf)+'" y1="60" x2="'+(cx+fhalf-28*Math.cos(95*Math.PI/180)).toFixed(1)+'" y2="'+(60+28*Math.sin(95*Math.PI/180)).toFixed(1)+'" stroke="#0d0d0c" stroke-width="0.8" stroke-dasharray="2 1.5"/>'+
+'<text x="'+cx+'" y="95" font-size="3.2" font-weight="700" fill="#dc2626" text-anchor="middle">목표 벌림각 95° (11자 평행) · 공장 기본 80~85°</text>'+
+'<text x="'+cx+'" y="99.5" font-size="2.4" fill="#8a877f" text-anchor="middle">앞테 기준 각도기에 다리를 올려 읽고 95°로 벌린다 · 다리 길이 '+tlen+'mm · 얼굴형 따라 ±조정</text>'+
 '<rect x="'+(lLcx-a/2)+'" y="35" width="'+a+'" height="9" rx="4" fill="none" stroke="#0d0d0c" stroke-width="0.8" transform="rotate('+wrap+' '+lLcx+' 39.5)"/>'+
 '<rect x="'+(lRcx-a/2)+'" y="35" width="'+a+'" height="9" rx="4" fill="none" stroke="#0d0d0c" stroke-width="0.8" transform="rotate('+(-wrap)+' '+lRcx+' 39.5)"/>'+
 '<line x1="'+(lLcx+a/2)+'" y1="39.5" x2="'+(lRcx-a/2)+'" y2="39.5" stroke="#0d0d0c" stroke-width="0.8"/>'+
@@ -271,8 +300,8 @@ function buildSheet(){
 '<line x1="'+pL+'" y1="86" x2="'+pL+'" y2="90" stroke="#b45309" stroke-width="0.5"/><line x1="'+pR+'" y1="86" x2="'+pR+'" y2="90" stroke="#b45309" stroke-width="0.5"/>'+
 '<text x="'+cx+'" y="87" font-size="3.6" font-weight="700" fill="#b45309" text-anchor="middle">목표 템플 간격 '+target+' mm</text>'+
 '<text x="'+cx+'" y="93.5" font-size="2.6" fill="#8a877f" text-anchor="middle">점선=직진 기준 · 실선=목표 휨 · 두 선 사이 각 = 벌림각 · 다리 끝을 빨간 점에 맞춰 휜다</text>'+
-'<line x1="8" y1="96" x2="192" y2="96" stroke="#e4e1da" stroke-width="0.3"/>'+
-'<text x="8" y="102" font-size="4" font-weight="700" fill="#0d0d0c">② 1:1 실측 도면 — 광학중심(OC) · 단안 PD (좌우 비대칭)</text>'+
+'<line x1="8" y1="106" x2="192" y2="106" stroke="#e4e1da" stroke-width="0.3"/>'+
+'<text x="8" y="113" font-size="4" font-weight="700" fill="#0d0d0c">② 1:1 실측 — 광학중심(OC) · 단안 PD (좌우 비대칭)</text>'+
 '<rect x="'+(lLcx-a/2)+'" y="'+lensTop+'" width="'+a+'" height="'+lensH+'" rx="6" fill="none" stroke="#0d0d0c" stroke-width="0.6"/>'+
 '<rect x="'+(lRcx-a/2)+'" y="'+lensTop+'" width="'+a+'" height="'+lensH+'" rx="6" fill="none" stroke="#0d0d0c" stroke-width="0.6"/>'+
 '<line x1="'+(lLcx+a/2)+'" y1="'+(lensTop+6)+'" x2="'+(lRcx-a/2)+'" y2="'+(lensTop+6)+'" stroke="#0d0d0c" stroke-width="0.6"/>'+
@@ -313,13 +342,14 @@ qr(168,220,24)+
       '<div class="k">9사이즈 / 적합도</div><div class="v">'+sz.code+' · '+sz.fit+'%</div>'+
       '<div class="k">PD (R/L) · OH</div><div class="v">'+pdT+'mm (R '+monoR+' / L '+monoL+') · '+oh+'mm</div>'+
       '<div class="k">목표 템플 간격</div><div class="v">'+target+'mm (오프셋 −'+sp.off+', '+MAT[F.material].n+')</div>'+
+      '<div class="k">목표 벌림각</div><div class="v">95° (11자 평행 · 공장 80~85°에서 벌림)</div>'+
       '<div class="k">벌림 조정량</div><div class="v">'+(sp.adjNeed!=null?((sp.adjNeed>0?'+':'')+sp.adjNeed+'mm'):'—')+' / 한계 ±'+MAT[F.material].adj+'</div>'+
       '<div class="k">판토 / VD</div><div class="v">'+panto+'° / '+(F.vd||12)+'mm</div>'+
       '<div class="k">코받침</div><div class="v">간격 '+(F._npGap||'-')+' / 각도 '+(F._npAng||'-')+(F.bridge==='fix'?' (일체형 한계)':'')+'</div>'+
     '</div>'+ matWarn +
     '<div class="sheetwrap">'+svg+'</div>'+
     '<div class="printbtns"><button class="btn small" onclick="window.print()">인쇄 (100%)</button></div>'+
-    '<div class="hint">① 빨간 점에 다리 끝 닿게 휨(벌림각). ② 렌즈 OC를 빨간 십자에 맞춤(단안 PD·동공높이). ③ 웨지에 렌즈 포개(판토). 50mm 스케일바로 1:1 검증, QR=디지털 측정기록·가상피팅 연결. 휜 값은 본부 DB 귀속.</div>';
+    '<div class="hint">① 실물 안경을 면이 바닥으로 올려 — 앞테 폭은 룰러, 다리 벌림각은 힌지 각도기로 읽어 빨간 목표 눈금에 맞춰 휨. ② 렌즈 OC를 빨간 십자에 맞춤(단안 PD·동공높이). ③ 옆에서 판토·정점. 50mm 스케일바로 1:1 검증, QR=디지털 측정기록·가상피팅 연결. 휜 값은 본부 DB 귀속.</div>';
   document.getElementById('sheetbox').innerHTML=html;
 }
 
