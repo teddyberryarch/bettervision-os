@@ -208,19 +208,35 @@
   </div>
 
   <h3>① OS 앱 — <code>bettervision-os/public/</code></h3>
+  <p style="font-size:15px;color:#6b6b6b;margin:4px 0 8px">상단 네비 8개 = 홈·사업개요·고객앱·가맹점·가맹본부·<b>접객</b>·검안·피팅. <b>접객(flow.html)이 전체 허브</b> — 맨 아래 시스템 맵에서 측정·추천·엔진 등 도구 전부 링크.</p>
   <table>
     <tr><th>파일</th><th>정체</th><th>정본</th></tr>
+    <tr><td colspan="3" style="background:#f5f3ef;font-weight:700;font-size:13px">기본 (네비)</td></tr>
     <tr><td>index.html</td><td>홈 · 랜딩</td><td>★</td></tr>
     <tr><td>login.html</td><td>로그인(본부/가맹점)</td><td>★</td></tr>
     <tr><td>customer.html</td><td>고객 앱(측정·가상피팅·견적·케어)</td><td>★</td></tr>
     <tr><td>store.html</td><td>가맹점(CRM·ERP·POS·재무·마케팅)</td><td>★</td></tr>
     <tr><td>hq.html</td><td>가맹본부(전사 대시보드·PB마진·발주푸시)</td><td>★</td></tr>
     <tr><td><b>a.html</b></td><td>사업 개요(설득 1장) = 팀설득덱 앱판</td><td>★ 정본</td></tr>
-    <tr><td><b>b.html</b></td><td>검안 매뉴얼(③ 표준 SOP) = 검안매뉴얼 앱판</td><td>★ 정본</td></tr>
-    <tr><td><b>exam.html</b></td><td>검안 자동 시스템(가이드 위저드, 변수 산출)</td><td>★ 신규</td></tr>
-    <tr><td>assets/app.css · app.js</td><td>공통 스타일·스크립트</td><td>★</td></tr>
+    <tr><td><b>flow.html</b> (접객)</td><td>매장 접객 시퀀스 · <b>전체 시스템 허브</b></td><td>★ 신규</td></tr>
+    <tr><td>exam.html (검안)</td><td>③A 검안 자동 시스템(위저드)</td><td>★ 신규</td></tr>
+    <tr><td>fit.html (피팅)</td><td>③C 피팅 + A4 시트(1:1 안경 형상)</td><td>★ 신규</td></tr>
+    <tr><td colspan="3" style="background:#f5f3ef;font-weight:700;font-size:13px">도구 (flow에서 링크)</td></tr>
+    <tr><td><b>engine.html</b></td><td>⑨ 9사이즈 환산엔진 튜너 (코어 IP)</td><td>★ 신규</td></tr>
+    <tr><td>measure.html</td><td>① 안면 측정(스캔→5값→9사이즈)</td><td>★ 신규</td></tr>
+    <tr><td>frames.html</td><td>② 타사 DB·큐레이팅(각인·적합도)</td><td>★ 신규</td></tr>
+    <tr><td>recommend.html</td><td>⑤ 추천·가상피팅(6변수·3대질문 평결)</td><td>★ 신규</td></tr>
+    <tr><td>rx.html</td><td>③B 조제 산출(편심·정점보정·블랭크)</td><td>★ 신규</td></tr>
+    <tr><td>lens.html</td><td>④ 콘택트 측정(BC·직경·도수)</td><td>★ 신규</td></tr>
+    <tr><td>b.html</td><td>③ 검안·피팅 표준 매뉴얼(SOP)</td><td>★ 정본</td></tr>
+    <tr><td>equipment.html</td><td>장비 표준·본부 지정 패키지(컨설팅)</td><td>★ 신규</td></tr>
+    <tr><td>insights.html</td><td>전략 인사이트(스마트안경 빈틈·AI 선점·해자)</td><td>★ 신규</td></tr>
+    <tr><td colspan="3" style="background:#f5f3ef;font-weight:700;font-size:13px">공통 모듈 — <code>public/assets/</code></td></tr>
+    <tr><td><b>bv-size-engine.js</b></td><td>9사이즈 환산엔진(코어). engine·measure·frames·recommend가 호출</td><td>★ 신규</td></tr>
+    <tr><td><b>bv-frame-db.js</b></td><td>타사 DB·적합도 매칭. frames·recommend가 호출(size엔진 먼저 로드)</td><td>★ 신규</td></tr>
+    <tr><td>app.css · app.js</td><td>공통 스타일·스크립트</td><td>★</td></tr>
   </table>
-  <p class="note">붙이는 법: a·b·exam.html을 public/ 루트(index와 같은 자리)에 넣고, 각 페이지 네비에 링크 3줄 추가.</p>
+  <p class="note">붙이는 법: html은 public/ 루트, .js 2개는 public/assets/. 로드 순서 — frames/recommend는 bv-size-engine.js → bv-frame-db.js 순. login·app.css·app.js는 손 안 댐.</p>
 
   <h3>② 문서 — 폰/PC 정본 (앱 아님)</h3>
   <table>
@@ -239,7 +255,7 @@
     <p style="font-size:17px;margin:6px 0">사업 개요·검안 매뉴얼은 이제 <b>앱(a.html·b.html)에서만 업데이트</b>한다. 문서판(팀설득덱·검안매뉴얼 .html)은 <b>스냅샷</b> — 손대지 않음. 사업 개요(짧은 1장) ≠ 사업계획서(정식 풀버전), 둘은 다른 물건.</p>
   </div>
 
-  <p class="note">다음 채팅 1순위: ③ 검안 변수 체계 채우기 — exam.html(검안 자동 시스템)에 들어갈 단계별 AI 기준값·정상범위·이상치(양지근 임상지식). b.html의 E 인덱스 빈칸이 그 작업 목록.</p>
+  <p class="note">다음 1순위: <b>측정 레코드 배선</b> — 측정 1번(measure)으로 잡은 값이 exam·recommend·rx·fit에 자동으로 흐르게(지금은 페이지마다 수기). 그리고 b.html의 〔확인〕 임상값을 양지근 면허 판단으로 확정.</p>
 </div>
 </body>
 </html>

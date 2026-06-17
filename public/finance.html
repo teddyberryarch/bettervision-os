@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 재무 모델</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px 0}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+.sld{margin:12px 0}
+.sld label{display:flex;justify-content:space-between;font-size:14px;color:var(--ink);font-weight:600;margin-bottom:5px}
+.sld label b{color:var(--ink)}
+.sld input[type=range]{width:100%}
+.sld .hint{font-size:12px;color:var(--muted);margin-top:2px}
+.big{display:flex;flex-direction:column;gap:10px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi .l{font-size:13px;color:var(--muted);font-weight:600}
+.kpi .v{font-size:30px;font-weight:700;color:var(--ink);letter-spacing:-.5px;margin:2px 0}
+.kpi .v small{font-size:16px;font-weight:600;color:var(--muted)}
+.kpi.tg .badge{font-size:12px;font-weight:700;border-radius:6px;padding:3px 8px;display:inline-block;margin-top:4px}
+.badge.ok{background:var(--good-soft);color:var(--good)}.badge.no{background:var(--warn-soft);color:var(--warn)}
+.bd{font-size:13px;color:var(--muted);line-height:1.7;margin-top:6px}
+.bd .row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line2);padding:4px 0}
+.bd .row b{color:var(--ink)}
+.note{font-size:13px;color:var(--muted);font-style:italic;margin:10px 0}
+</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="wrap"><section class="view active">
+<div class="lead"><div><div class="eyebrow">재무 모델 · 시뮬레이터</div><h2>매출·영업이익이 어떤 가정에서 나오나</h2>
+<div class="sub">가정을 직접 흔들어 보세요. 본사 매출 = 가맹 공급(전 품목 본사 공급) + 로열티 + 온라인. 두 불변원칙(데이터·공급 본사 귀속)이 이 모델의 전제.</div></div><span class="pill good">● 투자 검토용</span></div>
+
+<div class="grid">
+  <div class="card pad">
+    <div class="eyebrow" style="margin-bottom:8px">가정 (슬라이드)</div>
+    <div class="sld"><label>가맹점 수 <b id="vN">150</b>개</label><input id="N" type="range" min="30" max="300" step="5" value="150" oninput="calc()"></div>
+    <div class="sld"><label>점당 월 소매매출 <b id="vR">4,000</b>만원</label><input id="R" type="range" min="2000" max="8000" step="100" value="4000" oninput="calc()"><div class="hint">점포 1곳의 월 소매 판매액</div></div>
+    <div class="sld"><label>본사 공급가 비율 <b id="vH">40</b>%</label><input id="H" type="range" min="30" max="50" step="1" value="40" oninput="calc()"><div class="hint">소매가 대비 본사가 공급으로 가져가는 비중(전 품목 본사 공급)</div></div>
+    <div class="sld"><label>PB 침투율 <b id="vP">70</b>%</label><input id="P" type="range" min="40" max="95" step="1" value="70" oninput="calc()"><div class="hint">PB 비중 ↑ → 본사 마진(영업이익률) ↑</div></div>
+    <div class="sld"><label>로열티율 <b id="vRoy">3</b>% <span style="font-weight:400;color:var(--muted)">(소매 GMV 대비)</span></label><input id="Roy" type="range" min="0" max="6" step="0.5" value="3" oninput="calc()"></div>
+    <div class="sld"><label>온라인 직접 연매출 <b id="vO">50</b>억</label><input id="O" type="range" min="0" max="150" step="5" value="50" oninput="calc()"></div>
+  </div>
+
+  <div class="card pad">
+    <div class="eyebrow" style="margin-bottom:8px">결과</div>
+    <div class="big">
+      <div class="kpi"><div class="l">소매 GMV (전 매장 합)</div><div class="v" id="oGMV">—</div></div>
+      <div class="kpi tg"><div class="l">본사 매출</div><div class="v" id="oHQ">—</div><span class="badge" id="bHQ"></span>
+        <div class="bd" id="bdHQ"></div></div>
+      <div class="kpi tg"><div class="l">영업이익 <span style="font-weight:400;color:var(--muted)">(영업이익률 <b id="oOPM">—</b>)</span></div><div class="v" id="oOP">—</div><span class="badge" id="bOP"></span></div>
+    </div>
+    <div class="note">목표: 본사 매출 360~390억 · 영업이익 90~120억. 기본 가정(150점·점당 4천만·공급 40%·PB 70%)에서 목표 안착.</div>
+  </div>
+</div>
+<div class="card pad"><div class="eyebrow" style="margin-bottom:4px">모델 논리</div>
+<div style="font-size:14px;color:var(--ink);line-height:1.7">본사 매출 = <b>가맹 공급매출</b>(GMV × 공급비율) + <b>로열티</b>(GMV × 로열티율) + <b>온라인</b>. 영업이익률은 PB 침투율에 연동(PB 마진이 높아 침투율↑ = 이익률↑). 전 품목 본사 공급이 원칙이라 GMV의 일정 비율이 그대로 본사 매출로 귀속 — 이게 모델의 핵심.</div></div>
+</section></div>
+<div class="foot"><span>BETTERVISION OS · 재무 모델 v0.1</span><span>가정 공개 · 직접 검증</span></div>
+<script>
+function g(id){return parseFloat(document.getElementById(id).value);}
+function won(억){return 억>=1?억.toFixed(0)+'억':(억*10000).toFixed(0)+'만';}
+function calc(){
+  var N=g('N'),R=g('R'),H=g('H'),P=g('P'),Roy=g('Roy'),O=g('O');
+  document.getElementById('vN').textContent=N;
+  document.getElementById('vR').textContent=R.toLocaleString();
+  document.getElementById('vH').textContent=H;
+  document.getElementById('vP').textContent=P;
+  document.getElementById('vRoy').textContent=Roy;
+  document.getElementById('vO').textContent=O;
+  // 억 단위
+  var gmv = N * R * 12 / 10000;        // 만원→억
+  var supply = gmv * H/100;
+  var roy = gmv * Roy/100;
+  var hq = supply + roy + O;
+  var opm = 18 + (P-40)*0.30;           // PB 침투율 → 영업이익률(%)
+  var op = hq * opm/100;
+  document.getElementById('oGMV').innerHTML = Math.round(gmv).toLocaleString()+'<small> 억</small>';
+  document.getElementById('oHQ').innerHTML = Math.round(hq).toLocaleString()+'<small> 억</small>';
+  document.getElementById('oOP').innerHTML = Math.round(op).toLocaleString()+'<small> 억</small>';
+  document.getElementById('oOPM').textContent = opm.toFixed(1)+'%';
+  document.getElementById('bdHQ').innerHTML =
+    '<div class="row"><span>가맹 공급매출</span><b>'+Math.round(supply).toLocaleString()+'억</b></div>'+
+    '<div class="row"><span>로열티</span><b>'+Math.round(roy).toLocaleString()+'억</b></div>'+
+    '<div class="row"><span>온라인</span><b>'+Math.round(O).toLocaleString()+'억</b></div>';
+  function badge(el,val,lo,hi){var e=document.getElementById(el);
+    if(val>=lo&&val<=hi){e.className='badge ok';e.textContent='목표 '+lo+'~'+hi+'억 안착 ✓';}
+    else if(val<lo){e.className='badge no';e.textContent='목표('+lo+'~'+hi+'억) 미달 — 가정 상향 필요';}
+    else{e.className='badge ok';e.textContent='목표('+lo+'~'+hi+'억) 초과 ✓';}}
+  badge('bHQ',hq,360,390); badge('bOP',op,90,120);
+}
+calc();
+</script>
+</body></html>

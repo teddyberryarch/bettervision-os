@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BETTERVISION — 맞춤안경을 프랜차이즈로</title>
+<style>
+  :root{--ink:#1a1d1a;--paper:#f6f4ee;--card:#fffdf8;--line:#cbc7bb;--acc:#3a5f44;--warm:#b0552e;--grey:#5a5a52;--blue:#3f6d8c}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:#f6f4ee}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    background:#f6f4ee !important;color:#1a1d1a !important;font-size:19px;line-height:1.7;
+    -webkit-text-size-adjust:100%;padding:0 0 80px}
+  @media (prefers-color-scheme: dark){
+    html,body{background:#f6f4ee !important;color:#1a1d1a !important}
+    .card,.lead,.toc,.flow,.step,.crow{background:#fffdf8 !important}
+    .star{background:#f0ede4 !important}
+    p,li,h1,h2,h3,td,th,.card .v,.toc a,.crow .v{color:#1a1d1a !important}
+  }
+  .wrap{max-width:740px;margin:0 auto;padding:0 20px}
+  header{padding:38px 0 20px;border-bottom:3px solid var(--acc);margin-bottom:26px}
+  .brand{font-size:25px;font-weight:800;color:var(--acc)}
+  h1.title{font-size:27px;font-weight:800;margin-top:8px;line-height:1.22}
+  .meta{font-size:15px;color:var(--grey);margin-top:12px;line-height:1.6}
+  .lead{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--warm);
+    border-radius:4px;padding:18px 20px;margin:20px 0;font-size:19px}
+  .lead b{color:var(--warm)}
+  .lead .big{font-size:21px;font-weight:800;color:var(--ink);display:block;margin-top:4px}
+  h2{font-size:23px;font-weight:800;margin:36px 0 6px;padding-bottom:8px;border-bottom:2px solid var(--acc);line-height:1.25}
+  h2 .num{color:var(--warm);margin-right:8px}
+  h3{font-size:20px;font-weight:700;margin:20px 0 8px}
+  p{margin:9px 0}
+  .sub{font-size:17px;color:var(--grey)}
+  ul{margin:8px 0 8px 2px;list-style:none}
+  li{position:relative;padding-left:18px;margin:7px 0}
+  li::before{content:"·";position:absolute;left:4px;top:-2px;color:var(--acc);font-weight:800;font-size:22px}
+  li.x::before{content:"✕";color:var(--warm);font-size:15px;top:1px}
+  li.o::before{content:"✓";color:var(--acc);font-size:15px;top:1px}
+  .toc{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:14px 18px;margin:16px 0}
+  .toc a{display:block;color:var(--ink);text-decoration:none;font-size:18px;padding:6px 0;border-bottom:1px solid #eee}
+  .toc a:last-child{border-bottom:0}
+  .toc a .n{color:var(--acc);font-weight:800;margin-right:8px}
+  .star{background:#f0ede4;border:1px solid var(--acc);border-radius:4px;padding:16px 18px;margin:16px 0}
+  .star .h{font-weight:800;color:var(--acc);font-size:18px;margin-bottom:6px}
+  .star.w{border-color:var(--warm)}
+  .star.w .h{color:var(--warm)}
+  .flow{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:14px 16px;
+    margin:14px 0;font-size:18px;font-weight:700;color:var(--acc);line-height:1.7}
+  .cards{margin:12px 0}
+  .crow{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:13px 15px;margin:9px 0}
+  .crow.cust{border-left:4px solid var(--blue)}
+  .crow.fran{border-left:4px solid var(--warm)}
+  .crow.hq{border-left:4px solid var(--acc)}
+  .crow .k{font-size:16px;font-weight:800;margin-bottom:4px}
+  .crow.cust .k{color:var(--blue)} .crow.fran .k{color:var(--warm)} .crow.hq .k{color:var(--acc)}
+  .crow .v{font-size:17px;line-height:1.55}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:16px}
+  th,td{border:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+  th{background:#eeece6;font-weight:700;font-size:15px}
+  td .o{color:var(--acc);font-weight:800}
+  td .x{color:var(--warm);font-weight:800}
+  .us{background:#eef3ee}
+  .note{font-size:15px;color:var(--grey);font-style:italic;margin-top:6px}
+  .punch{background:var(--acc);color:#f6f4ee !important;border-radius:6px;padding:18px 20px;margin:22px 0;
+    font-size:20px;font-weight:800;line-height:1.5;text-align:center}
+  .punch span{color:#e8c9a8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">BETTERVISION</div>
+    <h1 class="title">맞춤안경을<br>프랜차이즈로 복제한다</h1>
+    <div class="meta">측정·모듈·매뉴얼로 맞춤을 표준화하는 프리미엄 안경 프랜차이즈 ｜ 사업 개요 ｜ 2026.06</div>
+  </header>
+
+  <div class="lead">
+    핵심 한 줄.
+    <span class="big">3D프린터가 못 하는 걸 우리가 한다 — 맞춤을 '출력'이 아니라 '측정·모듈·매뉴얼'로 분해해서 복제 가능하게 만든다.</span>
+  </div>
+
+  <div class="toc">
+    <a href="#s1"><span class="n">1</span>문제 — 시장의 빈칸</a>
+    <a href="#s2"><span class="n">2</span>왜 3D프린터가 답이 아닌가</a>
+    <a href="#s3"><span class="n">3</span>우리 대안 — 맞춤의 분해</a>
+    <a href="#s4"><span class="n">4</span>9사이즈 — 재고를 안 터뜨리는 구조</a>
+    <a href="#s5"><span class="n">5</span>검안·맞춤·데이터 장악 — 누가 뭘 얻나 ★</a>
+    <a href="#s6"><span class="n">6</span>매뉴얼 = 데이터 장악 장치</a>
+    <a href="#s7"><span class="n">7</span>미래 스마트안경 시장에서도 먹히는 이유 ★</a>
+    <a href="#s8"><span class="n">8</span>그래서 못 따라잡힌다 — 해자</a>
+  </div>
+
+  <!-- 1 -->
+  <h2 id="s1"><span class="num">1.</span>문제 — 시장의 빈칸</h2>
+  <p>안경 시장은 세 갈래인데, 가운데가 비어 있다.</p>
+  <ul>
+    <li class="x"><b>맞춤은 비싸다.</b> 3D프린팅 맞춤안경(브리즘)은 객단가 약 42만 — 한 명당 한 벌을 깎아 출력하는 구조라 대중가가 불가능하다.</li>
+    <li class="x"><b>싼 건 안 맞는다.</b> 대형 체인(다비치)·일반 기성테는 사실상 원사이즈여서, 한국인 얼굴의 다양성(폭·코·귀 위치)을 받아내지 못한다.</li>
+    <li class="x"><b>스마트안경은 한국인 얼굴·도수가 안 된다.</b> 빅테크 제품 = 원사이즈 + 도수 미지원. 멋있어도 못 쓰는 사람이 대다수.</li>
+  </ul>
+  <div class="star">
+    <div class="h">빈칸</div>
+    <p style="font-size:18px;margin:4px 0"><b>대중가로 맞고, 도수 되고, 확장 가능한 안경.</b> 이 자리가 비어 있다. 이게 우리 자리.</p>
+  </div>
+
+  <!-- 2 -->
+  <h2 id="s2"><span class="num">2.</span>왜 3D프린터가 답이 아닌가</h2>
+  <p class="sub">"맞춤 = 3D프린팅"이 미래라는 통념. 우리는 여기에 동의하지 않는다.</p>
+  <ul>
+    <li class="x"><b>소재 한계.</b> SLS 나일론은 아세테이트·티탄의 손맛·광택·내구·수리성을 못 따라감. 안경은 패션재인데 프린팅 질감이 티난다.</li>
+    <li class="x"><b>단가·속도.</b> 1개 출력 + 후가공(염색·연마)에 시간·비용 폭증 → 객단가 42만이어야 수지가 맞음 → 대중화 구조적으로 불가.</li>
+    <li class="x"><b>확장 불가.</b> "맞춤 = 출력"은 한 명에 한 출력이 묶이는 1대1 종속. 프랜차이즈로 복제가 안 된다.</li>
+    <li class="x"><b>수리 불가.</b> 부러지면 그 사람 데이터로 또 출력. 모듈 교체 개념이 없다.</li>
+  </ul>
+  <div class="star w">
+    <div class="h">우리 판단</div>
+    <p style="font-size:18px;margin:4px 0">미래는 <b>프린터가 소재를 대체하는 게 아니라, 검증된 소재(아세테이트·티탄)를 '프린터처럼' 맞춤으로 운용하는 것.</b> 그 운용법이 우리의 모듈식 9사이즈 + 측정→피팅 지시다.</p>
+  </div>
+
+  <!-- 3 -->
+  <h2 id="s3"><span class="num">3.</span>우리 대안 — 맞춤의 분해</h2>
+  <p>맞춤을 통째로 출력하지 않는다. 세 조각으로 쪼갠다.</p>
+  <div class="flow">맞춤 = 측정(SW) + 모듈(기성 소재) + 피팅지시(매뉴얼)</div>
+  <p>세 조각 모두 <b>복제 가능</b>하다. SW는 깔면 되고, 모듈은 본부가 공급하고, 매뉴얼은 가맹점에 주면 된다. 출력은 복제가 안 되지만 이 셋은 된다.</p>
+  <div class="star">
+    <div class="h">팀 설득 비유 (한 줄로 외울 것)</div>
+    <p style="font-size:18px;margin:4px 0"><b>브리즘 = 한 명당 한 벌 깎는 맞춤 양복점</b>(비싸고 느림).<br>
+    <b>우리 = 측정해서 기성 모듈을 조합·수선하는 맞춤 = 유니클로 + 수선집.</b><br>
+    둘 다 "맞춤"인데, 우리만 대중가 + 확장 가능.</p>
+  </div>
+  <p style="font-size:18px"><b>요지:</b> 3D프린터가 못 하는 건 '확장'이고, 우리가 가진 건 정확히 '확장'이다.</p>
+
+  <!-- 4 -->
+  <h2 id="s4"><span class="num">4.</span>9사이즈 — 재고를 안 터뜨리는 구조</h2>
+  <p class="sub">"맞춤이면 재고 터지는 거 아니냐"는 팀의 첫 의심. 안 터진다. 세 층이 다르기 때문.</p>
+  <table>
+    <tr><th>층</th><th>정체</th><th>숫자</th></tr>
+    <tr><td><b>9사이즈</b> (핏 등급)</td><td>측정값이 매핑되는 분류. 프론트폭 {S·M·L} × 템플길이 {S·M·L}</td><td>3×3 = <b>9</b></td></tr>
+    <tr><td><b>810</b> (모듈 카탈로그)</td><td>프론트·템플을 따로 소싱해 나사 조립. 프론트모듈 × 템플모듈</td><td>30×27 = <b>810</b></td></tr>
+    <tr><td><b>수요표</b> (재고 통제)</td><td>9등급별 예상 판매 비중 → 생산량·매장 샘플 배치</td><td>M·M 최대</td></tr>
+  </table>
+  <p><b>810은 카탈로그 숫자지 진열 숫자가 아니다.</b> 매장엔 수요표 가운데(M·M) 위주 대표 샘플만 깔고, 실판매는 측정 → 9등급 매칭 → 본부 발주·조립(브리즘 준맞춤과 같은 구조). 그래서 선반에 810개가 안 쌓인다.</p>
+  <div class="star">
+    <div class="h">모듈식의 진짜 무기</div>
+    <p style="font-size:18px;margin:4px 0">프론트·템플이 따로 조립되니 <b>'프론트 L + 템플 S'</b> 같은 독립 조합이 된다. 기성테는 둘이 한 몸이라 "얼굴 넓은데 귀까진 짧은 사람"을 못 맞춘다 — 우리는 맞춘다. 이게 9사이즈를 두 독립 축으로 굴리는 이유이자 맞춤 포지션의 핵심.</p>
+  </div>
+
+  <!-- 5 -->
+  <h2 id="s5"><span class="num">5.</span>검안·맞춤·데이터 장악 — 누가 뭘 얻나 ★</h2>
+  <p>같은 시스템이 세 주체에게 각각 다른 이득을 준다. 이게 설득의 본체.</p>
+
+  <div class="cards">
+    <div class="crow cust">
+      <div class="k">소비자가 얻는 것</div>
+      <div class="v">광학적으로 맞고(측정·검안) + 패셔너블(디자인·큐레이션) + 내 데이터 기반(얼굴·이력).
+      추천이 감이 아니라 근거 — "이 젠틀몬스터 78% vs 우리 PB(자체 브랜드) 96%"처럼 적합도를 숫자로 비교하니, 강매 없이 신뢰가 생긴다. 재구매 땐 내 데이터로 더 빠르고 정확하게.</div>
+    </div>
+    <div class="crow fran">
+      <div class="k">가맹점주가 얻는 것</div>
+      <div class="v">검안·발주·정산·마케팅이 자동화 → <b>안경사 1명 + 일반 직원</b>으로 운영. 추천·가격이 매뉴얼화돼 도제식("선배 눈치껏") 스트레스에서 해방.
+      기존 브랜드 팔던 방식 그대로 + 측정·추천으로 객단가·전환율↑. 진입장벽↓.</div>
+    </div>
+    <div class="crow hq">
+      <div class="k">본사(우리)가 얻는 것 = 장악</div>
+      <div class="v">타사 거래까지 포함해 <b>모든 거래가 우리 데이터로 귀속</b>(데이터 본부소유). 프론트·템플·렌즈 <b>공급 독점</b>.
+      매뉴얼 자체가 데이터 수집기 — 가맹이 늘수록 데이터·공급 지배력이 커진다.</div>
+    </div>
+  </div>
+
+  <h3>그래서 우리가 추구하는 것 / 장악하는 것</h3>
+  <table>
+    <tr><th>추구한다 (어떻게)</th><th>장악한다 (무엇을)</th></tr>
+    <tr>
+      <td><b>자동화</b> — 아무나 운영<br><b>맞춤화</b> — 측정→매칭→피팅<br><b>표준화</b> — 안경사 편차 제거</td>
+      <td><b>데이터</b> — 얼굴·구매·만족 누적<br><b>공급</b> — 프론트·템플·렌즈 독점<br><b>표준 IP</b> — 측정·검안 경계값·매뉴얼</td>
+    </tr>
+  </table>
+  <p class="note">자동화·맞춤화·표준화는 '수단'이고, 데이터·공급·IP 장악이 '목적'이다. 수단이 곧 데이터 수집 경로가 되도록 설계한 게 핵심.</p>
+
+  <!-- 6 -->
+  <h2 id="s6"><span class="num">6.</span>매뉴얼 = 데이터 장악 장치</h2>
+  <p>안경학과 시험범위 그대로 — <b>검안 → 사이즈 재기 → 조제 → 피팅</b>까지 표준 절차를 앱이 단계별로 띄운다. 따라가면 자동으로 표준 준수.</p>
+  <ul>
+    <li class="o"><b>비숙련도 베테랑급</b>(목표a) + <b>숙련자 판단차 제거</b>(목표b), 둘 다.</li>
+    <li class="o">AI가 기준값·이상치·다음 단계 제시 → 안경사는 확인·확정만.</li>
+    <li class="o"><b>가맹점이 매뉴얼대로 일하면 데이터가 자동으로 본부로 귀속.</b> "쉽게 주고 데이터 장악"이 정확히 이 구조.</li>
+  </ul>
+  <div class="flow">검안 → 측정(5값) → 객관화 추천 → 본부 표준가 → A4 피팅시트 → 정산·발주 → 재구매 마케팅 (전 과정 자동·표준)</div>
+  <p class="note">이 매뉴얼이 곧 마스터 설계도의 ③(검안·피팅 표준화)이자 가맹 패키지의 본체다.</p>
+
+  <!-- 7 -->
+  <h2 id="s7"><span class="num">7.</span>미래 스마트안경 시장에서도 먹히는 이유 ★</h2>
+  <p class="sub">우리는 원래 스마트안경(오디오글라스)으로 시작했다. 그 목표는 버린 게 아니라, 더 좋은 자리에서 다시 잡는 것.</p>
+  <div class="star w">
+    <div class="h">과거 패착 → 전략 수정</div>
+    <p style="font-size:18px;margin:4px 0">패착 = 처음부터 돈 들여 하드웨어 설계부터 하려 한 것. 수정 = <b>프차로 먼저 수익·인프라·데이터·유통망을 깔고, 병목에서 기다린다.</b> 시장 열릴 때 시작해도 늦지 않다.</p>
+  </div>
+  <h3>스마트안경 3대 약점 → 우리가 그대로 커버</h3>
+  <ul>
+    <li class="o"><b>안 예쁨</b> → 파라메트릭 9사이즈 + 복각 디자인 + 큐레이션.</li>
+    <li class="o"><b>원 사이즈(안 맞음)</b> → 9사이즈 + 자동 측정·피팅 = 한국인 얼굴 맞춤.</li>
+    <li class="o"><b>도수 안 됨</b> → 자동 검안 + 도수 안경 가능 = 시력 교정까지.</li>
+  </ul>
+  <div class="star">
+    <div class="h">병목 포지션 + 모듈식의 구조적 이점</div>
+    <p style="font-size:18px;margin:4px 0">빅테크가 하드웨어를 만들어도 <b>"한국인 얼굴에 맞고 도수 되는 안경으로 만들어 파는" 마지막 단계(측정·피팅·도수·유통)는 우리 같은 플레이어가 필요.</b> 미리 갖춰 두면 시장 열릴 때 병목에서 기다리면 된다. (메타가 안경 부분은 룩소티카에 맡긴 것처럼, 빅테크의 한국 안경 파트너 자리를 미리 선점)</p>
+    <p style="font-size:18px;margin:8px 0 0"><b>여기서 브리즘은 못 한다.</b> 풀출력 구조라 배터리·기판·스피커가 들어가는 스마트안경을 못 만든다 — 결국 표준 모듈을 따로 생산해 보조 맞추는 수밖에 없고, 그 순간 "100% 맞춤" 정체성이 깨진다. <b>우리는 처음부터 모듈식</b>이라 '프론트 = 전자모듈 / 템플 = 배터리·스피커'가 구조적으로 자연스럽다.</p>
+  </div>
+  <p style="font-size:18px"><b>결론:</b> 처음 목표(스마트안경)로 돌아오는데, 이번엔 <b>인프라 깔고 병목 잡은 채로</b> 돌아온다.</p>
+
+  <!-- 8 -->
+  <h2 id="s8"><span class="num">8.</span>그래서 못 따라잡힌다 — 해자</h2>
+  <table>
+    <tr><th></th><th>맞춤</th><th>스마트안경</th><th>데이터</th><th>대중가·확장</th></tr>
+    <tr><td><b>브리즘</b></td><td><span class="o">O</span> 풀출력</td><td><span class="x">X</span> 출력구조</td><td><span class="x">약</span> 1대1</td><td><span class="x">X</span> 42만</td></tr>
+    <tr><td><b>빅테크</b></td><td><span class="x">X</span> 원사이즈</td><td><span class="o">O</span></td><td><span class="o">O</span> 자체</td><td><span class="x">X</span> 얼굴·도수</td></tr>
+    <tr><td><b>다비치</b></td><td><span class="x">X</span> 기성</td><td><span class="x">X</span></td><td><span class="x">X</span></td><td><span class="o">O</span> 싸고많음</td></tr>
+    <tr class="us"><td><b>우리</b></td><td><span class="o">O</span> 준맞춤</td><td><span class="o">대기·구조적 가능</span></td><td><span class="o">O</span> 장악</td><td><span class="o">O</span></td></tr>
+  </table>
+
+  <div class="punch">
+    브리즘은 <span>스마트</span>를 못 가고,<br>
+    빅테크는 <span>한국인 얼굴·도수</span>를 못 맞추고,<br>
+    다비치는 <span>맞춤 데이터</span>가 없다.<br>
+    그 사이가 — 우리다.
+  </div>
+
+  <p class="note">측정·모듈·매뉴얼 — 이 세 조각이 맞춤안경을 처음으로 '복제 가능한 사업'으로 만든다.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 장비 표준</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.sec{margin-bottom:6px}.sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);margin:2px 0 4px}.sec .sdesc{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:10px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}.tbl th,.tbl td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}.tbl th{background:var(--surface);font-size:13px;color:var(--muted);font-weight:600}.tbl td:first-child{font-weight:600}
+.must{color:var(--bad);font-weight:700}.opt{color:var(--muted)}
+.star{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}.star.g{border-color:var(--good)}.star .h{font-weight:700;color:var(--ink);font-size:15px;margin-bottom:5px}.star.g .h{color:var(--good)}.star p{font-size:14px;line-height:1.6;color:var(--ink);margin:5px 0}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}.chip{font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:6px 10px}
+ul{list-style:none;padding:0;margin:8px 0}li{position:relative;padding-left:16px;font-size:14px;line-height:1.6;margin:6px 0;color:var(--ink)}li::before{content:"·";position:absolute;left:3px;top:-1px;color:var(--ink);font-weight:800;font-size:18px}
+.note{font-size:13px;color:var(--muted);font-style:italic;margin:8px 0}
+.toc{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.toc a{font-size:13px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 11px;text-decoration:none}
+</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="wrap"><section class="view active">
+<div class="lead"><div><div class="eyebrow">창업·운영 · 장비 표준</div><h2>안경원 필수 장비 — 본부 지정 패키지</h2>
+<div class="sub">장비는 4갈래 — 검안(도수)·가공(렌즈 깎기)·피팅(휨·조정)·우리 카메라 측정. 본부가 기종·연동을 지정해 가맹점 고민을 없애고, 데이터 연동과 공급 통제를 동시에 잡는다.</div></div><span class="pill good">● v0.1 컨설팅</span></div>
+
+<div class="toc">
+  <a href="#m1">① 검안 기계</a><a href="#m2">② 가공 기계</a><a href="#m3">③ 피팅 수공구</a><a href="#m4">④ 카메라 측정(우리)</a><a href="#m5">채널별 필수</a><a href="#m6">본부 패키지·비용</a>
+</div>
+
+<div class="card pad sec">
+  <div class="ctitle">큰 그림 — 측정의 3순간 · 장비의 4갈래</div>
+  <div class="sdesc">측정이 들어가는 순간은 셋: ①맨얼굴(사이즈·가상피팅) ②착용(조제용 as-worn) ③완성품 검증. ①②는 우리 카메라 1대(2모드)로 합치고, ③은 렌즈미터+A4로.</div>
+  <table class="tbl">
+    <tr><th>갈래</th><th>무엇</th><th>우리 모델에서</th></tr>
+    <tr><td>① 검안 기계</td><td>도수 측정(타각·자각·구도수)</td><td>도수 매장 <span class="must">필수</span></td></tr>
+    <tr><td>② 가공 기계</td><td>렌즈를 프레임에 맞춰 깎기</td><td><span class="opt">본부 중앙가공 → 매장 생략 가능</span></td></tr>
+    <tr><td>③ 피팅 수공구</td><td>프레임 휨·코받침·세척</td><td>전 매장 기본</td></tr>
+    <tr><td>④ 카메라 측정</td><td>얼굴 사이즈 + 착용 피팅 기하</td><td><span class="must">우리 고유</span> · 전 매장</td></tr>
+  </table>
+</div>
+
+<div class="card pad sec" id="m1">
+  <div class="ctitle">① 검안 기계 (도수) — 전문 측정기</div>
+  <div class="sdesc">법: 안경사의 타각 검사는 <b>자동굴절기 사용에 한정</b>(수기 타각·약제 검사 제외). 6세 이하는 의사 처방 필수. OS는 이 기계 값을 연동/촬영AI로 받아 표준화.</div>
+  <table class="tbl">
+    <tr><th>기계</th><th>역할</th><th>필수도</th><th>OS 연동</th><th>대략가(신품)</th></tr>
+    <tr><td>자동굴절기 (오토렙·케라토 겸용)</td><td>타각 도수 S/C/Ax + 각막곡률 자동</td><td class="must">도수 필수</td><td>표준통신/USB</td><td>1,000~2,500만</td></tr>
+    <tr><td>포롭터 (디지털 권장) + 시력표</td><td>자각 검사 → 최종 처방 확정</td><td class="must">도수 필수</td><td>디지털형 직결</td><td>1,500~3,000만</td></tr>
+    <tr><td>자동 렌즈미터</td><td>구도수·완성 렌즈 검수(③ 검증)</td><td class="must">필수</td><td>자동형 직결</td><td>300~700만</td></tr>
+    <tr><td>(안압계·세극등 등)</td><td>질환 검사</td><td class="opt">안과 영역 — 제외</td><td>—</td><td>—</td></tr>
+  </table>
+  <div class="note">디지털 포롭터·자동 렌즈미터를 고르면 수기 입력 0. 구형은 촬영+AI로 우회(③의 3가지 길).</div>
+</div>
+
+<div class="card pad sec" id="m2">
+  <div class="ctitle">② 가공 기계 (렌즈 깎기)</div>
+  <div class="sdesc">렌즈를 프레임에 맞게 깎는 장비. 우리 모델의 핵심 결정: <b>매장에 두지 않고 본부 중앙가공</b>.</div>
+  <table class="tbl">
+    <tr><th>기계</th><th>역할</th><th>필수도</th><th>대략가</th></tr>
+    <tr><td>자동 옥습기 (Tracer+Blocker+Edger 세트)</td><td>프레임 형상 읽기→렌즈 가공(면취·홈)</td><td class="opt">매장 가공 시만</td><td>2,000~4,000만+</td></tr>
+    <tr><td>무테 천공기 (Driller)</td><td>무테 렌즈 구멍 가공</td><td class="opt">무테 취급 시</td><td>에저 내장/별도</td></tr>
+    <tr><td>수가공 도구 (면취·홈파기)</td><td>보정 가공</td><td class="opt">보조</td><td>소액</td></tr>
+  </table>
+  <div class="star g"><div class="h">★ 본부 중앙가공 전략</div>
+    <p>매장은 옥습기 없이 → <b>측정·조제값을 본부로 발주 → 본부가 가공·조립 → 입고</b>. 효과: 매장 진입장벽·초기비용 大↓(가장 비싼 장비 제거), 가공 품질 표준화, 공급 독점·데이터 귀속 강화. "도수 매장도 옥습기 없이 연다"가 차별점.</p></div>
+</div>
+
+<div class="card pad sec" id="m3">
+  <div class="ctitle">③ 피팅 수공구 (휨·조정·세척)</div>
+  <div class="sdesc">완성 안경을 얼굴에 맞춰 휘고 조정하는 손도구. 전 매장(안테나샵 포함) 기본. A4 피팅시트가 가이드.</div>
+  <ul>
+    <li><b>프레임 워머</b>(온풍식 또는 비드/소금식) — 아세테이트 휨 전 가열. ~20~50만</li>
+    <li><b>피팅 플라이어 세트</b> — 각도조정(angling)·코받침 조정(snipe/round nose)·평면(flat)·나일론조(흠집 방지)·컷팅·끝말이. 종류별 5~8개. ~50~150만</li>
+    <li><b>정밀 드라이버 + 나사·부품 키트</b> — 힌지·코받침 교체</li>
+    <li><b>PD미터/PD자 · 동공높이 게이지</b> — (카메라 보조·검증용)</li>
+    <li><b>렌즈 곡률 게이지 · 두께 캘리퍼</b> — 검수</li>
+    <li><b>초음파 세척기</b> — 인도 전 세척. ~10~30만</li>
+    <li><b>A4 피팅 검증 시트</b>(우리) — 벌림각·판토·OC·정점 1:1 검증</li>
+  </ul>
+</div>
+
+<div class="card pad sec" id="m4">
+  <div class="ctitle">④ 카메라 측정 (우리 고유) — 얼굴 + 착용 2모드</div>
+  <div class="sdesc">한 기기로 두 측정을 합친다. 업계의 비디오 센트레이션 장비를 아이패드 버전으로 원가 파괴.</div>
+  <table class="tbl">
+    <tr><th>모드</th><th>측정</th><th>쓰임</th></tr>
+    <tr><td>모드1 · 맨얼굴</td><td>PD·얼굴폭·코·귀·안면각 + 얼굴 메시</td><td>9사이즈 매칭 · 가상피팅</td></tr>
+    <tr><td>모드2 · 착용(테 쓴 채)</td><td>as-worn PD·동공높이·판토·정점거리·안면각</td><td>조제·피팅 지시 (rx·fit)</td></tr>
+  </table>
+  <div class="star"><div class="h">벤치마크 = 비디오 센트레이션</div>
+    <p>Zeiss i.Terminal·VISUFIT / Essilor Visioffice / Hoya visuReal / Rodenstock ImpressionIST — 맨얼굴+착용을 한 기계로 재는 수천만 원짜리 장비. <b>우리는 아이패드(트루뎁스) → 3카메라 리그로 같은 걸 저가에.</b> 단계: 1단계 아이패드 1대(앱·매장 겸용) → 2단계 3카메라(엔진 동일, 하드웨어만 교체).</p></div>
+  <div class="note">"피팅 맞는지 체크하는 기계"를 따로 만들 필요 없음 = 모드2가 그것. 완성품 검증(③)은 렌즈미터+A4.</div>
+</div>
+
+<div class="card pad sec" id="m5">
+  <div class="ctitle">채널별 필수 구성</div>
+  <table class="tbl">
+    <tr><th>채널</th><th>검안 기계</th><th>가공</th><th>카메라</th><th>피팅 수공구</th></tr>
+    <tr><td>성수 안테나 (도수X·브랜딩)</td><td class="opt">불필요</td><td class="opt">불필요</td><td class="must">필수</td><td>기본</td></tr>
+    <tr><td>신규 가맹 (도수O·핫플)</td><td class="must">자동굴절기+포롭터+렌즈미터</td><td class="opt">본부 중앙(생략)</td><td class="must">필수</td><td>풀세트</td></tr>
+    <tr><td>기존 전환 (동네 도수)</td><td>기존 보유 + 표준 교체</td><td class="opt">본부 중앙(생략)</td><td class="must">필수</td><td>보유</td></tr>
+  </table>
+  <div class="note">안테나샵은 도수를 안 하니 검안·가공 기계 0 — 카메라 측정 + 피팅 수공구만. 진입 부담이 가장 가볍다.</div>
+</div>
+
+<div class="card pad sec" id="m6">
+  <div class="ctitle">본부 지정 패키지 · 비용 개요</div>
+  <div class="star g"><div class="h">★ 왜 본부가 기종을 지정하나</div>
+    <p>① 가맹점이 기계 고민 0 (지정 패키지만 구매) ② <b>OS 연동 보장</b>(지정 기종에 연동 드라이버 준비) ③ 공동구매·리스로 원가↓ ④ 데이터 표준·공급 통제력. = "장비 표준화"도 본부 통제의 일부.</p></div>
+  <table class="tbl">
+    <tr><th>구성</th><th>도수 매장</th><th>안테나샵</th></tr>
+    <tr><td>검안 3대</td><td>3,000~6,000만 (중고·리스 절반↓)</td><td>0</td></tr>
+    <tr><td>가공</td><td>0 (본부 중앙가공)</td><td>0</td></tr>
+    <tr><td>카메라 측정</td><td>아이패드 100~200만 (3카메라는 본부 단계)</td><td>100~200만</td></tr>
+    <tr><td>피팅 수공구</td><td>100~200만</td><td>50~100만</td></tr>
+    <tr><td><b>초기 장비 합계(대략)</b></td><td><b>3,500~6,500만</b> (중고/리스로 크게↓)</td><td><b>~200~300만</b></td></tr>
+  </table>
+  <div class="note">〔대략·견적 확인〕 — 신품 기준 추정치. 실제는 기종·신중고·딜러 견적에 따라 변동. 본부가 표준 패키지로 일괄 협상하면 개별 매장 단가 낮출 수 있음.</div>
+</div>
+</section></div>
+<div class="foot"><span>BETTERVISION OS · 장비 표준 v0.1</span><span>본부 지정 패키지 = 통제력</span></div>
+</body></html>

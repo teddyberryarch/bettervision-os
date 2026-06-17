@@ -17,6 +17,13 @@
 .prog .pb.on{background:var(--ink)}
 .prog .pb.done{background:var(--good)}
 .ex-step .eyebrow{margin-bottom:2px}
+.mmb{font-size:13px;font-weight:700;border-radius:8px;padding:6px 10px;margin-bottom:8px;display:inline-block}
+.mmb.auto{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
+.mmb.judge{background:var(--good-soft);color:var(--good);border:1px solid var(--good)}
+.mmb.info{background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe}
+.mmsum{font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:6px 0}
+.mmsum b{color:var(--ink)}
+.chip.mmon{background:var(--ink);color:#fff;border-color:var(--ink)}
 .ex-step .stitle{font-size:19px;font-weight:600;color:var(--ink);letter-spacing:-.3px;margin:2px 0 4px}
 .ex-step .sdesc{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:12px}
 .hint{font-size:13px;color:var(--good);background:var(--good-soft);border-radius:8px;padding:8px 11px;margin:8px 0}
@@ -82,8 +89,11 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <button class="chip" onclick="preset('astig')">난시 + 사위 → 의뢰 분기</button>
       <button class="chip" onclick="preset('reorder')">기존 안경 지참(렌즈미터)</button>
       <button class="chip" onclick="resetAll()">초기화</button>
+      <button class="chip" id="mmchip" onclick="toggleMM()">📡 기계 연동 모드</button>
     </div>
     <div class="prog" id="prog"></div>
+    <div id="exambanner"></div>
+    <div id="mmsummary"></div>
     <div id="stage" class="ex-step"></div>
     <div class="navbtns">
       <button class="btn small ghost" id="backBtn" onclick="back()">← 이전</button>
@@ -98,6 +108,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <span>표준 준수 + 변수 귀속</span>
 </div>
 
+<script src="/assets/bv-record.js"></script>
 <script>
 var S, idx;
 function blankEye(){return {S:'',C:'',A:'',ADD:'',PD:''};}
@@ -107,7 +118,7 @@ function resetAll(){
      va:{R:'',L:''},
      obj:{R:{S:'',C:'',A:''},L:{S:'',C:'',A:''}},
      subj:{R:{S:'',C:'',A:''},L:{S:'',C:'',A:''},vd:'12'},
-     bino:{pD:'',pN:''}, add:'' };
+     bino:{pD:'',pN:''}, add:'', machineMode:false };
   idx=0; render();
 }
 function steps(){
@@ -120,13 +131,37 @@ function steps(){
 }
 function cur(){return steps()[idx];}
 function num(v){var n=parseFloat(v);return isNaN(n)?null:n;}
+var MM_AUTO=['lensmeter','va','objective'], MM_JUDGE=['subjective','binocular','add'];
+function toggleMM(){ S.machineMode=!S.machineMode; if(S.machineMode) seedMachine(); render(); }
+function seedMachine(){
+  if(S.hasGlasses==='yes'){ if(!S.lm.R.S){S.lm.R={S:'-2.00',C:'-0.75',A:'180',ADD:'',PD:'32'};} if(!S.lm.L.S){S.lm.L={S:'-2.25',C:'-0.50',A:'175',ADD:'',PD:'31'};} }
+  if(!S.va.R)S.va.R='0.3'; if(!S.va.L)S.va.L='0.4';
+  if(!S.obj.R.S)S.obj.R={S:'-2.25',C:'-0.75',A:'175'}; if(!S.obj.L.S)S.obj.L={S:'-2.50',C:'-0.50',A:'5'};
+}
+function mmBadge(id){
+  if(!S.machineMode) return '';
+  if(MM_AUTO.indexOf(id)>=0) return '<div class="mmb auto">📡 자동 수신 — 기계가 채움, 안경사는 확인만</div>';
+  if(MM_JUDGE.indexOf(id)>=0) return '<div class="mmb judge">👁 안경사 판단 — 사람이 결정하는 지점</div>';
+  if(id==='intake') return '<div class="mmb info">📝 문진 — 분기 입력</div>';
+  if(id==='result') return '<div class="mmb info">✅ 처방 확정</div>';
+  return '';
+}
+function mmSummary(){
+  if(!S.machineMode) return '';
+  var st=steps();
+  var a=st.filter(function(s){return MM_AUTO.indexOf(s)>=0;}).length;
+  var j=st.filter(function(s){return MM_JUDGE.indexOf(s)>=0;}).length;
+  return '<div class="mmsum">기계 연동: 자동 수신 <b>'+a+'</b> · 안경사 판단 <b>'+j+'</b> — 절차는 표준대로 다 거치되, 안경사가 실제로 손대는 건 판단 '+j+'개.</div>';
+}
 
 /* ---------- 렌더 ---------- */
 function render(){
   var st=steps(), id=cur();
   var prog=st.map(function(s,i){return '<div class="pb '+(i<idx?'done':(i===idx?'on':''))+'"></div>';}).join('');
   document.getElementById('prog').innerHTML=prog;
-  document.getElementById('stage').innerHTML=view(id);
+  document.getElementById('stage').innerHTML=mmBadge(id)+view(id);
+  var _ms=document.getElementById('mmsummary'); if(_ms)_ms.innerHTML=mmSummary();
+  var _mc=document.getElementById('mmchip'); if(_mc)_mc.className='chip'+(S.machineMode?' mmon':'');
   document.getElementById('backBtn').style.visibility = idx===0?'hidden':'visible';
   document.getElementById('nextBtn').textContent = (id==='result')?'처음으로 ↺':'다음 →';
   if(id==='result') buildResult();
@@ -301,6 +336,7 @@ function buildResult(){
     '<div class="eyebrow" style="margin:16px 0 4px">전달 변수 (조제·피팅·9사이즈)</div>'+
     '<div class="dump">'+JSON.stringify(bundle,null,2)+'</div>'+
     '<div class="hint">이 변수 묶음이 조제(굴절률·정점보정), 피팅(A4 시트), 9사이즈 매칭으로 그대로 넘어간다. 모든 값은 raw 1층 + 본사 코드 2층으로 본부 귀속.</div>';
+  try{BVRecord.save({rx:{R:S.subj.R,L:S.subj.L,add:(S.presby?S.add:''),vd:S.subj.vd}, sphMax:Math.max(Math.abs(parseFloat(S.subj.R.S)||0),Math.abs(parseFloat(S.subj.L.S)||0)), pd:(S.hasGlasses==='yes'?S.lm.R.PD:'')});}catch(e){}
   document.getElementById('resbox').innerHTML=html;
 }
 
@@ -329,6 +365,7 @@ function preset(kind){
   idx=0; render();
 }
 resetAll();
+(function(){var r=(window.BVRecord&&BVRecord.load)?BVRecord.load():null;var b=document.getElementById("exambanner");if(b)b.innerHTML=r?BVRecord.banner(r,"검안"):"";})();
 </script>
 </body>
 </html>

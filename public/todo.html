@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 병렬 트랙 보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.board{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:10px 0}
+@media(max-width:820px){.board{grid-template-columns:1fr}}
+.col{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
+.col h3{font-size:15px;font-weight:700;margin:2px 0 8px;color:var(--ink)}
+.col .sub{font-size:12px;color:var(--muted);margin:-4px 0 10px}
+.it{border:1px solid var(--line2);border-radius:10px;padding:9px 11px;margin:7px 0}
+.it .t{font-size:14px;font-weight:600;color:var(--ink)}
+.it .a{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.45}
+.b{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px;margin-bottom:4px}
+.b.done{background:var(--good-soft);color:var(--good)}
+.b.run{background:#e0ecff;color:#1d4ed8}
+.b.wait{background:var(--surface);color:var(--muted)}
+.b.lock{background:var(--warn-soft);color:var(--warn)}
+</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="wrap"><section class="view active">
+<div class="lead"><div><div class="eyebrow">병렬 트랙 보드</div><h2>모든 트랙을 한 화면에 — 까먹지 않게</h2>
+<div class="sub">순서대로 하면 까먹으니까 동시에. 매번 여기 와서 상태만 갱신. 면허(2026.12) 전·후를 🔒로 구분.</div></div><span class="pill good">● 단일 보드</span></div>
+<div class="board">
+
+  <div class="col"><h3>A. 시스템 · 기술</h3><div class="sub">면허 무관 · 기하·데이터 영역</div>
+    <div class="it"><span class="b done">완료</span><div class="t">OS 13페이지 + 3모듈</div><div class="a">검안·측정·추천·조제·피팅·콘택트·엔진·타사DB·장비·인사이트·접객</div></div>
+    <div class="it"><span class="b done">완료</span><div class="t">측정 레코드 배선</div><div class="a">측정 1번 → 전 단계 자동(sessionStorage)</div></div>
+    <div class="it"><span class="b done">완료</span><div class="t">카메라 사진 가상피팅</div><div class="a">measure 촬영 → recommend 사진 위 피팅</div></div>
+    <div class="it"><span class="b run">진행</span><div class="t">9사이즈 경계 튜닝</div><div class="a">engine.html에서 사이즈코리아 분포로 M·M 최빈 맞추기</div></div>
+    <div class="it"><span class="b wait">대기</span><div class="t">추천 카탈로그 → 실제 PB 디자인</div><div class="a">디자인 확정되면 recommend CAT 교체</div></div>
+    <div class="it"><span class="b wait">대기</span><div class="t">가상피팅 랜드마크 자동정렬</div><div class="a">FaceMesh로 사진 위 안경 정밀 정렬</div></div>
+    <div class="it"><span class="b lock">면허 후</span><div class="t">b.html 임상값 확정</div><div class="a">2026.12 면허 + 임상 경험 후. 지금은 교과 초벌로 데모 OK</div></div>
+    <div class="it"><span class="b wait">운영</span><div class="t">서버 레코드·각인 OCR·TrueDepth</div><div class="a">실운영 단계 승격</div></div>
+  </div>
+
+  <div class="col"><h3>B. 사업</h3><div class="sub">면허 무관 · 시간가치 큼</div>
+    <div class="it"><span class="b run">진행</span><div class="t">상표 출원 (9+35, 우선심사)</div><div class="a">가이드 작성됨 → KIPRIS 선행검색 → 출원. ⚠ NICE 13판 안경류 분류 재확인</div></div>
+    <div class="it"><span class="b run">진행</span><div class="t">성수 안테나샵 (도수 X)</div><div class="a">기획서 작성됨. 도수 안 해서 면허 불필요 — 지금 열 수 있음</div></div>
+    <div class="it"><span class="b wait">대기</span><div class="t">초기창업패키지</div><div class="a">2027 Q2 최종창. 요건·서류 준비</div></div>
+    <div class="it"><span class="b wait">대기</span><div class="t">규제 샌드박스 (온라인 재구매)</div><div class="a">대한상의 통해, 도수 재구매 온라인 주문 실증특례</div></div>
+    <div class="it"><span class="b wait">대기</span><div class="t">1인 법인 설립</div><div class="a">100% 지분 → 용재·안선·효진 베스팅 later</div></div>
+    <div class="it"><span class="b wait">대기</span><div class="t">사업계획서 v9</div><div class="a">정식 풀버전(펀딩·관공서)</div></div>
+  </div>
+
+  <div class="col"><h3>C. 배포 · 자료</h3><div class="sub">데모·설득</div>
+    <div class="it"><span class="b run">진행</span><div class="t">Railway 배포 + 시연 점검</div><div class="a">measure→recommend→fit 흐름 한번 돌려 깨진 데 잡기</div></div>
+    <div class="it"><span class="b wait">대기</span><div class="t">팀·협력자 설득</div><div class="a">사업개요(a) + OS 시연 + 인사이트</div></div>
+    <div class="it"><span class="b wait">대기</span><div class="t">투자 자료</div><div class="a">데이터·OS·밸류업 스토리</div></div>
+    <div class="it"><span class="b done">완료</span><div class="t">실행가이드 마스터 인덱스</div><div class="a">전체 파일 지도. 새 채팅 복원용</div></div>
+  </div>
+
+</div>
+<div style="font-size:13px;color:var(--muted);font-style:italic;margin:8px 0">🔒 면허 후 = b.html 임상값만. 나머지 A·B·C는 지금 다 진행 가능. 안테나샵은 도수 안 하니 면허 전에도 오픈 가능.</div>
+</section></div>
+<div class="foot"><span>BETTERVISION OS · 병렬 트랙 보드 v0.1</span><span>까먹지 않게 한 화면에</span></div>
+</body></html>

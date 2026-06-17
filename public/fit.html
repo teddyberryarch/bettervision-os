@@ -76,6 +76,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <button class="chip" onclick="preset('wrap')">안면각 큰 얼굴 → 소재 한계</button>
       <button class="chip" onclick="resetAll()">초기화</button>
     </div>
+    <div id="fitbanner"></div>
     <div class="prog" id="prog"></div>
     <div id="stage" class="ex-step"></div>
     <div class="navbtns">
@@ -88,6 +89,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 
 <div class="foot"><span>BETTERVISION OS · 피팅 자동 시스템 v0.1</span><span>생산 고정 + 측정값 휨 지시</span></div>
 
+<script src="/assets/bv-record.js"></script>
 <script>
 var F, idx;
 function resetAll(){
@@ -97,6 +99,9 @@ function resetAll(){
     material:'titan', frontA:'', dbl:'', templeLen:'', frameSpread:'', bridge:'adj',
     // 산출
   };
+  var _r=(window.BVRecord&&BVRecord.load)?BVRecord.load():null;
+  if(_r){ F.name=_r.name||F.name; if(_r.faceWidth)F.faceW=_r.faceWidth; if(_r.earGap)F.earGap=_r.earGap; if(_r.noseH)F.noseH=_r.noseH; if(_r.faceWrap!=null)F.faceWrap=_r.faceWrap; if(_r.pd)F.pd=_r.pd; if(_r.pdR)F.pdR=_r.pdR; if(_r.pdL)F.pdL=_r.pdL; if(_r.oh)F.oh=_r.oh; if(_r.rx&&_r.rx.vd)F.vd=_r.rx.vd; if(_r.sphMax!=null&&_r.sphMax!=="")F.sphMax=_r.sphMax; if(_r.rx){F.rxR=_r.rx.R;F.rxL=_r.rx.L;F.rxAdd=_r.rx.add;} }
+  var _b=document.getElementById("fitbanner"); if(_b)_b.innerHTML=_r?BVRecord.banner(_r,"피팅"):"";
   idx=0; render();
 }
 var STEPS=['intake','size','splay','panto','vertex','nosepad','sheet'];
@@ -186,8 +191,8 @@ function matOpts(){var o='';for(var k in MAT){o+='<option value="'+k+'"'+(F.mate
 function band(v,lo,hi){ if(v==null)return '?'; if(v<lo)return 'S'; if(v>hi)return 'L'; return 'M'; }
 function sizeCalc(){
   var fw=num(F.faceW), tl=num(F.earGap);
-  // 〔확인〕 경계: 프론트폭 146/158mm, 템플 154/166mm (engine 설정과 동기)
-  var fwB=band(fw,146,158), twB=band(tl,154,166);
+  // 〔확인〕 경계: 프론트폭 146/158mm, 템플 156/168mm (engine 설정과 동기)
+  var fwB=band(fw,146,158), twB=band(tl,156,168);
   var fit = (fwB==='M'&&twB==='M')?96:(fwB==='M'||twB==='M')?88:80;
   var note=(fwB!=='?'&&twB!=='?'&&fwB!==twB)?'<div class="hint">독립 조합('+fwB+'·'+twB+') — 기성테가 못 맞추는 케이스. 모듈식이라 매칭 가능.</div>':'<div class="hint">측정값을 9사이즈 코드로 환산. 경계 mm값은 〔확인〕 초벌.</div>';
   return {code:fwB+'·'+twB, fw:fwB, tw:twB, fit:fit, note:note};
@@ -219,6 +224,7 @@ function back(){ collect(cur()); if(idx>0)idx--; render(); }
 /* A4 피팅시트 SVG */
 function buildSheet(){
   var sp=splayCalc(), sz=sizeCalc();
+  function eyeRx(o){return (o&&o.S!==undefined&&o.S!=="")?((o.S||"")+" "+(o.C||"")+" "+(o.A||"")).trim():"—";}
   var target=(sp.target==='—')?138:sp.target;
   var panto=num(F._panto)||10, half=target/2;
   var cx=100, frontW=num(F.frontA)||138, fhalf=frontW/2;
@@ -245,18 +251,26 @@ function buildSheet(){
 '<text x="8" y="12" font-size="6" font-weight="700" fill="#0d0d0c">BETTERVISION · 정밀 측정 · 피팅 시트</text>'+
 '<text x="8" y="19.5" font-size="3.4" fill="#8a877f">고객 '+(F.name||'____')+'\u3000|\u30009사이즈 '+sz.code+'\u3000|\u3000소재 '+MAT[F.material].n+'\u3000|\u3000인쇄: 실제크기 100% · 맞춤 끄기</text>'+
 '<line x1="8" y1="23" x2="192" y2="23" stroke="#e4e1da" stroke-width="0.3"/>'+
-'<text x="8" y="31" font-size="4" font-weight="700" fill="#0d0d0c">① 평면도 — 목표 템플 간격(벌림각) · 안면각</text>'+
-'<line x1="20" y1="44" x2="180" y2="44" stroke="#e4e1da" stroke-width="0.3" stroke-dasharray="2 2"/>'+
-'<path d="M '+(cx-fhalf)+' '+(44+wrap*0.5)+' Q '+cx+' '+(44-wrap*0.5)+' '+(cx+fhalf)+' '+(44+wrap*0.5)+'" fill="none" stroke="#3a5f44" stroke-width="0.5"/>'+
-'<text x="'+(cx+fhalf+3)+'" y="44" font-size="3" fill="#3a5f44">안면각 '+(wrap||'__')+'°</text>'+
-'<rect x="'+(cx-fhalf)+'" y="38" width="'+frontW+'" height="12" rx="3" fill="none" stroke="#0d0d0c" stroke-width="0.6"/>'+
-'<line x1="'+(cx-fhalf)+'" y1="44" x2="'+pL+'" y2="70" stroke="#0d0d0c" stroke-width="0.6"/>'+
-'<line x1="'+(cx+fhalf)+'" y1="44" x2="'+pR+'" y2="70" stroke="#0d0d0c" stroke-width="0.6"/>'+
-'<circle cx="'+pL+'" cy="70" r="1.6" fill="#dc2626"/><circle cx="'+pR+'" cy="70" r="1.6" fill="#dc2626"/>'+
-'<line x1="'+pL+'" y1="78" x2="'+pR+'" y2="78" stroke="#b45309" stroke-width="0.5"/>'+
-'<line x1="'+pL+'" y1="75" x2="'+pL+'" y2="81" stroke="#b45309" stroke-width="0.5"/><line x1="'+pR+'" y1="75" x2="'+pR+'" y2="81" stroke="#b45309" stroke-width="0.5"/>'+
-'<text x="'+cx+'" y="77" font-size="4" font-weight="700" fill="#b45309" text-anchor="middle">목표 템플 간격 '+target+' mm</text>'+
-'<text x="'+cx+'" y="86" font-size="2.8" fill="#8a877f" text-anchor="middle">다리 끝을 빨간 점에 닿게 휜다</text>'+
+'<text x="8" y="31" font-size="4" font-weight="700" fill="#0d0d0c">① 평면도 (위에서 본 안경) — 실물을 올려 다리를 빨간 점에 맞춰 휜다</text>'+
+'<rect x="'+(lLcx-a/2)+'" y="35" width="'+a+'" height="9" rx="4" fill="none" stroke="#0d0d0c" stroke-width="0.8" transform="rotate('+wrap+' '+lLcx+' 39.5)"/>'+
+'<rect x="'+(lRcx-a/2)+'" y="35" width="'+a+'" height="9" rx="4" fill="none" stroke="#0d0d0c" stroke-width="0.8" transform="rotate('+(-wrap)+' '+lRcx+' 39.5)"/>'+
+'<line x1="'+(lLcx+a/2)+'" y1="39.5" x2="'+(lRcx-a/2)+'" y2="39.5" stroke="#0d0d0c" stroke-width="0.8"/>'+
+'<text x="'+cx+'" y="33" font-size="2.6" fill="#8a877f" text-anchor="middle">\u25b2 얼굴 쪽 (앞테)</text>'+
+'<text x="'+(cx+fhalf+2)+'" y="40" font-size="2.8" fill="#3a5f44">안면각 '+(wrap||'__')+'\u00b0</text>'+
+'<circle cx="'+(cx-fhalf)+'" cy="44" r="1.1" fill="#0d0d0c"/><circle cx="'+(cx+fhalf)+'" cy="44" r="1.1" fill="#0d0d0c"/>'+
+'<line x1="'+(cx-fhalf)+'" y1="44" x2="'+(cx-fhalf)+'" y2="82" stroke="#cbc7bb" stroke-width="0.5" stroke-dasharray="1.5 1.5"/>'+
+'<line x1="'+(cx+fhalf)+'" y1="44" x2="'+(cx+fhalf)+'" y2="82" stroke="#cbc7bb" stroke-width="0.5" stroke-dasharray="1.5 1.5"/>'+
+'<line x1="'+(cx-fhalf)+'" y1="44" x2="'+pL+'" y2="82" stroke="#0d0d0c" stroke-width="1.5"/>'+
+'<line x1="'+(cx+fhalf)+'" y1="44" x2="'+pR+'" y2="82" stroke="#0d0d0c" stroke-width="1.5"/>'+
+'<text x="'+((cx-fhalf+pL)/2-2.5)+'" y="65" font-size="4.5" fill="#8a877f">\u2225</text>'+
+'<text x="'+((cx+fhalf+pR)/2+0.5)+'" y="65" font-size="4.5" fill="#8a877f">\u2225</text>'+
+'<circle cx="'+pL+'" cy="82" r="1.8" fill="#dc2626"/><circle cx="'+pR+'" cy="82" r="1.8" fill="#dc2626"/>'+
+'<text x="'+(cx-fhalf-2)+'" y="60" font-size="3" font-weight="700" fill="#0d0d0c" text-anchor="end">벌림각 '+(Math.round(Math.atan2((half-fhalf),(82-44))*180/Math.PI*10)/10)+'\u00b0</text>'+
+'<text x="'+cx+'" y="63" font-size="2.6" fill="#8a877f" text-anchor="middle">\u2225 = 다리 길이 생략 · 끝 = 귀 뒤</text>'+
+'<line x1="'+pL+'" y1="88" x2="'+pR+'" y2="88" stroke="#b45309" stroke-width="0.5"/>'+
+'<line x1="'+pL+'" y1="86" x2="'+pL+'" y2="90" stroke="#b45309" stroke-width="0.5"/><line x1="'+pR+'" y1="86" x2="'+pR+'" y2="90" stroke="#b45309" stroke-width="0.5"/>'+
+'<text x="'+cx+'" y="87" font-size="3.6" font-weight="700" fill="#b45309" text-anchor="middle">목표 템플 간격 '+target+' mm</text>'+
+'<text x="'+cx+'" y="93.5" font-size="2.6" fill="#8a877f" text-anchor="middle">점선=직진 기준 · 실선=목표 휨 · 두 선 사이 각 = 벌림각 · 다리 끝을 빨간 점에 맞춰 휜다</text>'+
 '<line x1="8" y1="96" x2="192" y2="96" stroke="#e4e1da" stroke-width="0.3"/>'+
 '<text x="8" y="102" font-size="4" font-weight="700" fill="#0d0d0c">② 1:1 실측 도면 — 광학중심(OC) · 단안 PD (좌우 비대칭)</text>'+
 '<rect x="'+(lLcx-a/2)+'" y="'+lensTop+'" width="'+a+'" height="'+lensH+'" rx="6" fill="none" stroke="#0d0d0c" stroke-width="0.6"/>'+
@@ -269,6 +283,7 @@ function buildSheet(){
 '<text x="'+ocL_x+'" y="'+(lensTop-3)+'" font-size="3" fill="#dc2626" text-anchor="middle">L</text>'+
 '<line x1="'+ocR_x+'" y1="'+(lensBot+6)+'" x2="'+ocL_x+'" y2="'+(lensBot+6)+'" stroke="#b45309" stroke-width="0.5"/>'+
 '<text x="'+cx+'" y="'+(lensBot+10)+'" font-size="3.4" font-weight="700" fill="#b45309" text-anchor="middle">PD '+pdT+'mm (R '+monoR+' / L '+monoL+') · OH '+oh+'mm</text>'+
+'<text x="'+cx+'" y="'+(lensBot+15)+'" font-size="3" fill="#3a3a37" text-anchor="middle">처방 R '+eyeRx(F.rxR)+'   L '+eyeRx(F.rxL)+(F.rxAdd?'   ADD '+F.rxAdd:'')+'</text>'+
 '<line x1="8" y1="178" x2="192" y2="178" stroke="#e4e1da" stroke-width="0.3"/>'+
 '<text x="8" y="184" font-size="4" font-weight="700" fill="#0d0d0c">③ 측면도 — 판토스코픽 틸트 · 정점거리</text>'+
 '<line x1="26" y1="190" x2="26" y2="210" stroke="#e4e1da" stroke-width="0.4"/>'+

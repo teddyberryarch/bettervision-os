@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 전략 인사이트</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);margin:2px 0 4px}.sec .sdesc{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:10px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}.tbl th,.tbl td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}.tbl th{background:var(--surface);font-size:13px;color:var(--muted);font-weight:600}.tbl td:first-child{font-weight:700;width:30%}
+.cover{color:var(--good);font-weight:600}
+.step{display:flex;gap:12px;align-items:flex-start;margin:10px 0}.step .n{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.step .t{font-size:15px;line-height:1.6;color:var(--ink)}.step .t b{font-weight:700}
+.star{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}.star.g{border-color:var(--good)}.star .h{font-weight:700;font-size:15px;color:var(--ink);margin-bottom:5px}.star.g .h{color:var(--good)}.star p{font-size:14px;line-height:1.6;margin:5px 0;color:var(--ink)}
+.punch{font-size:16px;font-weight:700;color:var(--ink);line-height:1.55;border-left:3px solid var(--ink);padding:6px 0 6px 12px;margin:12px 0}
+ul{list-style:none;padding:0;margin:8px 0}li{position:relative;padding-left:16px;font-size:14px;line-height:1.6;margin:6px 0;color:var(--ink)}li::before{content:"·";position:absolute;left:3px;top:-1px;color:var(--ink);font-weight:800;font-size:18px}
+.note{font-size:13px;color:var(--muted);font-style:italic;margin:8px 0}
+</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="wrap"><section class="view active">
+<div class="lead"><div><div class="eyebrow">전략 인사이트 · 모음</div><h2>왜 지금 안경 + 왜 우리가 병목인가</h2>
+<div class="sub">흩어지면 잊히는 핵심 논리를 한 데. 스마트안경의 빈틈 + AI 플랫폼 선점 + 안경사법 해자 = BETTERVISION의 자리.</div></div><span class="pill good">● 살아있는 메모</span></div>
+
+<div class="card pad sec">
+  <div class="ctitle">① 스마트안경의 7대 문제 → 우리가 그대로 커버</div>
+  <div class="sdesc">빅테크가 하드웨어를 만들어도 "한국인 얼굴에 맞고 도수 되는 안경으로 만들어 파는" 마지막 단계는 우리 같은 플레이어가 필요하다.</div>
+  <table class="tbl">
+    <tr><th>스마트안경 문제</th><th>현재 빅테크</th><th>우리 커버</th></tr>
+    <tr><td>1. 사이즈 안 맞음</td><td>원사이즈</td><td class="cover">9사이즈 + 자동측정 피팅</td></tr>
+    <tr><td>2. 도수 못 넣음</td><td>평면·제한적</td><td class="cover">자동검안 + 도수안경 가능</td></tr>
+    <tr><td>3. 못생김</td><td>가젯 룩</td><td class="cover">파라메트릭 9사이즈 + 복각 + 큐레이션</td></tr>
+    <tr><td>4. 두꺼움</td><td>부피 큼</td><td class="cover">디자인·소싱으로 점진 — 우리 강점은 핏·유통</td></tr>
+    <tr><td>5. 카메라 거부감</td><td>상시 카메라</td><td class="cover">오디오 우선(카메라 없는 모델) 채널</td></tr>
+    <tr><td>6. 성능·발열 미성숙</td><td>아직 약함</td><td class="cover">시간이 해결 — 그때까지 채널·데이터 선점(병목 대기)</td></tr>
+    <tr><td>7. 소프트웨어 없음</td><td>생태계 미비</td><td class="cover">우리 OS + 안경사망 = 측정·피팅·도수·유통 마지막 단계</td></tr>
+  </table>
+</div>
+
+<div class="card pad sec">
+  <div class="ctitle">② AI 플랫폼 선점 논리 — 제2의 카카오는 입출력 기기에서</div>
+  <div class="sdesc">왜 "지금" 안경 하드웨어를 잡아야 하는가.</div>
+  <div class="step"><div class="n">1</div><div class="t">AI는 지금 <b>메모리를 늘려 고속도로를 깔고</b> 있다. (인프라 단계)</div></div>
+  <div class="step"><div class="n">2</div><div class="t">다음은 <b>에이전틱 AI 앱</b> — 제2의 카톡·페이스북이 그 위에서 나온다.</div></div>
+  <div class="step"><div class="n">3</div><div class="t">에이전틱 AI는 결국 <b>몸에 붙은 입출력 기기</b>(시계·안경)로 작동한다. 음성·시야가 인터페이스.</div></div>
+  <div class="step"><div class="n">4</div><div class="t">그건 앱만으로 안 되고 <b>하드웨어가 붙어야</b> 한다. 모바일 혁신이 카카오를 만들었듯, 웨어러블 혁신이 다음 플랫폼을 만든다.</div></div>
+  <div class="punch">→ 그래서 입출력 기기(안경) 하드웨어를 선점하면, 그 위 소프트웨어까지 자연히 먹는다.</div>
+  <div class="star g"><div class="h">소프트웨어는 "잘 만들기"보다 "선점"</div>
+    <p>AI로 소프트웨어 개발 로드가 크게 낮아졌다 — 대기업도 "잘 만드는 것"은 따라잡혔다. 이제 승부는 <b>유통·데이터·선점</b>. 우리는 안경(하드웨어) + 안경사망(유통) + 측정 데이터(귀속)를 먼저 깔아 소프트웨어 우위까지 가져간다.</p></div>
+  <div class="star"><div class="h">순서 전환 — 인프라 먼저, 하드웨어는 나중에 박는다</div>
+    <p>과거 계획 = 돈 태워 AI 글라스 하드웨어부터 설계(리스크 大, 시장 안 열리면 매몰). 전환 = <b>안경 프차로 수익·영업 인프라(매장·측정·데이터·유통)를 먼저 깐 뒤</b>, 시장이 열리면 돈 되는 AI 템플만 만들어 박는다. 인프라가 있으면 <b>하드웨어 설계부터 해도 성공 확률이 높다</b> — 팔 곳·맞출 도구·살 사람이 이미 있으니까. "병목에서 기다린다"의 실체 = 노는 게 아니라 인프라를 깔며 기다리는 것.</p></div>
+</div>
+
+<div class="card pad sec">
+  <div class="ctitle">③ 병목 전략 — 먼저 돈 벌며 병목에서 대기</div>
+  <div class="sdesc">과거 패착 = 처음부터 돈 들여 하드웨어 설계부터 하려 한 것.</div>
+  <ul>
+    <li>대안 = <b>프랜차이즈로 먼저 수익·인프라(매장·측정·데이터)를 만든다.</b></li>
+    <li>스마트안경 시장이 열리면 그때 시작해도 늦지 않다 — <b>병목에서 기다린다.</b></li>
+    <li>빅테크가 하드웨어를 만들어도 "한국인 얼굴 맞고 도수 되는 안경으로 만들어 파는" <b>측정·피팅·도수·유통의 마지막 단계</b>는 우리가 쥔다.</li>
+    <li>미리 갖춰두면 시장이 열릴 때 병목에서 우선 파트너(메타+룩소티카의 한국 룩소티카 포지션).</li>
+  </ul>
+</div>
+
+<div class="card pad sec">
+  <div class="ctitle">④ 해자 — 왜 못 따라오나</div>
+  <div class="step"><div class="n">★</div><div class="t"><b>안경사법</b> — 도수·조제·판매는 면허 영역. 빅테크가 못 넘는 규제 장벽 = 구조적 해자.</div></div>
+  <ul>
+    <li>가맹 네트워크 (전국 유통·측정 접점)</li>
+    <li>안경 도메인 지식 (검안·피팅·소재)</li>
+    <li>IT 시스템 (OS·CRM·발주·가격통제)</li>
+    <li>데이터 자산 (측정·얼굴·구매 귀속)</li>
+    <li>옴니채널 · 9사이즈 · K-eyewear 브랜드</li>
+  </ul>
+  <div class="punch">한 줄: 우리는 스마트폰/스마트안경이 못 푸는 지점에서, 안경사법을 해자 삼아 병목에서 기다리다가 하드웨어를 선점하고 소프트웨어까지 먹는다.</div>
+</div>
+
+<div class="note">이 페이지는 흩어지는 전략 인사이트를 모으는 곳. 새 인사이트 나오면 여기에 누적. (사업계획서·마스터설계도의 요약 메모 역할)</div>
+</section></div>
+<div class="foot"><span>BETTERVISION OS · 전략 인사이트 v0.1</span><span>병목에서 기다린다</span></div>
+</body></html>

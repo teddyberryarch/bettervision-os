@@ -11,10 +11,10 @@ window.BVSizeEngine = (function(){
     },
     temple: { // 템플 = 귀 윗부분 간격 기반
       key:'earGap', name:'템플(귀 윗부분 간격)',
-      bounds:[154,166], labels:['S','M','L'], range:[140,182]
+      bounds:[156,168], labels:['S','M','L'], range:[140,182]
     },
     // 모집단 분포(사이즈코리아 초벌 — 〔확인〕). M·M이 최빈이 되도록 경계 설계
-    pop: { faceWidth:{mean:152, sd:6.5}, earGap:{mean:160, sd:7.5} }
+    pop: { faceWidth:{mean:152, sd:7.5}, earGap:{mean:162, sd:7} } /* 사이즈코리아: 얼굴가로 남157/여147→152, 머리너비 남168/여159→162 */
   };
 
   function erf(x){var s=x<0?-1:1;x=Math.abs(x);var t=1/(1+0.3275911*x);

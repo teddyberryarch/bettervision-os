@@ -21,6 +21,15 @@
 .tryon{border:1px solid var(--line);border-radius:12px;background:#fff;margin:8px 0}.tryon svg{display:block;width:100%;height:auto}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.tabs .chip{font-size:13px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer}
 .note{font-size:13px;color:var(--muted);font-style:italic;margin:8px 0}
+.vrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}
+.vt{border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+.vt.g{border-color:var(--good);background:var(--good-soft)}.vt.w{border-color:var(--warn)}.vt.b{border-color:var(--bad);background:var(--bad-soft)}
+.vt .vq{font-size:12px;color:var(--muted);font-weight:600}.vt .va{font-size:18px;font-weight:700;color:var(--ink);margin:2px 0}.vt .vv{font-size:13px;font-weight:600}
+.vt.g .vv{color:var(--good)}.vt.b .vv{color:var(--bad)}.vt.w .vv{color:var(--warn)}
+.ment{font-size:14px;color:var(--ink);background:var(--surface);border-radius:8px;padding:10px 12px;margin:8px 0}
+.sug{font-size:13px;color:var(--warn);font-weight:600;margin:6px 0}
+.prec{border:1px solid var(--ink);border-radius:12px;padding:13px 15px;margin:8px 0}
+.prec .h{font-size:14px;font-weight:700;color:var(--ink)}.prec p{font-size:13px;color:var(--muted);margin:4px 0 0;line-height:1.55}
 </style></head><body>
 <script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
 <div class="topbar"><div class="topbar-in">
@@ -34,6 +43,7 @@
     <div class="sub">측정·검안 데이터로 9사이즈 적합도·얼굴형·트렌드·스타일·용도·이력 6변수를 점수화. "어울리실 것 같아요"가 아니라 "96% + 얼굴형 적합 + 시즌 3위 + 지적 인상".</div>
   </div><span class="pill good">● 엔진 응용 #2</span></div>
 
+  <div id="recbanner"></div>
   <div class="card pad sec">
     <div class="ctitle">1 · 고객 조건</div>
     <div class="row">
@@ -48,6 +58,8 @@
     </div>
   </div>
 
+  <div class="card pad"><div class="prec"><div class="h">감이 아니라 측정값으로 답한다</div>
+    <p>PD·얼굴폭·귀간격·안면각을 측정 → 9사이즈로 환산 → 전 매장 판매 트렌드와 합산. 손님의 3대 질문(사이즈·유행·어울림)에 전부 수치로 답한다. 어느 안경사가 응대해도 같은 품질.</p></div></div>
   <div class="card pad sec">
     <div class="ctitle">2 · 추천 순위 (객관 점수)</div>
     <div class="sdesc">행을 누르면 가상피팅·점수 분해가 바뀐다. PB는 강매가 아니라 "제일 잘 맞아서" 위로 온다.</div>
@@ -59,14 +71,16 @@
     <div class="tryon" id="tryon"></div>
     <div class="bars" id="bars"></div>
     <div class="note" id="reason"></div>
+    <div id="verdict" style="margin-top:10px"></div>
   </div>
 </section></div>
 <div class="foot"><span>BETTERVISION OS · 추천·가상피팅 v0.1</span><span>6변수 객관화</span></div>
 
 <script src="/assets/bv-size-engine.js"></script>
 <script src="/assets/bv-frame-db.js"></script>
+<script src="/assets/bv-record.js"></script>
 <script>
-var E=window.BVSizeEngine, DB=window.BVFrameDB;
+var E=window.BVSizeEngine, DB=window.BVFrameDB; var _recPhoto=null,_recPhotoW=320,_recPhotoH=240;
 var CAT=[
  {brand:'BETTERVISION',model:'SAGA-01',shape:'스퀘어',style:['지적','강함'],eng:'54□18-145',material:'titan',pb:true,trend:3},
  {brand:'BETTERVISION',model:'SAGA-04',shape:'보스턴',style:['부드러움','캐주얼'],eng:'52□18-148',material:'metal',pb:true,trend:1},
@@ -106,14 +120,61 @@ function renderDetail(){
   var r=scored[sel]; if(!r)return;
   var face={faceWidth:+v('fw'),earGap:+v('eg')};
   document.getElementById('tryon').innerHTML=tryonSVG(r.c, face);
+  alignTryon();
   var rows=[['사이즈 매칭',r.size],['얼굴형',r.shape],['트렌드',r.trend],['스타일',r.style],['용도',r.use],['재구매',r.rep]];
   document.getElementById('bars').innerHTML=rows.map(function(x){
     return '<div class="l">'+x[0]+'</div><div class="track"><div class="fill" style="width:'+x[1]+'%"></div></div><div class="v">'+x[1]+'</div>';
   }).join('');
   document.getElementById('reason').textContent='근거: '+r.c.model+' — 사이즈 '+r.size+'% + '+(r.shape>=100?'얼굴형 적합':'얼굴형 보통')+' + 시즌 '+r.c.trend+'위 + "'+v('style')+'" '+(r.style>=100?'부합':'보통')+'. '+r.m.reason;
+  document.getElementById('verdict').innerHTML=verdictHTML(r);
+}
+function vtile(q,val,vd,cls){return '<div class="vt '+cls+'"><div class="vq">'+q+'</div><div class="va">'+val+'</div><div class="vv">'+vd+'</div></div>';}
+function verdictHTML(r){
+  var top=scored[0];
+  var sz=r.size>=90?['딱 맞음','g']:(r.size>=80?['맞음·미세조정','w']:['안 맞음','b']);
+  var tr=r.c.trend<=2?['지금 가장 인기','g']:(r.c.trend<=4?['꾸준한 스테디','w']:['개성·클래식','w']);
+  var su=r.shape>=100?['얼굴형 적합','g']:['무난','w'];
+  var tiles=vtile('사이즈 맞나?',r.size+'%',sz[0],sz[1])+vtile('유행인가?','시즌 '+r.c.trend+'위',tr[0],tr[1])+vtile('어울리나?',(r.shape>=100?'적합':'보통'),su[0],su[1]);
+  var sug=(r.c===top.c)?'현재 선택이 종합 1순위입니다.':('종합 1순위는 '+top.c.brand+' '+top.c.model+' ('+top.total+'점). 같이 비교해 보세요.');
+  var ment='"'+r.c.model+', 사이즈 '+r.size+'%로 '+sz[0]+'이고, '+(r.shape>=100?'얼굴형에도 맞고':'무난하게 어울리고')+', '+(r.c.trend<=2?'요즘 제일 인기':'클래식하게 꾸준한')+' 모델이에요."';
+  return '<div class="vrow">'+tiles+'</div><div class="ment">제안 멘트 — '+ment+'</div><div class="sug">▶ 능동 제안: '+sug+'</div>';
+}
+function alignTryon(){
+  try{
+    if(!_recPhoto||!window.BVFace) return;
+    if(!document.querySelector('#tryon #bvg')) return;
+    var im=new Image();
+    im.onload=function(){
+      window.BVFace.detect(im).then(function(e){
+        if(!e) return;
+        var pw=_recPhotoW||im.naturalWidth, ph=_recPhotoH||im.naturalHeight;
+        var x1=e.rx*pw,y1=e.ry*ph,x2=e.lx*pw,y2=e.ly*ph,Lx,Ly,Rx,Ry;
+        if(x1<=x2){Lx=x1;Ly=y1;Rx=x2;Ry=y2;}else{Lx=x2;Ly=y2;Rx=x1;Ry=y1;}
+        var mx=(Lx+Rx)/2,my=(Ly+Ry)/2,d=Math.hypot(Rx-Lx,Ry-Ly),ang=Math.atan2(Ry-Ly,Rx-Lx)*180/Math.PI;
+        var gg=document.querySelector('#tryon #bvg'); if(!gg) return;
+        gg.setAttribute('transform','translate('+mx+' '+my+') rotate('+ang+') scale('+(d/2)+')');
+        var n=document.getElementById('bvalignnote'); if(n) n.textContent=n.textContent.split(' · ')[0]+' · 눈 좌표 자동 정렬';
+      }).catch(function(){});
+    };
+    im.src=_recPhoto;
+  }catch(e){}
 }
 function tryonSVG(c, face){
   var p=DB.parseEngraving(c.eng)||{frontSpan:130,a:50,dbl:18};
+  if(_recPhoto){
+    var pw=_recPhotoW||320, ph=_recPhotoH||Math.round(pw*0.75);
+    var col2=c.pb?"#059669":"#0d0d0c";
+    var rxu=(c.shape==="라운드"?0.30:(c.shape==="보스턴"?0.18:0.10));
+    function lensU(cxu){return '<rect x="'+(cxu-0.55)+'" y="-0.31" width="1.1" height="0.62" rx="'+rxu+'" fill="rgba(255,255,255,0.10)" stroke="'+col2+'" stroke-width="2" vector-effect="non-scaling-stroke"/>';}
+    var dtr='translate('+(pw/2)+' '+(ph*0.42)+') rotate(0) scale('+(pw*0.23)+')';
+    return '<svg viewBox="0 0 '+pw+' '+ph+'" xmlns="http://www.w3.org/2000/svg">'+
+      '<image href="'+_recPhoto+'" x="0" y="0" width="'+pw+'" height="'+ph+'" preserveAspectRatio="none"/>'+
+      '<g id="bvg" transform="'+dtr+'">'+lensU(-1)+lensU(1)+
+        '<line x1="-0.45" y1="-0.08" x2="0.45" y2="-0.08" stroke="'+col2+'" stroke-width="2" vector-effect="non-scaling-stroke"/>'+
+        '<line x1="-1.55" y1="-0.05" x2="-2.15" y2="-0.20" stroke="'+col2+'" stroke-width="2" vector-effect="non-scaling-stroke"/>'+
+        '<line x1="1.55" y1="-0.05" x2="2.15" y2="-0.20" stroke="'+col2+'" stroke-width="2" vector-effect="non-scaling-stroke"/></g>'+
+      '<text id="bvalignnote" x="'+(pw/2)+'" y="'+(ph-6)+'" font-size="'+(ph*0.04)+'" fill="#fff" text-anchor="middle" font-family="Inter" style="paint-order:stroke;stroke:#000;stroke-width:'+(ph*0.006)+'">'+c.model+' · 가상피팅</text></svg>';
+  }
   var cx=100, cy=72, fw=Math.max(40,face.faceWidth||150)*0.62, fh=fw*1.28;
   var gW=(p.frontSpan||130)*0.62, a=(p.a||50)*0.62, dbl=(p.dbl||18)*0.62, lensH=22;
   var lx=cx-dbl/2-a/2, rx=cx+dbl/2+a/2, ly=cy-2;
@@ -130,6 +191,19 @@ function tryonSVG(c, face){
    '<text x="'+cx+'" y="135" font-size="7" fill="#8a877f" text-anchor="middle" font-family="Inter,Pretendard">'+c.model+' · '+c.shape+' · 프론트폭 '+(p.frontSpan)+'mm</text>'+
    '</svg>';
 }
+var _r=(window.BVRecord&&BVRecord.load)?BVRecord.load():null;
+if(_r){ if(_r.faceWidth)document.getElementById("fw").value=_r.faceWidth; if(_r.earGap)document.getElementById("eg").value=_r.earGap; if(_r.faceWrap!=null)document.getElementById("wr").value=_r.faceWrap; var rb=document.getElementById("recbanner"); if(rb)rb.innerHTML=BVRecord.banner(_r,"추천"); _recPhoto=_r.photo||null; _recPhotoW=_r.photoW||320; _recPhotoH=_r.photoH||240; }
 run();
+</script>
+<script type="module">
+import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
+let fl=null;
+async function ensure(){
+  if(fl) return fl;
+  const fs = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
+  fl = await FaceLandmarker.createFromOptions(fs, { baseOptions:{ modelAssetPath:"https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task" }, runningMode:"IMAGE", numFaces:1 });
+  return fl;
+}
+window.BVFace = { detect: async (img)=>{ try{ const m=await ensure(); const r=m.detect(img); if(!r.faceLandmarks||!r.faceLandmarks.length) return null; const lm=r.faceLandmarks[0]; const R=lm[468]||lm[33], L=lm[473]||lm[263]; return { rx:R.x, ry:R.y, lx:L.x, ly:L.y }; }catch(e){ return null; } } };
 </script>
 </body></html>
