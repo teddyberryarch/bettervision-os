@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION · 렌즈·콘택트 가격</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+table.pr{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
+table.pr th,table.pr td{border:1px solid var(--line);padding:10px 11px;text-align:center}
+table.pr th{background:var(--surface);font-size:13px;color:var(--muted)}
+table.pr td.idx{text-align:left;font-weight:600;color:var(--ink)}
+table.pr td.idx small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+table.pr .won{font-weight:700;color:var(--ink)} table.pr .plus{color:var(--good);font-size:12px}
+.guar{display:flex;align-items:center;gap:10px;background:var(--ink);color:#fff;border-radius:12px;padding:14px 16px;margin:4px 0 14px}
+.guar b{color:#fff} .guar .ic{font-size:22px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.cc{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fff}
+.cc .nm{font-size:16px;font-weight:700;color:var(--ink)} .cc .br{font-size:12px;color:var(--muted)}
+.cc .sw{display:flex;gap:5px;margin:9px 0}
+.cc .sw span{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+.cc .row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--line2)}
+.cc .row .k{color:var(--muted)} .cc .row .v{color:var(--ink);font-weight:600}
+.cc .price{font-size:18px;font-weight:700;color:var(--ink);margin-top:8px}
+.sec-h{font-size:18px;font-weight:700;color:var(--ink);margin:22px 0 4px}
+.sec-s{font-size:13px;color:var(--muted);margin-bottom:10px}
+.lock{background:var(--warn-soft);color:#92500a;font-size:12px;font-weight:700;border-radius:20px;padding:3px 10px;display:inline-block}
+.tag{font-size:11.5px;background:var(--surface);border-radius:20px;padding:2px 8px;color:var(--muted)}
+</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="wrap"><section class="view active">
+<div class="lead"><div><div class="eyebrow">고객 4·6·7 · 투명 가격</div><h2>렌즈·콘택트 가격을 미리, 다 보이게</h2>
+<div class="sub">즉흥 결정 안 하게. 본부 표준가로 매장마다 다르지 않게 — 눈탱이 걱정 제거.</div></div></div>
+
+<div class="guar"><span class="ic">🛡</span><div><b>본부 표준가 보증</b> — 모든 가맹점 동일가(서버 강제, 임의 인상 불가). 결제 전 견적서 자동 발급.</div></div>
+
+<div class="card pad">
+  <div class="sec-h" style="margin-top:0">안경렌즈 — 굴절률 × 기능 (1쌍, 표준가)</div>
+  <div class="sec-s">숫자가 클수록 얇음. 고도수일수록 높은 굴절률 권장. 아래는 데모 표준가 〔실가격 확정 필요〕.</div>
+  <table class="pr">
+   <tr><th>굴절률</th><th>일반(비구면)</th><th>청광 차단</th><th>변색</th><th>추천</th></tr>
+   <tr><td class="idx">1.50<small>표준·두꺼움</small></td><td class="won">40,000</td><td class="won">60,000</td><td class="won">110,000</td><td><span class="tag">저도수</span></td></tr>
+   <tr><td class="idx">1.60<small>얇음·가성비</small></td><td class="won">70,000</td><td class="won">95,000</td><td class="won">140,000</td><td><span class="tag">중도수</span></td></tr>
+   <tr><td class="idx">1.67<small>더 얇음</small></td><td class="won">120,000</td><td class="won">150,000</td><td class="won">200,000</td><td><span class="tag">고도수</span></td></tr>
+   <tr><td class="idx">1.74<small>가장 얇음</small></td><td class="won">200,000</td><td class="won">240,000</td><td class="won">290,000</td><td><span class="tag">초고도수</span></td></tr>
+  </table>
+  <div class="sec-s" style="margin-top:6px">누진다초점(별도): 1.60 250,000 / 1.67 340,000 · 사무용 중근거리 200,000부터. 〔실가격 확정〕</div>
+</div>
+
+<div class="sec-h">콘택트렌즈 — 모델·색·도수·가격</div>
+<div class="sec-s"><span class="lock">🔒 온라인 판매는 규제 샌드박스 통과 후</span> 지금은 정보 게시 + 매장 판매.</div>
+<div class="cards" id="cl"></div>
+</section></div>
+<div class="foot"><span>BETTERVISION · 가격 카탈로그 v0.1</span><span>본부 표준가 보증</span></div>
+<script>
+var CL=[
+ {nm:'클리어 1day',br:'1일 일회용 · 투명',cols:[],dia:'-0.50 ~ -10.00',box:'30개입',price:28000,feat:'함수율 58% · 데일리'},
+ {nm:'모이스트 1day',br:'1일 · 고수분',cols:[],dia:'-0.50 ~ -8.00',box:'30개입',price:34000,feat:'장시간 착용 · 건조 완화'},
+ {nm:'컬러 1day 브라운',br:'1일 · 컬러',cols:['#6b4423','#3a2c22'],dia:'0 ~ -6.00',box:'20개입',price:39000,feat:'자연스러운 갈색 확대'},
+ {nm:'컬러 1day 그레이',br:'1일 · 컬러',cols:['#7a7a7a','#4a4a4a'],dia:'0 ~ -6.00',box:'20개입',price:39000,feat:'시원한 회색 톤'},
+ {nm:'토릭 1day (난시)',br:'1일 · 난시용',cols:[],dia:'S -0.50~-6.00 / C -0.75~-1.75',box:'30개입',price:48000,feat:'난시 교정 · 축 안정'},
+ {nm:'먼슬리 클리어',br:'1개월 · 투명',cols:[],dia:'-0.50 ~ -10.00',box:'2개입',price:32000,feat:'한 달 사용 · 경제적'}
+];
+function won(n){return n.toLocaleString()+'원';}
+document.getElementById('cl').innerHTML=CL.map(function(c){
+ var sw=c.cols.length?'<div class="sw">'+c.cols.map(function(x){return '<span style="background:'+x+'"></span>';}).join('')+'</div>':'';
+ return '<div class="cc"><div class="nm">'+c.nm+'</div><div class="br">'+c.br+'</div>'+sw+
+  '<div class="row"><span class="k">도수 범위</span><span class="v">'+c.dia+'</span></div>'+
+  '<div class="row"><span class="k">구성</span><span class="v">'+c.box+'</span></div>'+
+  '<div class="row"><span class="k">특성</span><span class="v" style="font-weight:500">'+c.feat+'</span></div>'+
+  '<div class="price">'+won(c.price)+'</div></div>';
+}).join('');
+</script>
+</body></html>

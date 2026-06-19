@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 통합 고객 프로필</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.look{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.look .fld{flex:1;min-width:200px}
+.look input{font-size:18px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:4px 11px;cursor:pointer;color:var(--body)}
+.chip:hover{border-color:var(--ink)}
+.prof{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:720px){.prof{grid-template-columns:1fr}}
+.pcard{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}
+.phead{display:flex;align-items:center;gap:14px}
+.avatar{width:52px;height:52px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex:0 0 auto}
+.pname{font-size:21px;font-weight:700;color:var(--ink)}
+.pmeta{font-size:14px;color:var(--muted)}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.bdg{font-size:12px;font-weight:700;border-radius:20px;padding:3px 10px}
+.bdg.vip{background:#fef3c7;color:#b45309}.bdg.reg{background:var(--good-soft);color:var(--good)}
+.bdg.new{background:#dbeafe;color:#1d4ed8}.bdg.consent{background:var(--surface);color:var(--muted)}
+.bdg.risk{background:var(--bad-soft);color:var(--bad)}
+.ctitle{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.3px;margin:0 0 10px;text-transform:uppercase}
+.tl{position:relative;padding-left:18px}
+.tl:before{content:"";position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:var(--line)}
+.tle{position:relative;margin-bottom:12px}
+.tle:before{content:"";position:absolute;left:-16px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--ink);border:2px solid #fff}
+.tle .d{font-size:13px;color:var(--muted);font-weight:600}
+.tle .v{font-size:14px;color:var(--ink)}
+.kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.kv .k{color:var(--muted)} .kv .v{color:var(--ink);font-weight:600}
+.act{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{font-size:14px;font-weight:600;border-radius:9px;padding:9px 14px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.ghost{background:#fff;color:var(--ink)}
+.kakao{background:#fae100;color:#3a1d1d;border-color:#fae100}
+.msg{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--ink);line-height:1.55;margin-top:8px;white-space:pre-line}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.note{font-size:13px;color:var(--muted)}
+.empty{text-align:center;color:var(--muted);padding:40px 0;font-size:15px}
+</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="wrap"><section class="view active">
+<div class="lead"><div><div class="eyebrow">P0 · 통합 고객 프로필 · 저마찰 식별</div><h2>전화번호 하나로 — 접객·검안 이력·카톡을 한 줄로</h2>
+<div class="sub">방문/예약 시 번호만. 기존 고객이면 즉시 호출, 신규면 번호로 시작. 회원가입 강요 0.</div></div></div>
+
+<div class="card pad">
+  <div class="look">
+    <div class="fld"><label>전화번호로 조회</label><input id="phone" type="tel" placeholder="010-0000-0000" value="010-1234-5678"></div>
+    <button class="btn" onclick="lookup()">조회</button>
+  </div>
+  <div class="chips"><span class="note">데모:</span>
+    <span class="chip" onclick="setP('010-1234-5678')">010-1234-5678 (단골)</span>
+    <span class="chip" onclick="setP('010-9876-5432')">010-9876-5432 (VIP)</span>
+    <span class="chip" onclick="setP('010-2222-3333')">010-2222-3333 (이탈위험)</span>
+    <span class="chip" onclick="setP('010-0000-1111')">신규 번호</span>
+  </div>
+</div>
+
+<div id="out"></div>
+</section></div>
+<div class="foot"><span>BETTERVISION OS · 통합 고객 프로필 v0.1</span><span>전화번호 = 만능 키 · 데이터 본부 귀속</span></div>
+<script>
+// ── 데모 CRM (전화번호 키). 실제는 본부 서버 귀속. ──
+var DB={
+ '010-1234-5678':{name:'김민수',joinVia:'카카오싱크',consent:true,visits:5,first:'2021-03',
+   exams:[{date:'2021-03',R:{S:-2.00,C:-0.50,A:180},L:{S:-2.25,C:-0.25,A:175}},
+          {date:'2022-04',R:{S:-2.25,C:-0.50,A:180},L:{S:-2.50,C:-0.50,A:175}},
+          {date:'2023-05',R:{S:-2.50,C:-0.75,A:180},L:{S:-2.75,C:-0.50,A:170}},
+          {date:'2024-06',R:{S:-2.75,C:-0.75,A:175},L:{S:-3.00,C:-0.50,A:170}},
+          {date:'2025-06',R:{S:-3.00,C:-0.75,A:175},L:{S:-3.25,C:-0.75,A:170}}],
+   size:'M·M', measure:{pd:64,fw:142,wrap:5},
+   buys:[{date:'2025-06',item:'SAGA 03 스퀘어 (블랙) + 1.60 비구면',price:268000},
+         {date:'2023-05',item:'SAGA 01 라운드 (골드) + 1.67',price:312000}],
+   prefs:{shape:'스퀘어·라운드',color:'블랙·골드'}},
+ '010-9876-5432':{name:'이서연',joinVia:'카카오싱크',consent:true,visits:9,first:'2019-02',vip:true,
+   exams:[{date:'2022-02',R:{S:-4.00,C:-1.00,A:10},L:{S:-3.75,C:-1.25,A:170}},
+          {date:'2023-03',R:{S:-4.25,C:-1.00,A:10},L:{S:-4.00,C:-1.25,A:170}},
+          {date:'2024-03',R:{S:-4.25,C:-1.25,A:10},L:{S:-4.25,C:-1.25,A:165}},
+          {date:'2025-04',R:{S:-4.50,C:-1.25,A:10},L:{S:-4.50,C:-1.50,A:165}}],
+   size:'S·M', measure:{pd:60,fw:134,wrap:7},
+   buys:[{date:'2025-04',item:'SAGA 06 캣아이 (와인) + 1.67 청광',price:398000},
+         {date:'2024-03',item:'R-1982 에비에이터 (골드) 선글라스',price:245000},
+         {date:'2023-03',item:'콘택트 12개월분',price:288000}],
+   prefs:{shape:'캣아이·오벌',color:'와인·골드'}},
+ '010-2222-3333':{name:'박지훈',joinVia:'전화번호',consent:false,visits:2,first:'2022-08',risk:true,
+   exams:[{date:'2022-08',R:{S:-1.50,C:0,A:0},L:{S:-1.50,C:-0.25,A:180}},
+          {date:'2023-09',R:{S:-1.75,C:0,A:0},L:{S:-1.75,C:-0.25,A:180}}],
+   size:'L·M', measure:{pd:68,fw:150,wrap:4},
+   buys:[{date:'2023-09',item:'SAGA 02 보스턴 (하바나) + 1.60',price:236000}],
+   prefs:{shape:'보스턴',color:'하바나'}}
+};
+function setP(p){document.getElementById('phone').value=p;lookup();}
+function won(n){return n.toLocaleString()+'원';}
+function se(e){return ((e.R.S+e.R.C/2)+(e.L.S+e.L.C/2))/2;}
+function rx(o){return o.S.toFixed(2)+' '+(o.C?o.C.toFixed(2):'0.00')+' x'+o.A;}
+function monthsSince(ym){var p=ym.split('-');var d=new Date(+p[0],+p[1]-1,1);return Math.round((Date.now()-d)/(1000*3600*24*30));}
+
+function seGraph(exams){
+  var W=300,H=110,pad=26;
+  var ses=exams.map(se); var mn=Math.min.apply(null,ses)-0.3, mx=Math.max.apply(null,ses)+0.3;
+  var xs=function(i){return pad+(W-pad-10)*(exams.length<2?0.5:i/(exams.length-1));};
+  var ys=function(v){return 14+(H-28)*(1-(v-mn)/(mx-mn||1));};
+  var pts=exams.map(function(e,i){return xs(i)+','+ys(se(e));});
+  var path='M '+pts.join(' L ');
+  var g='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:340px">';
+  g+='<line x1="'+pad+'" y1="'+ys(mn+0.3)+'" x2="'+(W-10)+'" y2="'+ys(mn+0.3)+'" stroke="#eee"/>';
+  g+='<path d="'+path+'" fill="none" stroke="#dc2626" stroke-width="2"/>';
+  exams.forEach(function(e,i){g+='<circle cx="'+xs(i)+'" cy="'+ys(se(e))+'" r="3" fill="#dc2626"/>';
+    g+='<text x="'+xs(i)+'" y="'+(H-4)+'" font-size="8" fill="#999" text-anchor="middle">'+e.date.slice(2)+'</text>';});
+  g+='<text x="'+pad+'" y="10" font-size="8" fill="#999">SE(구면대응치) 추세 — 근시 진행</text></svg>';
+  return g;
+}
+
+function lookup(){
+  var p=document.getElementById('phone').value.trim();
+  var c=DB[p];
+  var out=document.getElementById('out');
+  if(!c){
+    out.innerHTML='<div class="card pad"><div class="phead"><div class="avatar" style="background:#1d4ed8">신</div>'
+      +'<div><div class="pname">신규 고객</div><div class="pmeta">'+p+' · 기록 없음</div>'
+      +'<div class="badges"><span class="bdg new">NEW</span></div></div></div>'
+      +'<div class="note" style="margin-top:12px">번호 하나로 시작 — 회원가입 폼 없음. 측정·검안하면 이 번호에 자동 누적. '
+      +'카카오 채널 친구추가(QR 1탭) 시 마케팅 동의·식별 동시 확보.</div>'
+      +'<div class="act"><a class="btn" href="measure.html">① 측정 시작</a><a class="btn ghost" href="exam.html">검안</a>'
+      +'<button class="btn kakao" onclick="alert(\'데모: 채널 친구추가 QR 노출 → 1탭 가입\')">카카오 친구추가 QR</button></div></div>';
+    return;
+  }
+  var last=c.exams[c.exams.length-1];
+  var due=12-monthsSince(last.date); // 1년 주기
+  var badge = c.vip?'<span class="bdg vip">VIP</span>':(c.risk?'<span class="bdg risk">이탈위험</span>':'<span class="bdg reg">단골</span>');
+  var consent = c.consent?'<span class="bdg consent">카톡 마케팅 동의</span>':'<span class="bdg consent">정보성만(미동의)</span>';
+  var trend = se(c.exams[c.exams.length-1])-se(c.exams[0]);
+
+  var left='<div class="pcard"><div class="phead"><div class="avatar">'+c.name[0]+'</div>'
+    +'<div><div class="pname">'+c.name+'</div><div class="pmeta">'+p+' · '+c.visits+'회 방문 · '+c.first+' 첫 방문</div>'
+    +'<div class="badges">'+badge+consent+'<span class="bdg consent">가입: '+c.joinVia+'</span></div></div></div>'
+    +'<div class="act"><a class="btn" href="recommend.html">재구매 시작 (저장 도수·사이즈)</a>'
+    +'<a class="btn ghost" href="flow.html">접객 카드</a></div>'
+    +'<div style="margin-top:16px"><div class="ctitle">측정 · 9사이즈</div>'
+    +'<div class="kv"><span class="k">9사이즈</span><span class="v">'+c.size+'</span></div>'
+    +'<div class="kv"><span class="k">PD</span><span class="v">'+c.measure.pd+'mm</span></div>'
+    +'<div class="kv"><span class="k">얼굴폭 / 안면각</span><span class="v">'+c.measure.fw+'mm / '+c.measure.wrap+'°</span></div></div>'
+    +'<div style="margin-top:16px"><div class="ctitle">선호 · 구매 이력</div>'
+    +'<div class="kv"><span class="k">선호</span><span class="v">'+c.prefs.shape+' · '+c.prefs.color+'</span></div>'
+    +c.buys.map(function(b){return '<div class="kv"><span class="k">'+b.date+'</span><span class="v" style="font-weight:500;text-align:right;max-width:62%">'+b.item+'<br><b>'+won(b.price)+'</b></span></div>';}).join('')
+    +'</div></div>';
+
+  var right='<div class="pcard"><div class="ctitle">검안 이력 · 시력 추세</div>'
+    +seGraph(c.exams)
+    +'<div class="note" style="margin:6px 0 12px">5년간 SE '+trend.toFixed(2)+'D 변화 — '+(trend<-0.5?'근시 진행. 1년 주기 권장.':'안정적.')+'</div>'
+    +'<div class="tl">'+c.exams.slice().reverse().map(function(e){return '<div class="tle"><div class="d">'+e.date+' · SE '+se(e).toFixed(2)+'</div><div class="v">R '+rx(e.R)+' / L '+rx(e.L)+'</div></div>';}).join('')+'</div>'
+    +'<div class="ctitle" style="margin-top:14px">카톡 발송</div>'
+    +'<div class="seg"><span class="bdg '+(due<=2?'risk':'consent')+'">재검 D'+(due<=0?'+'+(-due):('-'+due))+'개월</span>'
+    +'<span class="bdg consent">세그먼트: '+(c.risk?'이탈위험':(c.vip?'VIP':'단골'))+'</span></div>'
+    +'<div class="msg" id="kkmsg">[알림톡 · 정보성] '+c.name+'님, 마지막 검안이 '+monthsSince(last.date)+'개월 전입니다. 시력 변화 추적을 위해 1년 주기 재검을 권장드려요. 예약: (링크)</div>'
+    +'<div class="act"><button class="btn kakao" onclick="alert(\'데모: 알림톡 발송 — 전화번호만으로 가능(마케팅 동의 불필요)\')">알림톡 발송</button>'
+    +(c.consent?'<button class="btn ghost" onclick="friendMsg(\''+p+'\')">친구톡(광고) 미리보기</button>':'<span class="note" style="align-self:center">친구톡은 수신동의 필요</span>')+'</div></div>';
+
+  out.innerHTML='<div class="prof">'+left+right+'</div>';
+}
+function friendMsg(p){var c=DB[p];
+  document.getElementById('kkmsg').innerHTML='[친구톡 · 광고성] '+c.name+'님만을 위한 '+c.prefs.shape+' 신상 입고 🕶 선호 컬러('+c.prefs.color+') 우선 안내. VIP 10% 쿠폰 → (링크)';
+}
+lookup();
+</script>
+</body></html>

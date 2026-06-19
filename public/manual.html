@@ -1,0 +1,142 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 업셀·컴플레인 매뉴얼</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.tabs{display:flex;gap:8px;margin:6px 0 14px}
+.tab{font-size:15px;font-weight:600;border:1px solid var(--line);border-radius:9px;padding:9px 16px;cursor:pointer;color:var(--muted);background:#fff}
+.tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pane{display:none} .pane.on{display:block}
+.sc{border:1px solid var(--line);border-radius:13px;padding:0;margin:10px 0;overflow:hidden}
+.sc-h{padding:12px 15px;background:var(--surface);border-bottom:1px solid var(--line);font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:9px}
+.sc-h .tg{font-size:12px;font-weight:700;border-radius:20px;padding:2px 9px;margin-left:auto}
+.tg.up{background:var(--good-soft);color:var(--good)} .tg.lv1{background:#dbeafe;color:#1d4ed8} .tg.lv2{background:var(--warn-soft);color:#92500a} .tg.lv3{background:var(--bad-soft);color:var(--bad)}
+.sc-b{padding:13px 15px}
+.line{display:flex;gap:10px;margin:7px 0}
+.line .lab{font-size:12px;font-weight:700;color:var(--muted);min-width:54px;flex:0 0 auto;padding-top:2px}
+.line .txt{font-size:14px;color:var(--ink);line-height:1.55}
+.quote{background:var(--surface);border-left:3px solid var(--ink);border-radius:6px;padding:9px 13px;font-size:14px;color:var(--body);line-height:1.55;font-style:italic}
+.k{background:#eef2ff;border-left:3px solid #4f46e5;padding:10px 14px;font-size:13.5px;color:#312e81;margin:10px 0;border-radius:6px;line-height:1.55}
+.flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;margin:8px 0}
+.flow span{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 11px;color:var(--ink);font-weight:600}
+.flow .ar{color:var(--muted);font-weight:400}
+table.comp{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}
+table.comp th,table.comp td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+table.comp th{background:var(--surface);color:var(--muted);font-size:12.5px}
+</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="wrap"><section class="view active">
+<div class="lead"><div><div class="eyebrow">가맹점 4·9 · 운영 매뉴얼</div><h2>업셀 스크립트 · 컴플레인 대응</h2>
+<div class="sub">강매 아닌 큐레이션 멘트 + 유형별 컴플레인 대응·에스컬레이션·본사 보상 기준.</div></div></div>
+
+<div class="tabs">
+  <div class="tab on" onclick="tab('up')">업셀 스크립트</div>
+  <div class="tab" onclick="tab('cx')">컴플레인 대응</div>
+</div>
+
+<!-- 업셀 -->
+<div class="pane on" id="up">
+<div class="k">원칙: 강매 금지. <b>측정·검안 데이터에 근거</b>한 제안만. "권유"가 아니라 "당신 데이터를 보니 이게 맞다".</div>
+
+<div class="sc"><div class="sc-h">렌즈 업그레이드 <span class="tg up">업셀</span></div><div class="sc-b">
+  <div class="line"><div class="lab">상황</div><div class="txt">고도수(-4.00 이상)인데 저굴절률 선택 시</div></div>
+  <div class="line"><div class="lab">멘트</div><div class="txt"><div class="quote">"도수가 있으셔서 1.60으로 하면 렌즈가 두꺼워 테 밖으로 나와요. 1.67로 가면 두께가 30% 얇아져서 훨씬 가볍고 보기 좋습니다."</div></div></div>
+  <div class="line"><div class="lab">근거</div><div class="txt">검안 도수 → 굴절률 권장 자동 표시(rx 연동). 미적·무게 실측 차이.</div></div>
+</div></div>
+
+<div class="sc"><div class="sc-h">청광·변색 코팅 <span class="tg up">업셀</span></div><div class="sc-b">
+  <div class="line"><div class="lab">상황</div><div class="txt">용도가 업무·VDT(모니터)거나 야외 활동 많을 때</div></div>
+  <div class="line"><div class="lab">멘트</div><div class="txt"><div class="quote">"하루 종일 모니터 보신다고 하셨죠. 청광 차단 넣으면 눈 피로가 덜해요. 야외도 잦으면 변색렌즈 하나로 선글라스까지 됩니다."</div></div></div>
+  <div class="line"><div class="lab">근거</div><div class="txt">접객 카드의 '용도' 필드 → 코팅 매칭. 라이프스타일 기반.</div></div>
+</div></div>
+
+<div class="sc"><div class="sc-h">세컨드 안경 / 선글라스 <span class="tg up">업셀</span></div><div class="sc-b">
+  <div class="line"><div class="lab">상황</div><div class="txt">단골·재방문, 이미 측정 데이터 보유</div></div>
+  <div class="line"><div class="lab">멘트</div><div class="txt"><div class="quote">"사이즈가 이미 저장돼 있어서 두 번째 안경은 측정 없이 바로 됩니다. 운전용 변색이나 도수 선글라스 하나 더 어떠세요?"</div></div></div>
+  <div class="line"><div class="lab">근거</div><div class="txt">통합 프로필에 9사이즈·도수 저장 → 추가 구매 마찰 0. 재구매 훅.</div></div>
+</div></div>
+
+<div class="sc"><div class="sc-h">콘택트 병행 <span class="tg up">업셀</span></div><div class="sc-b">
+  <div class="line"><div class="lab">상황</div><div class="txt">운동·외출 시 안경 불편 언급</div></div>
+  <div class="line"><div class="lab">멘트</div><div class="txt"><div class="quote">"운동할 때 안경이 불편하시면, 1day 콘택트를 같이 쓰시는 분들 많아요. 도수는 이미 알고 있으니 맞는 제품 안내드릴게요."</div></div></div>
+  <div class="line"><div class="lab">근거</div><div class="txt">검안 도수 → 콘택트 도수 환산. 카탈로그 가격 투명.</div></div>
+</div></div>
+</div>
+
+<!-- 컴플레인 -->
+<div class="pane" id="cx">
+<div class="k">원칙: <b>고객 잘못으로 몰지 않는다.</b> 1차 매장 즉시 대응 → 안 되면 본사 에스컬레이션. 모든 건 로그 기록.</div>
+
+<div class="flow"><span>고객 접수</span><span class="ar">→</span><span>매장 1차 대응</span><span class="ar">→</span><span>본사 에스컬레이션</span><span class="ar">→</span><span>보상·처리</span><span class="ar">→</span><span>로그 기록</span></div>
+
+<div class="sc"><div class="sc-h">도수가 안 맞음 <span class="tg lv1">1차 매장</span></div><div class="sc-b">
+  <div class="line"><div class="lab">대응</div><div class="txt">즉시 재검안(무료). 적응 기간(1~2주) 안내. 처방 오류 확인 시 렌즈 무상 재제작.</div></div>
+  <div class="line"><div class="lab">멘트</div><div class="txt"><div class="quote">"불편하셨겠어요. 바로 다시 검사해드릴게요. 검사 결과 도수가 다르면 렌즈는 무상으로 다시 만들어 드립니다."</div></div></div>
+  <div class="line"><div class="lab">기준</div><div class="txt">검안 오류 = 본사 비용 무상 재제작. 적응 문제 = 재검 후 안내.</div></div>
+</div></div>
+
+<div class="sc"><div class="sc-h">피팅 불편 (흘러내림·압박) <span class="tg lv1">1차 매장</span></div><div class="sc-b">
+  <div class="line"><div class="lab">대응</div><div class="txt">즉시 재피팅(무료·무제한). A4 피팅지 재측정 → 벌림각·코받침 재조정.</div></div>
+  <div class="line"><div class="lab">멘트</div><div class="txt"><div class="quote">"피팅은 언제든 무료로 다시 맞춰드려요. 지금 바로 조정할게요."</div></div></div>
+  <div class="line"><div class="lab">기준</div><div class="txt">피팅은 영구 무상. 측정 데이터 재활용.</div></div>
+</div></div>
+
+<div class="sc"><div class="sc-h">파손 (힌지·렌즈) <span class="tg lv2">본사 연계</span></div><div class="sc-b">
+  <div class="line"><div class="lab">대응</div><div class="txt">무상 A/S 기간 내 = 무상 교체. 기간 외 = 본부 표준가 부품 교체. 자가 파손도 부품가만.</div></div>
+  <div class="line"><div class="lab">기준</div><div class="txt">A/S 기간: 프레임 1년. 부품 본부 공급가 투명 안내.</div></div>
+</div></div>
+
+<div class="sc"><div class="sc-h">환불 요구 <span class="tg lv2">본사 연계</span></div><div class="sc-b">
+  <div class="line"><div class="lab">대응</div><div class="txt">제작 전 = 전액. 제작 후 단순변심 = 정책 안내(맞춤 제작 특성). 하자 = 전액 환불·재제작 택1.</div></div>
+  <div class="line"><div class="lab">기준</div><div class="txt">맞춤 제작품 환불 정책 사전 고지(주문서 동의). 하자는 무조건 구제.</div></div>
+</div></div>
+
+<div class="sc"><div class="sc-h">제작 지연 <span class="tg lv1">1차 매장</span></div><div class="sc-b">
+  <div class="line"><div class="lab">대응</div><div class="txt">지연 사유·새 일정 즉시 알림톡. 약속 초과 시 소정 보상(쿠폰).</div></div>
+  <div class="line"><div class="lab">기준</div><div class="txt">알림톡 자동 발송(준비완료 트리거 연동).</div></div>
+</div></div>
+
+<div class="sc"><div class="sc-h">에스컬레이션 기준 <span class="tg lv3">본사</span></div><div class="sc-b">
+  <table class="comp">
+   <tr><th>등급</th><th>처리</th><th>권한</th></tr>
+   <tr><td>L1 매장</td><td>재검·재피팅·일정 안내</td><td>가맹점 즉시</td></tr>
+   <tr><td>L2 본사 연계</td><td>무상 재제작·부품·환불</td><td>본사 승인</td></tr>
+   <tr><td>L3 본사 직접</td><td>분쟁·보상·법적</td><td>본사 CS 전담</td></tr>
+  </table>
+  <div class="line"><div class="lab">로그</div><div class="txt">모든 컴플레인은 고객 프로필에 기록 → 반복 유형 본사 분석 → 제품·매뉴얼 개선.</div></div>
+</div></div>
+</div>
+
+<!-- 접객 강도 -->
+<div class="pane" id="gd">
+<div class="k">원칙(고객 2): <b>무관심도, 과잉 접객도 아니게.</b> 고객은 따라다니는 걸 싫어하지만 완전 방치도 뻘쭘하다. 신호를 읽고 타이밍에 들어간다.</div>
+<div class="sc"><div class="sc-h">입장 0~30초 <span class="tg lv1">방치·추적 금지</span></div><div class="sc-b">
+  <div class="line"><div class="lab">행동</div><div class="txt">가벼운 인사 한 번. "편하게 둘러보세요." 그 후 <b>1.5m 거리 유지, 따라다니지 않기.</b></div></div>
+  <div class="line"><div class="lab">금지</div><div class="txt"><div class="quote">첫 30초 영업 멘트 · 가격부터 꺼내기 · 뒤를 졸졸 따라다니기</div></div></div>
+</div></div>
+<div class="sc"><div class="sc-h">신호 포착 <span class="tg up">접근 타이밍</span></div><div class="sc-b">
+  <div class="line"><div class="lab">신호</div><div class="txt">같은 안경 2회+ 만짐 · 거울 2회+ 봄 · 두 개 비교 · 두리번 · 눈 마주침</div></div>
+  <div class="line"><div class="lab">멘트</div><div class="txt"><div class="quote">"그 모델 마음에 드세요? 그거 9사이즈로 나와서 얼굴에 맞춰 드릴 수 있어요. 써보실래요?"</div></div></div>
+  <div class="line"><div class="lab">근거</div><div class="txt">강요가 아니라 정보. 우리 강점(9사이즈·측정)을 자연스럽게.</div></div>
+</div></div>
+<div class="sc"><div class="sc-h">신규 vs 단골 <span class="tg lv1">강도 분기</span></div><div class="sc-b">
+  <div class="line"><div class="lab">신규</div><div class="txt">여유 있게. 측정·가상피팅 권유로 부담 낮추기. "온라인서 미리 골라보셔도 돼요."</div></div>
+  <div class="line"><div class="lab">단골</div><div class="txt">프로필 호출 → 바로 데이터 기반. "지난 사이즈 그대로 있어서 바로 보여드릴게요."</div></div>
+  <div class="line"><div class="lab">이탈위험</div><div class="txt">부담 없이 안부 + 무료 재검 제안. 영업 톤 자제.</div></div>
+</div></div>
+<div class="k">접객 데스크(counter)가 조회 시 <b>접객 강도</b>를 자동 표시 — 단골/VIP/이탈위험별 톤을 띄워준다.</div>
+</div>
+</section></div>
+<div class="foot"><span>BETTERVISION OS · 업셀·컴플레인 매뉴얼 v0.1</span><span>데이터 근거 · 고객 구제 우선</span></div>
+<script>
+function tab(id){
+ document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on')});
+ document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('on')});
+ event.target.classList.add('on'); document.getElementById(id).classList.add('on');
+}
+</script>
+</body></html>

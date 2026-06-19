@@ -73,11 +73,18 @@
     <div class="note" id="reason"></div>
     <div id="verdict" style="margin-top:10px"></div>
   </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">4 · BETTERVISION PB 카탈로그 (전 모델 9-size)</div>
+    <div class="note" style="margin-bottom:12px">추천된 사이즈로 우리 PB를 바로 본다. 색을 눌러 컬러웨이 확인. <a href="lookbook.html" style="color:var(--good);font-weight:700;text-decoration:none">전체 룩북 →</a></div>
+    <div id="pbcat" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px"></div>
+  </div>
 </section></div>
 <div class="foot"><span>BETTERVISION OS · 추천·가상피팅 v0.1</span><span>6변수 객관화</span></div>
 
 <script src="/assets/bv-size-engine.js"></script>
 <script src="/assets/bv-frame-db.js"></script>
+<script src="/assets/bv-frame-art.js"></script>
 <script src="/assets/bv-record.js"></script>
 <script>
 var E=window.BVSizeEngine, DB=window.BVFrameDB; var _recPhoto=null,_recPhotoW=320,_recPhotoH=240;
@@ -205,5 +212,44 @@ async function ensure(){
   return fl;
 }
 window.BVFace = { detect: async (img)=>{ try{ const m=await ensure(); const r=m.detect(img); if(!r.faceLandmarks||!r.faceLandmarks.length) return null; const lm=r.faceLandmarks[0]; const R=lm[468]||lm[33], L=lm[473]||lm[263]; return { rx:R.x, ry:R.y, lx:L.x, ly:L.y }; }catch(e){ return null; } } };
+</script>
+<script>
+(function(){
+ if(!window.BVFrameArt){return;}
+ var C={black:['#1a1a1a','rgba(0,0,0,0.05)','블랙'],gold:['#b8902e','rgba(184,144,46,0.06)','골드'],silver:['#9a9a9a','rgba(120,140,160,0.07)','실버'],havana:['#6b4423','rgba(107,68,35,0.08)','하바나'],crystal:['#c2beb6','rgba(0,0,0,0.03)','크리스탈'],brown:['#3a2c22','rgba(58,44,34,0.06)','브라운'],navy:['#1e2a44','rgba(30,42,68,0.06)','네이비'],wine:['#5a1a2a','rgba(90,26,42,0.07)','와인'],rose:['#c08a6a','rgba(192,138,106,0.06)','로즈골드'],gun:['#4a4a4a','rgba(0,0,0,0.06)','건메탈'],smoke:['#565656','rgba(0,0,0,0.05)','스모크']};
+ var M=[
+  {id:'SAGA 01',name:'라운드 메탈',shape:'round',metal:true,lw:84,lh:42,cols:['gold','silver','black']},
+  {id:'SAGA 02',name:'보스턴',shape:'panto',metal:false,lw:92,lh:44,cols:['black','crystal','havana']},
+  {id:'SAGA 03',name:'스퀘어',shape:'square',metal:false,lw:96,lh:40,cols:['black','brown','navy']},
+  {id:'SAGA 04',name:'브로우라인',shape:'browline',metal:false,brow:true,lw:94,lh:42,cols:['black','havana']},
+  {id:'SAGA 05',name:'오벌 메탈',shape:'oval',metal:true,lw:90,lh:38,cols:['silver','rose','gold']},
+  {id:'SAGA 06',name:'캣아이',shape:'cateye',metal:false,lw:90,lh:42,cols:['black','wine']},
+  {id:'R-1953',name:'캣아이 50s',shape:'cateye',metal:false,lw:92,lh:42,cols:['wine','black']},
+  {id:'R-1961',name:'브로우 60s',shape:'browline',metal:false,brow:true,lw:96,lh:42,cols:['black','havana']},
+  {id:'R-1968',name:'라운드 레논',shape:'round',metal:true,lw:80,lh:42,cols:['gold','gun']},
+  {id:'R-1974',name:'스퀘어 오버',shape:'square',metal:false,lw:100,lh:44,cols:['brown','smoke']},
+  {id:'R-1982',name:'에비에이터',shape:'aviator',metal:true,lw:90,lh:46,cols:['gold','silver']},
+  {id:'R-1986',name:'헥사곤',shape:'hexagon',metal:true,lw:86,lh:44,cols:['gun','silver']}
+ ];
+ var box=document.getElementById('pbcat'); if(!box) return;
+ function fr(m,c){return window.BVFrameArt.frameSVG({shape:m.shape,metal:m.metal,brow:m.brow,lw:m.lw,lh:m.lh,color:C[c][0],tint:C[c][1],browColor:C[c][0],w:300,h:130});}
+ M.forEach(function(m){
+   var first=m.cols[0];
+   var el=document.createElement('div');
+   el.style.cssText='border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff';
+   var sw=m.cols.map(function(c,i){return '<span data-c="'+c+'" style="width:15px;height:15px;border-radius:50%;background:'+C[c][0]+';border:1px solid rgba(0,0,0,.15);display:inline-block;cursor:pointer;'+(i===0?'outline:2px solid var(--ink);outline-offset:2px':'')+'"></span>';}).join(' ');
+   el.innerHTML='<div style="height:96px;display:flex;align-items:center;justify-content:center">'+fr(m,first)+'</div>'+
+     '<div style="font-size:12px;letter-spacing:1px;color:var(--good);font-weight:700">'+m.id+'</div>'+
+     '<div style="font-size:16px;font-weight:600;color:var(--ink)">'+m.name+'</div>'+
+     '<div style="font-size:13px;color:var(--muted);margin:2px 0 8px">'+m.shape+(m.metal?' · 메탈':' · 아세테이트')+' · 9-size</div>'+
+     '<div class="pbsw" style="display:flex;gap:6px">'+sw+'</div>';
+   el.querySelectorAll('.pbsw span').forEach(function(sp){sp.addEventListener('click',function(){
+     el.querySelector('div').innerHTML=fr(m,sp.getAttribute('data-c'));
+     el.querySelectorAll('.pbsw span').forEach(function(x){x.style.outline='none'});
+     sp.style.outline='2px solid var(--ink)';sp.style.outlineOffset='2px';
+   });});
+   box.appendChild(el);
+ });
+})();
 </script>
 </body></html>

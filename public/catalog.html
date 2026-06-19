@@ -1,0 +1,130 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION · 온라인 카탈로그 · 내 사이즈 매치</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<script src="/assets/bv-size-engine.js"></script>
+<script src="/assets/bv-frame-art.js"></script>
+<style>
+.inrow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.inrow .fld{flex:1;min-width:150px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:6px}
+.fc{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff}
+.fc .fr{height:92px;display:flex;align-items:center;justify-content:center}
+.fc .id{font-size:12px;letter-spacing:1px;color:var(--muted);font-weight:700}
+.fc .nm{font-size:17px;font-weight:600;color:var(--ink)}
+.fc .sp{font-size:13px;color:var(--muted)}
+.match{display:flex;align-items:center;gap:8px;margin:10px 0 6px}
+.bar{flex:1;height:7px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:4px}
+.pct{font-size:15px;font-weight:700;min-width:42px;text-align:right}
+.verd{font-size:12.5px;font-weight:600;border-radius:20px;padding:3px 9px;display:inline-block}
+.v-ok{background:var(--good-soft);color:var(--good)} .v-adj{background:var(--warn-soft);color:#92500a} .v-no{background:var(--bad-soft);color:var(--bad)}
+.sec-h{font-size:18px;font-weight:700;color:var(--ink);margin:20px 0 4px}
+.sec-s{font-size:13px;color:var(--muted);margin-bottom:8px}
+.note{font-size:13px;color:var(--muted);line-height:1.5}
+</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="wrap"><section class="view active">
+<div class="lead"><div><div class="eyebrow">고객 3·8 · 온라인 카탈로그</div><h2>전 모델 게시 + 나에게 맞는지·벌림각으로 되는지</h2>
+<div class="sub">측정값 입력 → PB는 9사이즈로 당신 사이즈 제공. 메이커(고정 사이즈)는 매치%와 벌림각 커버 여부 판정.</div></div></div>
+
+<div class="card pad">
+  <div class="inrow">
+    <div class="fld"><label>얼굴 가로폭 (mm)</label><input id="fw" type="number" value="152" oninput="render()"></div>
+    <div class="fld"><label>귀 간격 (mm)</label><input id="eg" type="number" value="160" oninput="render()"></div>
+    <div class="fld"><label>얼굴형</label><select id="face" onchange="render()"><option>계란</option><option>둥근</option><option>각진</option><option>역삼각</option></select></div>
+  </div>
+  <div class="note" id="mysize" style="margin-top:8px"></div>
+</div>
+
+<div class="sec-h">BETTERVISION PB — 9사이즈</div>
+<div class="sec-s">모든 모델이 당신 사이즈로 제공됨. 매치%는 얼굴형 적합도. 색 눌러 컬러 변경.</div>
+<div class="grid" id="pb"></div>
+
+<div class="sec-h">취급 메이커 — 고정 사이즈</div>
+<div class="sec-s">메이커테는 사이즈가 고정. 앞테 폭이 맞아야 하고, 다리 폭은 벌림각(공장 80~85°→95°)으로 일부 커버.</div>
+<div class="grid" id="mk"></div>
+</section></div>
+<div class="foot"><span>BETTERVISION · 온라인 카탈로그 v0.1</span><span>9사이즈 = 당신 사이즈 항상 있음</span></div>
+<script>
+var C={black:['#1a1a1a','rgba(0,0,0,0.05)','블랙'],gold:['#b8902e','rgba(184,144,46,0.06)','골드'],silver:['#9a9a9a','rgba(120,140,160,0.07)','실버'],havana:['#6b4423','rgba(107,68,35,0.08)','하바나'],crystal:['#c2beb6','rgba(0,0,0,0.03)','크리스탈'],brown:['#3a2c22','rgba(58,44,34,0.06)','브라운'],navy:['#1e2a44','rgba(30,42,68,0.06)','네이비'],wine:['#5a1a2a','rgba(90,26,42,0.07)','와인'],rose:['#c08a6a','rgba(192,138,106,0.06)','로즈골드'],gun:['#4a4a4a','rgba(0,0,0,0.06)','건메탈'],smoke:['#565656','rgba(0,0,0,0.05)','스모크']};
+var PB=[
+ {id:'SAGA 01',name:'라운드 메탈',shape:'round',metal:true,lw:84,lh:42,cols:['gold','silver','black']},
+ {id:'SAGA 02',name:'보스턴',shape:'panto',metal:false,lw:92,lh:44,cols:['black','crystal','havana']},
+ {id:'SAGA 03',name:'스퀘어',shape:'square',metal:false,lw:96,lh:40,cols:['black','brown','navy']},
+ {id:'SAGA 04',name:'브로우라인',shape:'browline',metal:false,brow:true,lw:94,lh:42,cols:['black','havana']},
+ {id:'SAGA 05',name:'오벌 메탈',shape:'oval',metal:true,lw:90,lh:38,cols:['silver','rose','gold']},
+ {id:'SAGA 06',name:'캣아이',shape:'cateye',metal:false,lw:90,lh:42,cols:['black','wine']},
+ {id:'R-1968',name:'라운드 레논',shape:'round',metal:true,lw:80,lh:42,cols:['gold','gun']},
+ {id:'R-1982',name:'에비에이터',shape:'aviator',metal:true,lw:90,lh:46,cols:['gold','silver']},
+ {id:'R-1986',name:'헥사곤',shape:'hexagon',metal:true,lw:86,lh:44,cols:['gun','silver']}
+];
+// 얼굴형 × 형태 적합도
+var SUIT={
+ '계란':{round:90,panto:92,square:88,browline:90,oval:92,cateye:88,aviator:90,hexagon:88},
+ '둥근':{square:94,hexagon:92,browline:92,cateye:88,panto:80,round:72,oval:74,aviator:84},
+ '각진':{round:94,oval:92,panto:90,aviator:86,browline:80,cateye:82,square:72,hexagon:74},
+ '역삼각':{panto:92,round:90,oval:88,browline:78,cateye:86,square:82,aviator:80,hexagon:80}
+};
+// 메이커(고정 사이즈) 목업 — frontW = 앞테 총폭
+var MK=[
+ {id:'M-LX 01',name:'클래식 스퀘어',shape:'square',metal:false,lw:50,lh:38,dbl:18,brand:'메이커 A',frontW:142,price:198000,cols:['black','brown']},
+ {id:'M-LX 02',name:'메탈 라운드',shape:'round',metal:true,lw:46,lh:44,dbl:21,brand:'메이커 A',frontW:148,price:176000,cols:['gold','silver']},
+ {id:'M-PR 01',name:'오버 보스턴',shape:'panto',metal:false,lw:54,lh:46,dbl:19,brand:'메이커 B',frontW:160,price:228000,cols:['havana','black']},
+ {id:'M-PR 02',name:'슬림 오벌',shape:'oval',metal:true,lw:48,lh:36,dbl:18,brand:'메이커 B',frontW:134,price:189000,cols:['silver','gold']},
+ {id:'M-NV 01',name:'와이드 브로우',shape:'browline',metal:false,brow:true,lw:53,lh:42,dbl:20,brand:'메이커 C',frontW:156,price:212000,cols:['black','havana']}
+];
+function won(n){return n.toLocaleString()+'원';}
+function barColor(p){return p>=85?'#059669':(p>=65?'#b45309':'#dc2626');}
+function frontClass(fw){return fw<146?'S':(fw>158?'L':'M');}
+
+function render(){
+ var fw=+document.getElementById('fw').value, eg=+document.getElementById('eg').value, face=document.getElementById('face').value;
+ var fc=frontClass(fw);
+ document.getElementById('mysize').innerHTML='당신 9사이즈 ≈ <b>프론트 '+fc+' · 템플 M</b> (얼굴폭 '+fw+' / 귀간격 '+eg+'). PB는 이 사이즈로 바로 제공.';
+ // PB
+ document.getElementById('pb').innerHTML='';
+ PB.forEach(function(m){
+  var suit=(SUIT[face]||SUIT['계란'])[m.shape]||85;
+  var first=m.cols[0];
+  var el=document.createElement('div'); el.className='fc';
+  var sw=m.cols.map(function(c,i){return '<span data-c="'+c+'" style="width:15px;height:15px;border-radius:50%;background:'+C[c][0]+';border:1px solid rgba(0,0,0,.15);display:inline-block;cursor:pointer;margin-right:5px;'+(i===0?'outline:2px solid var(--ink);outline-offset:2px':'')+'"></span>';}).join('');
+  el.innerHTML='<div class="fr">'+BVFrameArt.frameSVG({shape:m.shape,metal:m.metal,brow:m.brow,lw:m.lw,lh:m.lh,color:C[first][0],tint:C[first][1],browColor:C[first][0],w:300,h:120})+'</div>'+
+   '<div class="id">'+m.id+'</div><div class="nm">'+m.name+'</div>'+
+   '<div class="sp">'+m.shape+(m.metal?' · 메탈':' · 아세테이트')+'</div>'+
+   '<div class="match"><div class="bar"><i style="width:'+suit+'%;background:'+barColor(suit)+'"></i></div><div class="pct" style="color:'+barColor(suit)+'">'+suit+'%</div></div>'+
+   '<span class="verd v-ok">✓ 9사이즈 '+fc+'·M 제공</span> <span class="sp">'+face+'형 적합도</span>'+
+   '<div style="margin-top:10px" class="pbsw">'+sw+'</div>';
+  el.querySelectorAll('.pbsw span').forEach(function(sp){sp.addEventListener('click',function(){
+    el.querySelector('.fr').innerHTML=BVFrameArt.frameSVG({shape:m.shape,metal:m.metal,brow:m.brow,lw:m.lw,lh:m.lh,color:C[sp.getAttribute('data-c')][0],tint:C[sp.getAttribute('data-c')][1],browColor:C[sp.getAttribute('data-c')][0],w:300,h:120});
+    el.querySelectorAll('.pbsw span').forEach(function(x){x.style.outline='none'});sp.style.outline='2px solid var(--ink)';sp.style.outlineOffset='2px';
+  });});
+  document.getElementById('pb').appendChild(el);
+ });
+ // 메이커 — 매치% + 벌림각 판정
+ var rows=MK.map(function(m){
+  var frontDiff=Math.abs(fw-m.frontW);
+  var verd, vc, pct;
+  if(frontDiff<=3){verd='잘 맞음';vc='v-ok';pct=Math.round(96-frontDiff*2);}
+  else if(frontDiff<=7){verd='벌림각 조정으로 커버';vc='v-adj';pct=Math.round(82-(frontDiff-3)*4);}
+  else {verd='커버 불가 (앞테 고정)';vc='v-no';pct=Math.max(28,Math.round(58-(frontDiff-7)*3));}
+  return {m:m,pct:pct,verd:verd,vc:vc,diff:frontDiff};
+ }).sort(function(a,b){return b.pct-a.pct;});
+ document.getElementById('mk').innerHTML='';
+ rows.forEach(function(r){var m=r.m;var first=m.cols[0];
+  var el=document.createElement('div');el.className='fc';
+  el.innerHTML='<div class="fr">'+BVFrameArt.frameSVG({shape:m.shape,metal:m.metal,brow:m.brow,lw:m.lw,lh:m.lh,dbl:m.dbl,color:C[first][0],tint:C[first][1],browColor:C[first][0],w:300,h:120})+'</div>'+
+   '<div class="id">'+m.brand+' · '+m.id+'</div><div class="nm">'+m.name+'</div>'+
+   '<div class="sp">앞테폭 '+m.frontW+'mm · '+won(m.price)+'</div>'+
+   '<div class="match"><div class="bar"><i style="width:'+r.pct+'%;background:'+barColor(r.pct)+'"></i></div><div class="pct" style="color:'+barColor(r.pct)+'">'+r.pct+'%</div></div>'+
+   '<span class="verd '+r.vc+'">'+r.verd+'</span> <span class="sp">Δ앞테 '+r.diff+'mm</span>';
+  document.getElementById('mk').appendChild(el);
+ });
+}
+render();
+</script>
+</body></html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION · LOOKBOOK</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#141414;--muted:#7a766e;--line:#e6e3dc;--paper:#fbfaf8;--green:#059669}
+*{box-sizing:border-box}
+body{font-family:"Inter","Pretendard Variable",sans-serif;margin:0;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+header{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+.mark{font-size:clamp(30px,5vw,46px);font-weight:600;letter-spacing:1px}
+.mark b{color:var(--green);font-weight:600}
+.mark sup{font-size:.4em;font-weight:400;vertical-align:super;color:var(--muted)}
+.lookword{font-size:15px;letter-spacing:6px;color:var(--muted);font-weight:500;margin-top:10px}
+.tagline{font-size:17px;color:var(--muted);font-weight:300;margin-top:18px;max-width:560px;line-height:1.6}
+.sech{font-size:clamp(28px,4vw,40px);font-weight:300;letter-spacing:-.5px;margin:56px 0 6px}
+.secsub{font-size:15px;color:var(--muted);font-weight:400;margin-bottom:28px;letter-spacing:.3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:22px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 22px 20px;transition:box-shadow .2s}
+.card:hover{box-shadow:0 8px 30px rgba(0,0,0,.06)}
+.fr{height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.fr svg{max-height:120px}
+.mid{font-size:13px;letter-spacing:2px;color:var(--green);font-weight:600}
+.mname{font-size:21px;font-weight:400;letter-spacing:-.3px;margin:3px 0 2px}
+.mshape{font-size:14px;color:var(--muted);font-weight:400}
+.sw{display:flex;gap:7px;margin:14px 0 10px}
+.sw span{width:17px;height:17px;border-radius:50%;border:1px solid rgba(0,0,0,.12);cursor:pointer}
+.sw span.on{outline:2px solid var(--ink);outline-offset:2px}
+.meta{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:11px;margin-top:4px}
+.badge{font-size:12.5px;color:var(--ink);background:#f3f2ef;border-radius:20px;padding:3px 11px;font-weight:500}
+.blurb{font-size:13.5px;color:var(--muted);line-height:1.5;font-weight:300}
+footer{border-top:1px solid var(--line);margin-top:64px;padding:30px 0 60px;font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+</style></head><body>
+<div class="wrap">
+<header>
+  <div class="mark">BETTER<b>VISION</b><sup>™</sup></div>
+  <div class="lookword">L O O K B O O K</div>
+  <div class="tagline">Designed &amp; Assembled in Korea. 모든 모델 9-size 준맞춤 — 프론트 {S·M·L} × 템플 {S·M·L}. 측정값으로 핏을 고른다.</div>
+</header>
+<h2 class="sech">SAGA</h2>
+<div class="secsub">시그니처 라인 — 9사이즈 모듈 프리미엄</div>
+<div class="grid" id="saga"></div>
+<h2 class="sech">REVIVAL</h2>
+<div class="secsub">복각 라인 — 1950–1980 클래식, 만료 디자인의 재해석</div>
+<div class="grid" id="revival"></div>
+<footer><span>BETTERVISION™ LOOKBOOK · v0.1</span><span>전 품목 본부 공급 · 데이터 본부 귀속</span></footer>
+</div>
+<script>
+/* BETTERVISION Frame Art — 안경테 정면 라인아트 생성기
+   frameSVG(spec) → SVG 문자열. shape별 렌즈 path + 브리지 + 엔드피스 + 템플 + (브로우).
+   premium minimal: 얇은 선, 무채/저채도. metal=얇은 림, acetate=두꺼운 림. */
+(function(root){
+  // 렌즈 path (로컬 중심 0,0, 폭 lw·높이 lh)
+  function lensPath(shape, lw, lh){
+    var hw=lw/2, hh=lh/2, k=0.55; // bezier 원형계수
+    function E(){ // 타원형(라운드/오벌)
+      return 'M '+(-hw)+' 0 '
+        +'C '+(-hw)+' '+(-hh*k)+' '+(-hw*k)+' '+(-hh)+' 0 '+(-hh)+' '
+        +'C '+(hw*k)+' '+(-hh)+' '+hw+' '+(-hh*k)+' '+hw+' 0 '
+        +'C '+hw+' '+(hh*k)+' '+(hw*k)+' '+hh+' 0 '+hh+' '
+        +'C '+(-hw*k)+' '+hh+' '+(-hw)+' '+(hh*k)+' '+(-hw)+' 0 Z';
+    }
+    function RR(r){ // 라운드 사각
+      r=r||Math.min(hw,hh)*0.42;
+      return 'M '+(-hw+r)+' '+(-hh)+' L '+(hw-r)+' '+(-hh)
+        +' Q '+hw+' '+(-hh)+' '+hw+' '+(-hh+r)+' L '+hw+' '+(hh-r)
+        +' Q '+hw+' '+hh+' '+(hw-r)+' '+hh+' L '+(-hw+r)+' '+hh
+        +' Q '+(-hw)+' '+hh+' '+(-hw)+' '+(hh-r)+' L '+(-hw)+' '+(-hh+r)
+        +' Q '+(-hw)+' '+(-hh)+' '+(-hw+r)+' '+(-hh)+' Z';
+    }
+    if(shape==='round') { var r0=Math.min(hw,hh); return 'M '+(-r0)+' 0 C '+(-r0)+' '+(-r0*k)+' '+(-r0*k)+' '+(-r0)+' 0 '+(-r0)+' C '+(r0*k)+' '+(-r0)+' '+r0+' '+(-r0*k)+' '+r0+' 0 C '+r0+' '+(r0*k)+' '+(r0*k)+' '+r0+' 0 '+r0+' C '+(-r0*k)+' '+r0+' '+(-r0)+' '+(r0*k)+' '+(-r0)+' 0 Z'; }
+    if(shape==='oval')  return E();
+    if(shape==='square') return RR();
+    if(shape==='panto'){ // 보스턴/판토 — 윗변 평평·넓게, 하단 둥글게 좁아짐
+      return 'M '+(-hw)+' '+(-hh*0.35)+' '
+        +'C '+(-hw)+' '+(-hh*0.92)+' '+(-hw*0.5)+' '+(-hh)+' 0 '+(-hh)+' '
+        +'C '+(hw*0.5)+' '+(-hh)+' '+hw+' '+(-hh*0.92)+' '+hw+' '+(-hh*0.35)+' '
+        +'C '+hw+' '+(hh*0.5)+' '+(hw*0.52)+' '+hh+' 0 '+hh+' '
+        +'C '+(-hw*0.52)+' '+hh+' '+(-hw)+' '+(hh*0.5)+' '+(-hw)+' '+(-hh*0.35)+' Z';
+    }
+    if(shape==='cateye'){ // 캣아이 — 외측(좌) 상단 뾰족·치켜올림. 우측렌즈는 frameSVG에서 반전.
+      return 'M '+(-hw)+' '+(-hh*1.18)+' ' // 외측 상단 뾰족점(높이 위로)
+        +'C '+(-hw*0.3)+' '+(-hh*0.96)+' '+(hw*0.5)+' '+(-hh*0.82)+' '+hw+' '+(-hh*0.42)+' ' // 윗변→내측상단(낮음)
+        +'C '+(hw*1.04)+' '+(-hh*0.18)+' '+(hw*0.98)+' '+(hh*0.5)+' '+(hw*0.6)+' '+(hh*0.85)+' ' // 내측 하단 둥글
+        +'C '+(hw*0.1)+' '+(hh*1.04)+' '+(-hw*0.55)+' '+(hh*0.95)+' '+(-hw*0.9)+' '+(hh*0.42)+' ' // 하단
+        +'C '+(-hw*1.06)+' '+(hh*0.05)+' '+(-hw*1.1)+' '+(-hh*0.62)+' '+(-hw)+' '+(-hh*1.18)+' Z';
+    }
+    if(shape==='browline'){ // 하프림 느낌의 렌즈(아래 둥근 D). 브로우바는 별도.
+      return 'M '+(-hw)+' '+(-hh*0.55)+' L '+hw+' '+(-hh*0.55)+' '
+        +'C '+hw+' '+(hh*0.4)+' '+(hw*0.6)+' '+hh+' 0 '+hh+' '
+        +'C '+(-hw*0.6)+' '+hh+' '+(-hw)+' '+(hh*0.4)+' '+(-hw)+' '+(-hh*0.55)+' Z';
+    }
+    if(shape==='aviator'){ // 에비에이터 물방울 — 외측(좌) 둥근 상단, 내측(우) 하단 점. 우측렌즈 반전.
+      return 'M '+(-hw)+' '+(-hh*0.4)+' '
+        +'C '+(-hw)+' '+(-hh*0.92)+' '+(-hw*0.5)+' '+(-hh)+' '+(hw*0.1)+' '+(-hh)+' '
+        +'C '+(hw*0.72)+' '+(-hh)+' '+hw+' '+(-hh*0.68)+' '+hw+' '+(-hh*0.24)+' '
+        +'C '+hw+' '+(hh*0.36)+' '+(hw*0.6)+' '+(hh*0.82)+' '+(hw*0.04)+' '+hh+' '
+        +'C '+(-hw*0.46)+' '+(hh*0.8)+' '+(-hw*0.86)+' '+(hh*0.3)+' '+(-hw)+' '+(-hh*0.4)+' Z';
+    }
+    if(shape==='hexagon'){ // 6각
+      return 'M '+(-hw*0.5)+' '+(-hh)+' L '+(hw*0.5)+' '+(-hh)+' L '+hw+' 0 '
+        +'L '+(hw*0.5)+' '+hh+' L '+(-hw*0.5)+' '+hh+' L '+(-hw)+' 0 Z';
+    }
+    return E();
+  }
+
+  function frameSVG(spec){
+    var s=spec||{};
+    var shape=s.shape||'round';
+    var lw=s.lw||92, lh=s.lh||40, dbl=s.dbl||18;
+    var color=s.color||'#1a1a1a', tint=s.tint||'rgba(0,0,0,0.04)';
+    var metal=!!s.metal, brow=s.brow||null, browColor=s.browColor||color;
+    var rimW=metal?2.6:7;
+    var W=s.w||300, H=s.h||130, cy=0;
+    var hw=lw/2, hh=lh/2;
+    var cxL=-(dbl/2+hw), cxR=(dbl/2+hw);
+    var d=lensPath(shape,lw,lh);
+    var g='<g transform="translate('+(W/2)+','+(H/2)+')">';
+
+    // 템플(다리) — 엔드피스에서 바깥으로 짧게
+    var edgeL=cxL-hw, edgeR=cxR+hw, ty=-hh*0.35;
+    g+='<line x1="'+edgeL+'" y1="'+ty+'" x2="'+(edgeL-30)+'" y2="'+(ty-3)+'" stroke="'+color+'" stroke-width="'+(metal?2.2:5)+'" stroke-linecap="round"/>';
+    g+='<line x1="'+edgeR+'" y1="'+ty+'" x2="'+(edgeR+30)+'" y2="'+(ty-3)+'" stroke="'+color+'" stroke-width="'+(metal?2.2:5)+'" stroke-linecap="round"/>';
+    // 힌지 점
+    g+='<circle cx="'+edgeL+'" cy="'+ty+'" r="'+(metal?1.8:2.6)+'" fill="'+color+'"/>';
+    g+='<circle cx="'+edgeR+'" cy="'+ty+'" r="'+(metal?1.8:2.6)+'" fill="'+color+'"/>';
+
+    // 렌즈 틴트(채움) + 림(선)
+    g+='<path d="'+d+'" transform="translate('+cxL+','+cy+')" fill="'+tint+'" stroke="'+color+'" stroke-width="'+rimW+'" stroke-linejoin="round"/>';
+    g+='<path d="'+d+'" transform="translate('+cxR+','+cy+') scale(-1,1)" fill="'+tint+'" stroke="'+color+'" stroke-width="'+rimW+'" stroke-linejoin="round"/>';
+
+    // 브리지
+    var by=(shape==='aviator'||shape==='round'||shape==='panto')?(-hh*0.45):(-hh*0.2);
+    if(metal){ // 새들/더블바 느낌 — 살짝 내려오는 곡선
+      g+='<path d="M '+(cxL+hw)+' '+(by)+' Q 0 '+(by+hh*0.4)+' '+(cxR-hw)+' '+(by)+'" fill="none" stroke="'+color+'" stroke-width="'+rimW+'" stroke-linecap="round"/>';
+    } else { // 두꺼운 바
+      g+='<line x1="'+(cxL+hw-1)+'" y1="'+by+'" x2="'+(cxR-hw+1)+'" y2="'+by+'" stroke="'+color+'" stroke-width="'+(rimW+1)+'" stroke-linecap="round"/>';
+    }
+
+    // 브로우바(브로우라인)
+    if(brow){
+      g+='<path d="M '+(cxL-hw)+' '+(-hh*0.62)+' '
+        +'C '+(cxL)+' '+(-hh*0.95)+' '+(cxL+hw*0.6)+' '+(-hh)+' '+(cxL+hw)+' '+(-hh*0.62)+' '
+        +'L '+(cxR-hw)+' '+(-hh*0.62)+' '
+        +'C '+(cxR-hw*0.6)+' '+(-hh)+' '+(cxR)+' '+(-hh*0.95)+' '+(cxR+hw)+' '+(-hh*0.62)+'" '
+        +'fill="none" stroke="'+browColor+'" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+    g+='</g>';
+    return '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" width="100%">'+g+'</svg>';
+  }
+
+  var api={ frameSVG:frameSVG, lensPath:lensPath };
+  if(typeof module!=='undefined'&&module.exports) module.exports=api;
+  if(root) root.BVFrameArt=api;
+})(typeof window!=='undefined'?window:this);
+</script>
+<script>
+var C={
+ black:['#1a1a1a','rgba(0,0,0,0.05)','블랙'], gold:['#b8902e','rgba(184,144,46,0.06)','골드'],
+ silver:['#9a9a9a','rgba(120,140,160,0.07)','실버'], havana:['#6b4423','rgba(107,68,35,0.08)','하바나'],
+ crystal:['#c2beb6','rgba(0,0,0,0.03)','크리스탈'], brown:['#3a2c22','rgba(58,44,34,0.06)','브라운'],
+ navy:['#1e2a44','rgba(30,42,68,0.06)','네이비'], wine:['#5a1a2a','rgba(90,26,42,0.07)','와인'],
+ rose:['#c08a6a','rgba(192,138,106,0.06)','로즈골드'], gun:['#4a4a4a','rgba(0,0,0,0.06)','건메탈'],
+ smoke:['#565656','rgba(0,0,0,0.05)','스모크']
+};
+var SAGA=[
+ {id:'SAGA 01',name:'라운드 메탈',shape:'round',metal:true,lw:84,lh:42,cols:['gold','silver','black'],blurb:'얇은 메탈 림의 정원형. 가장 가벼운 인상.'},
+ {id:'SAGA 02',name:'보스턴',shape:'panto',metal:false,lw:92,lh:44,cols:['black','crystal','havana'],blurb:'둥근 윗변의 보스턴. 무난하게 넓은 호환.'},
+ {id:'SAGA 03',name:'스퀘어',shape:'square',metal:false,lw:96,lh:40,cols:['black','brown','navy'],blurb:'각진 아세테이트. 또렷한 윤곽.'},
+ {id:'SAGA 04',name:'브로우라인',shape:'browline',metal:false,brow:true,lw:94,lh:42,cols:['black','havana'],blurb:'상단 브로우 강조. 콤비 무드.'},
+ {id:'SAGA 05',name:'오벌 메탈',shape:'oval',metal:true,lw:90,lh:38,cols:['silver','rose','gold'],blurb:'납작한 타원 메탈. 미니멀.'},
+ {id:'SAGA 06',name:'캣아이',shape:'cateye',metal:false,lw:90,lh:42,cols:['black','wine'],blurb:'치켜올린 외측. 또렷한 개성.'}
+];
+var REV=[
+ {id:'R-1953',name:'캣아이 50s',shape:'cateye',metal:false,lw:92,lh:42,cols:['wine','black'],blurb:'1950년대 캣아이 실루엣 복각.'},
+ {id:'R-1961',name:'브로우라인 60s',shape:'browline',metal:false,brow:true,lw:96,lh:42,cols:['black','havana'],blurb:'1960년대 브로우라인. 클래식 콤비.'},
+ {id:'R-1968',name:'라운드 메탈',shape:'round',metal:true,lw:80,lh:42,cols:['gold','gun'],blurb:'1968 라운드 메탈. 레논 무드.'},
+ {id:'R-1974',name:'스퀘어 오버',shape:'square',metal:false,lw:100,lh:44,cols:['brown','smoke'],blurb:'1970년대 오버사이즈 스퀘어.'},
+ {id:'R-1982',name:'에비에이터',shape:'aviator',metal:true,lw:90,lh:46,cols:['gold','silver'],blurb:'1980년대 메탈 에비에이터.'},
+ {id:'R-1986',name:'헥사곤',shape:'hexagon',metal:true,lw:86,lh:44,cols:['gun','silver'],blurb:'각진 6각 메탈. 레트로 모던.'}
+];
+function card(m){
+  var first=C[m.cols[0]];
+  var svg=BVFrameArt.frameSVG({shape:m.shape,metal:m.metal,brow:m.brow,lw:m.lw,lh:m.lh,color:first[0],tint:first[1],browColor:first[0],w:300,h:130});
+  var sw=m.cols.map(function(c,i){return '<span class="'+(i===0?'on':'')+'" style="background:'+C[c][0]+'" title="'+C[c][2]+'" data-c="'+c+'"></span>';}).join('');
+  var el=document.createElement('div'); el.className='card';
+  el.innerHTML='<div class="fr">'+svg+'</div>'+
+    '<div class="mid">'+m.id+'</div><div class="mname">'+m.name+'</div>'+
+    '<div class="mshape">'+m.shape+(m.metal?' · 메탈':' · 아세테이트')+'</div>'+
+    '<div class="sw">'+sw+'</div>'+
+    '<div class="meta"><span class="badge">9-size 준맞춤</span><span class="blurb">'+m.blurb+'</span></div>';
+  // 색상 스왑
+  el.querySelectorAll('.sw span').forEach(function(sp){
+    sp.addEventListener('click',function(){
+      var c=C[sp.getAttribute('data-c')];
+      el.querySelector('.fr').innerHTML=BVFrameArt.frameSVG({shape:m.shape,metal:m.metal,brow:m.brow,lw:m.lw,lh:m.lh,color:c[0],tint:c[1],browColor:c[0],w:300,h:130});
+      el.querySelectorAll('.sw span').forEach(function(x){x.classList.remove('on')}); sp.classList.add('on');
+    });
+  });
+  return el;
+}
+SAGA.forEach(function(m){document.getElementById('saga').appendChild(card(m));});
+REV.forEach(function(m){document.getElementById('revival').appendChild(card(m));});
+</script>
+</body></html>

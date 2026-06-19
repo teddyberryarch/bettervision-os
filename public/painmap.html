@@ -1,0 +1,230 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 가맹점 페인포인트 감사 맵</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+.pp{border:1px solid var(--line);border-radius:14px;padding:0;margin:12px 0;overflow:hidden}
+.pp-h{display:flex;align-items:center;gap:10px;padding:13px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.pp-n{font-size:14px;font-weight:700;color:#fff;background:var(--ink);border-radius:7px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.pp-t{font-size:17px;font-weight:700;color:var(--ink)}
+.pp-b{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pp-b.one{grid-template-columns:1fr}
+.pp-b.one .desc{font-size:14px;color:var(--body);line-height:1.55;margin:0 0 8px}
+.pp-b .col h4{font-size:13px;font-weight:700;color:var(--muted);margin:0 0 6px;letter-spacing:.3px}
+.pp-b .col p{font-size:14px;color:var(--body);margin:0 0 6px;line-height:1.55}
+.st{display:inline-block;font-size:12px;font-weight:700;border-radius:20px;padding:2px 9px;margin-right:4px}
+.st.ok{background:var(--good-soft);color:var(--good)} .st.part{background:var(--warn-soft);color:var(--warn)}
+.st.no{background:var(--bad-soft);color:var(--bad)} .st.lock{background:#ede9fe;color:#6d28d9}
+.new{font-size:14px;color:var(--ink);font-weight:600;margin:3px 0;padding-left:14px;position:relative}
+.new:before{content:"+";position:absolute;left:0;color:var(--good);font-weight:700}
+.hero{background:var(--ink);color:#fff;border-radius:16px;padding:22px 22px}
+.hero h3{font-size:19px;margin:0 0 4px;color:#fff} .hero .e{font-size:13px;color:var(--good);font-weight:700;letter-spacing:2px}
+.hero p{font-size:14px;color:#d4d4d8;line-height:1.6;margin:8px 0}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:14px}
+.steps div{background:#1f1f1f;border-radius:10px;padding:12px 14px;font-size:13px;color:#e4e4e7;line-height:1.45}
+.steps b{color:var(--good);display:block;font-size:13px;margin-bottom:3px}
+.k{background:var(--surface);border-left:3px solid var(--ink);padding:10px 14px;font-size:13.5px;color:var(--body);margin:10px 0;border-radius:6px;line-height:1.55}
+table.prio{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+table.prio th,table.prio td{border:1px solid var(--line);padding:9px 11px;text-align:left}
+table.prio th{background:var(--surface);font-size:13px;color:var(--muted)}
+.pz{font-size:12px;font-weight:700;border-radius:6px;padding:2px 8px}
+.pz0{background:var(--bad-soft);color:var(--bad)} .pz1{background:var(--warn-soft);color:var(--warn)} .pz2{background:var(--surface);color:var(--muted)}
+</style></head><body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="wrap"><section class="view active">
+<div class="lead"><div><div class="eyebrow">양면 검증 · 페인포인트 감사</div><h2>고객 10 + 가맹점 9를 OS가 다 받치는가</h2>
+<div class="sub">고객이 겪는 10 + 가맹점이 겪는 9. 각 페인 → 해법 → 기존 OS → 새로 만들 것.</div></div></div>
+
+<!-- 상태 범례 -->
+<div class="card pad" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+  <span class="st ok">✅ 있음</span><span class="st part">△ 부분</span><span class="st no">❌ 없음</span><span class="st lock">🔒 면허 후</span>
+  <span style="font-size:13px;color:var(--muted);margin-left:auto">기존 13페이지 + 모듈 기준</span>
+</div>
+
+<!-- 핵심: 저마찰 고객 식별 -->
+<div class="card pad" style="background:none;border:none;padding:0;margin-top:14px">
+<div class="hero">
+  <div class="e">CORE STRATEGY</div>
+  <h3>고객을 어떻게 알아보고, 안 귀찮게 데이터를 모을까</h3>
+  <p>고객은 회원가입을 싫어한다. 마찰을 0에 가깝게 — <b style="color:#fff">전화번호 하나가 만능 키</b>다. 도수 이력은 전화번호+이름으로 조회되는 게 업계 표준. 여기서 출발한다.</p>
+  <div class="steps">
+    <div><b>① 전화번호 = 식별 키</b>방문/예약 시 전화번호만. 기존 고객이면 도수·방문횟수·선호 즉시 팝업. 신규는 번호 1개로 시작.</div>
+    <div><b>② 카카오싱크 1탭</b>회원가입 폼 대신 QR → 채널 친구추가 1탭. 가입 마찰 제거 + 식별 + 마케팅 동의 동시.</div>
+    <div><b>③ 알림톡 (정보성)</b>전화번호+비즈채널이면 발송. 예약확인·준비완료·1년 재검 리마인드. 마케팅 동의 없이도 리텐션.</div>
+    <div><b>④ 친구톡 (광고성)</b>채널 친구 + 수신동의 후. 신상·프로모션·세그먼트 타겟. 카톡이 마케팅 본진.</div>
+  </div>
+  <p style="margin-top:14px;color:#a1a1aa;font-size:13px">⚠️ 경쟁 참고 — <b style="color:#fff">레티나</b>(안경업계 점유율 50%)가 이미 고객관리·검안이력·고객모니터·본사 대시보드를 함. BETTERVISION은 CRM을 새로 발명하는 게 아니라 <b style="color:#fff">본부 데이터 귀속 + 9사이즈 측정표준 + 가상피팅 + 카톡 마케팅</b>으로 차별화·통합해야.</p>
+</div>
+</div>
+
+<!-- 고객 10 페인포인트 -->
+<div class="card pad" style="margin-top:14px">
+<div class="eyebrow" style="margin-bottom:4px">고객 10 페인포인트 × OS 매핑</div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">1</div><div class="pp-t">사이즈 맞는지 일일이 써봐야 함</div></div>
+<div class="pp-b one"><div><div class="desc">해법: 카메라로 사이즈 측정. <span class="st ok">✅</span> measure.html 안면측정(카메라)·9사이즈 환산 있음.</div>
+<div class="new">고객 앱에서 셀프 측정 → 내 9사이즈 확정(매장 가기 전)</div></div></div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">2</div><div class="pp-t">조용한 매장 뻘쭘 · 접객 부담 · 몇 개 못 써보고 삼</div></div>
+<div class="pp-b one"><div><div class="desc">해법: 가상 추천·피팅으로 부담 제거. <span class="st ok">✅</span> recommend 가상피팅 + <span class="st ok">✅</span> manual 접객강도 가이드(무관심도 과잉도 아니게).</div>
+<div class="new">접객 강도 가이드(말 걸 타이밍·거리감) 매뉴얼 — 무관심도 과잉도 아니게</div>
+<div class="new">고객이 폰으로 미리 골라오면 접객은 확인·업셀만</div></div></div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">3</div><div class="pp-t">어떤 모델 있는지 모름 · 가서 봐야</div></div>
+<div class="pp-b one"><div><div class="desc">해법: 전 모델 온라인 게시 + 사이즈 매치·벌림각 커버 판정. <span class="st ok">✅</span> catalog (PB 9사이즈 제공 + 메이커 매치%·벌림각 판정).</div>
+<div class="new"><b>모델별 내 사이즈 매치%</b> + "벌림각 조정으로 커버 가능/불가" 판정 표시</div></div></div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">4</div><div class="pp-t">렌즈 가격·정보 안 나옴 · 즉흥 결정</div></div>
+<div class="pp-b one"><div><div class="desc">해법: 렌즈 가격·특성 기재. <span class="st ok">✅</span> pricing 렌즈 굴절률×기능 가격표.</div>
+<div class="new"><b>렌즈 카탈로그</b> — 등급(굴절률·코팅·기능)별 가격·특성 투명 공개</div></div></div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">5</div><div class="pp-t">눈에 잘 맞는지 확신 안 섬 · 안경사 신뢰</div></div>
+<div class="pp-b one"><div><div class="desc">해법: 검안 시스템·안경사 신뢰도로 확신. <span class="st ok">✅</span> exam + <span class="st ok">✅</span> trust(면허·장비·프로세스 투명).</div>
+<div class="new">검안 과정·정밀도 고객 설명(시스템 투명화) + 안경사 면허·경력 프로필</div></div></div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">6</div><div class="pp-t">콘택트 가격·색·특징 안 나옴</div></div>
+<div class="pp-b one"><div><div class="desc">해법: 콘택트 가격·특징 모델별 기재. <span class="st ok">✅</span> pricing 콘택트 카탈로그 + <span class="st ok">✅</span> shop 구매(🔓 샌드박스 가정).</div>
+<div class="new"><b>콘택트 카탈로그</b> — 모델·색·도수범위·가격·특성. 온라인 판매는 샌드박스 통과 후</div></div></div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">7</div><div class="pp-t">눈탱이(바가지) 걱정</div></div>
+<div class="pp-b one"><div><div class="desc">해법: 눈탱이 안 치게 강조. <span class="st ok">✅</span> pricing 표준가 보증 + <span class="st ok">✅</span> quote 견적서 자동 발급.</div>
+<div class="new"><b>본부 표준가 고정·노출</b> — 가맹점 임의 인상 불가(서버 강제), 정가 공개</div>
+<div class="new"><b>견적서 자동 발급</b> — 프레임+렌즈+옵션 명세, 결제 전 투명</div>
+<div class="new">렌즈 등급별 가격표 공개 · 후기/평점 · "표준가 보증" 배지</div></div></div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">8</div><div class="pp-t">메이커 안경 어디 있는지 모름</div></div>
+<div class="pp-b one"><div><div class="desc">해법: 제휴 메이커 가격·사이즈 + 내 사이즈 매치. <span class="st ok">✅</span> catalog 메이커 매치%·벌림각 판정(실데이터 입력 필요).</div>
+<div class="new">취급 메이커 온라인 게시(가격·사이즈) + 모델별 내 사이즈 매치 판정</div></div></div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">9</div><div class="pp-t">재구매 매번 방문·검안 번거로움</div></div>
+<div class="pp-b one"><div><div class="desc">해법: 고객 데이터 저장 + 검안 트래킹. <span class="st ok">✅</span> profile 통합(도수 이력·시력추세·재구매).</div>
+<div class="new"><b>통합 프로필에 도수·사이즈 저장</b> → 재구매 원클릭(검안 생략 가능 여부 안내)</div>
+<div class="new">검안 트래킹(시력 변화) → 재검 필요 시만 안내</div></div></div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">10</div><div class="pp-t">선글라스는 온라인으로 사고 싶음</div></div>
+<div class="pp-b one"><div><div class="desc">해법: 선글라스 온라인 + 도수 재구매·콘택트(샌드박스). <span class="st ok">✅</span> shop(선글라스=합법 / 도수재구매·콘택트=🔓 샌드박스 가정·표시).</div>
+<div class="new"><b>선글라스 온라인 스토어</b>(비도수=합법) — 치수·추천·결제·배송</div>
+<div class="new">도수 안경 재구매는 <b>규제 샌드박스</b> 신청 → 픽업/온라인 배송 트라이 (콘택트도 샌드박스 후)</div></div></div></div>
+</div>
+
+<!-- 9 페인포인트 -->
+<div class="card pad" style="margin-top:14px">
+<div class="eyebrow" style="margin-bottom:4px">가맹점 9 페인포인트 × OS 매핑</div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">1</div><div class="pp-t">접객 시스템 — 누가 왔는지 자동으로</div></div>
+<div class="pp-b">
+  <div class="col"><h4>네 해법</h4><p>예약 시 자동으로 방문횟수·예약여부·특징 표시. 단골/신규 구분.</p>
+    <h4>기존 OS</h4><p><span class="st part">△</span> flow.html 접객 시퀀스(허브)는 있으나 <b>예약 연동·재방문 자동 인식은 없음</b>.</p></div>
+  <div class="col"><h4>새로 만들 것</h4>
+    <div class="new">예약→방문 시 <b>고객카드 자동 팝업</b> (전화번호 인식 → 방문횟수·지난 도수·선호 프레임)</div>
+    <div class="new">신규/단골/VIP 자동 배지 + 접객 가이드 분기</div>
+    <div class="new">예약 캘린더(알림톡 예약확인 연동)</div></div>
+</div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">2</div><div class="pp-t">손님 데이터 — 어떻게 쌓을지</div></div>
+<div class="pp-b">
+  <div class="col"><h4>네 해법</h4><p>CRM으로 잘 쌓기. 고객 최대한 안 귀찮게.</p>
+    <h4>기존 OS</h4><p><span class="st part">△</span> customer.html 멤버십·포인트 + bv-record 측정레코드는 있으나 <b>통합 고객 프로필/타임라인은 없음</b>.</p></div>
+  <div class="col"><h4>새로 만들 것</h4>
+    <div class="new"><b>통합 고객 프로필</b> — 전화번호 키 · 검안 이력 · 구매 · 방문 타임라인 · 선호 · A/S</div>
+    <div class="new">저마찰 수집(카카오싱크·전화번호) — 위 CORE 전략</div>
+    <div class="new">본부 데이터 귀속 구조(가맹점은 조회, 소유는 본부)</div></div>
+</div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">3</div><div class="pp-t">마케팅 — 카톡 푸시</div></div>
+<div class="pp-b">
+  <div class="col"><h4>네 해법</h4><p>CRM→ERP로 카톡 푸시 마케팅. 카톡이 중요.</p>
+    <h4>기존 OS</h4><p><span class="st ok">✅</span> kakao 마케팅 엔진(세그먼트·트리거·알림톡/친구톡).</p></div>
+  <div class="col"><h4>새로 만들 것</h4>
+    <div class="new"><b>카톡 마케팅 엔진</b> — 알림톡(정보성) + 친구톡(광고성) 분리</div>
+    <div class="new">세그먼트(신규·단골·이탈위험·1년경과) 타겟 발송</div>
+    <div class="new">자동 트리거 — 안경 준비완료·생일·1년 재검·A/S 만기</div></div>
+</div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">4</div><div class="pp-t">판매 — 업셀을 어떻게 잘할까</div></div>
+<div class="pp-b">
+  <div class="col"><h4>네 해법</h4><p>판매 매뉴얼. 고객이 온라인서 추천받고 가상피팅으로 마음 어느정도 굳히고 옴.</p>
+    <h4>기존 OS</h4><p><span class="st ok">✅</span> recommend + <span class="st ok">✅</span> manual 업셀 스크립트.</p></div>
+  <div class="col"><h4>새로 만들 것</h4>
+    <div class="new"><b>업셀 매뉴얼/스크립트</b> — 렌즈 업그레이드·세컨드 안경·선글라스·블루라이트, 근거 멘트</div>
+    <div class="new">온라인 사전추천 → 매장 연결(예약+장바구니 인계)</div></div>
+</div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">5</div><div class="pp-t">손님 상대 전반 (1~4 종합)</div></div>
+<div class="pp-b">
+  <div class="col"><h4>네 해법</h4><p>1~4 포함 다양한 방법으로. 더 할 게 있나?</p>
+    <h4>기존 OS</h4><p><span class="st ok">✅</span> counter 통합 접객 데스크(고객·추천·업셀·카톡 한 화면).</p></div>
+  <div class="col"><h4>새로 만들 것 / 더 할 것</h4>
+    <div class="new">접객 화면에 고객 프로필·추천·업셀이 <b>한 화면에</b> 뜨게 통합</div>
+    <div class="new">후기·재방문 유도(시술 후 알림톡 만족도 1탭)</div>
+    <div class="new">대기/혼잡 관리(예약 슬롯)</div></div>
+</div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">6</div><div class="pp-t">검안 — 초보·어려운 케이스 + 이력 추적</div></div>
+<div class="pp-b">
+  <div class="col"><h4>네 해법</h4><p>검안 자동화. 재방문 고객은 ID에 도수 자동 표시. 시력변화 추적·예방.</p>
+    <h4>기존 OS</h4><p><span class="st ok">✅</span> exam.html 기계연동 모드(자동수신/판단 분리). <span class="st no">❌</span> <b>도수 이력·시력변화 추적은 없음</b>. <span class="st lock">🔒</span> 임상값 면허 후.</p></div>
+  <div class="col"><h4>새로 만들 것</h4>
+    <div class="new"><b>처방 이력 타임라인</b> — 방문마다 도수 누적, 재방문 시 자동 호출</div>
+    <div class="new"><b>시력변화 그래프</b> + 추세선 → 1년 후 재검 예측·예방 알림</div>
+    <div class="new">어려운 케이스 의사결정 트리(검안 보조)</div></div>
+</div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">7</div><div class="pp-t">제조 — 안경별 제조 매뉴얼</div></div>
+<div class="pp-b">
+  <div class="col"><h4>네 해법</h4><p>각 안경마다 제조 매뉴얼. 사이즈는 고객이 이미 재서 옴. 그거 보고 제조.</p>
+    <h4>기존 OS</h4><p><span class="st ok">✅</span> workorder 주문별 제조 작업지시서(측정→제조 자동, 재입력 0).</p></div>
+  <div class="col"><h4>새로 만들 것</h4>
+    <div class="new"><b>주문별 제조 작업지시서</b> 1장 — 9사이즈·렌즈 스펙·OC/PD·가공 옵션·휨값, 측정 레코드에서 자동</div>
+    <div class="new">QR로 측정→제조 인계(재입력 0)</div></div>
+</div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">8</div><div class="pp-t">피팅 — 측정·피팅지</div></div>
+<div class="pp-b">
+  <div class="col"><h4>네 해법</h4><p>얼굴 사이즈 측정, 피팅 매뉴얼, 피팅지.</p>
+    <h4>기존 OS</h4><p><span class="st ok">✅</span> measure.html 안면측정 + fit.html A4 피팅지(각도기 지그·95° 표준). <b>양호</b>.</p></div>
+  <div class="col"><h4>새로 만들 것 (보강)</h4>
+    <div class="new">피팅 전/후 사진 기록 → 고객 프로필에 저장</div>
+    <div class="new">피팅 매뉴얼 영상/체크리스트(비숙련 보조)</div></div>
+</div></div>
+
+<div class="pp"><div class="pp-h"><div class="pp-n">9</div><div class="pp-t">컴플레인 — 본사 대응 매뉴얼</div></div>
+<div class="pp-b">
+  <div class="col"><h4>네 해법</h4><p>본사 컴플레인 대응 매뉴얼.</p>
+    <h4>기존 OS</h4><p><span class="st no">❌</span> <b>없음</b>.</p></div>
+  <div class="col"><h4>새로 만들 것</h4>
+    <div class="new"><b>컴플레인 대응 매뉴얼</b> — 유형별(도수 안 맞음·피팅·파손·환불) 스크립트</div>
+    <div class="new">에스컬레이션 경로 + 본사 보상 기준 + 처리 로그</div></div>
+</div></div>
+</div>
+
+<!-- 우선순위 -->
+<div class="card pad">
+<div class="eyebrow" style="margin-bottom:6px">빌드 우선순위 추천</div>
+<table class="prio">
+<tr><th>순위</th><th>만들 것</th><th>커버 페인</th><th>이유</th></tr>
+<tr><td><span class="pz pz0">P0</span></td><td><b>통합 고객 프로필 + 저마찰 식별</b></td><td>1·2·5·6</td><td>나머지 전부의 입구이자 기반. 전화번호 키 하나로 접객·CRM·이력이 다 붙음</td></tr>
+<tr><td><span class="pz pz0">P0</span></td><td><b>카톡 마케팅 엔진</b></td><td>3</td><td>리텐션·재방문의 핵심. 알림톡(정보성)부터 즉효</td></tr>
+<tr><td><span class="pz pz1">P1</span></td><td>처방 이력·시력변화 추적</td><td>6</td><td>안경원 본질 차별화. 레티나 대비 예방·추세 우위</td></tr>
+<tr><td><span class="pz pz1">P1</span></td><td>주문별 제조 작업지시서</td><td>7</td><td>측정 레코드 재활용 — 재입력 0, 불량 감소</td></tr>
+<tr><td><span class="pz pz2">P2</span></td><td>업셀 스크립트</td><td>4</td><td>매출 직결이나 매뉴얼 성격 — 빠르게 가능</td></tr>
+<tr><td><span class="pz pz2">P2</span></td><td>컴플레인 대응 매뉴얼</td><td>9</td><td>문서형 — 빠르게 가능</td></tr>
+</table>
+<div class="k"><b>입구는 P0 "통합 고객 프로필 + 저마찰 식별".</b> 전화번호 하나로 방문 인식 → 접객 카드 → 검안 이력 → 카톡까지 한 줄로 꿰어진다. 가맹점 1·2·3·5·6 + 고객 9가 동시에 풀린다.</div>
+<div class="eyebrow" style="margin:16px 0 6px">고객측 신규 (온라인·투명성)</div>
+<table class="prio">
+<tr><th>만들 것</th><th>커버</th><th>합법성</th></tr>
+<tr><td>온라인 모델 카탈로그 + 내 사이즈 매치%·벌림각 커버판정</td><td>고객 3·8</td><td>비도수 게시 자유</td></tr>
+<tr><td>렌즈·콘택트 가격/특성 카탈로그</td><td>고객 4·6</td><td>정보 게시 자유</td></tr>
+<tr><td>투명 가격·견적·표준가 보증(눈탱이 방지)</td><td>고객 7</td><td>자유</td></tr>
+<tr><td>선글라스 온라인 스토어(비도수)</td><td>고객 10</td><td>합법</td></tr>
+<tr><td>도수 재구매·콘택트 온라인</td><td>고객 10·6</td><td>🔒 샌드박스 후</td></tr>
+</table>
+</div>
+</section></div>
+<div class="foot"><span>BETTERVISION OS · 페인포인트 감사 맵 v0.3 (대부분 구현 완료)</span><span>전화번호 하나가 만능 키</span></div>
+</body></html>
