@@ -16,9 +16,20 @@ const TYPES = {
 const CAP = 2; // 30분당 정원
 
 function send(res, code, obj, extraHeaders){ var h={'content-type':'application/json; charset=utf-8'}; if(extraHeaders)for(var k in extraHeaders)h[k]=extraHeaders[k]; res.writeHead(code, h); res.end(JSON.stringify(obj)); }
-const AUTH_ON = process.env.AUTH_ON === 'true';
+// [09.24] 인증 기본 켜짐. 끄려면 AUTH_ON=false 를 명시해야 함 (fail-closed)
+const AUTH_ON = process.env.AUTH_ON !== 'false';
+// 로그인 없이 열리는 페이지 (고객 대면·데모)
+const PUBLIC_PAGES = ['/index.html','/login.html','/customer.html','/catalog.html','/lookbook.html','/pricing.html'];
+// [09.24] 서비스하지 않는 페이지 — 방향결정 v2.6 이전 내부 문서. 파일은 그대로 두고(삭제 금지) 404로 막음
+//  기준 문서는 구글드라이브 01_코어·02_문서세트
+function isBlockedPage(p){ return /^\/BETTERVISION_[^/]*\.html$/.test(p) || /^\/BETTERVISION_[^/.]*$/.test(p); }
+// 본부 계정만 여는 페이지 (내부 전략·재무)
+const HQ_PAGES = ['/hq.html','/a.html','/finance.html','/insights.html','/todo.html','/painmap.html'];
+function isSecure(req){ return (req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https'; }
+function tokenCookie(req, token, maxAge){ return 'bv_token='+token+'; Path=/; Max-Age='+maxAge+'; HttpOnly; SameSite=Lax'+(isSecure(req)?'; Secure':''); }
 function getCookie(req,name){ var c=req.headers.cookie||''; var m=c.match(new RegExp('(?:^|; )'+name+'=([^;]+)')); return m?decodeURIComponent(m[1]):null; }
-function body(req){ return new Promise(function(resolve){ let d=''; req.on('data',function(c){d+=c;}); req.on('end',function(){ try{resolve(d?JSON.parse(d):{});}catch(e){resolve({});} }); }); }
+// [09.24] 가맹점 계정이면 body.store 를 본인 지점으로 고정 (다른 지점 쓰기 차단)
+function body(req){ return new Promise(function(resolve){ let d=''; req.on('data',function(c){d+=c; if(d.length>1e6) req.destroy();}); req.on('end',function(){ var o; try{o=d?JSON.parse(d):{};}catch(e){o={};} if(req.bvUser&&req.bvUser.role==='store'&&o&&typeof o==='object') o.store=req.bvUser.store; resolve(o); }); }); }
 
 async function api(req, res, url){
   try{
@@ -28,28 +39,44 @@ async function api(req, res, url){
       const b=await body(req); const r=await db.login(b.username, b.pass);
       if(!r.ok) return send(res,401,r);
       return send(res,200,{ok:true,role:r.role,store:r.store,username:r.username},
-        {'Set-Cookie':'bv_token='+r.token+'; Path=/; Max-Age=86400; SameSite=Lax'});
+        {'Set-Cookie':tokenCookie(req,r.token,86400)});
     }
     if(req.method==='POST' && url.pathname==='/api/logout'){
       await db.logout(getCookie(req,'bv_token'));
-      return send(res,200,{ok:true},{'Set-Cookie':'bv_token=; Path=/; Max-Age=0'});
+      return send(res,200,{ok:true},{'Set-Cookie':tokenCookie(req,'',0)});
     }
     if(req.method==='GET' && url.pathname==='/api/me'){
       const u=await db.userByToken(getCookie(req,'bv_token'));
       return send(res,200,{ok:true, authOn:AUTH_ON, user:u||null});
     }
     if(AUTH_ON){
-      const PUBLIC=['/api/login','/api/logout','/api/me','/api/catalog','/api/bookings','/api/pickups','/api/customer'];
-      const isPublic = PUBLIC.some(function(pp){ return url.pathname===pp; });
-      // /api/customer (단건) 공개, /api/customers (목록)은 보호
+      // [09.24] 공개는 "고객이 로그인 없이 하는 행동"만. 개인정보를 돌려주는 조회는 전부 로그인 필요
+      //  - GET  /api/catalog            상품 목록
+      //  - GET  /api/bookings           → 로그인 없으면 시간대별 인원수만 (이름·전화 없음)
+      //  - POST /api/bookings, /api/pickups  고객 예약·주문 접수
+      //  /api/customer(단건)는 공개 예외에서 제외
+      const PUBLIC_ANY=['/api/catalog'];
+      //  - 고객 앱: 7일째 착용 확인 응답(본인 건만), 자가측정 결과 제출(항상 임시값으로 저장)
+      const PUBLIC_GET=['/api/bookings','/api/aftercare/mine'];
+      const PUBLIC_POST=['/api/bookings','/api/pickups','/api/aftercare/respond'];
+      const isPublic = PUBLIC_ANY.indexOf(url.pathname)>=0
+        || (req.method==='POST' && /^\/api\/measure\/sessions\/[^/]+\/result$/.test(url.pathname))
+        || (req.method==='GET' && PUBLIC_GET.indexOf(url.pathname)>=0)
+        || (req.method==='POST' && PUBLIC_POST.indexOf(url.pathname)>=0);
+      const u=await db.userByToken(getCookie(req,'bv_token'));
+      req.bvUser=u||null;
       if(!isPublic){
-        const u=await db.userByToken(getCookie(req,'bv_token'));
         if(!u) return send(res,401,{ok:false,error:'로그인이 필요해요'});
         if(u.role==='store'){
-          const HQ_ONLY=['/api/sales/range','/api/pb-margin','/api/orders/status','/api/customers/move'];
-          if(HQ_ONLY.indexOf(url.pathname)>=0) return send(res,403,{ok:false,error:'본부 전용이에요'});
+          const HQ_ONLY=['/api/sales/range','/api/pb-margin','/api/orders/status','/api/customers/move',
+            '/api/analytics','/api/forecast','/api/activity','/api/orders/push','/api/price-policy'];
+          const HQ_ONLY_GET_OK=['/api/price-policy']; // 권장가 조회는 가맹점도 가능, 수정은 본부만
+          if(HQ_ONLY.indexOf(url.pathname)>=0 && !(req.method==='GET' && HQ_ONLY_GET_OK.indexOf(url.pathname)>=0))
+            return send(res,403,{ok:false,error:'본부 전용이에요'});
           const qs=url.searchParams.get('store');
           if(qs && qs!==u.store) return send(res,403,{ok:false,error:'다른 지점 데이터는 볼 수 없어요'});
+          // store 파라미터를 빼고 호출하면 전 지점이 나오던 문제 → 본인 지점으로 고정
+          url.searchParams.set('store', u.store);
         }
       }
     }
@@ -57,6 +84,11 @@ async function api(req, res, url){
     if(req.method==='GET' && url.pathname==='/api/bookings'){
       const store=url.searchParams.get('store'), date=url.searchParams.get('date');
       const rows=await db.listBookings(store, date);
+      // [09.24] 로그인 안 한 요청(고객 앱)에는 시간대별 인원수만. 이름·전화번호 안 내보냄
+      if(AUTH_ON && !req.bvUser){
+        const slots={}; rows.forEach(function(r){ var k=r.date+' '+r.time; slots[k]=(slots[k]||0)+1; });
+        return send(res,200,{ok:true, cap:CAP, slots:slots});
+      }
       return send(res,200,{ok:true, cap:CAP, bookings:rows});
     }
     // POST /api/bookings  {store,date,time,name,phone} -> 생성(정원 체크)
@@ -90,6 +122,7 @@ async function api(req, res, url){
     if(req.method==='GET' && url.pathname==='/api/customer'){
       const id=url.searchParams.get('id'); const c=await db.getCustomer(id);
       if(!c) return send(res,404,{ok:false,error:'고객 없음'});
+      if(req.bvUser && req.bvUser.role==='store' && c.store!==req.bvUser.store) return send(res,403,{ok:false,error:'다른 지점 고객이에요'});
       return send(res,200,{ok:true, customer:c, history:await db.customerHistory(id)});
     }
     // POST /api/customers/move {id,toStore} -> 고객 소속 지점 변경(데이터 귀속 데모)
@@ -225,18 +258,107 @@ async function api(req, res, url){
       const store=url.searchParams.get('store')||null, from=url.searchParams.get('from'), to=url.searchParams.get('to');
       return send(res,200,{ok:true, days:await db.salesDaily(store,from,to)});
     }
+
+    // ===== [09.24] 판 다음 확인 (7일째 착용 확인) =====
+    const U=req.bvUser; const scopeOK=function(st){ return !U || U.role!=='store' || st===U.store; };
+    if(req.method==='GET' && url.pathname==='/api/aftercare'){
+      return send(res,200,{ok:true, items:await db.listAftercare(url.searchParams.get('store'), url.searchParams.get('status')), issues:db.CARE_ISSUES});
+    }
+    if(req.method==='POST' && url.pathname==='/api/aftercare/record'){
+      const b=await body(req); const cur=await db.getAftercare(b.id);
+      if(!cur) return send(res,404,{ok:false,error:'확인 건이 없어요'});
+      if(!scopeOK(cur.store)) return send(res,403,{ok:false,error:'다른 지점 건이에요'});
+      const r=await db.recordAftercare(b.id, Object.assign({},b,{source:'매장 전화'})); return send(res, r.ok?200:400, r);
+    }
+    if(req.method==='GET' && url.pathname==='/api/aftercare/mine'){
+      const cid=url.searchParams.get('customer_id'); if(!cid) return send(res,400,{ok:false,error:'customer_id 필요'});
+      return send(res,200,{ok:true, items:await db.pendingAftercareFor(cid), issues:db.CARE_ISSUES});
+    }
+    if(req.method==='POST' && url.pathname==='/api/aftercare/respond'){
+      const b=await body(req); const cur=await db.getAftercare(b.id);
+      if(!cur || +cur.customer_id!==+b.customer_id) return send(res,404,{ok:false,error:'확인 건이 없어요'});
+      const r=await db.recordAftercare(b.id,{comfort:b.comfort,issues:b.issues,note:b.note,source:'고객 앱',onlyPending:true});
+      return send(res, r.ok?200:400, {ok:r.ok, error:r.error, comfort:r.comfort});
+    }
+    // ===== [09.24] A/S — 원인(검안·가공·피팅·추천)을 골라야 종결 =====
+    if(req.method==='GET' && url.pathname==='/api/as'){
+      return send(res,200,{ok:true, items:await db.listAS(url.searchParams.get('store'), url.searchParams.get('status')), causes:db.AS_CAUSES});
+    }
+    if(req.method==='POST' && url.pathname==='/api/as'){
+      const b=await body(req); if(!b.store) return send(res,400,{ok:false,error:'store 필요'});
+      const r=await db.openAS(b); return send(res, r.ok?201:400, r);
+    }
+    if(req.method==='POST' && url.pathname==='/api/as/close'){
+      const b=await body(req); const cur=await db.getAS(b.id);
+      if(!cur) return send(res,404,{ok:false,error:'A/S 건이 없어요'});
+      if(!scopeOK(cur.store)) return send(res,403,{ok:false,error:'다른 지점 건이에요'});
+      const r=await db.closeAS(b.id, b.cause, b.action); return send(res, r.ok?200:400, r);
+    }
+    if(req.method==='GET' && url.pathname==='/api/care/summary'){
+      return send(res,200,Object.assign({ok:true}, await db.careSummary(url.searchParams.get('store'))));
+    }
+    // ===== [09.24] 측정 (설계서 v0.3 §4) =====
+    if(req.method==='POST' && url.pathname==='/api/measure/sessions'){
+      const b=await body(req); if(!b.customer_id) return send(res,400,{ok:false,error:'customer_id 필요'});
+      const c=await db.getCustomer(b.customer_id); if(!c) return send(res,404,{ok:false,error:'고객 없음'});
+      if(!scopeOK(c.store)) return send(res,403,{ok:false,error:'다른 지점 고객이에요'});
+      b.operator=U?U.username:null; if(!b.store) b.store=c.store;
+      return send(res,201,{ok:true, session:await db.createMeasureSession(b)});
+    }
+    let mm;
+    if(req.method==='GET' && (mm=url.pathname.match(/^\/api\/measure\/sessions\/(\d+)$/))){
+      const ss=await db.getMeasureSession(mm[1]); if(!ss) return send(res,404,{ok:false,error:'세션이 없어요'});
+      if(!scopeOK(ss.store)) return send(res,403,{ok:false,error:'다른 지점 세션이에요'});
+      return send(res,200,{ok:true, session:ss});
+    }
+    if(req.method==='POST' && (mm=url.pathname.match(/^\/api\/measure\/sessions\/([^/]+)\/result$/))){
+      const b=await body(req);
+      if(U && U.role==='store'){
+        const ss=mm[1]!=='adhoc'?await db.getMeasureSession(mm[1]):null;
+        const c=await db.getCustomer(ss?ss.customer_id:b.customer_id);
+        if(!c || !scopeOK(c.store)) return send(res,403,{ok:false,error:'다른 지점 고객이에요'});
+      }
+      if(AUTH_ON && !U){ // 로그인 안 한 자가측정: 고객 존재만 확인, 결과는 임시값
+        if(!/^\d+$/.test(String(b.customer_id||''))) return send(res,400,{ok:false,error:'customer_id 필요'});
+        const c=await db.getCustomer(b.customer_id); if(!c) return send(res,404,{ok:false,error:'고객 없음'});
+      }
+      const r=await db.saveMeasurement(mm[1], b, AUTH_ON?U:(U||{username:'(인증 꺼짐)'}));
+      return send(res, r.ok?201:400, r);
+    }
+    if(req.method==='GET' && (mm=url.pathname.match(/^\/api\/customers\/(\d+)\/measurements$/))){
+      const c=await db.getCustomer(mm[1]); if(!c) return send(res,404,{ok:false,error:'고객 없음'});
+      if(!scopeOK(c.store)) return send(res,403,{ok:false,error:'다른 지점 고객이에요'});
+      await db.logMeasureAccess(U?U.username:null, +mm[1], 'read');
+      return send(res,200,{ok:true, items:await db.listMeasurements(mm[1])});
+    }
     return send(res,404,{ok:false,error:'not found'});
   }catch(e){ console.error(e); return send(res,500,{ok:false,error:'server error'}); }
 }
 
-function serveStatic(req,res,url){
-  let p=decodeURIComponent(url.pathname); if(p==='/')p='/index.html';
+// [09.24] 페이지 접근 제한 — 화면 안의 로그인 체크는 HTML이 이미 내려간 뒤라 우회 가능. 서버에서 막는다
+async function pageGate(req,res,p){
+  if(!AUTH_ON) return true;
+  var page=p.endsWith('.html')?p:(path.extname(p)?null:p+'.html');
+  if(!page || PUBLIC_PAGES.indexOf(page)>=0) return true;   // css·js·이미지, 공개 페이지
+  const u=await db.userByToken(getCookie(req,'bv_token'));
+  var need = HQ_PAGES.indexOf(page)>=0 ? 'hq' : 'any';
+  if(u && (need==='any' || u.role==='hq')) return true;
+  if(u){ res.writeHead(403,{'content-type':TYPES['.html']}); res.end('본부 계정만 볼 수 있는 페이지예요. <a href="/index.html">처음으로</a>'); return false; }
+  res.writeHead(302,{location:'/login.html?next='+encodeURIComponent(page.slice(1))}); res.end(); return false;
+}
+
+async function serveStatic(req,res,url){
+  let p; try{ p=decodeURIComponent(url.pathname); }catch(e){ res.writeHead(400); return res.end('bad request'); }
+  if(p==='/')p='/index.html';
+  if(isBlockedPage(p)){ res.writeHead(404,{'content-type':TYPES['.html']}); return res.end('Not found'); }
+  if(!(await pageGate(req,res,p))) return;
   let fp=path.join(ROOT,p);
   if(!fp.startsWith(ROOT)){res.writeHead(403);return res.end('forbidden');}
   fs.readFile(fp,function(err,data){
     if(err){ fs.readFile(fp+'.html',function(e2,d2){
       if(!e2){res.writeHead(200,{'content-type':TYPES['.html']});return res.end(d2);}
-      fs.readFile(path.join(ROOT,'index.html'),function(e3,d3){res.writeHead(e3?404:200,{'content-type':TYPES['.html']});res.end(e3?'Not found':d3);});
+      // [09.24] 없는 페이지는 홈 대신 404 (깨진 링크가 홈으로 보여서 안 보이던 문제)
+      res.writeHead(404,{'content-type':TYPES['.html']}); res.end('<!doctype html><meta charset="utf-8"><title>없는 페이지</title><body style="font-family:Pretendard,sans-serif;background:#F7F6F3;color:#1C1C1A;padding:48px;font-size:17px">없는 페이지예요. <a href="/index.html" style="color:#9A7B4F">처음으로</a></body>');
     }); return; }
     res.writeHead(200,{'content-type':TYPES[path.extname(fp)]||'application/octet-stream'});
     res.end(data);

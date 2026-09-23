@@ -1,7 +1,8 @@
 // PostgreSQL 래퍼. DATABASE_URL 없으면 메모리 폴백.
 // 테이블: bookings(예약), inventory(지점×SKU 재고), sales(결제 라인)
 let pool=null, ready=false;
-const mem={ bookings:[], inventory:[], sales:[], orders:[], customers:[], pickups:[], users:[], policy:{} };
+const mem={ bookings:[], inventory:[], sales:[], orders:[], customers:[], pickups:[], users:[], policy:{},
+  aftercare:[], ascases:[], msessions:[], measurements:[], accesslog:[] };
 try{
   if(process.env.DATABASE_URL){
     const { Pool } = require('pg');
@@ -11,13 +12,29 @@ try{
 }catch(e){ console.warn('pg 모듈 없음 — 메모리 폴백'); }
 
 const STORES=['성수점','홍대점','판교점'];
-// 데모 계정 (실제 운영 시 비번 해시·변경 필수). 본부 마스터 = hq/admin
+// [09.24] 계정 비밀번호는 코드에 두지 않는다. Railway 환경변수 HQ_PASS / STORE_PASS 로 설정
+//  - 설정돼 있으면 서버 시작 때마다 해시로 덮어씀 (비번 변경 = 환경변수 변경 + 재배포)
+//  - 없으면 임의 비번으로 잠금 (로그인 불가, 로그에 경고)
+const crypto=require('crypto');
+function hashPass(p){ const salt=crypto.randomBytes(16).toString('hex'); return 'scrypt$'+salt+'$'+crypto.scryptSync(String(p),salt,32).toString('hex'); }
+function checkPass(stored, p){
+  if(!stored || !String(stored).startsWith('scrypt$')) return false;   // 평문 비번은 더 이상 통과 안 함
+  const parts=stored.split('$'); const h=crypto.scryptSync(String(p||''),parts[1],32);
+  const want=Buffer.from(parts[2],'hex'); return want.length===h.length && crypto.timingSafeEqual(want,h);
+}
+function envPass(role){ return role==='hq' ? process.env.HQ_PASS : process.env.STORE_PASS; }
 const SEED_USERS=[
-  {username:'hq', pass:'admin', role:'hq', store:null},
-  {username:'seongsu', pass:'1234', role:'store', store:'성수점'},
-  {username:'hongdae', pass:'1234', role:'store', store:'홍대점'},
-  {username:'pangyo',  pass:'1234', role:'store', store:'판교점'}
+  {username:'hq', role:'hq', store:null},
+  {username:'seongsu', role:'store', store:'성수점'},
+  {username:'hongdae', role:'store', store:'홍대점'},
+  {username:'pangyo',  role:'store', store:'판교점'}
 ];
+function seedPassHash(u){
+  const p=envPass(u.role);
+  if(p && p.length>=8) return hashPass(p);
+  console.warn('[auth] '+(u.role==='hq'?'HQ_PASS':'STORE_PASS')+' 환경변수가 없거나 8자 미만 — '+u.username+' 계정 잠금');
+  return hashPass(crypto.randomBytes(24).toString('hex'));
+}
 
 // ---- 30종 SKU 카탈로그 (디자인 × 사이즈) ----
 const DESIGNS=[
@@ -44,7 +61,7 @@ function buildCatalog(){
     {name:'1개월용 콘택트(2P)', cat:'콘택트', price:28000, medical:false},
     {name:'난시용 콘택트(30P)', cat:'콘택트', price:42000, medical:false},
     {name:'컬러 콘택트(10P)',   cat:'콘택트', price:30000, medical:false},
-    {name:'오디오 이어팁',  cat:'액세서리', price:18000, medical:false},
+    {name:'코받침 교체 세트', cat:'액세서리', price:18000, medical:false},
     {name:'안경 케이스',    cat:'액세서리', price:12000, medical:false},
     {name:'안경 클리너 세트', cat:'액세서리', price:9000, medical:false},
     {name:'스포츠 스트랩',  cat:'액세서리', price:15000, medical:false}
@@ -59,18 +76,18 @@ function skuId(base,s){
 const CATALOG=buildCatalog();
 // 본부 가격 정책 기본 할인 한도(%) — PB(렌즈·콘택트)는 마진 보호 위해 낮게
 const DEFAULT_DISC={ '렌즈':5, '콘택트':5, '테':15, '선글라스':15, '액세서리':10 };
-// 멤버십: 누적 구매액 기준 등급, 등급별 적립률(재구매 lock-in)
+// 멤버십: 누적 구매액 기준 등급, 등급별 적립률(재방문 혜택)
 function tierOf(spend){ if(spend>=3000000)return 'VIP'; if(spend>=1000000)return '골드'; if(spend>=300000)return '실버'; return '웰컴'; }
 function rateOf(tier){ return tier==='VIP'?0.10:tier==='골드'?0.07:tier==='실버'?0.05:0.03; }
 function nextTier(spend){ if(spend<300000)return {name:'실버',need:300000-spend}; if(spend<1000000)return {name:'골드',need:1000000-spend}; if(spend<3000000)return {name:'VIP',need:3000000-spend}; return null; }
 const SEED_CUSTOMERS=[
-  {name:'양지근',phone:'010-2480-1001',store:'성수점',size:'F2×T2',face:'142mm / 낮은코',pd:'63.5mm',rx:'OD -3.25 / OS -3.50',nose:'낮음',seg:'단골',points:18500},
-  {name:'김서연',phone:'010-3391-2210',store:'성수점',size:'F1×T1',face:'131mm / 표준',pd:'60.0mm',rx:'OD -1.75 / OS -2.00',nose:'표준',seg:'단골',points:9200},
-  {name:'박도현',phone:'010-7782-5503',store:'홍대점',size:'F3×T2',face:'149mm / 높은코',pd:'66.0mm',rx:'OD -4.50 / OS -4.25',nose:'높음',seg:'신규',points:1200},
-  {name:'이수민',phone:'010-5519-8834',store:'성수점',size:'F2×T1',face:'138mm / 표준',pd:'62.0mm',rx:'OD -2.25 / OS -2.25',nose:'표준',seg:'재방문',points:5400},
-  {name:'정하준',phone:'010-6640-1199',store:'판교점',size:'F2×T2',face:'143mm / 낮은코',pd:'64.0mm',rx:'OD -3.00 / OS -2.75',nose:'낮음',seg:'단골',points:22100},
-  {name:'최우진',phone:'010-2231-7788',store:'홍대점',size:'F2×T3',face:'145mm / 표준',pd:'65.0mm',rx:'OD -2.50 / OS -2.50',nose:'표준',seg:'재방문',points:3300},
-  {name:'한지우',phone:'010-9982-3344',store:'판교점',size:'F1×T2',face:'133mm / 낮은코',pd:'59.5mm',rx:'OD -1.25 / OS -1.50',nose:'낮음',seg:'신규',points:800}
+  {name:'윤서진',phone:'010-0000-0001',store:'성수점',size:'F2×T2',face:'142mm / 낮은코',pd:'63.5mm',rx:'OD -3.25 / OS -3.50',nose:'낮음',seg:'단골',points:18500},
+  {name:'김서연',phone:'010-0000-0002',store:'성수점',size:'F1×T1',face:'131mm / 표준',pd:'60.0mm',rx:'OD -1.75 / OS -2.00',nose:'표준',seg:'단골',points:9200},
+  {name:'박도현',phone:'010-0000-0003',store:'홍대점',size:'F3×T2',face:'149mm / 높은코',pd:'66.0mm',rx:'OD -4.50 / OS -4.25',nose:'높음',seg:'신규',points:1200},
+  {name:'이수민',phone:'010-0000-0004',store:'성수점',size:'F2×T1',face:'138mm / 표준',pd:'62.0mm',rx:'OD -2.25 / OS -2.25',nose:'표준',seg:'재방문',points:5400},
+  {name:'정하준',phone:'010-0000-0005',store:'판교점',size:'F2×T2',face:'143mm / 낮은코',pd:'64.0mm',rx:'OD -3.00 / OS -2.75',nose:'낮음',seg:'단골',points:22100},
+  {name:'최우진',phone:'010-0000-0006',store:'홍대점',size:'F2×T3',face:'145mm / 표준',pd:'65.0mm',rx:'OD -2.50 / OS -2.50',nose:'표준',seg:'재방문',points:3300},
+  {name:'한지우',phone:'010-0000-0007',store:'판교점',size:'F1×T2',face:'133mm / 낮은코',pd:'59.5mm',rx:'OD -1.25 / OS -1.50',nose:'낮음',seg:'신규',points:800}
 ];
 
 function seedStock(sku, store){
@@ -132,19 +149,72 @@ async function init(){
     for(const o of h.orders){ await pool.query('INSERT INTO orders(store,sku,name,cat,qty,status) VALUES($1,$2,$3,$4,$5,$6)',[o.store,o.sku,o.name,o.cat,o.qty,o.status]); }
     for(const pk of h.pickups){ await pool.query('INSERT INTO pickups(store,customer_id,name,phone,kind,items,rx,date,time,pay_type,amount,deposit,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',[pk.store,pk.customer_id,pk.name,pk.phone,pk.kind,pk.items,pk.rx,pk.date,pk.time,pk.payType,pk.amount,pk.deposit,pk.status]); }
   }
+  // [09.24] 데모 매출 보충: 시드가 6월에 한 번만 들어가서 최근 기간 매출이 ₩0으로 보이던 문제
+  //  마지막 매출일 다음 날 ~ 오늘(최대 60일)을 데모 매출로 채움. 끄려면 DEMO_TOPUP=off
+  if(process.env.DEMO_TOPUP!=='off'){
+    const mx=await pool.query('SELECT MAX(date) AS d FROM sales');
+    const last=mx.rows[0].d? new Date(mx.rows[0].d+'T00:00:00') : null;
+    const today=new Date(); today.setHours(0,0,0,0);
+    const days=[]; for(let k=59;k>=0;k--){ const dt=new Date(today.getTime()-k*864e5); if(!last || dt>last) days.push(dt); }
+    if(days.length){
+      const h=genHistory({days:days});
+      for(const x of h.sales){ await pool.query('INSERT INTO sales(store,date,sku,name,cat,qty,amount,medical,method,customer_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',[x.store,x.date,x.sku,x.name,x.cat,x.qty,x.amount,x.medical,x.method,x.customer_id]); }
+      console.log('[demo] 매출 보충 '+days.length+'일, '+h.sales.length+'건');
+    }
+  }
   await pool.query(`CREATE TABLE IF NOT EXISTS users(
     id SERIAL PRIMARY KEY, username TEXT UNIQUE, pass TEXT, role TEXT, store TEXT, token TEXT)`);
   const uc=await pool.query('SELECT COUNT(*)::int AS c FROM users');
   if(uc.rows[0].c===0){ for(const u of SEED_USERS){
-    await pool.query('INSERT INTO users(username,pass,role,store,token) VALUES($1,$2,$3,$4,NULL)',[u.username,u.pass,u.role,u.store||null]); } }
+    await pool.query('INSERT INTO users(username,pass,role,store,token) VALUES($1,$2,$3,$4,NULL)',[u.username,seedPassHash(u),u.role,u.store||null]); } }
+  // [09.24] 기존 계정 비번 교체: 환경변수가 있으면 그 값으로, 없으면 평문(admin/1234) 계정을 잠금. 기존 로그인 세션도 끊음
+  { const ur=await pool.query('SELECT id,username,pass,role FROM users');
+    for(const u of ur.rows){
+      const p=envPass(u.role);
+      if(p && p.length>=8){ if(!checkPass(u.pass,p)) await pool.query('UPDATE users SET pass=$2, token=NULL WHERE id=$1',[u.id,hashPass(p)]); }
+      else if(!String(u.pass||'').startsWith('scrypt$')){ await pool.query('UPDATE users SET pass=$2, token=NULL WHERE id=$1',[u.id,seedPassHash(u)]); }
+    } }
+  // [09.24] 라이브 DB에 이미 들어간 데모 데이터 정리 (실명·실제 형식 전화번호 → 가상 데이터, 오디오 품목명 교체)
+  { const MAP=[['양지근','010-2480-1001','윤서진','010-0000-0001'],['김서연','010-3391-2210',null,'010-0000-0002'],
+      ['박도현','010-7782-5503',null,'010-0000-0003'],['이수민','010-5519-8834',null,'010-0000-0004'],
+      ['정하준','010-6640-1199',null,'010-0000-0005'],['최우진','010-2231-7788',null,'010-0000-0006'],['한지우','010-9982-3344',null,'010-0000-0007']];
+    for(const m of MAP){ for(const t of ['customers','pickups']){
+      await pool.query('UPDATE '+t+' SET phone=$2 WHERE phone=$1',[m[1],m[3]]);
+      if(m[2]) await pool.query('UPDATE '+t+' SET name=$2 WHERE name=$1',[m[0],m[2]]); } }
+    await pool.query("UPDATE inventory SET name='코받침 교체 세트' WHERE name='오디오 이어팁'");
+    await pool.query("UPDATE sales SET name='코받침 교체 세트' WHERE name='오디오 이어팁'");
+    await pool.query("UPDATE orders SET name='코받침 교체 세트' WHERE name='오디오 이어팁'");
+    await pool.query("UPDATE pickups SET items=REPLACE(items,'오디오','') WHERE items LIKE '%오디오%'"); }
   await pool.query(`CREATE TABLE IF NOT EXISTS price_policy(sku TEXT PRIMARY KEY, list_price INT, max_disc INT)`);
   const pc=await pool.query('SELECT COUNT(*)::int AS c FROM price_policy');
   if(pc.rows[0].c===0){ for(const it of CATALOG){
     await pool.query('INSERT INTO price_policy(sku,list_price,max_disc) VALUES($1,$2,$3)',[it.sku,it.price,(DEFAULT_DISC[it.cat]!=null?DEFAULT_DISC[it.cat]:10)]); } }
+  // [09.24] 판 다음 확인(7일째 착용 확인) · A/S 원인 기록 · 측정 기록(설계서 v0.3 §5)
+  await pool.query(`CREATE TABLE IF NOT EXISTS aftercare(
+    id SERIAL PRIMARY KEY, customer_id INT, store TEXT, sale_date TEXT, due_date TEXT,
+    status TEXT DEFAULT '예정',      -- 예정 / 완료 / 연락 안 됨
+    comfort TEXT, issues TEXT, note TEXT, source TEXT, done_at TIMESTAMPTZ, created_at TIMESTAMPTZ DEFAULT now())`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS as_cases(
+    id SERIAL PRIMARY KEY, customer_id INT, store TEXT, aftercare_id INT, symptom TEXT,
+    cause TEXT,                     -- 검안 / 가공 / 피팅 / 추천 (종결 때 필수)
+    action TEXT, status TEXT DEFAULT '열림', opened_at TIMESTAMPTZ DEFAULT now(), closed_at TIMESTAMPTZ)`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS measure_sessions(
+    id SERIAL PRIMARY KEY, customer_id INT, device TEXT, store TEXT, operator TEXT,
+    status TEXT DEFAULT '대기', created_at TIMESTAMPTZ DEFAULT now())`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS measurements(
+    id SERIAL PRIMARY KEY, customer_id INT, session_id INT, store TEXT, device TEXT, measured_at TIMESTAMPTZ DEFAULT now(),
+    pd REAL, face_width REAL, nose_height REAL, nose_angle REAL, ear_l REAL, ear_r REAL, wrap_angle REAL,
+    pow_json TEXT, confidence REAL, provisional BOOLEAN, method TEXT, operator TEXT, source TEXT)`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS measure_access_log(
+    id SERIAL PRIMARY KEY, username TEXT, customer_id INT, action TEXT, at TIMESTAMPTZ DEFAULT now())`);
+  const ac=await pool.query('SELECT COUNT(*)::int AS c FROM aftercare');
+  if(ac.rows[0].c===0){ const d=_demoCare();
+    for(const x of d.care){ await pool.query('INSERT INTO aftercare(customer_id,store,sale_date,due_date,status,comfort,issues,note,source,done_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',[x.customer_id,x.store,x.sale_date,x.due_date,x.status,x.comfort,x.issues,x.note,x.source,x.done_at]); }
+    for(const a of d.as){ await pool.query('INSERT INTO as_cases(customer_id,store,symptom,cause,action,status,closed_at) VALUES($1,$2,$3,$4,$5,$6,$7)',[a.customer_id,a.store,a.symptom,a.cause,a.action,a.status,a.closed_at]); } }
   ready=true;
 }
 // ---- 데모 히스토리 생성기 (최근 30일 매출 + 발주/픽업) ----
-function genHistory(){
+function genHistory(opts){
   function pad(n){return (n<10?'0':'')+n;}
   function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1));}
   function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
@@ -156,8 +226,9 @@ function genHistory(){
   var storeVol={'성수점':[3,5],'홍대점':[2,4],'판교점':[1,3]};
   var sales=[], orders=[], pickups=[];
   var today=new Date();
-  for(var d=29; d>=0; d--){
-    var dt=new Date(today.getTime()-d*864e5);
+  var DAYS=(opts&&opts.days)||[]; if(!DAYS.length){ for(var k=29;k>=0;k--) DAYS.push(new Date(today.getTime()-k*864e5)); }
+  for(var di=0; di<DAYS.length; di++){
+    var dt=DAYS[di];
     var iso=dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());
     var dow=dt.getDay(); var weekendBoost=(dow===0||dow===6)?1.4:1;
     STORES.forEach(function(st){
@@ -181,13 +252,14 @@ function genHistory(){
   // 픽업 샘플
   function pad2(n){return (n<10?'0':'')+n;}
   var tmw=new Date(today.getTime()+864e5); var tiso=tmw.getFullYear()+'-'+pad2(tmw.getMonth()+1)+'-'+pad2(tmw.getDate());
-  pickups.push({store:'성수점',customer_id:1,name:'양지근',phone:'010-2480-1001',kind:'A',items:'로마 ACE-02 + 알도R 1.60',rx:'OD -3.25 / OS -3.50',date:tiso,time:'14:00',payType:'보증금',amount:0,deposit:10000,status:'예약'});
-  pickups.push({store:'홍대점',customer_id:3,name:'박도현',phone:'010-7782-5503',kind:'C',items:'안경 케이스 + 클리너',rx:'',date:tiso,time:'11:00',payType:'온라인',amount:21000,deposit:0,status:'예약'});
-  pickups.push({store:'판교점',customer_id:5,name:'정하준',phone:'010-6640-1199',kind:'A',items:'콘택트 1개월용',rx:'OD -3.00 / OS -2.75',date:tiso,time:'16:00',payType:'보증금',amount:0,deposit:10000,status:'방문완료'});
+  pickups.push({store:'성수점',customer_id:1,name:'윤서진',phone:'010-0000-0001',kind:'A',items:'로마 ACE-02 + 알도R 1.60',rx:'OD -3.25 / OS -3.50',date:tiso,time:'14:00',payType:'보증금',amount:0,deposit:10000,status:'예약'});
+  pickups.push({store:'홍대점',customer_id:3,name:'박도현',phone:'010-0000-0003',kind:'C',items:'안경 케이스 + 클리너',rx:'',date:tiso,time:'11:00',payType:'온라인',amount:21000,deposit:0,status:'예약'});
+  pickups.push({store:'판교점',customer_id:5,name:'정하준',phone:'010-0000-0005',kind:'A',items:'콘택트 1개월용',rx:'OD -3.00 / OS -2.75',date:tiso,time:'16:00',payType:'보증금',amount:0,deposit:10000,status:'방문완료'});
   return {sales:sales, orders:orders, pickups:pickups};
 }
 function seedMem(){
-  SEED_USERS.forEach(function(u,i){ mem.users.push({id:i+1,username:u.username,pass:u.pass,role:u.role,store:u.store||null,token:null}); });
+  (function(){ var d=_demoCare(); d.care.forEach(function(x,i){ x.id=i+1; mem.aftercare.push(x); }); d.as.forEach(function(a,i){ a.id=i+1; a.opened_at=new Date().toISOString(); mem.ascases.push(a); }); })();
+  SEED_USERS.forEach(function(u,i){ mem.users.push({id:i+1,username:u.username,pass:seedPassHash(u),role:u.role,store:u.store||null,token:null}); });
   CATALOG.forEach(function(it){ mem.policy[it.sku]={list_price:it.price, max_disc:(DEFAULT_DISC[it.cat]!=null?DEFAULT_DISC[it.cat]:10)}; });
   SEED_CUSTOMERS.forEach(function(c,i){ mem.customers.push(Object.assign({id:i+1},c)); });
   STORES.forEach(function(st){ CATALOG.forEach(function(it){
@@ -243,9 +315,10 @@ async function setPricePolicy(sku, list_price, max_disc){
   return {ok:true, sku:sku, list_price:list_price, max_disc:max_disc};
 }
 async function recordSale(store, date, method, lines, customerId, redeem){
-  // 본부 가격 정책 검증: 단가가 (권장가 × (1-할인한도)) 미만이면 거절
-  const pol=await _policyMap();
-  for(const ln of lines){ var pp=pol[ln.sku]; if(pp){ var unit=ln.qty>0?ln.amount/ln.qty:0; var floor=pp.list_price*(1-(pp.max_disc||0)/100); if(unit < floor-1){ return {ok:false, error:ln.name+' — 본부 할인 한도('+(pp.max_disc||0)+'%) 초과'}; } } }
+  // [09.24] 판매가는 가맹점이 정한다. 본부 권장가·권장 할인 범위를 벗어나도 결제는 막지 않고 안내만 돌려준다
+  //  (가격 구속 금지. 지침: 권장가까지만)
+  const pol=await _policyMap(); const notices=[];
+  for(const ln of lines){ var pp=pol[ln.sku]; if(pp){ var unit=ln.qty>0?ln.amount/ln.qty:0; var floor=pp.list_price*(1-(pp.max_disc||0)/100); if(unit < floor-1){ notices.push(ln.name+' — 권장 할인 범위('+(pp.max_disc||0)+'%)보다 낮은 가격'); } } }
   // lines: [{sku,name,cat,qty,amount,medical}]
   if(ready){
     const client=await pool.connect();
@@ -261,7 +334,8 @@ async function recordSale(store, date, method, lines, customerId, redeem){
           [store,date,ln.sku,ln.name,ln.cat,ln.qty,ln.amount,ln.medical,method,customerId||null]);
       }
       await client.query('COMMIT');
-      return await _applyPoints(store,customerId,lines,redeem);
+      await _afterSale(store,customerId,date,lines);
+      return Object.assign(await _applyPoints(store,customerId,lines,redeem),{notices:notices});
     }catch(e){ await client.query('ROLLBACK'); return {ok:false,error:'결제 처리 오류'}; }
     finally{ client.release(); }
   }
@@ -269,7 +343,8 @@ async function recordSale(store, date, method, lines, customerId, redeem){
   for(const ln of lines){ const it=mem.inventory.find(i=>i.store===store&&i.sku===ln.sku); if(!it||it.stock<ln.qty)return{ok:false,error:'재고 부족: '+ln.name}; }
   for(const ln of lines){ const it=mem.inventory.find(i=>i.store===store&&i.sku===ln.sku); it.stock-=ln.qty; it.sold+=ln.qty;
     mem.sales.push({store,date,sku:ln.sku,name:ln.name,cat:ln.cat,qty:ln.qty,amount:ln.amount,medical:ln.medical,method,customer_id:customerId||null}); }
-  return await _applyPoints(store,customerId,lines,redeem);
+  await _afterSale(store,customerId,date,lines);
+  return Object.assign(await _applyPoints(store,customerId,lines,redeem),{notices:notices});
 }
 async function _applyPoints(store, customerId, lines, redeem){
   if(!customerId) return {ok:true};
@@ -366,10 +441,10 @@ async function respondPush(id, accept){
   var o=mem.orders.find(function(x){return x.id===id;}); if(o&&o.status==='푸시대기')o.status=to; return {ok:true};
 }
 async function autoConfirmPushes(){
-  // 마감 지난 푸시대기 -> 자동 승인(본부안대로)
+  // [09.24] 마감 지난 푸시대기 -> 만료. 매장이 승인하지 않은 발주는 넣지 않는다
   var nowISO=new Date().toISOString();
-  if(ready){ const r=await pool.query("UPDATE orders SET status='승인', updated_at=now() WHERE status='푸시대기' AND deadline IS NOT NULL AND deadline <= $1 RETURNING id",[nowISO]); return r.rowCount; }
-  var n=0; mem.orders.forEach(function(o){ if(o.status==='푸시대기'&&o.deadline&&o.deadline<=nowISO){o.status='승인';n++;} }); return n;
+  if(ready){ const r=await pool.query("UPDATE orders SET status='만료', updated_at=now() WHERE status='푸시대기' AND deadline IS NOT NULL AND deadline <= $1 RETURNING id",[nowISO]); return r.rowCount; }
+  var n=0; mem.orders.forEach(function(o){ if(o.status==='푸시대기'&&o.deadline&&o.deadline<=nowISO){o.status='만료';n++;} }); return n;
 }
 async function listOrders(store, status){
   await autoConfirmPushes();
@@ -403,7 +478,7 @@ async function listCustomers(store, seg){
   return mem.customers.filter(c=>(!store||c.store===store)&&(!seg||c.seg===seg));
 }
 async function getCustomer(id){
-  var c;
+  var c; if(!/^\d+$/.test(String(id))) return null;
   if(ready){const r=await pool.query('SELECT id,name,phone,store,size,face,pd,rx,nose,seg,points FROM customers WHERE id=$1',[id]);c=r.rows[0]||null;}
   else { c=mem.customers.find(x=>x.id==id)||null; }
   if(!c) return null;
@@ -585,12 +660,12 @@ async function settlement(store, from, to){
   return {net:net, refunds:refunds, medical:medical, vat:vat, methods:methods};
 }
 
-function _genToken(){ return 'tk_'+Math.random().toString(36).slice(2)+Date.now().toString(36); }
+function _genToken(){ return 'tk_'+crypto.randomBytes(32).toString('hex'); }
 async function login(username, pass){
   let u;
   if(ready){const r=await pool.query('SELECT id,username,pass,role,store FROM users WHERE username=$1',[username]); u=r.rows[0];}
   else { u=mem.users.find(function(x){return x.username===username;}); }
-  if(!u || u.pass!==pass) return {ok:false,error:'아이디 또는 비밀번호가 틀렸어요'};
+  if(!u || !checkPass(u.pass,pass)) return {ok:false,error:'아이디 또는 비밀번호가 틀렸어요'};
   var token=_genToken();
   if(ready){ await pool.query('UPDATE users SET token=$2 WHERE id=$1',[u.id,token]); }
   else { var mu=mem.users.find(function(x){return x.id===u.id;}); if(mu)mu.token=token; }
@@ -607,7 +682,155 @@ async function logout(token){
   else { var u=mem.users.find(function(x){return x.token===token;}); if(u)u.token=null; }
 }
 
-module.exports={ init, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+
+/* ===================== [09.24] 판 다음 확인 · A/S · 측정 ===================== */
+const AS_CAUSES=['검안','가공','피팅','추천'];
+const CARE_ISSUES=['코','귀','어지러움','흐림','기타'];
+function _iso(d){ var p=function(n){return (n<10?'0':'')+n;}; return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+function _addDays(iso,n){ var d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return _iso(d); }
+function _demoCare(){
+  var t=new Date(); var today=_iso(t); var ago=function(n){return new Date(t.getTime()-n*864e5).toISOString();};
+  var care=[
+    {customer_id:1,store:'성수점',sale_date:_addDays(today,-7),due_date:today,status:'예정',comfort:null,issues:null,note:null,source:null,done_at:null},
+    {customer_id:4,store:'성수점',sale_date:_addDays(today,-9),due_date:_addDays(today,-2),status:'예정',comfort:null,issues:null,note:null,source:null,done_at:null},
+    {customer_id:2,store:'성수점',sale_date:_addDays(today,-12),due_date:_addDays(today,-5),status:'완료',comfort:'편함',issues:'',note:'',source:'매장 전화',done_at:ago(4)},
+    {customer_id:3,store:'홍대점',sale_date:_addDays(today,-10),due_date:_addDays(today,-3),status:'완료',comfort:'불편',issues:'코',note:'코받침 눌림',source:'고객 앱',done_at:ago(2)},
+    {customer_id:6,store:'홍대점',sale_date:_addDays(today,-5),due_date:_addDays(today,2),status:'예정',comfort:null,issues:null,note:null,source:null,done_at:null},
+    {customer_id:5,store:'판교점',sale_date:_addDays(today,-14),due_date:_addDays(today,-7),status:'완료',comfort:'불편',issues:'어지러움',note:'누진 적응',source:'매장 전화',done_at:ago(6)},
+    {customer_id:7,store:'판교점',sale_date:_addDays(today,-11),due_date:_addDays(today,-4),status:'연락 안 됨',comfort:null,issues:null,note:'2회 통화 안 됨',source:'매장 전화',done_at:null}
+  ];
+  var as=[
+    {customer_id:3,store:'홍대점',symptom:'코 (7일 확인) · 코받침 눌림',cause:null,action:null,status:'열림',closed_at:null},
+    {customer_id:5,store:'판교점',symptom:'어지러움 (7일 확인) · 누진 적응',cause:'검안',action:'가입도 재측정 후 렌즈 재제작',status:'종결',closed_at:ago(3)},
+    {customer_id:2,store:'성수점',symptom:'다리 흘러내림',cause:'피팅',action:'템플 끝 재조정',status:'종결',closed_at:ago(20)}
+  ];
+  return {care:care, as:as};
+}
+async function _afterSale(store, customerId, date, lines){
+  // 테·렌즈를 산 고객이면 7일째 착용 확인을 자동으로 잡는다
+  if(!customerId) return;
+  if(!lines.some(function(l){return l.cat==='테'||l.cat==='렌즈';})) return;
+  var due=_addDays(date,7);
+  if(ready){ await pool.query("INSERT INTO aftercare(customer_id,store,sale_date,due_date,status) VALUES($1,$2,$3,$4,'예정')",[customerId,store,date,due]); return; }
+  mem.aftercare.push({id:mem.aftercare.length+1,customer_id:+customerId,store:store,sale_date:date,due_date:due,status:'예정',comfort:null,issues:null,note:null,source:null,done_at:null});
+}
+async function _custNames(){ var m={}; if(ready){ const r=await pool.query('SELECT id,name,phone FROM customers'); r.rows.forEach(function(c){m[c.id]=c;}); } else mem.customers.forEach(function(c){m[c.id]=c;}); return m; }
+async function listAftercare(store, status){
+  var rows;
+  if(ready){ const r=await pool.query('SELECT id,customer_id,store,sale_date,due_date,status,comfort,issues,note,source,done_at FROM aftercare WHERE ($1::text IS NULL OR store=$1) AND ($2::text IS NULL OR status=$2) ORDER BY due_date DESC, id DESC',[store||null,status||null]); rows=r.rows; }
+  else rows=mem.aftercare.filter(function(x){return (!store||x.store===store)&&(!status||x.status===status);}).slice().sort(function(a,b){return a.due_date<b.due_date?1:-1;});
+  var names=await _custNames();
+  return rows.map(function(x){ var c=names[x.customer_id]||{}; return Object.assign({},x,{name:c.name||'-',phone:c.phone||''}); });
+}
+async function getAftercare(id){
+  if(!/^\d+$/.test(String(id))) return null;
+  if(ready){ const r=await pool.query('SELECT * FROM aftercare WHERE id=$1',[id]); return r.rows[0]||null; }
+  return mem.aftercare.find(function(x){return x.id===+id;})||null;
+}
+function _cleanIssues(v){ var a=Array.isArray(v)?v:String(v||'').split(','); return a.map(function(x){return String(x).trim();}).filter(function(x){return CARE_ISSUES.indexOf(x)>=0;}).join(','); }
+async function recordAftercare(id, b){
+  var cur=await getAftercare(id); if(!cur) return {ok:false,error:'확인 건이 없어요'};
+  if(b.onlyPending && cur.status!=='예정') return {ok:false,error:'이미 확인된 건이에요'};
+  var status = b.status==='연락 안 됨' ? '연락 안 됨' : '완료';
+  var comfort = status==='완료' ? (b.comfort==='불편'?'불편':'편함') : null;
+  var issues = comfort==='불편' ? _cleanIssues(b.issues) : '';
+  var note = String(b.note||'').slice(0,300); var source = b.source==='고객 앱'?'고객 앱':'매장 전화';
+  if(ready){ await pool.query('UPDATE aftercare SET status=$2,comfort=$3,issues=$4,note=$5,source=$6,done_at=now() WHERE id=$1',[id,status,comfort,issues,note,source]); }
+  else Object.assign(cur,{status:status,comfort:comfort,issues:issues,note:note,source:source,done_at:new Date().toISOString()});
+  var asId=null;
+  // 불편하면 A/S 건을 바로 연다 (원인은 종결 때 고른다)
+  if(comfort==='불편') asId=(await openAS({customer_id:cur.customer_id,store:cur.store,aftercare_id:+id,symptom:(issues||'불편')+' (7일 확인)'+(note?' · '+note:'')})).id;
+  return {ok:true, status:status, comfort:comfort, as_id:asId};
+}
+async function pendingAftercareFor(customerId){
+  // 고객 앱용: 개인정보 없이 날짜만
+  var rows=(await listAftercare(null,'예정')).filter(function(x){return +x.customer_id===+customerId;});
+  return rows.map(function(x){return {id:x.id, due_date:x.due_date, sale_date:x.sale_date};});
+}
+async function openAS(a){
+  var symptom=String(a.symptom||'').slice(0,300); if(!symptom) return {ok:false,error:'증상을 적어 주세요'};
+  if(ready){ const r=await pool.query("INSERT INTO as_cases(customer_id,store,aftercare_id,symptom,status) VALUES($1,$2,$3,$4,'열림') RETURNING id",[a.customer_id||null,a.store||null,a.aftercare_id||null,symptom]); return {ok:true,id:r.rows[0].id}; }
+  var id=mem.ascases.length+1; mem.ascases.push({id:id,customer_id:a.customer_id||null,store:a.store||null,aftercare_id:a.aftercare_id||null,symptom:symptom,cause:null,action:null,status:'열림',opened_at:new Date().toISOString(),closed_at:null}); return {ok:true,id:id};
+}
+async function getAS(id){ if(!/^\d+$/.test(String(id))) return null; if(ready){ const r=await pool.query('SELECT * FROM as_cases WHERE id=$1',[id]); return r.rows[0]||null; } return mem.ascases.find(function(x){return x.id===+id;})||null; }
+async function listAS(store, status){
+  var rows;
+  if(ready){ const r=await pool.query('SELECT id,customer_id,store,aftercare_id,symptom,cause,action,status,opened_at,closed_at FROM as_cases WHERE ($1::text IS NULL OR store=$1) AND ($2::text IS NULL OR status=$2) ORDER BY status DESC, id DESC',[store||null,status||null]); rows=r.rows; }
+  else rows=mem.ascases.filter(function(x){return (!store||x.store===store)&&(!status||x.status===status);}).slice().sort(function(a,b){return a.status===b.status?b.id-a.id:(a.status==='열림'?-1:1);});
+  var names=await _custNames();
+  return rows.map(function(x){ var c=names[x.customer_id]||{}; return Object.assign({},x,{name:c.name||'-'}); });
+}
+async function closeAS(id, cause, action){
+  // 원인(검안·가공·피팅·추천) 하나를 골라야 종결된다
+  if(AS_CAUSES.indexOf(cause)<0) return {ok:false,error:'원인을 검안·가공·피팅·추천 중에서 골라 주세요'};
+  var cur=await getAS(id); if(!cur) return {ok:false,error:'A/S 건이 없어요'};
+  if(cur.status==='종결') return {ok:false,error:'이미 종결된 건이에요'};
+  action=String(action||'').slice(0,300);
+  if(ready) await pool.query("UPDATE as_cases SET cause=$2,action=$3,status='종결',closed_at=now() WHERE id=$1",[id,cause,action]);
+  else Object.assign(cur,{cause:cause,action:action,status:'종결',closed_at:new Date().toISOString()});
+  return {ok:true};
+}
+async function careSummary(store){
+  var care=await listAftercare(store,null), as=await listAS(store,null), today=_iso(new Date());
+  var due=care.filter(function(x){return x.due_date<=today;});
+  var done=due.filter(function(x){return x.status==='완료';});
+  var uncomf=done.filter(function(x){return x.comfort==='불편';});
+  var issues={}; uncomf.forEach(function(x){ String(x.issues||'').split(',').filter(Boolean).forEach(function(k){issues[k]=(issues[k]||0)+1;}); });
+  var causes={}; AS_CAUSES.forEach(function(c){causes[c]=0;}); as.forEach(function(a){ if(a.status==='종결'&&causes[a.cause]!=null) causes[a.cause]++; });
+  var byStore={}; due.forEach(function(x){ var b=byStore[x.store]=byStore[x.store]||{due:0,done:0,uncomf:0}; b.due++; if(x.status==='완료'){b.done++; if(x.comfort==='불편')b.uncomf++;} });
+  return { due:due.length, done:done.length, overdue:due.filter(function(x){return x.status==='예정';}).length,
+    noreach:due.filter(function(x){return x.status==='연락 안 됨';}).length, uncomf:uncomf.length, issues:issues,
+    as_open:as.filter(function(a){return a.status==='열림';}).length, as_closed:as.filter(function(a){return a.status==='종결';}).length, causes:causes, byStore:byStore };
+}
+/* 측정 (설계서 v0.3 §4·§5) */
+function _num(v){ var n=parseFloat(v); return isFinite(n)?Math.round(n*10)/10:null; }
+async function createMeasureSession(b){
+  var device=['phone','ipad','rig'].indexOf(b.device)>=0?b.device:'ipad';
+  if(ready){ const r=await pool.query('INSERT INTO measure_sessions(customer_id,device,store,operator) VALUES($1,$2,$3,$4) RETURNING id,customer_id,device,store,operator,status,created_at',[b.customer_id||null,device,b.store||null,b.operator||null]); return r.rows[0]; }
+  var row={id:mem.msessions.length+1,customer_id:b.customer_id||null,device:device,store:b.store||null,operator:b.operator||null,status:'대기',created_at:new Date().toISOString()}; mem.msessions.push(row); return row;
+}
+async function getMeasureSession(id){ if(!/^\d+$/.test(String(id))) return null; if(ready){ const r=await pool.query('SELECT * FROM measure_sessions WHERE id=$1',[id]); return r.rows[0]||null; } return mem.msessions.find(function(x){return x.id===+id;})||null; }
+async function saveMeasurement(sessionId, b, who){
+  // 원칙: 영상·프레임은 받지 않는다(수치+메타만) / confidence<0.7 → provisional / 확정값만 고객 캐시 갱신
+  var sess=null; if(sessionId && sessionId!=='adhoc'){ sess=await getMeasureSession(sessionId); if(!sess) return {ok:false,error:'세션이 없어요'}; }
+  var cid=sess?sess.customer_id:(b.customer_id||null); if(!cid || !/^\d+$/.test(String(cid))) return {ok:false,error:'customer_id 필요'};
+  var conf=Math.max(0,Math.min(1,parseFloat(b.confidence)||0));
+  var anon=!who; // 로그인 안 한 고객 자가측정 → 항상 임시값
+  var provisional = anon ? true : (conf<0.7 || b.provisional===true);
+  var row={customer_id:+cid, session_id:sess?sess.id:null, store:sess?sess.store:(b.store||null), device:anon?'phone':(sess?sess.device:(['phone','ipad','rig'].indexOf(b.device)>=0?b.device:'ipad')),
+    pd:_num(b.pd), face_width:_num(b.face_width), nose_height:_num(b.nose_height), nose_angle:_num(b.nose_angle),
+    ear_l:_num(b.ear_left), ear_r:_num(b.ear_right), wrap_angle:_num(b.wrap_angle),
+    pow_json:b.pow?JSON.stringify(b.pow).slice(0,2000):null, confidence:conf, provisional:provisional,
+    method:['truedepth','iris_scale','rig_stereo'].indexOf(b.method)>=0?b.method:'iris_scale',
+    operator:who?who.username:null, source:anon?'고객 자가측정':'매장'};
+  if(row.pd==null && row.face_width==null) return {ok:false,error:'측정값이 없어요'};
+  var id;
+  if(ready){ const r=await pool.query('INSERT INTO measurements(customer_id,session_id,store,device,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,pow_json,confidence,provisional,method,operator,source) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING id',
+      [row.customer_id,row.session_id,row.store,row.device,row.pd,row.face_width,row.nose_height,row.nose_angle,row.ear_l,row.ear_r,row.wrap_angle,row.pow_json,row.confidence,row.provisional,row.method,row.operator,row.source]); id=r.rows[0].id;
+    if(sess) await pool.query("UPDATE measure_sessions SET status='완료' WHERE id=$1",[sess.id]); }
+  else { id=mem.measurements.length+1; row.id=id; row.measured_at=new Date().toISOString(); mem.measurements.push(row); if(sess) sess.status='완료'; }
+  var cacheUpdated=false;
+  if(!provisional){
+    var pdTxt=row.pd!=null?row.pd.toFixed(1)+'mm':null;
+    var faceOf=function(face){ return row.face_width!=null ? (Math.round(row.face_width)+'mm'+(face&&face.indexOf('/')>=0?' /'+face.split('/').slice(1).join('/'):'')) : face; };
+    if(ready){ const c=await pool.query('SELECT face FROM customers WHERE id=$1',[row.customer_id]);
+      await pool.query('UPDATE customers SET pd=COALESCE($2,pd), face=$3 WHERE id=$1',[row.customer_id,pdTxt,faceOf(c.rows[0]?c.rows[0].face:null)]); }
+    else { var mc=mem.customers.find(function(x){return x.id===row.customer_id;}); if(mc){ if(pdTxt)mc.pd=pdTxt; mc.face=faceOf(mc.face); } }
+    cacheUpdated=true;
+  }
+  await logMeasureAccess(who?who.username:'(고객 앱)', row.customer_id, 'write');
+  return {ok:true, id:id, provisional:provisional, cache_updated:cacheUpdated};
+}
+async function listMeasurements(customerId){
+  if(ready){ const r=await pool.query('SELECT id,session_id,store,device,measured_at,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,confidence,provisional,method,operator,source FROM measurements WHERE customer_id=$1 ORDER BY id DESC',[customerId]); return r.rows; }
+  return mem.measurements.filter(function(m){return m.customer_id===+customerId;}).slice().reverse();
+}
+async function logMeasureAccess(username, customerId, action){
+  if(ready){ await pool.query('INSERT INTO measure_access_log(username,customer_id,action) VALUES($1,$2,$3)',[username||null,customerId||null,action]); return; }
+  mem.accesslog.push({username:username,customer_id:customerId,action:action,at:new Date().toISOString()});
+}
+
+module.exports={ init, AS_CAUSES, CARE_ISSUES, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,
