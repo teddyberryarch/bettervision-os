@@ -1,0 +1,152 @@
+/* ============================================================
+   BETTERVISION — bv-theme.css
+   DESIGN v1.1 토큰 오버라이드 레이어 (09.24 D-05 반영: 굵기 400 전체 · 본문 17 · 라벨 15 · 13px 미만 금지)
+
+   사용법: 각 HTML의 <head>에서 app.css **뒤에** 로드한다.
+     <link rel="stylesheet" href="/assets/app.css">
+     <link rel="stylesheet" href="/assets/bv-theme.css">   ← 추가
+
+   원칙: 이 파일은 색·타이포·radius만 건드린다.
+        display / grid / flex / width / position 은 절대 선언하지 않는다.
+        → 레이아웃이 깨질 수 없는 구조.
+   ============================================================ */
+
+/* ── 1. 토큰 ───────────────────────────────────────────── */
+:root{
+  /* DESIGN.md v1.0 정식 토큰 */
+  --bv-paper:#F7F6F3;  --bv-surface:#FFFFFF; --bv-ink:#1C1C1A;
+  --bv-mute:#6E6C66;   --bv-faint:#A3A099;   --bv-line:#E5E3DE;
+  --bv-line2:#EEECE7;  --bv-fill:#EAE8E3;    --bv-hover:#FBFAF8;
+  --bv-bronze:#9A7B4F; --bv-stage:#121210;
+  --bv-ok:#3E7A5E;     --bv-warn:#B8862B;    --bv-danger:#A5493F;
+  --bv-ok-soft:#EAF0EC; --bv-warn-soft:#F6EFE0; --bv-danger-soft:#F5E9E7;
+
+  /* 기존 app.css 변수명을 새 토큰으로 재지정 — 이 줄들이 전체 결을 바꾼다 */
+  --ink:var(--bv-ink);
+  --muted:var(--bv-mute);
+  --faint:var(--bv-faint);
+  --line:var(--bv-line);
+  --line2:var(--bv-line2);
+  --surface:var(--bv-fill);      /* 기존 코드에서 바 트랙·헤더 채움으로 쓰임 */
+  --good:var(--bv-ok);
+  --warn:var(--bv-warn);
+  --bad:var(--bv-danger);
+  --good-soft:var(--bv-ok-soft);
+  --kr:'Pretendard Variable',Pretendard,-apple-system,'Malgun Gothic',sans-serif;
+}
+
+/* ── 2. 지면 ───────────────────────────────────────────── */
+html,body{
+  background:var(--bv-paper);
+  color:var(--bv-ink);
+  font-family:'Pretendard Variable',Pretendard,-apple-system,'Malgun Gothic',sans-serif;
+  font-feature-settings:'tnum';          /* 모든 숫자 등폭 — 시그니처 */
+  -webkit-font-smoothing:antialiased;
+}
+/* 순백 배경 금지: 표면으로 쓰인 #fff는 유지하되 페이지 배경만 오프화이트로 */
+.wrap,.view,.stab,.pscreen{ background:transparent; }
+
+/* ── 3. 타이포 ─────────────────────────────────────────── */
+h1{ font-weight:400; letter-spacing:-.015em; }
+h2{ font-weight:400; letter-spacing:-.01em; }
+h3,h4{ font-weight:400; }
+b,strong{ font-weight:400; }              /* D-05: 굵기 400 전체 */
+*{ font-weight:inherit; }
+[class]{ font-synthesis:none; }
+
+/* 13px 미만 금지 — 하한 강제 */
+.rtag,.seat,.pbbadge,.herotag,.locktag,.frombhq,.sizebadge,.vbadge,
+.feedrow .fm,.cal-cell .d,.cal-cell .v,.fcrow .fcm,.mklog-row .meta,
+.pcard .pdc,.psp,.abar,.lenstbl,.sb-time,.sb-right{ font-size:13px !important; }
+.eyebrow{ font-size:15px; font-weight:400; letter-spacing:.18em; color:var(--bv-bronze); }
+.label,.sub,.sd,.rc-d{ color:var(--bv-mute); }
+
+/* 액센트 — 핵심 숫자에만 */
+.big,.dash-kpi .big,.kpi .v,.mkt-kpis .mk .v,.simtotal b{
+  color:var(--bv-bronze); font-weight:400; letter-spacing:-.02em;
+}
+.rc-no,.snum{ color:var(--bv-bronze); font-weight:400; }
+
+/* ── 4. 형태 — radius 4단계 고정 ───────────────────────── */
+/* pill 전면 금지 */
+.pill,.chip,.csub .cs,.rtag,.subtab,.ptab,.btn{ border-radius:8px !important; }
+.card,.pcard,.rolecard,.dash-kpi,.anabox,.fcstore,.feedbox,
+.mkt-kpis .mk,.pushbox,.cal-cell,.optbox,.pbnote{ border-radius:10px !important; }
+/* 바 트랙·필 — 9999px → 2px */
+.tr,.tf,.rbar,.rfill,.cbar,.cfill,.sbar,.sfill,.at,.at i,
+.bar-track,.bar-fill,.qc-track,.qc-fill,.cyctrack,.cycfill,
+.demo-track,.demo-fill,.bepbar,.bepfill{ border-radius:2px !important; }
+/* 완전 원은 순번·아바타·스와치만 */
+.rnum,.dot,.livedot,.sw,.pchip,.ring{ border-radius:50% !important; }
+/* 표는 각지게 */
+.tbl,.lenstbl,.tbl th,.tbl td,.lenstbl th,.lenstbl td{ border-radius:0 !important; }
+
+/* 보더/그림자 — 둘 중 하나만 */
+.card,.pcard,.rolecard,.dash-kpi,.anabox,.fcstore{
+  border:1px solid var(--bv-line) !important; box-shadow:none !important;
+  background:var(--bv-surface);
+}
+.card.pad{ background:var(--bv-surface); }
+
+/* ── 5. 컴포넌트 ───────────────────────────────────────── */
+.topbar{ background:var(--bv-paper); border-bottom:1px solid var(--bv-line); box-shadow:none; }
+.brand .mark{ font-weight:400; letter-spacing:.02em; }
+.brand .mark b{ font-weight:400; }
+.brand .mark sup{ display:none; }          /* ™ 제거 — 싸 보인다 */
+.brand .tag{ color:var(--bv-bronze); font-size:15px; font-weight:400; letter-spacing:.2em; }
+.nav-links a{ color:var(--bv-mute); font-size:15px; }
+.nav-links a:hover{ color:var(--bv-ink); }
+
+.btn{ background:var(--bv-ink); color:var(--bv-paper); font-weight:400; font-size:15px;
+      border:1px solid var(--bv-ink); box-shadow:none; }
+.btn.ghost{ background:transparent; color:var(--bv-ink); border:1px solid var(--bv-ink); }
+.btn:hover{ opacity:.88; }
+
+.chip,.subtab,.ptab,.csub .cs{ background:var(--bv-surface); border:1px solid var(--bv-line);
+      color:var(--bv-mute); font-weight:400; }
+.chip.active,.subtab.active,.ptab.active,.csub .cs.active{
+      background:var(--bv-ink); color:var(--bv-paper); border-color:var(--bv-ink); font-weight:400; }
+
+.tbl th,.lenstbl th{ background:var(--bv-fill); color:var(--bv-ink); font-weight:400; border-color:var(--bv-line); }
+.tbl td,.lenstbl td{ border-color:var(--bv-line2); }
+.tbl tbody tr:hover{ background:var(--bv-hover); }
+.tbl td,.mv,.vv,.rval,.cval,.av{ font-feature-settings:'tnum'; }
+
+.pill{ font-weight:400; font-size:15px; border:none; }
+.pill.good{ background:var(--bv-ok-soft); color:var(--bv-ok); }
+.pill.warn{ background:var(--bv-warn-soft); color:var(--bv-warn); }
+.pill.bad{ background:var(--bv-danger-soft); color:var(--bv-danger); }
+
+.finput,.finput2,.mcellin,.hqsel,.pprow input,#mxTotal{
+  background:var(--bv-surface); border:1px solid var(--bv-line); border-radius:8px; color:var(--bv-ink); }
+.finput:focus,.finput2:focus,.mcellin:focus{ outline:none; border-color:var(--bv-ink); box-shadow:0 0 0 1px var(--bv-ink); }
+input[type=range]{ accent-color:var(--bv-ink); }
+
+/* 무대 — 카메라가 도는 구간만 차콜 */
+.tryon-stage,.phone-stage,.scanwrap{ background:var(--bv-stage); }
+
+/* 아이콘 배경 채움 정리 (하드코딩 hex 대체) */
+.feedrow .fi{ background:var(--bv-fill); }
+.feedrow .fi.WARN{ background:var(--bv-danger-soft); }
+.feedrow .fi.CARD{ background:var(--bv-ok-soft); }
+.feedrow .fi.BOX,.feedrow .fi.BAG{ background:var(--bv-fill); }
+.pbbadge,.herotag{ background:var(--bv-ink); color:var(--bv-paper); font-weight:400; border-radius:8px; }
+
+/* ── 6. 모션 ───────────────────────────────────────────── */
+a,button,.chip,.subtab,.ptab,.rolecard,.runitem{ transition:120ms ease-out; }
+@media (prefers-reduced-motion:reduce){ *{ transition:none !important; animation:none !important; } }
+:focus-visible{ outline:2px solid var(--bv-ink); outline-offset:2px; }
+
+/* ── 7. D-05 (09.24) — 굵기·크기 하한 ───────────────────── */
+/* 굵기 400 전체: 인라인 style의 font-weight도 덮는다 */
+*,*::before,*::after{ font-weight:400 !important; }
+html,body{ font-size:17px; }
+.label,.fd{ font-size:15px; }
+.sub,.sd,.rc-d{ font-size:17px; }
+.nav-links a,.role,.subtab,.ptab,.chip{ font-size:15px; }
+/* 섹션 제목 */
+.lead h2{ font-size:clamp(40px,5vw,72px); line-height:1.12; }
+/* 밀도 화면 예외(가맹점·본부): 22px 이상 */
+body.bv-dense .lead h2{ font-size:clamp(22px,3vw,40px); }
+/* 강조는 굵기 대신 색으로 */
+b,strong{ color:var(--bv-ink); }

@@ -10,8 +10,8 @@ window.BVRecord = (function(){
     if(!rec) return '';
     var nm=rec.name||'측정 손님';
     return '<div style="display:flex;align-items:center;gap:10px;background:var(--good-soft);border:1px solid var(--good);border-radius:10px;padding:9px 13px;margin:8px 0;font-size:13px;color:var(--good);font-weight:600">'+
-      '<span>📥 측정값 자동 적용 — 손님 '+nm+(stage?' · '+stage:'')+'</span>'+
-      '<button onclick="BVRecord.clear();location.reload();" style="margin-left:auto;font-size:12px;border:1px solid var(--good);background:#fff;color:var(--good);border-radius:6px;padding:4px 8px;cursor:pointer">측정 비우기</button>'+
+      '<span>측정값 자동 적용 — 손님 '+nm+(stage?' · '+stage:'')+'</span>'+
+      '<button onclick="BVRecord.clear();location.reload();" style="margin-left:auto;font-size:13px;border:1px solid var(--good);background:#fff;color:var(--good);border-radius:6px;padding:4px 8px;cursor:pointer">측정 비우기</button>'+
       '</div>';
   }
   return {load:load, save:save, clear:clear, banner:banner};
