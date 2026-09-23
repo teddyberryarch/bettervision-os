@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 가맹점</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 .finput2{font-family:inherit;font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:#fff}
 .slotrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2);font-size:14px}
@@ -45,18 +43,18 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:6px}
 .cal-cell{aspect-ratio:1/1;border:1px solid var(--line);border-radius:8px;padding:5px 6px;display:flex;flex-direction:column;justify-content:space-between;min-height:54px}
 .cal-cell.empty{border:0}
-.cal-cell .d{font-size:12px;color:var(--muted)}
-.cal-cell .v{font-size:12px;font-weight:600;color:var(--ink);text-align:right}
+.cal-cell .d{font-size:13px;color:var(--muted)}
+.cal-cell .v{font-size:13px;font-weight:600;color:var(--ink);text-align:right}
 .cal-cell.today{outline:2px solid var(--ink)}
-@media(max-width:640px){.cal-cell{min-height:44px}.cal-cell .v{font-size:11px}}
+@media(max-width:640px){.cal-cell{min-height:44px}.cal-cell .v{font-size:13px}}
 .pushrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line2);flex-wrap:wrap}
 .pushrow:last-child{border-bottom:0}
 .pushrow .pn{font-size:14px;color:var(--ink)}
-.pushrow .pdl{font-size:12px;color:var(--warn);margin-top:2px}
+.pushrow .pdl{font-size:13px;color:var(--warn);margin-top:2px}
 .pushrow .pacts{display:flex;gap:6px}
 </style>
 </head>
-<body>
+<body class="bv-dense">
 <script>
 /* 진입 인증 체크 (AUTH_ON일 때만 동작) */
 fetch('/api/me').then(function(r){return r.json();}).then(function(j){
@@ -83,7 +81,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div>
       <div class="eyebrow">Franchise · 가맹점</div>
       <h2>고객 관리(CRM) · 운영(ERP) · 재무를 한 시스템에서</h2>
-      <div class="sub">고객은 CRM으로 묶고, 재고·발주·POS는 운영으로 자동화하고, 돈(손익·현금흐름·세무)은 재무 탭이 알아서 정리한다. "돈 계산 약한 사장"도 숫자를 안 놓치게.</div>
+      <div class="sub">고객은 CRM으로 기억하고, 재고·발주·POS는 운영으로 자동화하고, 돈(손익·현금흐름·세무)은 재무 탭이 알아서 정리한다. "돈 계산 약한 사장"도 숫자를 안 놓치게.</div>
     </div>
     <span class="pill good">● 본사 실시간 동기화</span>
   </div>
@@ -93,12 +91,12 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="eyebrow" style="margin:0">오늘 할 일 — 본부가 내려준 순서대로</div>
       <div class="label" id="runcount">2 / 5 완료</div>
     </div>
-    <div class="label" style="margin:6px 0 4px">생각할 필요 없이 위에서부터. 본부 지정 항목은 그대로 실행만.</div>
+    <div class="label" style="margin:6px 0 4px">위에서부터 하나씩. 본부 안내 항목은 참고해서 매장이 정해요.</div>
     <div id="runlist">
       <div class="runitem done" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">어제 매출 마감 확인</div></div>
-      <div class="runitem done" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">재고 부족 2품목 본부 발주 승인</div><span class="frombhq">본부 지정</span></div>
+      <div class="runitem done" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">재고 부족 2품목 본부 발주 승인</div><span class="frombhq">본부 안내</span></div>
       <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">재방문 권장 고객 4명 카톡 발송</div><span class="frombhq">원클릭</span></div>
-      <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">신규 프로모션 'F2 가을 컬러' 매대 세팅 + 사진 인증</div><span class="frombhq">본부 지정</span></div>
+      <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">신규 프로모션 'F2 가을 컬러' 매대 세팅 (선택)</div><span class="frombhq">본부 안내</span></div>
       <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">안경사·일반인 오늘 스케줄 확인</div></div>
     </div>
     <div class="divider"></div>
@@ -115,6 +113,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="subtab" data-t="erp">운영 ERP · POS</div>
     <div class="subtab" data-t="fin">재무</div>
     <div class="subtab" data-t="hr">인력 · 채용</div>
+    <div class="subtab" data-t="care">사후 확인</div>
     <div class="subtab" data-t="book">예약</div>
     <div class="subtab" data-t="mkt">마케팅</div>
   </div>
@@ -153,8 +152,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <!-- POS -->
       <div class="card pad">
         <div class="eyebrow">POS · 결제</div>
-        <div class="locktag" style="display:inline-block;margin-bottom:8px">가격 = 본부 지정가 · 매장 수정 잠김 🔒</div>
-        <div class="label" style="margin-bottom:8px">고객 <b style="color:var(--ink)">양지근</b> · F2×T2 · 자동 연결됨</div>
+        <div class="locktag" style="display:inline-block;margin-bottom:8px">가격 = 본부 권장가가 기본 · 판매가는 매장이 조정</div>
+        <div class="label" style="margin-bottom:8px">고객 <b style="color:var(--ink)">윤서진</b> · F2×T2 · 자동 연결됨</div>
         <div class="label" style="margin:4px 0 5px">지점 선택 (본부가 전 지점 관리)</div>
         <select id="posStore" class="finput2" style="width:100%;margin-bottom:8px"></select>
         <div class="label" style="margin:4px 0 5px">고객 (선택 — 구매이력 연결)</div>
@@ -188,12 +187,12 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <div class="divider"></div>
           <div class="eyebrow" style="margin-bottom:6px">카테고리별 판매 (오늘)</div>
           <div id="catSales"></div>
-          <div class="eyebrow" style="margin:16px 0 6px">자동 발주 제안 🤖</div>
+          <div class="eyebrow" style="margin:16px 0 6px">자동 발주 제안 </div>
           <div class="label" style="font-size:13px;margin-bottom:6px">재고 + 최근 판매 속도로 시스템이 추천. 사장님은 확인만.</div>
           <button class="btn small ghost" style="width:100%" onclick="suggestLoad()">제안 보기</button>
           <div id="sugBox" style="margin-top:8px"></div>
           <button class="btn ghost" style="margin-top:10px;width:100%" onclick="placeOrders()">재고 부족분 수동 발주</button>
-          <div class="eyebrow" style="margin:14px 0 6px">본부 발주 제안 🔔 <span class="label" style="font-weight:400">· 승인하면 발주 확정</span></div>
+          <div class="eyebrow" style="margin:14px 0 6px">본부 발주 제안 <span class="label" style="font-weight:400">· 승인하면 발주 확정</span></div>
           <div id="pushBox"></div>
           <div class="eyebrow" style="margin:14px 0 6px">내 발주 현황</div>
           <div id="ordBox"></div>
@@ -232,7 +231,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     </div>
 
     <div class="card pad" style="margin-top:18px">
-      <div class="eyebrow">자동 정산 · 세무 리포트 🤖 <span class="label" style="font-weight:400">· 위 지점·월 기준</span></div>
+      <div class="eyebrow">자동 정산 · 세무 리포트 <span class="label" style="font-weight:400">· 위 지점·월 기준</span></div>
       <div class="label" style="font-size:13px;margin:6px 0 12px">결제수단별 매출·환불·부가세·의료비 세액공제 대상을 자동 집계. 세무사에게 그대로 전달.</div>
       <div class="hq-grid">
         <div>
@@ -342,6 +341,26 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       </div>
     </div>
   </div>
+  <!-- [09.24] 판 다음까지 확인: 7일째 착용 확인 · A/S 원인 기록 -->
+  <div class="stab" id="t-care">
+    <div class="lead"><div><div class="eyebrow">판 다음까지 확인</div><h2 style="font-size:30px">7일째 착용 확인 · A/S</h2>
+      <div class="sub">테·렌즈를 산 고객은 결제 7일 뒤 확인 목록에 자동으로 올라와요. 불편하다고 하면 A/S 건이 열리고, 원인을 골라야 종결돼요.</div></div></div>
+    <div class="store-grid">
+      <div class="card pad">
+        <div class="eyebrow">확인할 고객 <span id="ccCount" class="muted"></span></div>
+        <div id="ccList" style="margin-top:8px"></div>
+      </div>
+      <div class="card pad">
+        <div class="eyebrow">A/S <span id="asCount" class="muted"></span></div>
+        <div id="asList" style="margin-top:8px"></div>
+        <div class="divider"></div>
+        <div class="eyebrow" style="margin-bottom:6px">A/S 접수</div>
+        <select id="asCust" class="finput2" style="width:100%;margin-bottom:6px"></select>
+        <input type="text" id="asSym" class="finput2" placeholder="증상 (예: 다리 흘러내림)" style="width:100%">
+        <button class="btn small" style="width:100%;margin-top:8px" onclick="asOpen()">접수</button>
+      </div>
+    </div>
+  </div>
   <!-- 예약 접수 -->
   <div class="stab" id="t-book">
     <div class="lead"><div><div class="eyebrow">예약 접수</div><h2 style="font-size:30px">방문 예약 현황</h2>
@@ -372,7 +391,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="sub">본사 캠페인과 별개로, 매장이 직접 단골·재방문 고객에게 카톡·문자를 보냅니다. (데모: 더미 고객·발송 이력)</div></div></div>
 
     <div class="card pad" style="margin-bottom:16px">
-      <div class="eyebrow">자동 추천 대상 🤖 · 교체주기 도래 단골</div>
+      <div class="eyebrow">자동 추천 대상 · 교체주기 도래 단골</div>
       <div class="label" style="font-size:13px;margin:6px 0 10px">렌즈·콘택트 교체 시기가 다가온 고객을 시스템이 자동으로 찾아요. 사장님은 발송만 누르면 끝 — 재구매가 곧 본부 PB 마진.</div>
       <div id="autoMkBox"></div>
     </div>
@@ -442,6 +461,66 @@ window.__bvGuide={title:'가맹점 가이드',sub:'사장님 혼자 다 하던 �
 document.getElementById('subtabs').addEventListener('click',e=>{const t=e.target.closest('.subtab');if(!t)return;
   document.querySelectorAll('.subtab').forEach(x=>x.classList.remove('active'));t.classList.add('active');
   document.querySelectorAll('.stab').forEach(s=>s.classList.remove('active'));document.getElementById('t-'+t.dataset.t).classList.add('active');});
+
+/* ===== [09.24] 사후 확인 (7일째 착용 확인 · A/S 원인 기록) ===== */
+var CC_ISSUES=[], AS_CAUSES=[];
+function _esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function careLoad(){
+  var st=curStore(); var today=new Date(); var tiso=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  fetch('/api/aftercare?store='+encodeURIComponent(st)).then(function(r){return r.json();}).then(function(j){
+    CC_ISSUES=j.issues||[]; var items=j.items||[];
+    var todo=items.filter(function(x){return x.status==='예정';}), done=items.filter(function(x){return x.status!=='예정';}).slice(0,6);
+    document.getElementById('ccCount').textContent='· 대기 '+todo.length+'건';
+    var row=function(x){
+      var late=x.status==='예정'&&x.due_date<tiso, due=x.status==='예정'&&x.due_date<=tiso;
+      var right = x.status==='예정'
+        ? (due? '<span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn small" onclick="ccRec('+x.id+',\'편함\')">편함</button><button class="btn small ghost" onclick="ccUncomf('+x.id+')">불편</button><button class="btn small ghost" onclick="ccRec('+x.id+',null,\'연락 안 됨\')">연락 안 됨</button></span>' : '<span class="muted">'+x.due_date+' 예정</span>')
+        : '<span class="muted">'+(x.status==='완료'?x.comfort+(x.issues?' · '+_esc(x.issues):''):x.status)+' · '+(x.source||'')+'</span>';
+      return '<div class="pl-row" style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line2)"><span>'+_esc(x.name)+' <span class="muted">'+_esc(x.phone)+' · 결제 '+x.sale_date+(late?' · 기한 지남':'')+'</span></span>'+right+'</div>'+
+        '<div id="ccu_'+x.id+'" style="display:none;padding:8px 0 12px"></div>';
+    };
+    document.getElementById('ccList').innerHTML=(todo.map(row).join('')||'<div class="muted">확인할 고객이 없어요</div>')+
+      (done.length?'<div class="label" style="margin:14px 0 4px">최근 확인</div>'+done.map(row).join(''):'');
+  });
+  fetch('/api/as?store='+encodeURIComponent(st)).then(function(r){return r.json();}).then(function(j){
+    AS_CAUSES=j.causes||[]; var items=j.items||[]; var open=items.filter(function(a){return a.status==='열림';});
+    document.getElementById('asCount').textContent='· 열림 '+open.length+'건';
+    document.getElementById('asList').innerHTML=items.slice(0,10).map(function(a){
+      var body = a.status==='열림'
+        ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><select id="asc_'+a.id+'" class="finput2"><option value="">원인 선택</option>'+AS_CAUSES.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select><input id="asa_'+a.id+'" class="finput2" placeholder="조치 내용" style="flex:1;min-width:140px"><button class="btn small" onclick="asClose('+a.id+')">종결</button></div>'
+        : '<div class="muted" style="margin-top:4px">원인: '+_esc(a.cause)+' · '+_esc(a.action||'')+'</div>';
+      return '<div style="padding:10px 0;border-bottom:1px solid var(--line2)"><div style="display:flex;justify-content:space-between;gap:8px"><span>'+_esc(a.name)+' <span class="muted">'+_esc(a.symptom)+'</span></span><span class="pill '+(a.status==='열림'?'warn':'good')+'">'+a.status+'</span></div>'+body+'</div>';
+    }).join('')||'<div class="muted">A/S 건이 없어요</div>';
+  });
+  fetch('/api/customers?store='+encodeURIComponent(st)).then(function(r){return r.json();}).then(function(j){
+    document.getElementById('asCust').innerHTML=(j.customers||[]).map(function(c){return '<option value="'+c.id+'">'+_esc(c.name)+'</option>';}).join('');
+  });
+}
+function ccUncomf(id){
+  var box=document.getElementById('ccu_'+id); box.style.display='block';
+  box.innerHTML='<div class="label" style="margin-bottom:6px">불편한 곳</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+CC_ISSUES.map(function(k){return '<label style="display:flex;gap:4px;align-items:center;font-size:15px"><input type="checkbox" value="'+k+'" class="cci_'+id+'">'+k+'</label>';}).join('')+'</div>'+
+    '<input id="ccn_'+id+'" class="finput2" placeholder="메모 (선택)" style="width:100%;margin-top:8px"><button class="btn small" style="margin-top:8px" onclick="ccRec('+id+',\'불편\')">기록하고 A/S 열기</button>';
+}
+function ccRec(id, comfort, status){
+  var issues=[].slice.call(document.querySelectorAll('.cci_'+id+':checked')).map(function(x){return x.value;});
+  if(comfort==='불편'&&!issues.length){ toast('불편한 곳을 하나 이상 골라 주세요'); return; }
+  var note=(document.getElementById('ccn_'+id)||{}).value||'';
+  fetch('/api/aftercare/record',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:id,comfort:comfort,issues:issues,note:note,status:status||'완료'})})
+    .then(function(r){return r.json();}).then(function(j){ if(!j.ok){toast(j.error||'기록 실패');return;} toast(j.as_id?'기록했어요 · A/S 건을 열었어요':'기록했어요'); careLoad(); });
+}
+function asOpen(){
+  var cid=document.getElementById('asCust').value, sym=document.getElementById('asSym').value.trim();
+  if(!sym){ toast('증상을 적어 주세요'); return; }
+  fetch('/api/as',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({customer_id:+cid,store:curStore(),symptom:sym})})
+    .then(function(r){return r.json();}).then(function(j){ if(!j.ok){toast(j.error||'접수 실패');return;} document.getElementById('asSym').value=''; toast('A/S 접수했어요'); careLoad(); });
+}
+function asClose(id){
+  var cause=document.getElementById('asc_'+id).value, action=document.getElementById('asa_'+id).value;
+  if(!cause){ toast('원인을 골라야 종결할 수 있어요'); return; }
+  fetch('/api/as/close',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:id,cause:cause,action:action})})
+    .then(function(r){return r.json();}).then(function(j){ if(!j.ok){toast(j.error||'종결 실패');return;} toast('종결했어요 · 원인 '+cause); careLoad(); });
+}
+document.querySelector('.subtab[data-t="care"]').addEventListener('click',careLoad);
 var CRM_LIST=[], CRM_CUR=null;
 function dotName(st){return st==='재방문'?'재방문':st==='신규'?'신규':'안정';}
 (function(){
@@ -467,17 +546,25 @@ function crmSel(i){
   var c=CRM_LIST[i]; if(!c)return;
   fetch('/api/customer?id='+c.id).then(function(r){return r.json();}).then(function(j){
     var cust=j.customer||c, hist=j.history||[]; CRM_CUR=cust;
+    // [09.24] 측정 기록 (설계서 v0.3 — 임시값은 '임시'로 표시)
+    fetch('/api/customers/'+cust.id+'/measurements').then(function(r){return r.json();}).then(function(m){
+      var box=document.getElementById('measBox'); if(!box) return; var it=(m.items||[]).slice(0,4);
+      box.innerHTML = it.length ? it.map(function(x){ var d=String(x.measured_at||'').slice(0,10);
+        return '<div class="hist"><span>PD '+(x.pd!=null?x.pd+'mm':'-')+' · 얼굴폭 '+(x.face_width!=null?Math.round(x.face_width)+'mm':'-')+(x.provisional?' <span class="pill warn">임시</span>':'')+'</span><span class="muted">'+d+' · '+(x.source||'')+' · 신뢰도 '+Math.round((x.confidence||0)*100)+'%</span></div>'; }).join('')
+        : '측정 기록 없음 (고객 앱 자가측정이나 매장 정밀 측정을 하면 쌓여요)';
+    }).catch(function(){});
     var histHtml = hist.length? hist.map(function(h){return '<div class="hist"><span>'+h.name+' <span class="muted">×'+h.qty+'</span></span><span class="muted">'+h.date+' · '+('₩'+h.amount.toLocaleString('ko-KR'))+'</span></div>';}).join('')
       : '<div class="muted" style="font-size:14px">구매 이력 없음 (POS에서 이 고객으로 결제하면 쌓여요)</div>';
     document.getElementById('detail').innerHTML=
       '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="nm">'+cust.name+'</div><div class="label">사이즈 '+(cust.size||'-')+' · '+(cust.seg||'')+'</div></div><span class="pill '+(cust.seg==='재방문'?'warn':cust.seg==='신규'?'':'good')+'">'+(cust.seg||'안정')+'</span></div>'+
-      '<div class="locktag" style="display:inline-block;margin-top:8px">🔒 가맹점·본사 전용 — 상세 처방·연락처 포함</div>'+
+      '<div class="locktag" style="display:inline-block;margin-top:8px">가맹점·본사 전용 — 상세 처방·연락처 포함</div>'+
       '<div class="divider"></div>'+
       '<div class="kv"><span class="label">연락처</span><span>'+(cust.phone||'-')+'</span></div>'+
       '<div class="kv"><span class="label">소속 지점</span><span>'+(cust.store||'-')+'</span></div>'+
       '<div class="kv"><span class="label">동공 간 거리(PD)</span><span>'+(cust.pd||'-')+'</span></div>'+
       '<div class="kv"><span class="label">얼굴 측정값</span><span>'+(cust.face||'-')+'</span></div>'+
       '<div class="kv"><span class="label">최근 처방(시력)</span><span>'+(cust.rx||'-')+'</span></div>'+
+      '<div class="label" style="margin:14px 0 6px">측정 기록</div><div id="measBox" class="muted" style="font-size:15px">불러오는 중</div>'+
       '<div class="label" style="margin:14px 0 6px">구매 이력 (매장·본사 전용)</div>'+histHtml+
       '<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><button class="btn small" onclick="autoQuote()">검안 기반 자동 견적</button><button class="btn small ghost" onclick="toast(\''+cust.name+'님 재방문 카톡 발송 (프로토타입)\')">카톡 발송</button></div><div id="autoQuote" style="margin-top:12px"></div>';
   });
@@ -551,18 +638,23 @@ function renderCatalog(){
     }).join('')+'</div>';
   }).join('');
 }
+// [09.24] 판매가는 매장이 정한다. 기본값 = 본부 권장가, 줄마다 수정 가능
+var posPrice={};
+function unitOf(sku){return posPrice[sku]!=null?posPrice[sku]:skuFind(sku).price;}
+function posSetPrice(sku,v){var n=Math.max(0,Math.round(+v||0)); posPrice[sku]=n; renderPos();}
 function posAdd(sku){if(!skuFind(sku))return; posCart[sku]=(posCart[sku]||0)+1; renderPos();}
 function posQty(sku,d){posCart[sku]=Math.max(0,(posCart[sku]||0)+d); if(posCart[sku]===0)delete posCart[sku]; renderPos();}
 function posClear(){posCart={}; renderPos();}
 function renderPos(){
   var skus=Object.keys(posCart);
   document.getElementById('posLines').innerHTML = skus.length? skus.map(function(sku){var it=skuFind(sku), q=posCart[sku];
-    return '<div class="posline"><span>'+it.name+' <span class="muted">'+won(it.price)+'</span></span>'+
+    var off=unitOf(sku)!==it.price;
+    return '<div class="posline"><span>'+it.name+' <span class="muted">권장 '+won(it.price)+'</span> <input type="number" class="pospr" value="'+unitOf(sku)+'" min="0" step="1000" style="width:110px;font-size:15px" onchange="posSetPrice(\''+sku+'\',this.value)" aria-label="판매가">'+(off?' <span class="muted">매장 조정가</span>':'')+'</span>'+
       '<span class="qwrap"><button class="qbtn" onclick="posQty(\''+sku+'\',-1)">−</button>'+q+
       '<button class="qbtn" onclick="posQty(\''+sku+'\',1)">+</button></span></div>';}).join('')
     : '<div class="muted" style="font-size:14px;padding:6px 0">상품을 담아주세요</div>';
-  var total=skus.reduce(function(a,sku){return a+skuFind(sku).price*posCart[sku];},0);
-  var med=skus.reduce(function(a,sku){var it=skuFind(sku);return a+(it.medical?it.price*posCart[sku]:0);},0);
+  var total=skus.reduce(function(a,sku){return a+unitOf(sku)*posCart[sku];},0);
+  var med=skus.reduce(function(a,sku){var it=skuFind(sku);return a+(it.medical?unitOf(sku)*posCart[sku]:0);},0);
   document.getElementById('posTotal').textContent=won(total);
   document.getElementById('posMedical').textContent = med>0? ('의료비 세액공제 대상 '+won(med)+' · 영수증 자동 발급') : '';
 }
@@ -575,19 +667,20 @@ function loadPosCustomers(){
 }
 function posPay(method){
   var skus=Object.keys(posCart); if(!skus.length){toast('담은 상품이 없어요');return;}
-  var lines=skus.map(function(sku){var it=skuFind(sku);return {sku:sku,name:it.name,cat:it.cat,qty:posCart[sku],amount:it.price*posCart[sku],medical:it.medical};});
+  var lines=skus.map(function(sku){var it=skuFind(sku);return {sku:sku,name:it.name,cat:it.cat,qty:posCart[sku],amount:unitOf(sku)*posCart[sku],medical:it.medical};});
   var total=lines.reduce(function(a,l){return a+l.amount;},0);
   fetch('/api/sales',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:curStore(),date:dnow(),method:method,customerId:(document.getElementById('posCustomer').value||null),lines:lines})})
     .then(function(r){return r.json();}).then(function(res){
       if(!res.ok){toast(res.error||'결제 실패');return;}
-      posCart={}; renderPos();
-      Promise.all([loadInventory(),loadSummary()]).then(function(){ toast(method+' 결제 '+won(total)+' 완료 · 본부에 반영됨'); });
+      posCart={}; posPrice={}; renderPos();
+      var nt=(res.notices&&res.notices.length)?' · 참고: '+res.notices.join(', '):'';
+      Promise.all([loadInventory(),loadSummary()]).then(function(){ toast(method+' 결제 '+won(total)+' 완료 · 본부에 반영됨'+nt); });
     }).catch(function(){toast('네트워크 오류');});
 }
 function renderInv(){
   document.getElementById('invBox').innerHTML=cats().map(function(cat){
     var rows=INVMAP[cat].map(function(it){var low=it.stock<=LOWAT;
-      return '<div class="pr'+(low?' warn':'')+'"><span>'+it.name+'</span><span>'+it.stock+(low?' ⚠':'')+'</span></div>';}).join('');
+      return '<div class="pr'+(low?' warn':'')+'"><span>'+it.name+'</span><span>'+it.stock+(low?' (부족)':'')+'</span></div>';}).join('');
     return '<div class="invcat"><div class="ph">'+cat+'</div>'+rows+'</div>';
   }).join('');
 }
@@ -609,7 +702,7 @@ function pushRender(){
   fetch('/api/orders?store='+encodeURIComponent(curStore())+'&status='+encodeURIComponent('푸시대기')).then(function(r){return r.json();}).then(function(j){
     var ps=j.orders||[];
     document.getElementById('pushBox').innerHTML = ps.length? ps.map(function(o){
-      return '<div class="pushrow"><div class="pri"><div class="pn">'+o.name+' <span class="muted">×'+o.qty+'</span></div><div class="pdl">'+_dlText(o.deadline)+' · 무응답 시 자동 발주</div></div>'+
+      return '<div class="pushrow"><div class="pri"><div class="pn">'+o.name+' <span class="muted">×'+o.qty+'</span></div><div class="pdl">'+_dlText(o.deadline)+' · 무응답 시 만료 (발주 안 됨)</div></div>'+
         '<div class="pacts"><button class="btn small" onclick="pushRespond('+o.id+',true)">승인</button>'+
         '<button class="btn small ghost" onclick="pushRespond('+o.id+',false)">거절</button></div></div>';
     }).join('') : '<div class="muted" style="font-size:14px">본부에서 내려온 발주 제안이 없어요</div>';
@@ -626,7 +719,7 @@ function ordRender(){
   fetch('/api/orders?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
     var os=(j.orders||[]).filter(function(o){return o.status!=='푸시대기';});
     document.getElementById('ordBox').innerHTML = os.length? os.map(function(o){
-      var cls=o.status==='입고완료'?'good':o.status==='승인'?'warn':o.status==='취소'?'bad':'';
+      var cls=o.status==='입고완료'?'good':o.status==='승인'?'warn':(o.status==='취소'||o.status==='만료')?'bad':'';
       return '<div class="pl-row"><span>'+o.name+' <span class="muted">×'+o.qty+'</span></span><span class="pill '+cls+'">'+o.status+'</span></div>';
     }).join('') : '<div class="muted" style="font-size:14px">발주 없음</div>';
   });
@@ -773,7 +866,7 @@ function suggestLoad(){
     document.getElementById('sugBox').innerHTML=SUG.map(function(it,i){
       var dl=(it.daysLeft==null)?'판매 데이터 적음':(it.daysLeft+'일 내 소진 예상');
       var urg=(it.daysLeft!=null&&it.daysLeft<=7)||it.stock<=5;
-      return '<div class="pl-row"><span>'+(urg?'🔴 ':'')+it.name+' <span class="muted">재고 '+it.stock+' · 30일 '+it.sold30+'개 · '+dl+'</span></span>'+
+      return '<div class="pl-row"><span>'+(urg?'[임박] ':'')+it.name+' <span class="muted">재고 '+it.stock+' · 30일 '+it.sold30+'개 · '+dl+'</span></span>'+
         '<span><b>+'+it.suggest+'</b> <button class="btn small" onclick="suggestOrder('+i+')">발주</button></span></div>';
     }).join('')+'<button class="btn" style="width:100%;margin-top:10px" onclick="suggestOrderAll()">전체 제안 한 번에 발주</button>';
   }).catch(function(){toast('제안 불러오기 실패');});
@@ -790,7 +883,7 @@ function autoMkLoad(){
   fetch('/api/customers?seg=재방문').then(function(r){return r.json();}).then(function(j){
     AUTO_MK=j.customers||[];
     box.innerHTML = AUTO_MK.length? AUTO_MK.map(function(c,i){
-      return '<div class="pl-row"><span>🔔 '+c.name+' <span class="muted">'+(c.store||'')+' · '+(c.size||'')+' · 교체주기 도래</span></span><button class="btn small" onclick="autoMkSend('+i+')">카톡 예약</button></div>';
+      return '<div class="pl-row"><span>'+c.name+' <span class="muted">'+(c.store||'')+' · '+(c.size||'')+' · 교체주기 도래</span></span><button class="btn small" onclick="autoMkSend('+i+')">카톡 예약</button></div>';
     }).join('')+'<button class="btn" style="width:100%;margin-top:10px" onclick="autoMkSendAll()">전체 자동 카톡 예약 발송</button>'
      : '<div class="muted" style="font-size:14px">지금 교체주기 도래 고객이 없어요</div>';
   }).catch(function(){box.innerHTML='<div class="muted" style="font-size:14px">불러오기 실패</div>';});

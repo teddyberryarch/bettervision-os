@@ -2,8 +2,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 통합 고객 프로필</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 .look{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 .look .fld{flex:1;min-width:200px}
@@ -19,7 +19,7 @@
 .pname{font-size:21px;font-weight:700;color:var(--ink)}
 .pmeta{font-size:14px;color:var(--muted)}
 .badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.bdg{font-size:12px;font-weight:700;border-radius:20px;padding:3px 10px}
+.bdg{font-size:13px;font-weight:700;border-radius:20px;padding:3px 10px}
 .bdg.vip{background:#fef3c7;color:#b45309}.bdg.reg{background:var(--good-soft);color:var(--good)}
 .bdg.new{background:#dbeafe;color:#1d4ed8}.bdg.consent{background:var(--surface);color:var(--muted)}
 .bdg.risk{background:var(--bad-soft);color:var(--bad)}
@@ -164,7 +164,7 @@ function lookup(){
   out.innerHTML='<div class="prof">'+left+right+'</div>';
 }
 function friendMsg(p){var c=DB[p];
-  document.getElementById('kkmsg').innerHTML='[친구톡 · 광고성] '+c.name+'님만을 위한 '+c.prefs.shape+' 신상 입고 🕶 선호 컬러('+c.prefs.color+') 우선 안내. VIP 10% 쿠폰 → (링크)';
+  document.getElementById('kkmsg').innerHTML='[친구톡 · 광고성] '+c.name+'님만을 위한 '+c.prefs.shape+' 신상 입고 선호 컬러('+c.prefs.color+') 우선 안내. VIP 10% 쿠폰 → (링크)';
 }
 lookup();
 </script>

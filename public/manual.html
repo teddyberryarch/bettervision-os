@@ -2,8 +2,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 업셀·컴플레인 매뉴얼</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 .tabs{display:flex;gap:8px;margin:6px 0 14px}
 .tab{font-size:15px;font-weight:600;border:1px solid var(--line);border-radius:9px;padding:9px 16px;cursor:pointer;color:var(--muted);background:#fff}
@@ -11,11 +11,11 @@
 .pane{display:none} .pane.on{display:block}
 .sc{border:1px solid var(--line);border-radius:13px;padding:0;margin:10px 0;overflow:hidden}
 .sc-h{padding:12px 15px;background:var(--surface);border-bottom:1px solid var(--line);font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:9px}
-.sc-h .tg{font-size:12px;font-weight:700;border-radius:20px;padding:2px 9px;margin-left:auto}
+.sc-h .tg{font-size:13px;font-weight:700;border-radius:20px;padding:2px 9px;margin-left:auto}
 .tg.up{background:var(--good-soft);color:var(--good)} .tg.lv1{background:#dbeafe;color:#1d4ed8} .tg.lv2{background:var(--warn-soft);color:#92500a} .tg.lv3{background:var(--bad-soft);color:var(--bad)}
 .sc-b{padding:13px 15px}
 .line{display:flex;gap:10px;margin:7px 0}
-.line .lab{font-size:12px;font-weight:700;color:var(--muted);min-width:54px;flex:0 0 auto;padding-top:2px}
+.line .lab{font-size:13px;font-weight:700;color:var(--muted);min-width:54px;flex:0 0 auto;padding-top:2px}
 .line .txt{font-size:14px;color:var(--ink);line-height:1.55}
 .quote{background:var(--surface);border-left:3px solid var(--ink);border-radius:6px;padding:9px 13px;font-size:14px;color:var(--body);line-height:1.55;font-style:italic}
 .k{background:#eef2ff;border-left:3px solid #4f46e5;padding:10px 14px;font-size:13.5px;color:#312e81;margin:10px 0;border-radius:6px;line-height:1.55}
@@ -24,7 +24,7 @@
 .flow .ar{color:var(--muted);font-weight:400}
 table.comp{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}
 table.comp th,table.comp td{border:1px solid var(--line);padding:8px 10px;text-align:left}
-table.comp th{background:var(--surface);color:var(--muted);font-size:12.5px}
+table.comp th{background:var(--surface);color:var(--muted);font-size:13px}
 </style></head><body>
 <script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
 <div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>

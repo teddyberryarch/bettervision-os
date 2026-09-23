@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 타사 DB · 큐레이팅</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 .sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);margin:2px 0 4px}
 .sec .sdesc{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:10px}
@@ -25,9 +25,9 @@
 .rk.pb .pct{color:var(--good)}
 .rk .meta{flex:1;font-size:14px}
 .rk .meta .b{font-weight:700}
-.rk .meta .s{font-size:12px;color:var(--muted);margin-top:2px}
-.rk .tagpb{font-size:11px;font-weight:700;color:var(--good);background:#fff;border:1px solid var(--good);border-radius:6px;padding:2px 7px}
-.rk .tagx{font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:6px;padding:2px 7px}
+.rk .meta .s{font-size:13px;color:var(--muted);margin-top:2px}
+.rk .tagpb{font-size:13px;font-weight:700;color:var(--good);background:#fff;border:1px solid var(--good);border-radius:6px;padding:2px 7px}
+.rk .tagx{font-size:13px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:6px;padding:2px 7px}
 .tbl{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
 .tbl th,.tbl td{border:1px solid var(--line);padding:8px 10px;text-align:left}
 .tbl th{background:var(--surface);font-size:13px;color:var(--muted);font-weight:600}
@@ -118,7 +118,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="card pad sec">
     <div class="ctitle">4 · DB 전체</div>
     <table class="tbl" id="dbtbl"></table>
-    <div class="note">법적 락업: 타사 큐레이션 라인도 본사 공급(가맹계약 "전품목 본사공급" 조항). 큐레이션 자유 + 공급 독점 양립.</div>
+    <div class="note">공급: 타사 큐레이션 라인도 본부 경유 공급 (가맹계약 공급 조항, 변호사 확인 후 확정). 큐레이션은 자유, 공급은 본부 한 경로.</div>
   </div>
 </section>
 </div>

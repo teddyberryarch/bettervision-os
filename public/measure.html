@@ -2,8 +2,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 안면 측정</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>.sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);margin:2px 0 4px}.sec .sdesc{font-size:14px;color:var(--muted);margin-bottom:10px}
 .fld{margin:8px 0}.fld label{display:flex;justify-content:space-between;font-size:14px;color:var(--ink);font-weight:600;margin-bottom:4px}.fld label b{color:var(--ink)}.fld input[type=range]{width:100%}
 .scan{border:1px solid var(--line);border-radius:12px;background:#fff;margin:8px 0}.scan svg{display:block;width:100%;height:auto}
@@ -63,8 +63,8 @@ function upd(){
   '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(W/2)+'" ry="'+(H/2)+'" fill="#f3efe9" stroke="#cbc7bb" stroke-width="0.8"/>'+
   '<ellipse cx="'+(cx-pd/2)+'" cy="'+cy+'" rx="3.2" ry="2.2" fill="#8a877f"/><ellipse cx="'+(cx+pd/2)+'" cy="'+cy+'" rx="3.2" ry="2.2" fill="#8a877f"/>'+
   '<line x1="'+(cx-pd/2)+'" y1="'+(cy+18)+'" x2="'+(cx+pd/2)+'" y2="'+(cy+18)+'" stroke="#b45309" stroke-width="0.6"/>'+
-  '<text x="'+cx+'" y="'+(cy+24)+'" font-size="6" fill="#b45309" text-anchor="middle" font-family="Inter">PD '+gv('PD')+'</text>'+
-  '<text x="'+cx+'" y="138" font-size="6" fill="#8a877f" text-anchor="middle" font-family="Inter">얼굴폭 '+fw+' · 귀간격 '+eg+' · 9사이즈 '+(r.code||'-')+'</text></svg>';
+  '<text x="'+cx+'" y="'+(cy+24)+'" font-size="6" fill="#b45309" text-anchor="middle" font-family="Pretendard">PD '+gv('PD')+'</text>'+
+  '<text x="'+cx+'" y="138" font-size="6" fill="#8a877f" text-anchor="middle" font-family="Pretendard">얼굴폭 '+fw+' · 귀간격 '+eg+' · 9사이즈 '+(r.code||'-')+'</text></svg>';
 }
 upd();
 </script></body></html>

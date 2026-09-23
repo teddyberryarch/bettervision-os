@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 검안 매뉴얼</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 .b-nav{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:56px;background:var(--card);
   padding:10px 0;z-index:5;border-bottom:1px solid var(--line2);margin-bottom:14px}
@@ -16,23 +14,23 @@
   border:1px solid var(--line);border-radius:8px;padding:7px 11px;text-decoration:none}
 .b-sec{margin-bottom:16px}
 .b-sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);letter-spacing:-.3px;margin:2px 0 4px}
-.b-sec .gw{font-size:12px;color:var(--muted);font-weight:500;margin-left:6px}
+.b-sec .gw{font-size:13px;color:var(--muted);font-weight:500;margin-left:6px}
 .b-sec p{font-size:14px;line-height:1.6;color:var(--ink);margin:7px 0}
 .io{font-size:13px;color:var(--muted);margin:4px 0 8px}
 .io b{color:var(--ink)}
 .b-flow{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:11px 13px;
   font-size:14px;font-weight:600;color:var(--ink);text-align:center;margin:10px 0}
-.dft{color:var(--good);font-weight:700;font-size:12px;white-space:nowrap}
-.blk{color:var(--warn);font-weight:800;font-size:12px;letter-spacing:.05em;white-space:nowrap}
+.dft{color:var(--good);font-weight:700;font-size:13px;white-space:nowrap}
+.blk{color:var(--warn);font-weight:800;font-size:13px;letter-spacing:.05em;white-space:nowrap}
 .bvt{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
 .bvt th,.bvt td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
-.bvt th{background:var(--surface);font-weight:600;font-size:12px;color:var(--muted)}
+.bvt th{background:var(--surface);font-weight:600;font-size:13px;color:var(--muted)}
 .bvt td:first-child{font-weight:600;width:28%}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:4px 0 2px}
 .b-li{list-style:none;padding:0;margin:6px 0}
 .b-li li{position:relative;padding-left:16px;font-size:14px;line-height:1.55;margin:6px 0;color:var(--ink)}
 .b-li li::before{content:"·";position:absolute;left:3px;top:-1px;color:var(--ink);font-weight:800;font-size:18px}
-.note{font-size:12px;color:var(--muted);font-style:italic;margin:6px 0}
+.note{font-size:13px;color:var(--muted);font-style:italic;margin:6px 0}
 </style>
 </head>
 <body>
@@ -203,7 +201,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <tr><td>교정 불충분</td><td>최대교정에도 목표 미달</td><td>→ 의뢰</td></tr>
       <tr><td>양안시 이상</td><td>억제·복시·큰 사위</td><td>→ 프리즘 검토/의뢰</td></tr>
     </table>
-    <p class="note">"데이터 장악"과 "법적 안전"을 동시에. 의뢰조차 기록되면 그것도 본부 데이터.</p>
+    <p class="note">"데이터 기록"과 "법적 안전"을 동시에. 의뢰조차 기록되면 그것도 본부 데이터.</p>
   </div>
 
   <div class="card pad b-sec" id="se">

@@ -2,20 +2,20 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION · 렌즈·콘택트 가격</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 table.pr{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
 table.pr th,table.pr td{border:1px solid var(--line);padding:10px 11px;text-align:center}
 table.pr th{background:var(--surface);font-size:13px;color:var(--muted)}
 table.pr td.idx{text-align:left;font-weight:600;color:var(--ink)}
-table.pr td.idx small{display:block;font-weight:400;color:var(--muted);font-size:12px}
-table.pr .won{font-weight:700;color:var(--ink)} table.pr .plus{color:var(--good);font-size:12px}
+table.pr td.idx small{display:block;font-weight:400;color:var(--muted);font-size:13px}
+table.pr .won{font-weight:700;color:var(--ink)} table.pr .plus{color:var(--good);font-size:13px}
 .guar{display:flex;align-items:center;gap:10px;background:var(--ink);color:#fff;border-radius:12px;padding:14px 16px;margin:4px 0 14px}
 .guar b{color:#fff} .guar .ic{font-size:22px}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
 .cc{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fff}
-.cc .nm{font-size:16px;font-weight:700;color:var(--ink)} .cc .br{font-size:12px;color:var(--muted)}
+.cc .nm{font-size:16px;font-weight:700;color:var(--ink)} .cc .br{font-size:13px;color:var(--muted)}
 .cc .sw{display:flex;gap:5px;margin:9px 0}
 .cc .sw span{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
 .cc .row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--line2)}
@@ -23,8 +23,8 @@ table.pr .won{font-weight:700;color:var(--ink)} table.pr .plus{color:var(--good)
 .cc .price{font-size:18px;font-weight:700;color:var(--ink);margin-top:8px}
 .sec-h{font-size:18px;font-weight:700;color:var(--ink);margin:22px 0 4px}
 .sec-s{font-size:13px;color:var(--muted);margin-bottom:10px}
-.lock{background:var(--warn-soft);color:#92500a;font-size:12px;font-weight:700;border-radius:20px;padding:3px 10px;display:inline-block}
-.tag{font-size:11.5px;background:var(--surface);border-radius:20px;padding:2px 8px;color:var(--muted)}
+.lock{background:var(--warn-soft);color:#92500a;font-size:13px;font-weight:700;border-radius:20px;padding:3px 10px;display:inline-block}
+.tag{font-size:13px;background:var(--surface);border-radius:20px;padding:2px 8px;color:var(--muted)}
 </style></head><body>
 <script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
 <div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
@@ -33,7 +33,7 @@ table.pr .won{font-weight:700;color:var(--ink)} table.pr .plus{color:var(--good)
 <div class="lead"><div><div class="eyebrow">고객 4·6·7 · 투명 가격</div><h2>렌즈·콘택트 가격을 미리, 다 보이게</h2>
 <div class="sub">즉흥 결정 안 하게. 본부 표준가로 매장마다 다르지 않게 — 눈탱이 걱정 제거.</div></div></div>
 
-<div class="guar"><span class="ic">🛡</span><div><b>본부 표준가 보증</b> — 모든 가맹점 동일가(서버 강제, 임의 인상 불가). 결제 전 견적서 자동 발급.</div></div>
+<div class="guar"><span class="ic">—</span><div><b>가격 공개</b> — 본부 권장가를 공개합니다. 결제 전 견적서 자동 발급.</div></div>
 
 <div class="card pad">
   <div class="sec-h" style="margin-top:0">안경렌즈 — 굴절률 × 기능 (1쌍, 표준가)</div>
@@ -49,7 +49,7 @@ table.pr .won{font-weight:700;color:var(--ink)} table.pr .plus{color:var(--good)
 </div>
 
 <div class="sec-h">콘택트렌즈 — 모델·색·도수·가격</div>
-<div class="sec-s"><span class="lock">🔒 온라인 판매는 규제 샌드박스 통과 후</span> 지금은 정보 게시 + 매장 판매.</div>
+<div class="sec-s"><span class="lock">온라인 판매는 규제 샌드박스 통과 후</span> 지금은 정보 게시 + 매장 판매.</div>
 <div class="cards" id="cl"></div>
 </section></div>
 <div class="foot"><span>BETTERVISION · 가격 카탈로그 v0.1</span><span>본부 표준가 보증</span></div>

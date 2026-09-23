@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 고객 앱</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 .mfield{margin:10px 0}
 .mlabrow{display:flex;justify-content:space-between;font-size:14px;color:var(--ink);margin-bottom:5px}
@@ -18,7 +16,7 @@
 .recrow:first-of-type{border-top:0}
 .recrow .rn{font-size:15px;color:var(--ink)}
 .recrow .rd{font-size:13px;color:var(--muted);margin-top:2px}
-.rtag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:9999px;padding:1px 7px;margin-left:4px}
+.rtag{font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:9999px;padding:1px 7px;margin-left:4px}
 .rmatch{font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap}
 .rmatch.best{color:var(--good)}
 .rmatch.good{color:var(--ink)}
@@ -28,7 +26,7 @@
 .chip{font-family:inherit;font-size:14px;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;transition:.12s}
 .chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
 .chip.slot{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 12px}
-.chip .seat{font-size:11px;font-weight:400;opacity:.7}
+.chip .seat{font-size:13px;font-weight:400;opacity:.7}
 .chip.full{opacity:.4;cursor:not-allowed}
 .finput{width:100%;font-family:inherit;font-size:15px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff}
 .bookmsg{display:none;margin-top:10px;background:var(--good-soft);color:var(--good);border-radius:8px;padding:10px 12px;font-size:14px;font-weight:500}
@@ -48,7 +46,7 @@
 .pcard .pn{font-size:16px;font-weight:600;color:var(--ink)}
 .pcard .pp{font-size:15px;color:var(--ink);margin-top:3px;font-weight:600}
 .pcard .pdc{font-size:14px;color:var(--muted);margin-top:7px;line-height:1.55}
-.pbbadge{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--ink);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:middle}
+.pbbadge{display:inline-block;font-size:13px;font-weight:700;color:#fff;background:var(--ink);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:middle}
 .pbnote{border:1px solid var(--ink);border-radius:12px;padding:13px;margin-bottom:12px;background:var(--surface)}
 .pbnote .pt{font-size:15px;font-weight:600;color:var(--ink)}
 .pbnote .pd{font-size:14px;color:var(--muted);margin-top:5px;line-height:1.55}
@@ -71,7 +69,7 @@
 .simtotal span{font-size:15px;color:var(--ink)}
 .simtotal b{font-size:22px;color:var(--ink)}
 .pcard.hero{border:1.5px solid var(--ink);position:relative}
-.herotag{position:absolute;top:12px;right:12px;font-size:11px;font-weight:700;color:#fff;background:var(--ink);border-radius:6px;padding:2px 8px}
+.herotag{position:absolute;top:12px;right:12px;font-size:13px;font-weight:700;color:#fff;background:var(--ink);border-radius:6px;padding:2px 8px}
 .pspec{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-top:11px;border-top:1px solid var(--line2);padding-top:11px}
 .psp{display:flex;justify-content:space-between;font-size:13px}
 .psp span{color:var(--muted)}.psp b{color:var(--ink);font-weight:600}
@@ -119,7 +117,7 @@
     <div>
       <div class="eyebrow">Customer · 고객</div>
       <h2>측정하고, 쓰고, 평생 케어받는다</h2>
-      <div class="sub">홈에서 추천·구매, 측정 탭에서 얼굴을 재서 프론트·템플 사이즈 산출, 케어 탭에서 렌즈·테 교체주기와 눈 건강을 관리. Phase 2(오디오)·Phase 3(눈건강 모니터링) 기능이 케어 탭에 얹힌다.</div>
+      <div class="sub">홈에서 추천·구매, 측정 탭에서 얼굴을 재서 프론트·템플 사이즈 산출, 케어 탭에서 렌즈·테 교체주기와 눈 건강을 관리. 착용 후 확인(7일째 착용 확인·A/S 기록)이 케어 탭에 이어진다.</div>
     </div>
   </div>
 
@@ -131,7 +129,7 @@
           <span class="sb-right"><span class="sb-sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:9px"></i><i style="height:11px"></i></span><span class="sb-5g">5G</span><span class="sb-bat"></span></span>
         </div>
         <div class="app-top">
-          <div class="hi">안녕하세요, <b>양지근</b>님</div>
+          <div class="hi">안녕하세요, <b>윤서진</b>님</div>
           <div class="ring">VIP</div>
         </div>
         <div class="ptabs" id="ptabs">
@@ -166,8 +164,8 @@
             <div class="appcard">
               <h4>내 사이즈 추천 <span class="label">F2×T2 매칭</span></h4>
               <div class="frame-row"><div class="frame-th"></div><div class="frame-meta"><div class="n">로마 클래식 ACE-02</div><div class="match">매칭 98%</div></div><div class="label">189,000</div></div>
-              <div class="frame-row"><div class="frame-th b"></div><div class="frame-meta"><div class="n">NORM 오디오 템플</div><div class="match">매칭 95%</div></div><div class="label">240,000</div></div>
-              <div class="frame-row"><div class="frame-th c"></div><div class="frame-meta"><div class="n">Lindberg 협업 라인</div><div class="match">매칭 91%</div></div><div class="label">470,000</div></div>
+              <div class="frame-row"><div class="frame-th b"></div><div class="frame-meta"><div class="n">로마 슬림</div><div class="match">매칭 95%</div></div><div class="label">189,000</div></div>
+              <div class="frame-row"><div class="frame-th c"></div><div class="frame-meta"><div class="n">수입 브랜드 A 라인</div><div class="match">매칭 91%</div></div><div class="label">470,000</div></div>
             </div>
             <div class="appcard member">
               <h4>BETTERVISION 멤버십 <span class="pill" style="background:rgba(255,255,255,.16);color:#ffffff">구독</span></h4>
@@ -250,7 +248,7 @@
                 <div class="chips" id="tryStyle">
                   <button class="chip active" data-s="round">라운드</button>
                   <button class="chip" data-s="square">스퀘어</button>
-                  <button class="chip" data-s="audio">오디오</button>
+                  <!-- [09.24 숨김] <button class="chip" data-s="audio">오디오</button> -->
                 </div>
                 <div class="tryswatch" id="trySwatch">
                   <span class="sw on" data-c="#1a1a1a" style="background:#1a1a1a"></span>
@@ -298,8 +296,25 @@
 
           <!-- CARE -->
           <div class="pscreen" id="s-care">
+            <!-- [09.24] 판 다음까지 확인: 7일째 착용 확인 -->
+            <div class="appcard" id="careCheckCard" style="display:none">
+              <h4>착용 7일째 확인</h4>
+              <div class="label" id="ccLead" style="margin:6px 0 10px">새 안경을 쓴 지 7일째예요. 불편한 곳이 있나요?</div>
+              <div id="ccBody">
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <button class="btn small" onclick="ccSend('편함')">편해요</button>
+                  <button class="btn small ghost" onclick="ccShowIssues()">불편한 곳이 있어요</button>
+                </div>
+                <div id="ccIssues" style="display:none;margin-top:12px">
+                  <div class="label" style="margin-bottom:6px">어디가 불편한지 골라 주세요 (여러 개 가능)</div>
+                  <div id="ccChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+                  <input id="ccNote" class="finput" placeholder="한 줄로 적어 주세요 (선택)" style="width:100%;margin-top:10px;font-size:15px;padding:10px">
+                  <button class="btn small" style="margin-top:10px" onclick="ccSend('불편')">매장에 알리기</button>
+                </div>
+              </div>
+            </div>
             <div class="appcard" id="remindCard">
-              <h4>재구매 알림 🔔</h4>
+              <h4>재구매 알림 </h4>
               <div class="label" style="margin:6px 0 4px">교체 시기가 다가온 항목이에요. 도수 제품은 매장 방문, 소모품은 바로 구매.</div>
               <div id="remindBox"></div>
             </div>
@@ -321,7 +336,7 @@
                 <div class="cyctrack"><div class="cycfill" style="width:46%;background:var(--good)"></div></div>
               </div>
               <div class="cyc">
-                <div class="ct"><span>오디오 이어팁</span><span style="color:var(--warn)">교체 시기</span></div>
+                <div class="ct"><span>코받침 교체</span><span style="color:var(--warn)">교체 시기</span></div>
                 <div class="cd">소모품 · 권장 6개월</div>
                 <div class="cyctrack"><div class="cycfill" style="width:80%;background:var(--warn)"></div></div>
               </div>
@@ -351,6 +366,7 @@
               <div class="label" style="text-align:right;font-size:14px">우안(OD) 구면 추이 · 4회 검안</div>
             </div>
 
+            <!-- [09.24 숨김] 스마트안경 기능은 부록·나중 (방향결정 §0·§2)
             <div class="appcard">
               <h4>오디오 안경 기능 <span class="phaseflag">Phase 2</span></h4>
               <div class="audiorow"><div class="ai">◑</div><div><b>실시간 번역·받아쓰기</b> — 대화를 자막·기록으로</div></div>
@@ -364,6 +380,7 @@
               <div class="audiorow"><div class="ai">⊙</div><div>코받침·다리 센서로 착용 습관·눈 피로 추정</div></div>
               <div class="label" style="margin-top:8px;font-size:14px">감시가 아니라 "돕는 도구" — 기록하되 투명하게, 돕되 의존시키지 않게.</div>
             </div>
+            -->
           </div>
 
           <div class="pscreen" id="s-products">
@@ -388,14 +405,14 @@
 
     <div>
       <div class="card pad">
-        <div class="eyebrow">고객 여정 = 락인 단계</div>
+        <div class="eyebrow">고객 여정 = 다시 찾는 이유</div>
         <div class="feat-list">
-          <div class="feat"><div class="ic">①</div><div><div class="ft">측정 — 데이터가 잡힌다</div><div class="fd">얼굴·PD·프론트·템플 사이즈가 본사에 저장. 다른 데선 다시 재야 함.</div></div></div>
-          <div class="feat"><div class="ic">②</div><div><div class="ft">구매 — 통째 판매(객단가)</div><div class="fd">F2×T2 규격 맞춤. 호환 부품이 못 끼는 구조.</div></div></div>
-          <div class="feat"><div class="ic">③</div><div><div class="ft">케어 — 재구매 + 구독</div><div class="fd">렌즈·이어팁 교체주기 + 멤버십. 카톡이 알아서 재방문 유도.</div></div></div>
-          <div class="feat"><div class="ic">④</div><div><div class="ft">눈 건강 — 시간이 쌓일수록 못 떠남</div><div class="fd">도수 타임라인·모니터링. 기록이 곧 전환비용.</div></div></div>
+          <div class="feat"><div class="ic">①</div><div><div class="ft">측정 — 한 번 재면 기록으로</div><div class="fd">얼굴·PD·프론트·템플 사이즈가 본부 시스템에 저장. 어느 매장에서든 이어서 씀.</div></div></div>
+          <div class="feat"><div class="ic">②</div><div><div class="ft">구매 — 맞는 사이즈로</div><div class="fd">9사이즈 중 얼굴에 맞는 F×T 조합으로 추천.</div></div></div>
+          <div class="feat"><div class="ic">③</div><div><div class="ft">케어 — 재구매 + 구독</div><div class="fd">렌즈·콘택트 교체주기 + 멤버십. 때가 되면 알림.</div></div></div>
+          <div class="feat"><div class="ic">④</div><div><div class="ft">판 다음까지 — 7일째 확인</div><div class="fd">착용 7일째 불편한 곳을 묻고, 불편하면 매장이 조정. 도수 변화도 기록.</div></div></div>
         </div>
-        <div class="note">측정→구매→케어→눈건강으로 갈수록 전환비용이 커진다. LTV 30만 → 5년 70~80만, 전부 본사 데이터·공급으로 귀속.</div>
+        <div class="note">측정→구매→7일 확인→케어로 이어지는 기록이 쌓일수록 매장이 고객을 더 잘 맞춘다.</div>
       </div>
     </div>
   </div>
@@ -416,6 +433,7 @@ window.__bvGuide={title:'고객 앱 가이드',sub:'안경 사는 불확실성�
 ]};
 </script>
 <script src="/assets/app.js"></script>
+<script src="/assets/bv-measure.js"></script>
 <script type="module">
 import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
 let landmarker=null;
@@ -427,39 +445,7 @@ let landmarker=null;
   }catch(e){ window.__bvFaceReady=false; console.warn("FaceLandmarker init fail",e); }
 })();
 function D(a,b,W,H){return Math.hypot((a.x-b.x)*W,(a.y-b.y)*H);}
-window.bvFaceMeasure=async function(onDone,onErr,onStat){
-  if(!landmarker){ onErr&&onErr("모델 로딩 전이에요. 잠시 후 다시."); return; }
-  let stream;
-  try{ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:640,height:480}}); }
-  catch(e){ onErr&&onErr("카메라 권한이 필요해요."); return; }
-  const vid=document.getElementById("camVid");
-  vid.srcObject=stream; vid.style.display="block";
-  try{ await vid.play(); }catch(e){}
-  onStat&&onStat("얼굴을 화면 중앙에 맞춰주세요…");
-  const samples=[]; const t0=performance.now();
-  await new Promise(function(res){
-    function loop(){
-      const now=performance.now(); const W=vid.videoWidth||640, H=vid.videoHeight||480;
-      let r=null; try{ r=landmarker.detectForVideo(vid, now); }catch(e){}
-      if(r && r.faceLandmarks && r.faceLandmarks[0]){
-        const L=r.faceLandmarks[0];
-        const irisPx=D(L[469],L[471],W,H);
-        const pdPx=D(L[468],L[473],W,H);
-        const fwPx=D(L[234],L[454],W,H);
-        if(irisPx>2){ const sc=11.7/irisPx; samples.push({pd:pdPx*sc, fw:fwPx*sc}); }
-        onStat&&onStat("측정 중… "+samples.length);
-      }
-      if(now-t0<2600 && samples.length<45){ requestAnimationFrame(loop); } else { res(); }
-    }
-    requestAnimationFrame(loop);
-  });
-  stream.getTracks().forEach(function(t){t.stop();}); vid.style.display="none"; vid.srcObject=null;
-  if(!samples.length){ onErr&&onErr("얼굴을 못 잡았어요. 조명을 밝게 하고 다시."); return; }
-  function med(a){ a.sort(function(x,y){return x-y;}); return a[Math.floor(a.length/2)]; }
-  const pd=med(samples.map(function(s){return s.pd;}));
-  const fw=med(samples.map(function(s){return s.fw;}));
-  onDone&&onDone({pd:Math.round(pd*10)/10, faceWidth:Math.round(fw)});
-};
+/* [09.24] 측정은 BV-Measure 엔진 v0.3(/assets/bv-measure.js)이 맡는다. 이 모듈의 landmarker는 가상 피팅용 */
 
 /* ===== 가상 피팅 (간이) ===== */
 window.__tryStyle="round"; window.__tryColor="#1a1a1a";
@@ -561,9 +547,9 @@ var CATALOG=[
   {n:'로마 라운드',   line:'PB',   lens:47, bridge:21, temple:145, nose:'표준', price:'189,000'},
   {n:'로마 스퀘어',   line:'PB',   lens:54, bridge:16, temple:147, nose:'표준', price:'189,000'},
   {n:'로마 스몰',     line:'PB',   lens:45, bridge:17, temple:135, nose:'낮음', price:'159,000'},
-  {n:'NORM 오디오',   line:'오디오', lens:53, bridge:18, temple:150, nose:'표준', price:'240,000'},
-  {n:'NORM 오디오 S', line:'오디오', lens:50, bridge:18, temple:145, nose:'낮음', price:'240,000'},
-  {n:'Lindberg 협업', line:'명품',  lens:51, bridge:19, temple:140, nose:'높음', price:'470,000'}
+  // [09.24 숨김] {n:'NORM 오디오',   line:'오디오', lens:53, bridge:18, temple:150, nose:'표준', price:'240,000'},
+  // [09.24 숨김] {n:'NORM 오디오 S', line:'오디오', lens:50, bridge:18, temple:145, nose:'낮음', price:'240,000'},
+  {n:'수입 브랜드 A', line:'명품',  lens:51, bridge:19, temple:140, nose:'높음', price:'470,000'}
 ];
 function frontWidthOf(fr){ return fr.lens*2 + fr.bridge + FIT.endpiece; }
 function clamp100(x){ return Math.max(0,Math.min(100,x)); }
@@ -616,6 +602,7 @@ function renderRecs(faceW,templeLen,nose){
   }).join('');
   document.getElementById('recList').innerHTML = html || '<div class="rd" style="color:var(--muted)">측정값에 맞는 프레임이 없어요. 값을 조절해 보세요.</div>';
 }
+var DEMO_CUSTOMER_ID=1; // 데모 고객(윤서진). 고객 로그인이 생기면 세션의 고객으로 바꾼다
 /* 카메라 자동 측정(데모): 애니메이션 후 측정값 채우고 재계산 */
 function measureCamera(){
   var btn=document.getElementById('scanbtn'), w=document.getElementById('scanwrap'), st=document.getElementById('scanstat');
@@ -630,6 +617,12 @@ function measureCamera(){
     w.classList.remove('scanning'); w.classList.add('done');
     st.textContent='측정 완료 · PD '+res.pd+'mm · '+sz+' (관자=추정)';
     btn.disabled=false; btn.textContent='다시 측정';
+    // [09.24] 결과를 본부 측정 기록에 저장 (수치만, 영상 없음). 집에서 잰 값은 임시값 → 매장에서 정밀 측정으로 확정
+    if(window.BVMeasure && window.__bvLastResult){
+      BVMeasure.submit(DEMO_CUSTOMER_ID, window.__bvLastResult, {}).then(function(){
+        st.textContent+=' · 임시값으로 저장됨, 매장에서 정밀 측정';
+      }).catch(function(){ st.textContent+=' · 저장 실패(다음에 다시)'; });
+    }
   }, function(err){
     w.classList.remove('scanning'); btn.disabled=false; btn.textContent='카메라로 측정';
     st.textContent=err; toast(err);
@@ -654,6 +647,31 @@ recompute();
     s+='<text x="'+pts[i][0].toFixed(1)+'" y="'+(H-6)+'" font-size="13" fill="#6b7280" text-anchor="middle">'+d[0]+'</text>';});
   c.innerHTML=s+'</svg>';})();
 
+
+/* ===== [09.24] 착용 7일째 확인 (판 다음까지 확인) ===== */
+var CC_ITEM=null, CC_SEL={};
+function ccLoad(){
+  fetch('/api/aftercare/mine?customer_id='+DEMO_CUSTOMER_ID).then(function(r){return r.json();}).then(function(j){
+    var it=(j.items||[])[0]; var card=document.getElementById('careCheckCard'); if(!card) return;
+    if(!it){ card.style.display='none'; return; }
+    CC_ITEM=it; card.style.display='block';
+    document.getElementById('ccChips').innerHTML=(j.issues||[]).map(function(k){return '<button class="chip" data-k="'+k+'" onclick="ccToggle(this)">'+k+'</button>';}).join('');
+  }).catch(function(){});
+}
+function ccShowIssues(){ document.getElementById('ccIssues').style.display='block'; }
+function ccToggle(el){ var k=el.dataset.k; CC_SEL[k]=!CC_SEL[k]; el.classList.toggle('active',!!CC_SEL[k]); }
+function ccSend(comfort){
+  if(!CC_ITEM) return;
+  var issues=Object.keys(CC_SEL).filter(function(k){return CC_SEL[k];});
+  if(comfort==='불편' && !issues.length){ toast('불편한 곳을 하나 이상 골라 주세요'); return; }
+  fetch('/api/aftercare/respond',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:CC_ITEM.id,customer_id:DEMO_CUSTOMER_ID,comfort:comfort,issues:issues,note:(document.getElementById('ccNote')||{}).value||''})})
+    .then(function(r){return r.json();}).then(function(j){
+      if(!j.ok){ toast(j.error||'보내지 못했어요. 다시 시도해 주세요'); return; }
+      document.getElementById('ccLead').textContent = comfort==='편함' ? '알려 주셔서 고마워요. 불편해지면 언제든 매장에 들러 주세요.' : '매장에 전달했어요. 매장에서 연락드리고 조정해 드릴게요.';
+      document.getElementById('ccBody').style.display='none';
+    }).catch(function(){ toast('네트워크 오류. 다시 시도해 주세요'); });
+}
+ccLoad();
 /* ===== 방문 예약 (공통 BVBooking 사용) ===== */
 (function(){var el=document.getElementById('bkDate'); if(el){el.value=BVBooking.todayISO(); el.min=BVBooking.todayISO();}})();
 function bkStoreVal(){var a=document.querySelector('#bkStore .chip.active');return a?a.dataset.v:null;}
@@ -693,7 +711,7 @@ bkRenderSlots();
 /* ===== 소모품 재주문 장바구니 ===== */
 var CART=[
   {n:'알도 R 렌즈 (좌우)', price:120000, q:1},
-  {n:'오디오 이어팁',       price:18000,  q:1},
+  {n:'코받침 교체 세트',   price:18000,  q:1},
   {n:'코받침 세트',         price:6000,   q:0}
 ];
 function won(n){return '₩'+n.toLocaleString('ko-KR');}
@@ -750,7 +768,7 @@ function ordConfirm(){
   if(!item){toast('제품을 입력해주세요');return;}
   if(!date||!time){toast('픽업 날짜·시간을 골라주세요');return;}
   var isDep=(pay==='보증금'); var payType=isDep?'보증금':'매장결제'; var deposit=isDep?ORD_DEPOSIT:0;
-  fetch('/api/pickups',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:store,customerId:1,name:'양지근',kind:k,items:item,rx:rx,date:date,time:time,payType:payType,amount:0,deposit:deposit})})
+  fetch('/api/pickups',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:store,customerId:1,name:'윤서진',kind:k,items:item,rx:rx,date:date,time:time,payType:payType,amount:0,deposit:deposit})})
     .then(function(r){return r.json();}).then(function(j){
       if(!j.ok){toast('주문 실패');return;}
       var msg=document.getElementById('ordMsg'); msg.className='bookmsg show';
@@ -762,19 +780,19 @@ function ordConfirm(){
 /* ===== 상품 카탈로그 ===== */
 var CAT_DATA={
   frame:[
-    {n:'로마 ACE-02',pb:true,price:'189,000',hero:true,desc:'BETTERVISION 대표 모델. 이탈리아 마쭈첼리 아세테이트를 한국에서 조립("Designed & Assembled in Korea"). 9사이즈 파라메트릭으로 얼굴폭·관자에 맞춰 딱.',spec:[['렌즈폭','52mm'],['브릿지','18mm'],['템플','145mm'],['무게','18g'],['힌지','5배럴 스프링'],['사이즈','9종(F1~F3×T1~T3)']],colors:['#1a1a1a','#5b3a29','#c9b8a0']},
-    {n:'로마 클래식',pb:true,price:'189,000',desc:'이탈리아 아세테이트. 9사이즈 파라메트릭으로 얼굴폭·관자에 맞춰 고름. 가장 무난한 데일리.'},
+    {n:'로마 ACE-02',pb:true,price:'189,000',hero:true,desc:'BETTERVISION 대표 모델. 이탈리아 마쭈첼리 아세테이트를 한국에서 조립("Designed & Assembled in Korea"). 9사이즈 중 얼굴폭·관자에 맞는 사이즈로.',spec:[['렌즈폭','52mm'],['브릿지','18mm'],['템플','145mm'],['무게','18g'],['힌지','5배럴 스프링'],['사이즈','9종(F1~F3×T1~T3)']],colors:['#1a1a1a','#5b3a29','#c9b8a0']},
+    {n:'로마 클래식',pb:true,price:'189,000',desc:'이탈리아 아세테이트. 9사이즈 중 얼굴폭·관자에 맞춰 고름. 가장 무난한 데일리.'},
     {n:'로마 슬림',pb:true,price:'189,000',desc:'얇은 림·가벼운 무게. 작은 얼굴·미니멀 취향. F1~F2 사이즈 추천.'},
     {n:'로마 와이드',pb:true,price:'189,000',desc:'넓은 프론트·또렷한 인상. F2~F3, 광대·얼굴폭 넓은 분께.'},
     {n:'로마 라운드',pb:true,price:'189,000',desc:'둥근 림·클래식 무드. 각진 얼굴과 대비로 부드럽게.'},
-    {n:'Lindberg 협업',pb:false,price:'390,000',desc:'덴마크 럭셔리 타이업. 무나사 티타늄·초경량. 프리미엄 라인.'}
+    {n:'수입 브랜드 A',pb:false,price:'390,000',desc:'수입 티타늄 라인 (예시). 초경량 프리미엄.'}
   ],
   sun:[
     {n:'편광 선글라스',pb:true,price:'230,000',desc:'난반사 차단 편광 렌즈. 운전·수상·설원. 자외선 100% 차단.'},
     {n:'클립온 선글라스',pb:true,price:'90,000',desc:'안경 위에 자석 탈착. 도수 안경 그대로 선글라스로. 가성비.'}
   ],
   goggle:[
-    {n:'NORM G1',pb:true,price:'290,000',hero:true,desc:'자체 브랜드 NORM 대표 모델. 오픈이어 오디오 템플 내장 — 귀를 막지 않고 통화·음악·번역. 무음 연결로 프리미엄 사용감.',spec:[['재생시간','약 7시간'],['블루투스','5.3'],['방수','IPX4 생활방수'],['무게','28g'],['연결음','무음 커스텀'],['BT명','NORM-G1']],colors:['#1a1a1a','#2b3a4a','#e8e4dd']},
+    // [09.24 숨김] {n:'NORM G1',pb:true,price:'290,000',hero:true,desc:'자체 브랜드 NORM 대표 모델. 오픈이어 오디오 템플 내장 — 귀를 막지 않고 통화·음악·번역. 무음 연결로 프리미엄 사용감.',spec:[['재생시간','약 7시간'],['블루투스','5.3'],['방수','IPX4 생활방수'],['무게','28g'],['연결음','무음 커스텀'],['BT명','NORM-G1']],colors:['#1a1a1a','#2b3a4a','#e8e4dd']},
     {n:'스포츠 고글',pb:true,price:'180,000',desc:'러닝·라이딩용 밀착 핏. 김서림 방지·교체 렌즈.'}
   ]
 };
@@ -792,10 +810,10 @@ var LENS_IDX=[
   {idx:'1.74',thick:'가장 얇음',rec:'-6.00D 이상',price:'+160,000',note:'초고도수 전용. 가장 얇고 가볍지만 최고가.'}
 ];
 var COATINGS=[
-  {i:'🔵',n:'블루라이트(청광) 차단',d:'디지털 기기 청색광 완화. 눈 피로·수면 영향 줄임. 사무직·학생 추천.'},
-  {i:'🌗',n:'변색(포토크로믹)',d:'실내 투명 → 야외 햇빛에 자동으로 짙어짐. 안경+선글라스 하나로.'},
-  {i:'👓',n:'누진(다초점)',d:'한 렌즈에 원·근거리. 노안·원근 동시 교정. 40대+ 추천.'},
-  {i:'✨',n:'발수·반사방지 멀티코팅',d:'기본 적용. 김서림·물방울·빛반사 줄여 시야 또렷. 내구성↑.'}
+  {i:'청',n:'블루라이트(청광) 차단',d:'디지털 기기 청색광 완화. 눈 피로·수면 영향 줄임. 사무직·학생 추천.'},
+  {i:'변',n:'변색(포토크로믹)',d:'실내 투명 → 야외 햇빛에 자동으로 짙어짐. 안경+선글라스 하나로.'},
+  {i:'누',n:'누진(다초점)',d:'한 렌즈에 원·근거리. 노안·원근 동시 교정. 40대+ 추천.'},
+  {i:'코',n:'발수·반사방지 멀티코팅',d:'기본 적용. 김서림·물방울·빛반사 줄여 시야 또렷. 내구성↑.'}
 ];
 
 function pbBadge(pb){return pb?'<span class="pbbadge">PB</span>':'';}
@@ -837,7 +855,7 @@ function renderCat(c){
 var SIM_FRAMES=[
   {n:'로마 클래식 (PB)',p:189000},{n:'로마 슬림 (PB)',p:189000},
   {n:'로마 와이드 (PB)',p:189000},{n:'로마 라운드 (PB)',p:189000},
-  {n:'Lindberg 협업',p:390000},{n:'편광 선글라스 (PB)',p:230000}
+  {n:'수입 브랜드 A',p:390000},{n:'편광 선글라스 (PB)',p:230000}
 ];
 var SIM_LENS=[
   {n:'1.50 (약도수 ~ -2.00D)',p:50000},{n:'1.56 (~ -3.00D)',p:80000},
@@ -901,7 +919,7 @@ function goProducts(){var t=document.querySelector('.ptab[data-s="products"]'); 
 var REMINDERS=[
   {name:'알도R 1.60 렌즈', kind:'도수', sub:'마지막 교체 2024.12 · 권장 12개월', due:'D-9', go:'매장 방문'},
   {name:'1일용 콘택트(30P)', kind:'소모품', sub:'30일 주기 · 잔여 약 5일', due:'D-5', go:'바로 구매'},
-  {name:'오디오 이어팁', kind:'소모품', sub:'권장 6개월 경과', due:'교체 권장', go:'바로 구매'}
+  {name:'코받침 교체 세트', kind:'소모품', sub:'권장 6개월 경과', due:'교체 권장', go:'바로 구매'}
 ];
 function renderRemind(){
   var b=document.getElementById('remindBox'); if(!b)return;

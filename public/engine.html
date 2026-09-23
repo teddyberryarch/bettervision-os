@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 9사이즈 환산엔진</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 .sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);margin:2px 0 4px}
 .sec .sdesc{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:10px}
@@ -19,7 +19,7 @@
 .bigout .code{font-size:30px;font-weight:700;color:var(--ink);min-width:74px}
 .bigout .sm{font-size:13px;color:var(--muted);line-height:1.5}
 .grid3{display:grid;grid-template-columns:42px 1fr 1fr 1fr;gap:6px;margin:10px 0}
-.grid3 .h{font-size:12px;color:var(--muted);font-weight:600;text-align:center;align-self:center}
+.grid3 .h{font-size:13px;color:var(--muted);font-weight:600;text-align:center;align-self:center}
 .cell{border:1px solid var(--line);border-radius:10px;padding:10px 6px;text-align:center;min-height:62px;display:flex;flex-direction:column;justify-content:center}
 .cell .c{font-size:14px;font-weight:700;color:var(--ink)}
 .cell .p{font-size:13px;color:var(--muted);margin-top:2px}
@@ -27,7 +27,7 @@
 .cell.here{box-shadow:inset 0 0 0 2px var(--ink)}
 .tunecard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
 .note{font-size:13px;color:var(--muted);font-style:italic;margin:8px 0}
-.dump{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--tile);color:#d7d7da;border-radius:10px;padding:14px;white-space:pre-wrap;line-height:1.5;overflow:auto}
+.dump{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--tile);color:#d7d7da;border-radius:10px;padding:14px;white-space:pre-wrap;line-height:1.5;overflow:auto}
 .warnbox{font-size:13px;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:8px 11px;margin:8px 0}
 </style>
 </head>
@@ -159,8 +159,8 @@ function upd(){
   document.getElementById('grid').innerHTML=html;
   var modePct=(maxv*100).toFixed(1);
   var ml=document.getElementById('modeline');
-  if(mi===1&&mj===1) ml.innerHTML='✅ 최빈 = M·M ('+modePct+'%) — 재고 효율 기준 충족.';
-  else ml.innerHTML='⚠ 최빈 = '+L[mi]+'·'+L[mj]+' ('+modePct+'%). 경계를 조정해 M·M이 최대가 되게 맞추세요.';
+  if(mi===1&&mj===1) ml.innerHTML='최빈 = M·M ('+modePct+'%) — 재고 효율 기준 충족.';
+  else ml.innerHTML='주의: 최빈 = '+L[mi]+'·'+L[mj]+' ('+modePct+'%). 경계를 조정해 M·M이 최대가 되게 맞추세요.';
   // 출력
   document.getElementById('dump').textContent=JSON.stringify({front:C.front,temple:C.temple,pop:C.pop},null,2);
 }

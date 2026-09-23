@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 검안 자동 시스템</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 .ex-presets{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
 .ex-presets .chip{font-size:13px;font-weight:600;color:var(--ink);background:var(--surface);
@@ -35,7 +35,7 @@
 .fld input,.fld select{width:100%;font-family:var(--kr);font-size:15px;color:var(--ink);
   border:1px solid var(--line);border-radius:8px;padding:10px 11px;background:#fff}
 .eyegrid{display:grid;grid-template-columns:46px 1fr 1fr 1fr;gap:8px;align-items:center;margin:6px 0}
-.eyegrid .eh{font-size:12px;color:var(--muted);font-weight:600;text-align:center}
+.eyegrid .eh{font-size:13px;color:var(--muted);font-weight:600;text-align:center}
 .eyegrid .er{font-size:14px;font-weight:700;color:var(--ink);text-align:center}
 .eyegrid input{width:100%;font-size:15px;text-align:center;border:1px solid var(--line);border-radius:8px;padding:9px 6px;background:#fff;color:var(--ink)}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);margin:7px 0}
@@ -43,7 +43,7 @@
 .navbtns{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
 .kv{display:grid;grid-template-columns:130px 1fr;gap:6px 10px;font-size:14px;margin:8px 0}
 .kv .k{color:var(--muted)} .kv .v{color:var(--ink);font-weight:600}
-.dump{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--tile);color:#d7d7da;
+.dump{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--tile);color:#d7d7da;
   border-radius:10px;padding:14px;white-space:pre-wrap;line-height:1.5;margin:10px 0;overflow:auto}
 .flagline{font-size:14px;padding:7px 0;border-bottom:1px solid var(--line2)}
 .flagline:last-child{border-bottom:0}
@@ -89,7 +89,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <button class="chip" onclick="preset('astig')">난시 + 사위 → 의뢰 분기</button>
       <button class="chip" onclick="preset('reorder')">기존 안경 지참(렌즈미터)</button>
       <button class="chip" onclick="resetAll()">초기화</button>
-      <button class="chip" id="mmchip" onclick="toggleMM()">📡 기계 연동 모드</button>
+      <button class="chip" id="mmchip" onclick="toggleMM()">기계 연동 모드</button>
     </div>
     <div class="prog" id="prog"></div>
     <div id="exambanner"></div>
@@ -140,10 +140,10 @@ function seedMachine(){
 }
 function mmBadge(id){
   if(!S.machineMode) return '';
-  if(MM_AUTO.indexOf(id)>=0) return '<div class="mmb auto">📡 자동 수신 — 기계가 채움, 안경사는 확인만</div>';
-  if(MM_JUDGE.indexOf(id)>=0) return '<div class="mmb judge">👁 안경사 판단 — 사람이 결정하는 지점</div>';
-  if(id==='intake') return '<div class="mmb info">📝 문진 — 분기 입력</div>';
-  if(id==='result') return '<div class="mmb info">✅ 처방 확정</div>';
+  if(MM_AUTO.indexOf(id)>=0) return '<div class="mmb auto">자동 수신 — 기계가 채움, 안경사는 확인만</div>';
+  if(MM_JUDGE.indexOf(id)>=0) return '<div class="mmb judge">안경사 판단 — 사람이 결정하는 지점</div>';
+  if(id==='intake') return '<div class="mmb info">문진 — 분기 입력</div>';
+  if(id==='result') return '<div class="mmb info">처방 확정</div>';
   return '';
 }
 function mmSummary(){
@@ -314,7 +314,7 @@ function idxRefr(){
 function eyeStr(o){var s=(o.S||'·'),c=(o.C||'·'),a=(o.A||'·');return 'S '+s+' / C '+c+' / Ax '+a;}
 function buildResult(){
   var fl=flags();
-  var flHtml = fl.length? fl.map(function(f){return '<div class="flagline"><span class="t" style="color:var(--'+f.lv+')">⚑ '+f.t+'</span> — '+f.d+'</div>';}).join('') : '<div class="flagline">이상치 없음 — 표준 범위 내</div>';
+  var flHtml = fl.length? fl.map(function(f){return '<div class="flagline"><span class="t" style="color:var(--'+f.lv+')">'+f.t+'</span> — '+f.d+'</div>';}).join('') : '<div class="flagline">이상치 없음 — 표준 범위 내</div>';
   var bundle={
     환자:{구분:S.mode==='new'?'초진':'재방문',나이:S.age,용도:S.use,노안:S.presby},
     구도수_렌즈미터:S.hasGlasses==='yes'?{R:eyeStr(S.lm.R),L:eyeStr(S.lm.L),PD:S.lm.R.PD,ADD:S.lm.R.ADD}:'없음',

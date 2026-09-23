@@ -5,10 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
+<style>/* bv-steps (09.24) */
+.step{display:grid;grid-template-columns:40px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--bv-line)}
+.snum{font-size:22px;color:var(--bv-bronze)}
+.st{font-size:19px;color:var(--bv-ink)}
+.sd{color:var(--bv-mute);margin:4px 0 8px}
+.sgo{font-size:15px;color:var(--bv-ink);text-decoration:none}
+</style>
 </head>
 <body>
 <div class="topbar"><div class="topbar-in">
@@ -29,7 +34,7 @@
   <div class="hero">
     <div class="eyebrow">BETTERVISION OS</div>
     <h1>안경 프랜차이즈를<br>데이터로 운영하는 본부 시스템</h1>
-    <p>고객은 측정·구매·케어로 묶고, 가맹점은 CRM·ERP·재무를 자동화하고, 본부는 데이터·납품·시스템을 쥔다.</p>
+    <p>고객은 측정·구매·사후 확인까지 한 기록으로 관리하고, 가맹점은 CRM·ERP·재무를 자동화하고, 본부는 데이터·공급·시스템을 맡는다.</p>
     <div class="hero-meta">고객 · 가맹점 · 본부 — 세 화면, 하나의 시스템</div>
   </div>
 
@@ -49,7 +54,7 @@
     <a class="rolecard" href="hq.html">
       <div class="rc-no">03 · Headquarters</div>
       <div class="rc-t">가맹본부</div>
-      <div class="rc-d">전사 대시보드·PB 마진·고객 데이터 귀속·공급 독점으로 채널을 통제.</div>
+      <div class="rc-d">전사 대시보드·PB 마진·고객 데이터 관리·본부 공급으로 전 매장의 기준을 맞춥니다.</div>
       <span class="rc-go">열기 →</span>
     </a>
   </div>
@@ -74,23 +79,23 @@
       <div class="step">
         <div class="snum">3</div>
         <div class="sbody"><div class="st">가맹점, 픽업·결제 → 본부 정책가 적용</div>
-          <div class="sd">POS에서 결제하면 본부 권장가·할인 한도 안에서만. 포인트 적립, 매출은 즉시 본부 반영.</div>
+          <div class="sd">POS에서 결제하면 본부 권장가가 기본으로 뜨고 판매가는 매장이 정함. 포인트 적립, 매출은 즉시 본부 반영.</div>
           <a class="sgo" href="store.html">가맹점 · POS →</a></div>
       </div>
       <div class="step">
         <div class="snum">4</div>
-        <div class="sbody"><div class="st">본부, 데이터로 통제 → 다시 가맹점으로</div>
+        <div class="sbody"><div class="st">본부, 데이터로 기준 조정 → 다시 가맹점으로</div>
           <div class="sd">실시간 매출 관제, 사이즈·상권 분석, 수요 예측 → 부족분을 가맹점에 발주 푸시.</div>
           <a class="sgo" href="hq.html">가맹본부 · 대시보드 →</a></div>
       </div>
       <div class="step">
         <div class="snum">5</div>
-        <div class="sbody"><div class="st">고객, 재구매 알림 → 반복구매 lock-in</div>
-          <div class="sd">렌즈·콘택트 교체주기가 오면 앱이 알림. 포인트·등급이 쌓일수록 본부 PB 채널에 묶임.</div>
+        <div class="sbody"><div class="st">고객, 재구매 알림 → 반복 방문</div>
+          <div class="sd">렌즈·콘택트 교체주기가 오면 앱이 알림. 포인트·등급 혜택으로 다시 찾게 합니다.</div>
           <a class="sgo" href="customer.html">고객 앱 · 케어 →</a></div>
       </div>
     </div>
-    <div class="scen-foot">고객 → 가맹점 → 본부 → 다시 고객. 데이터·공급·시스템을 본부가 쥐고 순환을 통제합니다.</div>
+    <div class="scen-foot">고객 → 가맹점 → 본부 → 다시 고객. 데이터·공급·시스템을 본부가 맡아 이 순환을 돌립니다.</div>
   </div>
 
   <div class="scenario" style="margin-top:8px">
@@ -100,13 +105,13 @@
     <div style="margin-top:14px">
       <div style="font-size:13px;font-weight:700;color:var(--muted);margin:10px 0 6px">운영 흐름</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">
-        <a class="sgo" href="profile.html" style="display:block">🔑 통합 고객 프로필 →</a>
-        <a class="sgo" href="counter.html" style="display:block">🖥 통합 접객 데스크 →</a>
-        <a class="sgo" href="kakao.html" style="display:block">💬 카톡 마케팅 엔진 →</a>
+        <a class="sgo" href="profile.html" style="display:block">통합 고객 프로필 →</a>
+        <span class="sgo" style="display:block;color:var(--bv-mute)">통합 접객 데스크 · 준비 중</span>
+        <a class="sgo" href="kakao.html" style="display:block">카톡 마케팅 엔진 →</a>
         <a class="sgo" href="flow.html" style="display:block">접객 시퀀스 (허브) →</a>
         <a class="sgo" href="exam.html" style="display:block">검안 시스템 →</a>
         <a class="sgo" href="fit.html" style="display:block">피팅 · A4 시트 →</a>
-        <a class="sgo" href="workorder.html" style="display:block">🏭 제조 작업지시서 →</a>
+        <span class="sgo" style="display:block;color:var(--bv-mute)">제조 작업지시서 · 준비 중</span>
       </div>
       <div style="font-size:13px;font-weight:700;color:var(--muted);margin:14px 0 6px">측정 · 시스템 도구</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">
@@ -114,11 +119,11 @@
         <a class="sgo" href="measure.html" style="display:block">① 안면 측정 →</a>
         <a class="sgo" href="frames.html" style="display:block">② 타사 DB·큐레이팅 →</a>
         <a class="sgo" href="recommend.html" style="display:block">⑤ 추천·가상피팅 →</a>
-        <a class="sgo" href="catalog.html" style="display:block">🛍 온라인 카탈로그·사이즈매치 →</a>
-        <a class="sgo" href="shop.html" style="display:block">🛒 온라인 스토어(선글라스·샌드박스) →</a>
-        <a class="sgo" href="pricing.html" style="display:block">💰 렌즈·콘택트 가격 →</a>
-        <a class="sgo" href="quote.html" style="display:block">🧾 견적서 자동 발급 →</a>
-        <a class="sgo" href="trust.html" style="display:block">🛡 검안 신뢰 (안경사) →</a>
+        <a class="sgo" href="catalog.html" style="display:block">온라인 카탈로그·사이즈매치 →</a>
+        <span class="sgo" style="display:block;color:var(--bv-mute)">온라인 스토어(선글라스·샌드박스) · 준비 중</span>
+        <a class="sgo" href="pricing.html" style="display:block">렌즈·콘택트 가격 →</a>
+        <span class="sgo" style="display:block;color:var(--bv-mute)">견적서 자동 발급 · 준비 중</span>
+        <span class="sgo" style="display:block;color:var(--bv-mute)">검안 신뢰 (안경사) · 준비 중</span>
         <a class="sgo" href="rx.html" style="display:block">③B 조제 산출 →</a>
         <a class="sgo" href="lens.html" style="display:block">④ 콘택트 측정 →</a>
         <a class="sgo" href="b.html" style="display:block">③ 검안·피팅 매뉴얼 →</a>
@@ -128,17 +133,17 @@
         <a class="sgo" href="customer.html" style="display:block">고객 앱 →</a>
         <a class="sgo" href="store.html" style="display:block">가맹점 →</a>
         <a class="sgo" href="hq.html" style="display:block">가맹본부 →</a>
-        <a class="sgo" href="equipment.html" style="display:block">🛠 장비 표준 →</a>
+        <a class="sgo" href="equipment.html" style="display:block">장비 표준 →</a>
       </div>
       <div style="font-size:13px;font-weight:700;color:var(--muted);margin:14px 0 6px">전략 · 자료</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">
         <a class="sgo" href="a.html" style="display:block">사업 개요 →</a>
-        <a class="sgo" href="insights.html" style="display:block">💡 전략 인사이트 →</a>
-        <a class="sgo" href="finance.html" style="display:block">📊 재무 모델 →</a>
-        <a class="sgo" href="production.html" style="display:block">📦 9사이즈 생산비율 →</a>
-        <a class="sgo" href="todo.html" style="display:block">📋 병렬 트랙 보드 →</a>
-        <a class="sgo" href="painmap.html" style="display:block">🔎 페인포인트 감사 맵 →</a>
-        <a class="sgo" href="manual.html" style="display:block">📕 업셀·컴플레인 매뉴얼 →</a>
+        <a class="sgo" href="insights.html" style="display:block">전략 인사이트 →</a>
+        <a class="sgo" href="finance.html" style="display:block">재무 모델 →</a>
+        <a class="sgo" href="production.html" style="display:block">9사이즈 생산비율 →</a>
+        <a class="sgo" href="todo.html" style="display:block">병렬 트랙 보드 →</a>
+        <a class="sgo" href="painmap.html" style="display:block">페인포인트 감사 맵 →</a>
+        <a class="sgo" href="manual.html" style="display:block">업셀·컴플레인 매뉴얼 →</a>
       </div>
     </div>
   </div>
@@ -150,9 +155,9 @@
 </div>
 <script>
 window.__bvGuide={title:'BETTERVISION OS 데모',sub:'세 화면, 하나의 시스템. 항목을 누르면 해당 카드로 이동해요.',points:[
-{sel:'.rolecard:nth-child(1)',t:'고객 앱',d:'측정·가상피팅·투명 견적·재구매 케어로 고객을 묶어요.'},
+{sel:'.rolecard:nth-child(1)',t:'고객 앱',d:'측정·가상피팅·투명 견적·재구매 케어를 한곳에서.'},
 {sel:'.rolecard:nth-child(2)',t:'가맹점',d:'CRM·POS·자동 발주·자동 마케팅·세무까지 — 버튼만 누르는 가게.'},
-{sel:'.rolecard:nth-child(3)',t:'가맹본부',d:'데이터·납품·시스템을 쥐고 채널을 통제. PB 마진이 수익 핵심.'}
+{sel:'.rolecard:nth-child(3)',t:'가맹본부',d:'데이터·공급·시스템을 본부가 맡아요. 공급 마진이 수익 핵심.'}
 ]};
 </script>
 <script src="/assets/app.js"></script>

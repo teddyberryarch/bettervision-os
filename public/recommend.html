@@ -3,8 +3,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 추천 · 가상피팅</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 .sec .ctitle{font-size:18px;font-weight:600;color:var(--ink);margin:2px 0 4px}
 .sec .sdesc{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:10px}
@@ -14,7 +14,7 @@
 .rk{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin:7px 0;cursor:pointer}
 .rk.pb{border-color:var(--good);background:var(--good-soft)}.rk.sel{box-shadow:inset 0 0 0 2px var(--ink)}
 .rk .pct{font-size:24px;font-weight:700;color:var(--ink);min-width:54px}.rk.pb .pct{color:var(--good)}
-.rk .meta{flex:1;font-size:14px}.rk .meta .b{font-weight:700}.rk .meta .s{font-size:12px;color:var(--muted);margin-top:2px}
+.rk .meta{flex:1;font-size:14px}.rk .meta .b{font-weight:700}.rk .meta .s{font-size:13px;color:var(--muted);margin-top:2px}
 .bars{display:grid;grid-template-columns:88px 1fr 42px;gap:5px 8px;font-size:13px;align-items:center;margin:8px 0}
 .bars .l{color:var(--muted)}.bars .track{height:9px;background:var(--surface);border-radius:9999px;overflow:hidden}
 .bars .fill{height:100%;background:var(--ink);border-radius:9999px}.bars .v{text-align:right;font-weight:600}
@@ -24,7 +24,7 @@
 .vrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}
 .vt{border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
 .vt.g{border-color:var(--good);background:var(--good-soft)}.vt.w{border-color:var(--warn)}.vt.b{border-color:var(--bad);background:var(--bad-soft)}
-.vt .vq{font-size:12px;color:var(--muted);font-weight:600}.vt .va{font-size:18px;font-weight:700;color:var(--ink);margin:2px 0}.vt .vv{font-size:13px;font-weight:600}
+.vt .vq{font-size:13px;color:var(--muted);font-weight:600}.vt .va{font-size:18px;font-weight:700;color:var(--ink);margin:2px 0}.vt .vv{font-size:13px;font-weight:600}
 .vt.g .vv{color:var(--good)}.vt.b .vv{color:var(--bad)}.vt.w .vv{color:var(--warn)}
 .ment{font-size:14px;color:var(--ink);background:var(--surface);border-radius:8px;padding:10px 12px;margin:8px 0}
 .sug{font-size:13px;color:var(--warn);font-weight:600;margin:6px 0}
@@ -119,7 +119,7 @@ function run(){
 function v(id){return document.getElementById(id).value;}
 function renderRank(){
   document.getElementById('rank').innerHTML=scored.map(function(r,i){
-    return '<div class="rk'+(r.c.pb?' pb':'')+(i===sel?' sel':'')+'" onclick="pick('+i+')"><div class="pct">'+r.total+'</div><div class="meta"><span class="b">'+r.c.brand+' '+r.c.model+'</span> '+(r.c.pb?'<span style="font-size:11px;color:var(--good);font-weight:700">PB</span>':'')+'<div class="s">'+r.c.shape+' · '+r.c.style.join('/')+' · '+DB.MAT[r.c.material].n+(r.m.splayOK?'':' · 소재 못맞춤')+'</div></div></div>';
+    return '<div class="rk'+(r.c.pb?' pb':'')+(i===sel?' sel':'')+'" onclick="pick('+i+')"><div class="pct">'+r.total+'</div><div class="meta"><span class="b">'+r.c.brand+' '+r.c.model+'</span> '+(r.c.pb?'<span style="font-size:13px;color:var(--good);font-weight:700">PB</span>':'')+'<div class="s">'+r.c.shape+' · '+r.c.style.join('/')+' · '+DB.MAT[r.c.material].n+(r.m.splayOK?'':' · 소재 못맞춤')+'</div></div></div>';
   }).join('');
 }
 function pick(i){sel=i;renderRank();renderDetail();}
@@ -180,7 +180,7 @@ function tryonSVG(c, face){
         '<line x1="-0.45" y1="-0.08" x2="0.45" y2="-0.08" stroke="'+col2+'" stroke-width="2" vector-effect="non-scaling-stroke"/>'+
         '<line x1="-1.55" y1="-0.05" x2="-2.15" y2="-0.20" stroke="'+col2+'" stroke-width="2" vector-effect="non-scaling-stroke"/>'+
         '<line x1="1.55" y1="-0.05" x2="2.15" y2="-0.20" stroke="'+col2+'" stroke-width="2" vector-effect="non-scaling-stroke"/></g>'+
-      '<text id="bvalignnote" x="'+(pw/2)+'" y="'+(ph-6)+'" font-size="'+(ph*0.04)+'" fill="#fff" text-anchor="middle" font-family="Inter" style="paint-order:stroke;stroke:#000;stroke-width:'+(ph*0.006)+'">'+c.model+' · 가상피팅</text></svg>';
+      '<text id="bvalignnote" x="'+(pw/2)+'" y="'+(ph-6)+'" font-size="'+(ph*0.04)+'" fill="#fff" text-anchor="middle" font-family="Pretendard" style="paint-order:stroke;stroke:#000;stroke-width:'+(ph*0.006)+'">'+c.model+' · 가상피팅</text></svg>';
   }
   var cx=100, cy=72, fw=Math.max(40,face.faceWidth||150)*0.62, fh=fw*1.28;
   var gW=(p.frontSpan||130)*0.62, a=(p.a||50)*0.62, dbl=(p.dbl||18)*0.62, lensH=22;
@@ -195,7 +195,7 @@ function tryonSVG(c, face){
    '<line x1="'+(lx+a/2)+'" y1="'+(ly-3)+'" x2="'+(rx-a/2)+'" y2="'+(ly-3)+'" stroke="'+col+'" stroke-width="1.6"/>'+
    '<line x1="'+(lx-a/2)+'" y1="'+(ly-lensH/2+3)+'" x2="'+(lx-a/2-16)+'" y2="'+(ly-lensH/2+1)+'" stroke="'+col+'" stroke-width="1.4"/>'+
    '<line x1="'+(rx+a/2)+'" y1="'+(ly-lensH/2+3)+'" x2="'+(rx+a/2+16)+'" y2="'+(ly-lensH/2+1)+'" stroke="'+col+'" stroke-width="1.4"/>'+
-   '<text x="'+cx+'" y="135" font-size="7" fill="#8a877f" text-anchor="middle" font-family="Inter,Pretendard">'+c.model+' · '+c.shape+' · 프론트폭 '+(p.frontSpan)+'mm</text>'+
+   '<text x="'+cx+'" y="135" font-size="7" fill="#8a877f" text-anchor="middle" font-family="Pretendard">'+c.model+' · '+c.shape+' · 프론트폭 '+(p.frontSpan)+'mm</text>'+
    '</svg>';
 }
 var _r=(window.BVRecord&&BVRecord.load)?BVRecord.load():null;
@@ -239,7 +239,7 @@ window.BVFace = { detect: async (img)=>{ try{ const m=await ensure(); const r=m.
    el.style.cssText='border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff';
    var sw=m.cols.map(function(c,i){return '<span data-c="'+c+'" style="width:15px;height:15px;border-radius:50%;background:'+C[c][0]+';border:1px solid rgba(0,0,0,.15);display:inline-block;cursor:pointer;'+(i===0?'outline:2px solid var(--ink);outline-offset:2px':'')+'"></span>';}).join(' ');
    el.innerHTML='<div style="height:96px;display:flex;align-items:center;justify-content:center">'+fr(m,first)+'</div>'+
-     '<div style="font-size:12px;letter-spacing:1px;color:var(--good);font-weight:700">'+m.id+'</div>'+
+     '<div style="font-size:13px;letter-spacing:1px;color:var(--good);font-weight:700">'+m.id+'</div>'+
      '<div style="font-size:16px;font-weight:600;color:var(--ink)">'+m.name+'</div>'+
      '<div style="font-size:13px;color:var(--muted);margin:2px 0 8px">'+m.shape+(m.metal?' · 메탈':' · 아세테이트')+' · 9-size</div>'+
      '<div class="pbsw" style="display:flex;gap:6px">'+sw+'</div>';

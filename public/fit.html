@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 피팅 자동 시스템</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 .ex-presets{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
 .ex-presets .chip{font-size:13px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
@@ -258,7 +258,7 @@ function buildSheet(){
   }
 
   var svg=''+
-'<svg viewBox="0 0 200 272" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Pretendard,sans-serif">'+
+'<svg viewBox="0 0 200 272" xmlns="http://www.w3.org/2000/svg" font-family="Pretendard,sans-serif">'+
 '<rect x="0" y="0" width="200" height="272" fill="#ffffff" stroke="#0d0d0c" stroke-width="0.4"/>'+
 '<text x="8" y="12" font-size="6" font-weight="700" fill="#0d0d0c">BETTERVISION · 정밀 측정 · 피팅 시트</text>'+
 '<text x="8" y="19.5" font-size="3.4" fill="#8a877f">고객 '+(F.name||'____')+'\u3000|\u30009사이즈 '+sz.code+'\u3000|\u3000소재 '+MAT[F.material].n+'\u3000|\u3000인쇄: 실제크기 100% · 맞춤 끄기</text>'+
