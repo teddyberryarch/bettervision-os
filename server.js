@@ -16,8 +16,8 @@ const TYPES = {
 const CAP = 2; // 30분당 정원
 
 function send(res, code, obj, extraHeaders){ var h={'content-type':'application/json; charset=utf-8'}; if(extraHeaders)for(var k in extraHeaders)h[k]=extraHeaders[k]; res.writeHead(code, h); res.end(JSON.stringify(obj)); }
-// [09.24] 인증 기본 켜짐. 끄려면 AUTH_ON=false 를 명시해야 함 (fail-closed)
-const AUTH_ON = process.env.AUTH_ON !== 'false';
+// [09.24] 클로즈드 베타 동안 로그인 없이 운영 (지근 결정). 실제 손님 데이터를 넣기 전에 Railway에 AUTH_ON=true 추가
+const AUTH_ON = process.env.AUTH_ON === 'true';
 // 로그인 없이 열리는 페이지 (고객 대면·데모)
 const PUBLIC_PAGES = ['/index.html','/login.html','/customer.html','/catalog.html','/lookbook.html','/pricing.html'];
 // [09.24] 서비스하지 않는 페이지 — 방향결정 v2.6 이전 내부 문서. 파일은 그대로 두고(삭제 금지) 404로 막음
