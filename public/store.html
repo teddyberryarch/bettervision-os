@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 가맹점</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
-<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 .finput2{font-family:inherit;font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:#fff}
 .slotrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2);font-size:14px}
@@ -54,7 +54,7 @@ textarea.finput2{font-family:inherit;font-size:15px;line-height:1.5}
 .pushrow .pacts{display:flex;gap:6px}
 </style>
 </head>
-<body class="bv-dense">
+<body>
 <script>
 /* 진입 인증 체크 (AUTH_ON일 때만 동작) */
 fetch('/api/me').then(function(r){return r.json();}).then(function(j){

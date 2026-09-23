@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BETTERVISION OS · 가맹본부</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
-<link rel="stylesheet" href="/assets/bv-theme.css">
 <style>
 .hqbk-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
 .hqbk-row:last-child{border-bottom:0}
@@ -95,7 +95,7 @@
 .feedrow.new{animation:feedin .4s ease}
 </style>
 </head>
-<body class="bv-dense">
+<body>
 <script>
 /* 진입 인증 체크 (AUTH_ON일 때만 동작) */
 fetch('/api/me').then(function(r){return r.json();}).then(function(j){
@@ -1052,7 +1052,7 @@ function feedLoad(){
     document.getElementById('careKpis').innerHTML=kv('확인 기한 도래',j.due+'건')+kv('확인 완료',j.done+'건 ('+pct(j.done,j.due)+')')+kv('기한 지남 · 미확인',j.overdue+'건')+kv('연락 안 됨',j.noreach+'건')+kv('불편 응답',j.uncomf+'건 ('+pct(j.uncomf,j.done)+')')+kv('A/S 열림 / 종결',j.as_open+' / '+j.as_closed);
     document.getElementById('careStores').innerHTML='<table class="tbl"><thead><tr><th>지점</th><th>도래</th><th>완료</th><th>불편</th></tr></thead><tbody>'+Object.keys(j.byStore).map(function(k){var b=j.byStore[k];return '<tr style="cursor:default"><td>'+k+'</td><td>'+b.due+'</td><td>'+b.done+'</td><td>'+b.uncomf+'</td></tr>';}).join('')+'</tbody></table>';
     var bars=function(o){ var ks=Object.keys(o), mx=Math.max.apply(null,ks.map(function(k){return o[k];}).concat([1]));
-      return ks.length? ks.map(function(k){return '<div style="display:flex;align-items:center;gap:10px;margin:6px 0"><span style="width:72px;font-size:15px">'+k+'</span><span style="flex:1;height:8px;background:var(--bv-fill);border-radius:2px;overflow:hidden"><i style="display:block;height:100%;width:'+(o[k]*100/mx)+'%;background:var(--bv-ink)"></i></span><span style="width:32px;text-align:right">'+o[k]+'</span></div>';}).join('') : '<div class="muted">아직 없음</div>'; };
+      return ks.length? ks.map(function(k){return '<div style="display:flex;align-items:center;gap:10px;margin:6px 0"><span style="width:72px;font-size:15px">'+k+'</span><span style="flex:1;height:8px;background:var(--line2);border-radius:2px;overflow:hidden"><i style="display:block;height:100%;width:'+(o[k]*100/mx)+'%;background:var(--ink)"></i></span><span style="width:32px;text-align:right">'+o[k]+'</span></div>';}).join('') : '<div class="muted">아직 없음</div>'; };
     document.getElementById('careCauses').innerHTML=bars(j.causes);
     document.getElementById('careIssues').innerHTML=bars(j.issues);
   }).catch(function(){});
