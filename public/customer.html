@@ -117,8 +117,8 @@
   <div class="lead">
     <div>
       <div class="eyebrow">고객 앱</div>
-      <h2>측정하고, 쓰고, 평생 케어받는다</h2>
-      <div class="sub">홈에서 추천·구매, 측정 탭에서 얼굴을 재서 프론트·템플 사이즈 산출, 케어 탭에서 렌즈·테 교체주기와 눈 건강을 관리. 착용 후 확인(7일째 착용 확인·A/S 기록)이 케어 탭에 이어진다.</div>
+      <h2>손님 앱</h2>
+      <div class="sub">얼굴을 재서 맞는 사이즈를 찾고, 새 안경을 받은 뒤 7일째에 착용감을 물어봐요. 교체 시기도 여기서 알려드려요.</div>
     </div>
   </div>
 
@@ -155,11 +155,11 @@
               <div class="kv"><span class="label">동공 간 거리(PD)</span><span id="myPD">63.5 mm</span></div>
               <div class="kv"><span class="label">시력 (도수)</span><span id="myRx">OD -3.25 / OS -3.50</span></div>
               <div class="kv" style="border-bottom:0"><span class="label">난시 / 축</span><span>OD -0.75 ×180 / OS -0.50 ×175</span></div>
-              <div class="note" style="font-size:14px;margin-top:10px">처방전·구매 내역·연락처 등 상세 정보는 개인정보 보호를 위해 매장(가맹점)과 본사에서만 관리해요.</div>
+              <div class="note" style="font-size:14px;margin-top:10px">처방과 구매 내역, 연락처는 매장과 본사에서만 볼 수 있어요.</div>
             </div>
             <div class="appcard ar">
               <h4>AR 가상 피팅 <span class="pill" style="background:rgba(255,255,255,.14);color:#ffffff">NEW</span></h4>
-              <div class="label" style="margin:8px 0 14px">얼굴에 씌워보고 고르세요. F2×T2에 맞는 810+ 조합만.</div>
+              <div class="label" style="margin:8px 0 14px">얼굴에 씌워보고 골라요. 내 사이즈 F2×T2에 맞는 테만 보여드려요.</div>
               <button class="btn small" style="background:#ffffff;color:#111111;border-color:#ffffff" onclick="toast('AR 피팅 실행 (프로토타입)')">가상으로 써보기</button>
             </div>
             <div class="appcard">
@@ -199,7 +199,7 @@
 
             <div class="kakao">
               <div class="kh">◗ 카카오톡 알림</div>
-              <div class="kbub">렌즈 교체 권장 시기예요 (+11개월). 성수점 예약하기 →<div class="kt">오늘 09:12 · 도수 리콜 자동</div></div>
+              <div class="kbub">렌즈 교체 권장 시기예요 (+11개월). 성수점 예약하기 ›<div class="kt">오늘 09:12 · 도수 리콜 자동</div></div>
             </div>
           </div>
 
@@ -207,7 +207,7 @@
           <div class="pscreen" id="s-measure">
             <div class="appcard">
               <h4>얼굴 측정 <span class="phaseflag">Phase 1 · 핵심</span></h4>
-              <div class="label" style="margin:6px 0 0">카메라로 자동 측정하거나, 아래 슬라이더로 직접 조절해요. 값이 바뀌면 사이즈·추천이 바로 갱신됩니다.</div>
+              <div class="label" style="margin:6px 0 0">카메라로 재거나 아래에서 직접 조절해요. 값을 바꾸면 추천도 바로 바뀌어요.</div>
               <div class="scanwrap" id="scanwrap">
                 <video id="camVid" playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"></video>
                 <div class="face"></div>
@@ -217,10 +217,10 @@
               </div>
               <button class="btn" style="width:100%;margin-top:12px" id="scanbtn" onclick="measureCamera()">카메라로 측정</button>
               <button class="btn small ghost" style="width:100%;margin-top:6px" onclick="runDemo()">데모값 넣기</button>
-              <div class="label" style="margin-top:6px;font-size:13px">카메라 권한 허용 필요 · 측정은 추정치(조명·각도 영향). 관자 길이는 정면 측정이 어려워 추정값이니 슬라이더로 조절하세요.</div>
+              <div class="label" style="margin-top:6px;font-size:13px">카메라 권한이 필요해요. 집에서 잰 값은 참고용이고, 정확한 값은 매장에서 다시 재요.</div>
 
               <div class="divider"></div>
-              <div class="label" style="margin-bottom:8px">측정값 — 직접 조절 가능</div>
+              <div class="label" style="margin-bottom:8px">측정값 조절</div>
               <div class="mfield"><div class="mlabrow"><span>안면 폭</span><b id="vW">142 mm</b></div>
                 <input type="range" id="inW" min="120" max="155" value="142" oninput="recompute()"></div>
               <div class="mfield"><div class="mlabrow"><span>관자(템플) 길이</span><b id="vL">143 mm</b></div>
@@ -239,7 +239,7 @@
 
             <div class="appcard" id="tryonCard">
               <h4>가상 피팅 <span class="phaseflag">베타</span></h4>
-              <div class="label" style="margin:6px 0 0">카메라로 얼굴 위에 안경을 얹어봐요. 간이 데모 — 위치·기울기 자동.</div>
+              <div class="label" style="margin:6px 0 0">카메라로 얼굴에 안경을 씌워봐요.</div>
               <div class="tryon-stage" id="tryStage">
                 <video id="tryVid" playsinline muted></video>
                 <div class="glass-wrap" id="glassWrap"></div>
@@ -258,18 +258,18 @@
                 </div>
               </div>
               <button class="btn" id="tryBtn" style="width:100%;margin-top:10px" onclick="tryToggle()">가상 피팅 시작</button>
-              <div class="label" style="font-size:13px;margin-top:6px">간이 데모 — 실제 제품 정합·렌즈 반사는 추후 본격 AR에서.</div>
+              <div class="label" style="font-size:13px;margin-top:6px">체험용 화면이에요. 실제 착용감은 매장에서 확인해요.</div>
             </div>
 
             <div class="appcard" id="recCard">
               <h4>맞는 프레임 <span class="label" id="recCount" style="font-weight:400"></span></h4>
               <div id="recList" style="margin-top:4px"></div>
-              <button class="btn small ghost" style="width:100%;margin-top:10px" onclick="goProducts()">전체 상품 보기 (테·선글라스·렌즈·콘택트) →</button>
+              <button class="btn small ghost" style="width:100%;margin-top:10px" onclick="goProducts()">전체 상품 보기</button>
             </div>
 
             <div class="appcard" id="ordCard">
               <h4>주문 / 픽업</h4>
-              <div class="label" style="margin:6px 0 8px">도수 안경·콘택트는 매장 방문·결제가 원칙이에요. 앱에선 예약만 하고, 노쇼 방지용 소액 보증금만 받아요(방문 시 차감 또는 환불). 소모품은 케어 탭에서 바로 구매.</div>
+              <div class="label" style="margin:6px 0 8px">도수 안경과 콘택트렌즈는 매장에서 결제해요. 앱에서는 예약만 하고 소액 보증금을 받아요. 방문하면 결제 금액에서 빼드려요.</div>
               <div class="label" style="margin-bottom:4px">주문 유형</div>
               <div class="chips" id="ordKind">
                 <button class="chip active" data-k="B" data-pay="매장">안경테 (잡아두기)</button>
@@ -292,7 +292,7 @@
               <button class="btn" style="width:100%;margin-top:11px" onclick="ordConfirm()">주문 확정</button>
               <div id="ordMsg" class="bookmsg"></div>
             </div>
-            <div class="note" style="font-size:15px">측정값은 본사 클라우드에 저장 → 어느 가맹점에서도 이어서 응대 → 호환 안 되는 타사 프레임은 못 맞춤(렌즈·소모품 재구매의 시작).</div>
+            <div class="note" style="font-size:15px">측정값은 저장돼서 다른 매장에 가도 다시 잴 필요가 없어요.</div>
           </div>
 
           <!-- CARE -->
@@ -316,12 +316,12 @@
             </div>
             <div class="appcard" id="remindCard">
               <h4>재구매 알림 </h4>
-              <div class="label" style="margin:6px 0 4px">교체 시기가 다가온 항목이에요. 도수 제품은 매장 방문, 소모품은 바로 구매.</div>
+              <div class="label" style="margin:6px 0 4px">바꿀 때가 된 것들이에요. 도수 제품은 매장에서, 소모품은 여기서 바로 살 수 있어요.</div>
               <div id="remindBox"></div>
             </div>
             <div class="appcard" id="wishCard">
               <h4>위시리스트 <span class="label" id="wishCount" style="font-weight:400"></span></h4>
-              <div class="label" style="margin:6px 0 8px">상품 탭에서 ♡로 담은 관심 제품. 나란히 비교하고 매장에 잡아둘 수 있어요.</div>
+              <div class="label" style="margin:6px 0 8px">찜한 제품이에요. 비교해 보고 매장에 맡아둘 수 있어요.</div>
               <div id="wishBox"></div>
             </div>
             <div class="appcard">
@@ -362,7 +362,7 @@
 
             <div class="appcard">
               <h4>눈 건강 타임라인 <span class="label">도수 변화</span></h4>
-              <div class="label" style="margin:6px 0 0">내 눈 기록이 다 쌓여요. 떠나면 못 가져가는 기록.</div>
+              <div class="label" style="margin:6px 0 0">검사할 때마다 시력 기록이 쌓여요.</div>
               <div class="tl-chart" id="tlChart"></div>
               <div class="label" style="text-align:right;font-size:14px">우안(OD) 구면 추이 · 4회 검안</div>
             </div>
@@ -387,7 +387,7 @@
           <div class="pscreen" id="s-products">
             <div class="appcard">
               <h4>상품</h4>
-              <div class="label" style="margin:6px 0 12px">카테고리별 제품과 가격이에요. 도수 제품(안경·콘택트)은 매장 방문이 원칙, 측정 탭에서 주문/픽업으로 이어져요.</div>
+              <div class="label" style="margin:6px 0 12px">종류별 제품과 가격이에요. 도수 제품은 매장에서 맞춰요.</div>
               <div class="csub" id="csub">
                 <div class="cs active" data-c="frame">테</div>
                 <div class="cs" data-c="sun">선글라스</div>
@@ -406,14 +406,14 @@
 
     <div>
       <div class="card pad">
-        <div class="eyebrow">고객 여정 = 다시 찾는 이유</div>
+        <div class="eyebrow">손님이 다시 오는 이유</div>
         <div class="feat-list">
-          <div class="feat"><div class="ic">①</div><div><div class="ft">측정 — 한 번 재면 기록으로</div><div class="fd">얼굴·PD·프론트·템플 사이즈가 본부 시스템에 저장. 어느 매장에서든 이어서 씀.</div></div></div>
-          <div class="feat"><div class="ic">②</div><div><div class="ft">구매 — 맞는 사이즈로</div><div class="fd">9사이즈 중 얼굴에 맞는 F×T 조합으로 추천.</div></div></div>
-          <div class="feat"><div class="ic">③</div><div><div class="ft">케어 — 재구매 + 구독</div><div class="fd">렌즈·콘택트 교체주기 + 멤버십. 때가 되면 알림.</div></div></div>
-          <div class="feat"><div class="ic">④</div><div><div class="ft">판 다음까지 — 7일째 확인</div><div class="fd">착용 7일째 불편한 곳을 묻고, 불편하면 매장이 조정. 도수 변화도 기록.</div></div></div>
+          <div class="feat"><div class="ic">①</div><div><div class="ft">한 번 재면 계속 써요</div><div class="fd">얼굴 크기와 눈 사이 거리가 저장돼서 어느 매장에서든 이어서 써요.</div></div></div>
+          <div class="feat"><div class="ic">②</div><div><div class="ft">맞는 사이즈로 골라요</div><div class="fd">9개 사이즈 중 얼굴에 맞는 걸 추천해요.</div></div></div>
+          <div class="feat"><div class="ic">③</div><div><div class="ft">바꿀 때 알려드려요</div><div class="fd">렌즈와 콘택트렌즈 교체 시기에 맞춰 알림이 가요.</div></div></div>
+          <div class="feat"><div class="ic">④</div><div><div class="ft">7일째 다시 물어봐요</div><div class="fd">불편한 곳이 있으면 매장에서 연락드리고 조정해 드려요.</div></div></div>
         </div>
-        <div class="note">측정→구매→7일 확인→케어로 이어지는 기록이 쌓일수록 매장이 고객을 더 잘 맞춘다.</div>
+        <div class="note">기록이 쌓일수록 다음 안경을 더 잘 맞출 수 있어요.</div>
       </div>
     </div>
   </div>
@@ -607,7 +607,7 @@ var DEMO_CUSTOMER_ID=1; // 데모 고객(윤서진). 고객 로그인이 생기�
 /* 카메라 자동 측정(데모): 애니메이션 후 측정값 채우고 재계산 */
 function measureCamera(){
   var btn=document.getElementById('scanbtn'), w=document.getElementById('scanwrap'), st=document.getElementById('scanstat');
-  if(!window.bvFaceMeasure || !window.__bvFaceReady){ toast('카메라 모듈 로딩 중 — 데모값으로 진행'); runDemo(); return; }
+  if(!window.bvFaceMeasure || !window.__bvFaceReady){ toast('카메라를 준비하고 있어요. 예시 값으로 보여드릴게요'); runDemo(); return; }
   w.classList.remove('done'); w.classList.add('scanning'); btn.disabled=true; btn.textContent='측정 중…';
   window.bvFaceMeasure(function(res){
     var fw=Math.max(120,Math.min(155,res.faceWidth));
@@ -703,7 +703,7 @@ function book(){
   BVBooking.add({store:store,date:date,time:time,name:name,phone:phone}).then(function(res){
     if(!res.ok){ toast(res.error||'예약 실패'); bkRenderSlots(); return; }
     msg.className='bookmsg show';
-    msg.textContent='✓ '+store+' · '+date+' '+time+' · '+name+'님 예약 완료 — 매장에 전달됐어요.';
+    msg.textContent='✓ '+store+' · '+date+' '+time+' · '+name+'님 예약이 잡혔어요. 매장에 전달했어요.';
     document.getElementById('bkName').value=''; document.getElementById('bkPhone').value=''; bkRenderSlots();
   });
 }
@@ -773,8 +773,8 @@ function ordConfirm(){
     .then(function(r){return r.json();}).then(function(j){
       if(!j.ok){toast('주문 실패');return;}
       var msg=document.getElementById('ordMsg'); msg.className='bookmsg show';
-      msg.textContent='✓ '+store+' '+date+' '+time+' · '+item+(payType==='보증금'?(' · 보증금 ₩'+ORD_DEPOSIT.toLocaleString('ko-KR')+' 결제(방문 시 차감/환불)'):' · 매장에 잡아둠')+' — 매장에 전달됐어요. 결제는 방문 시 매장에서.';
-      toast(payType==='보증금'?'예약 + 보증금 접수 — 결제는 매장에서':'매장에 잡아두기 완료');
+      msg.textContent='✓ '+store+' '+date+' '+time+' · '+item+(payType==='보증금'?(' · 보증금 ₩'+ORD_DEPOSIT.toLocaleString('ko-KR')+' 결제(방문 시 차감/환불)'):' · 매장에 잡아둠')+' 매장에 전달했어요. 결제는 방문해서 해요.';
+      toast(payType==='보증금'?'예약과 보증금을 받았어요. 결제는 매장에서 해요':'매장에 잡아두기 완료');
     }).catch(function(){toast('네트워크 오류');});
 }
 
@@ -953,7 +953,7 @@ function wishRemove(n){var i=WISH.indexOf(n); if(i>=0)WISH.splice(i,1); renderWi
 /* ===== 가상 피팅 컨트롤 ===== */
 var tryOn=false;
 function tryToggle(){
-  if(!window.bvTryStart){ toast('카메라 모듈 로딩 중 — 잠시 후 다시'); return; }
+  if(!window.bvTryStart){ toast('카메라를 준비하고 있어요. 잠시 후 다시 눌러주세요'); return; }
   if(!tryOn){
     window.bvTryStart(function(e){toast(e);}).then(function(ok){ if(ok){tryOn=true; document.getElementById('tryBtn').textContent='정지';} });
   } else {

@@ -122,8 +122,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="lead">
     <div>
       <div class="eyebrow">가맹본부</div>
-      <h2>본부가 데이터와 공급, 시스템을 맡아 매장이 판매에 집중하게 해요</h2>
-      <div class="sub">두 원칙 — ① 데이터는 본부가 관리 ② 공급은 본부 단일 경로. 본부 수익은 안경 판매가 아니라 공급마진·가맹비·구독에서 나온다.</div>
+      <h2>전체 매장 현황</h2>
+      <div class="sub">전 매장 매출과 재고, 손님 기록을 한곳에서 봐요.</div>
     </div>
   </div>
 
@@ -139,7 +139,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     </div>
     <div class="dash-top">
       <div class="dash-kpi"><div class="label">이번 달 GMV (전 지점)</div><div class="big kfig" id="dashGMV">₩0</div><div class="label" id="dashGMVsub" style="font-size:13px"></div></div>
-      <div class="dash-kpi pb"><div class="label">PB 침투율 (렌즈·콘택트)</div><div class="big kfig" id="dashPB">0%</div><div class="label" style="font-size:13px">본부 마진 핵심 — 높을수록 본부 수익↑</div></div>
+      <div class="dash-kpi pb"><div class="label">PB 침투율 (렌즈·콘택트)</div><div class="big kfig" id="dashPB">0%</div><div class="label" style="font-size:13px">렌즈와 콘택트렌즈 매출 비중</div></div>
     </div>
     <div class="hq-grid l" style="margin-top:16px">
       <div>
@@ -181,7 +181,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- PB 마진 관리 -->
   <div class="card pad" style="margin-bottom:6px">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-      <div class="eyebrow">PB 마진 관리 <span class="livedot">LIVE</span> <span class="label" style="font-weight:400">· 본부 수익의 실체</span></div>
+      <div class="eyebrow">PB 마진 관리 <span class="livedot">LIVE</span> <span class="label" style="font-weight:400">· PB 마진</span></div>
       <div style="display:flex;gap:8px;align-items:center">
         <button class="qbtn" onclick="pbMonth(-1)">‹</button>
         <span id="pbYM" style="font-size:15px;min-width:96px;text-align:center"></span>
@@ -196,10 +196,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div>
         <div class="eyebrow" style="margin-bottom:8px">카테고리별 본부 마진</div>
         <div id="pbCat"></div>
-        <div class="label" style="font-size:13px;margin-top:6px">렌즈·콘택트(PB)는 공급마진율이 높아 본부 수익의 핵심. 테는 낮게(미끼·브랜딩).</div>
+        <div class="label" style="font-size:13px;margin-top:6px">렌즈와 콘택트렌즈는 공급 마진이 높고, 테는 낮게 잡았어요.</div>
       </div>
       <div>
-        <div class="eyebrow" style="margin-bottom:8px">지점별 본부 기여 마진 · PB 비중</div>
+        <div class="eyebrow" style="margin-bottom:8px">매장별 마진과 PB 비중</div>
         <div id="pbStores"></div>
       </div>
     </div>
@@ -207,8 +207,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 
   <!-- 고객 데이터 귀속 -->
   <div class="card pad" style="margin-bottom:6px">
-    <div class="eyebrow">고객 데이터 귀속 · 데이터는 본부 소유 ⬡</div>
-    <div class="label" style="font-size:13px;margin:6px 0 12px">이사·이직으로 다른 가맹점에 가도 측정·처방·구매이력이 그대로 승계돼요. 데이터를 매장이 아니라 본부가 쥐기 때문 — 가맹점이 떠나도 고객·이력은 네트워크에 남아요.</div>
+    <div class="eyebrow">손님 기록</div>
+    <div class="label" style="font-size:13px;margin:6px 0 12px">손님이 다른 매장에 가도 측정값과 처방, 구매 기록을 이어서 볼 수 있어요.</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
       <div><div class="label" style="margin-bottom:4px">고객</div><select id="belongSel" class="hqsel" onchange="belongShow()"></select></div>
       <div><div class="label" style="margin-bottom:4px">지점 이동 (이사 시뮬)</div><select id="belongTo" class="hqsel"></select></div>
@@ -220,14 +220,14 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- 수요 예측 -> 푸시 발주 -->
   <div class="card pad" style="margin-bottom:6px">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-      <div class="eyebrow">수요 예측 → 푸시 발주 <span class="label" style="font-weight:400">· 본부가 알아서 밀어줌</span></div>
+      <div class="eyebrow">발주 제안 <span class="label" style="font-weight:400">· 매장이 승인해요</span></div>
       <select id="fcDl" class="hqsel">
         <option value="tmw18">내일 18:00 마감</option>
         <option value="today18">오늘 18:00 마감</option>
         <option value="h3">3시간 후 마감</option>
       </select>
     </div>
-    <div class="label" style="font-size:13px;margin:8px 0 12px">최근 30일 판매 속도로 다음 주 수요를 예측 → 부족분을 가맹점에 푸시. 사장님은 승인만, 무응답은 자동 확정.</div>
+    <div class="label" style="font-size:13px;margin:8px 0 12px">최근 30일 판매량으로 다음 주에 부족할 품목을 찾아요. 발주안을 보내면 매장이 승인해요. 답이 없으면 만료돼요.</div>
     <div id="fcBox"></div>
     <button class="btn" id="fcAllBtn" style="width:100%;margin-top:12px;display:none" onclick="fcPushAll()">권장 물량 전 지점 일괄 푸시</button>
   </div>
@@ -235,7 +235,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- 본부 분석 리포트 -->
   <div class="card pad" style="margin-bottom:6px">
     <div class="eyebrow">본부 분석 리포트 <span class="livedot">LIVE</span> <span class="label" style="font-weight:400">· 데이터로 생산·소싱 결정</span></div>
-    <div class="label" style="font-size:13px;margin:8px 0 12px">최근 30일. 어떤 사이즈·디자인이 팔리는지(생산 발주), 어느 상권이 PB가 강한지(소싱·마케팅 배분)를 본부가 한눈에.</div>
+    <div class="label" style="font-size:13px;margin:8px 0 12px">최근 30일 동안 어떤 사이즈와 디자인이 팔렸는지, 매장별로 PB가 얼마나 팔렸는지 봐요.</div>
     <div class="anagrid">
       <div class="anabox">
         <div class="anah">프레임 사이즈 분포 <span class="label">· 생산 비중 결정</span></div>
@@ -250,7 +250,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
         <div id="anaDesign"></div>
       </div>
       <div class="anabox">
-        <div class="anah">상권별 PB 침투율 <span class="label">· 높을수록 본부 마진↑</span></div>
+        <div class="anah">상권별 PB 침투율 <span class="label"></span></div>
         <div id="anaPb"></div>
       </div>
     </div>
@@ -259,7 +259,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- 본부 권장가 -->
   <div class="card pad" style="margin-bottom:6px">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-      <div class="eyebrow">권장가 · 본부 <span class="label" style="font-weight:400">· 권장 소비자가와 권장 할인 범위 안내 (판매가는 매장이 정함)</span></div>
+      <div class="eyebrow">권장가 <span class="label" style="font-weight:400">· 권장 소비자가와 권장 할인 범위 안내 (판매가는 매장이 정함)</span></div>
       <select id="ppCat" class="hqsel" onchange="ppLoad()">
         <option value="렌즈">렌즈</option>
         <option value="콘택트">콘택트</option>
@@ -268,14 +268,14 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
         <option value="액세서리">액세서리</option>
       </select>
     </div>
-    <div class="label" style="font-size:13px;margin:8px 0 6px">권장가를 바꾸면 가맹점 POS의 기본 표시가가 바뀌어요. 판매가는 매장이 조정할 수 있고, 권장 할인 범위를 벗어나면 안내만 떠요. PB(렌즈·콘택트)는 마진 보호로 한도를 낮게.</div>
+    <div class="label" style="font-size:13px;margin:8px 0 6px">권장가를 바꾸면 매장 결제 화면에 먼저 뜨는 가격이 바뀌어요. 판매가는 매장이 정하고, 권장 범위를 벗어나면 안내만 떠요.</div>
     <div id="ppBox"></div>
   </div>
 
   <!-- 공급·물류 자동화 -->
   <div class="card pad" style="margin-bottom:6px">
-    <div class="eyebrow">공급·물류 자동화 · 본부 출고센터 </div>
-    <div class="label" style="font-size:13px;margin:6px 0 12px">전 지점 발주를 품목별로 통합해 본부가 한 번에 출고. 공급이 본부 한 경로라서 가능 — 규모의 경제·재고 효율.</div>
+    <div class="eyebrow">본부 출고 </div>
+    <div class="label" style="font-size:13px;margin:6px 0 12px">매장 발주를 품목별로 모아서 한 번에 보내요.</div>
     <div class="dash-top">
       <div class="dash-kpi"><div class="label">출고 대기 (대기+배송중)</div><div class="big kfig" id="logiCount">0건</div></div>
       <div class="dash-kpi"><div class="label">총 출고 수량</div><div class="big kfig" id="logiQty">0개</div></div>
@@ -301,7 +301,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       </select>
     </div>
     <div class="pushbox">
-      <div class="eyebrow" style="margin-bottom:8px">지점에 발주 푸시 <span class="label" style="font-weight:400">· 본부 주도 — 가맹점은 승인만</span></div>
+      <div class="eyebrow" style="margin-bottom:8px">매장에 발주 제안 보내기 <span class="label" style="font-weight:400">매장이 승인해야 발주돼요</span></div>
       <div class="pushgrid">
         <select id="pushStore" class="hqsel"></select>
         <select id="pushSku" class="hqsel"></select>
@@ -313,15 +313,15 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
         </select>
         <button class="btn small" onclick="pushSend()">푸시 발송</button>
       </div>
-      <div class="label" style="font-size:13px;margin-top:6px">마감까지 가맹점이 응답 안 하면 본부안대로 자동 확정돼요.</div>
+      <div class="label" style="font-size:13px;margin-top:6px">마감까지 매장이 답하지 않으면 발주안은 만료돼요.</div>
     </div>
     <div id="hqOrders" style="margin-top:12px"></div>
   </div>
 
   <!-- 신규 가맹 시뮬레이터 -->
   <div class="card pad" style="margin-bottom:6px">
-    <div class="eyebrow">신규 가맹 시뮬레이터 · 영업 도구</div>
-    <div class="label" style="font-size:13px;margin:6px 0 12px">상권·입지·평수를 넣으면 예상 매출·본부 마진·가맹점 수익·회수기간을 즉시 계산. 가맹 영업 미팅용 (데모 추정).</div>
+    <div class="eyebrow">새 매장 수익 계산</div>
+    <div class="label" style="font-size:13px;margin:6px 0 12px">상권과 평수를 넣으면 예상 매출과 회수 기간을 계산해요. 추정치예요.</div>
     <div class="frgrid">
       <div><div class="label" style="margin-bottom:4px">상권 유형</div>
         <select id="frTrade" class="hqsel" style="width:100%" onchange="frCalc()">
@@ -345,7 +345,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     </div>
     <div class="hq-grid l" style="margin-top:16px">
       <div><div class="eyebrow" style="margin-bottom:8px">가맹점 손익 (월)</div><div id="frStoreBox"></div></div>
-      <div><div class="eyebrow" style="margin-bottom:8px">초기 투자 · 회수기간</div><div id="frInvBox"></div></div>
+      <div><div class="eyebrow" style="margin-bottom:8px">개설 비용과 회수 기간</div><div id="frInvBox"></div></div>
     </div>
   </div>
 
@@ -371,23 +371,23 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="card pad" id="storeDetail"></div>
     <div class="card pad">
       <div class="eyebrow">전 매장 예약 현황 (오늘) <span class="livedot">LIVE</span></div>
-      <div class="label" style="margin:6px 0 10px">30분당 정원 2명 기준. (데모: 샘플 예약)</div>
+      <div class="label" style="margin:6px 0 10px">30분에 2명 기준이에요.</div>
       <div id="hqBook"></div>
     </div>
     <div class="card pad">
       <div class="eyebrow">실시간 알림 (전 매장)</div>
-      <div class="stockrow"><span style="color:var(--warn)">● 성수점 — F2 알도 R 렌즈 재고 임박(2)</span><span class="muted">방금</span></div>
-      <div class="stockrow"><span style="color:var(--warn)">● 강남점 — 대기 3명, 인력 부족 신호</span><span class="muted">3분 전</span></div>
-      <div class="stockrow"><span style="color:var(--bad)">● 부산서면 — 재고 3품목 부족, 발주 필요</span><span class="muted">8분 전</span></div>
-      <div class="stockrow"><span style="color:var(--good)">● 홍대점 — 목표 매출 102% 달성</span><span class="muted">12분 전</span></div>
-      <div class="stockrow" style="border-bottom:0"><span class="muted">● 판교점 — 누진렌즈 검수 중</span><span class="muted">21분 전</span></div>
-      <div class="note" style="margin-top:14px"><b>관제.</b> 매출만이 아니라 방문·대기·재고·인력·발주·이상을 전 매장 실시간으로. 문제 매장에 본부가 먼저 조치(발주 푸시·인력 매칭).</div>
+      <div class="stockrow"><span style="color:var(--warn)">● 성수점 · 알도 R 렌즈 재고 2개 남았어요</span><span class="muted">방금</span></div>
+      <div class="stockrow"><span style="color:var(--warn)">● 강남점 · 대기 3명, 직원이 부족해요</span><span class="muted">3분 전</span></div>
+      <div class="stockrow"><span style="color:var(--bad)">● 부산서면 · 재고 부족 3품목, 발주가 필요해요</span><span class="muted">8분 전</span></div>
+      <div class="stockrow"><span style="color:var(--good)">● 홍대점 · 목표 매출 102% 달성했어요</span><span class="muted">12분 전</span></div>
+      <div class="stockrow" style="border-bottom:0"><span class="muted">● 판교점 · 누진렌즈 검수 중이에요</span><span class="muted">21분 전</span></div>
+      <div class="note" style="margin-top:14px"><b>관제.</b> 매출, 방문, 대기, 재고를 매장별로 봐요. 문제가 있는 매장은 본부가 먼저 연락해요.</div>
     </div>
   </div>
 
   <!-- 전 매장 설정 (권장가·프로모션 안내) -->
   <div class="card pad ctlcard" style="margin-top:18px">
-    <div class="eyebrow">전 매장 설정 — 본부 권장가·프로모션 배포</div>
+    <div class="eyebrow">권장가와 프로모션 안내</div>
     <div class="hq-grid" style="margin-top:6px">
       <div>
         <div class="label" style="margin-bottom:4px">권장가 · 프로모션 안내</div>
@@ -398,7 +398,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <span class="label">프로모션 'F2 가을 컬러 10%'</span>
           <button class="btn small" onclick="toast('전 매장에 프로모션 안내 발송 · 참여는 매장 선택 (프로토타입)')">전 매장에 안내</button>
         </div>
-        <div class="note" style="margin-top:12px;font-size:15px"><b>원칙.</b> 판매가는 가맹점이 정한다. 본부는 권장가와 프로모션을 안내하고, 참여는 매장이 고른다.</div>
+        <div class="note" style="margin-top:12px;font-size:15px"><b>원칙.</b> 판매가는 매장이 정해요. 본부는 권장가와 프로모션을 안내하고, 참여는 매장이 골라요.</div>
       </div>
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2)">
@@ -406,27 +406,27 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <div class="switch" onclick="this.classList.toggle('off');toast('자동 발주 제안 설정 변경 (프로토타입)')"></div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2)">
-          <div><div style="font-size:16px">진열 가이드 배포</div><div class="label">이번 주 권장 매대 = 'F2 가을 컬러 전면' · 적용 여부는 매장 선택</div></div>
+          <div><div style="font-size:16px">진열 가이드 배포</div><div class="label">이번 주 권장 진열은 'F2 가을 컬러'예요. 적용은 매장이 정해요</div></div>
           <div class="switch" onclick="this.classList.toggle('off');toast('진열 가이드 배포 변경 (프로토타입)')"></div>
         </div>
         <div style="padding:9px 0">
-          <div style="font-size:16px;margin-bottom:6px">표준 운영 점수 (QC) — 실행률·응대·청결·후기</div>
+          <div style="font-size:16px;margin-bottom:6px">매장 운영 점수</div>
           <div class="qc-row"><span class="label">성수점</span><div class="qc-track"><div class="qc-fill" style="width:94%;background:var(--good)"></div></div><span class="muted" style="text-align:right">94</span></div>
           <div class="qc-row"><span class="label">홍대점</span><div class="qc-track"><div class="qc-fill" style="width:88%;background:var(--good)"></div></div><span class="muted" style="text-align:right">88</span></div>
           <div class="qc-row"><span class="label">강남점</span><div class="qc-track"><div class="qc-fill" style="width:82%;background:var(--accent)"></div></div><span class="muted" style="text-align:right">82</span></div>
           <div class="qc-row"><span class="label">판교점</span><div class="qc-track"><div class="qc-fill" style="width:79%;background:var(--warn)"></div></div><span class="muted" style="text-align:right">79</span></div>
           <div class="qc-row"><span class="label">부산서면</span><div class="qc-track"><div class="qc-fill" style="width:71%;background:var(--warn)"></div></div><span class="muted" style="text-align:right">71</span></div>
         </div>
-        <div class="note" style="font-size:15px"><b>연결.</b> QC 점수 → 등급·인센티브·경고로. 낮은 매장은 본부가 원격 피팅 코칭·재교육 투입.</div>
+        <div class="note" style="font-size:15px"><b>연결.</b> 점수가 낮은 매장에는 본부가 피팅 교육을 지원해요.</div>
       </div>
     </div>
-    <div class="note" style="margin-top:4px"><b>역할.</b> 본부는 기준(권장가·진열 가이드·발주 제안·품질)을 만들고, 가맹점은 '버튼만 누르는 가게'(오늘 할 일·원클릭 마케팅·자동 세팅)로 운영한다. 결정은 매장이 한다.</div>
+    <div class="note" style="margin-top:4px"><b>역할.</b> 가격과 발주는 매장이 최종으로 정해요.</div>
   </div>
 
   <!-- 부품 ODM · 공급망 + 수요→생산 환산 -->
   <div class="hq-grid l" style="margin-top:18px">
     <div class="card pad">
-      <div class="eyebrow">부품 ODM · 공급망 (프론트 / 템플 / 렌즈 분리)</div>
+      <div class="eyebrow">부품 공급 (앞판, 다리, 렌즈)</div>
       <div class="label" style="margin-bottom:6px">완성품이 아니라 부품 단위로 소싱·관리. "Designed &amp; Assembled in Korea".</div>
       <table class="tbl">
         <thead><tr><th>부품</th><th>공급사 / 허브</th><th>리드타임</th><th>발주 잔량</th><th>전국 재고</th><th>상태</th></tr></thead>
@@ -437,10 +437,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <tr style="cursor:default"><td>렌즈 (알도 R)</td><td>본부 공급</td><td>7일</td><td>5,000</td><td>12,000</td><td><span class="pill good">적정</span></td></tr>
         </tbody>
       </table>
-      <div class="note" style="font-size:15px"><b>관리.</b> 프론트·템플 리드타임이 달라 따로 관리해야 결품을 막는다.</div>
+      <div class="note" style="font-size:15px"><b>관리.</b> 앞판과 다리는 입고 기간이 달라서 따로 챙겨요.</div>
     </div>
     <div class="card pad">
-      <div class="eyebrow">수요 → 생산 발주 환산</div>
+      <div class="eyebrow">생산 발주 수량</div>
       <div class="label" style="margin-bottom:6px">프론트×템플 수요 매트릭스를 부품 생산 수량으로 자동 환산.</div>
       <div class="asm"><span>프론트 F2</span><span><b>320</b> ea 추천</span></div>
       <div class="asm"><span>프론트 F1 / F3</span><span><b>240 / 190</b> ea</span></div>
@@ -453,8 +453,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 
   <!-- [09.24] 판 다음까지 확인 — 전 매장 -->
   <div class="card pad" style="margin-top:18px">
-    <div class="eyebrow">판 다음까지 확인 · 전 매장</div>
-    <div class="label" style="margin:6px 0 12px">결제 7일 뒤 착용 확인과 A/S 원인 기록. 원인이 쌓이면 검안·가공·피팅·추천 중 어디를 고칠지 보입니다.</div>
+    <div class="eyebrow">판 다음 확인</div>
+    <div class="label" style="margin:6px 0 12px">안경을 건넨 뒤 7일째 물어본 결과와 A/S 원인이에요.</div>
     <div class="hq-grid">
       <div><div id="careKpis"></div><div id="careStores" style="margin-top:12px"></div></div>
       <div><div class="label" style="margin-bottom:6px">A/S 종결 원인</div><div id="careCauses"></div>
@@ -464,7 +464,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 
   <!-- 전 매장 그리드 + 이상 탐지 -->
   <div class="card pad" style="margin-top:18px">
-    <div class="eyebrow">전 매장 그리드 — 관제 한 판</div>
+    <div class="eyebrow">매장별 현황</div>
     <div class="sgrid">
       <div class="scard"><div class="sn">성수점 <span class="pill good">정상</span></div><div class="sm"><span class="label">오늘 매출</span><span class="mv">₩412만</span></div><div class="sm"><span class="label">QC</span><span class="mv">94</span></div><div class="sm"><span class="label">재고 경고</span><span class="mv">2품목</span></div><div class="sm"><span class="label">알림</span><span class="mv">F2 렌즈 임박</span></div></div>
       <div class="scard"><div class="sn">홍대점 <span class="pill good">정상</span></div><div class="sm"><span class="label">오늘 매출</span><span class="mv">₩388만</span></div><div class="sm"><span class="label">QC</span><span class="mv">88</span></div><div class="sm"><span class="label">재고 경고</span><span class="mv">0</span></div><div class="sm"><span class="label">알림</span><span class="mv">목표 102%</span></div></div>
@@ -478,11 +478,11 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="hq-grid l" style="margin-top:18px">
     <div class="card pad">
       <div class="eyebrow">이상 탐지 (자동)</div>
-      <div class="flagrow"><span class="supplybad">● 강남점 — 권장 할인 범위 밖 판매 5건 (매장 판단, 참고)</span><span class="pill">참고</span></div>
-      <div class="flagrow"><span class="supplybad">● 부산서면 — 판매 기록과 본부 출고 불일치(미경유 매입 의심)</span><span class="pill warn">조사</span></div>
-      <div class="flagrow"><span class="supplywarn">● 판교점 — QC 94→79 급락</span><span class="pill warn">경고</span></div>
+      <div class="flagrow"><span class="supplybad">● 강남점 · 권장 범위 밖 판매 5건 (참고)</span><span class="pill">참고</span></div>
+      <div class="flagrow"><span class="supplybad">● 부산서면 · 판매 기록과 본부 출고 기록이 달라요</span><span class="pill warn">조사</span></div>
+      <div class="flagrow"><span class="supplywarn">● 판교점 · 운영 점수 94에서 79로 떨어졌어요</span><span class="pill warn">경고</span></div>
       <div class="flagrow"><span class="muted">● 본부 공급 품목 기준 재고 대조 작동 중</span><span class="pill good">정상</span></div>
-      <div class="note" style="margin-top:14px"><b>목적.</b> 품질(QC)과 공급 기록 불일치를 빨리 찾아 매장과 함께 고친다. 가격은 매장이 정하고, 권장 범위 밖 판매는 참고용으로만 본다.</div>
+      <div class="note" style="margin-top:14px"><b>목적.</b> 운영 점수나 공급 기록이 이상하면 매장과 같이 확인해요. 권장 범위 밖 판매는 참고로만 봐요.</div>
     </div>
     <div class="card pad">
       <div class="eyebrow">본부 조치 (원클릭)</div>
@@ -499,23 +499,23 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="hq-grid l">
     <div class="card pad">
       <div style="display:flex;justify-content:space-between;align-items:baseline">
-        <div class="eyebrow">월 매출 추이 · 등락 (전국 GMV)</div>
+        <div class="eyebrow">월별 전체 매출</div>
         <div class="label">최근 8개월 · 단위 억원</div>
       </div>
       <div class="trend" id="trend"></div>
-      <div class="note"><b>등락 읽기.</b> 1~2월 비수기 하락(▼) 후 3월부터 5개월 연속 상승(▲). 변동은 계절·신규 출점 영향 — 추세는 우상향.</div>
+      <div class="note"><b>등락 읽기.</b> 1~2월에 줄었다가 3월부터 5개월 연속 늘었어요.</div>
     </div>
     <div class="card pad">
-      <div class="eyebrow">본부 수익 — 세 겹</div>
+      <div class="eyebrow">본부 수익</div>
       <div style="display:flex;height:34px;border-radius:8px;overflow:hidden;margin:6px 0 14px;border:1px solid var(--line)">
         <div style="width:52%;background:var(--ink);color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:15px">제품공급 52%</div>
         <div style="width:30%;background:#6b7280;color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:15px">가맹비 30%</div>
         <div style="width:18%;background:#e5e7eb;color:#111111;display:flex;align-items:center;justify-content:center;font-size:15px">구독 18%</div>
       </div>
       <div class="feat-list">
-        <div class="feat"><div class="ic" style="background:var(--ink);color:#ffffff">¹</div><div><div class="ft">제품 공급 마진</div><div class="fd">테·다리·렌즈(알도 R) 본부 공급 — 성숙기 메인.</div></div></div>
-        <div class="feat"><div class="ic">²</div><div><div class="ft">가맹비·가입비</div><div class="fd">초기 셋업비 회수 — 성숙기 비중↓.</div></div></div>
-        <div class="feat"><div class="ic">³</div><div><div class="ft">CRM/ERP 구독</div><div class="fd">무료로 시작 → 유료 전환.</div></div></div>
+        <div class="feat"><div class="ic" style="background:var(--ink);color:#ffffff">¹</div><div><div class="ft">제품 공급 마진</div><div class="fd">테와 렌즈 공급 마진. 매장이 늘수록 커져요.</div></div></div>
+        <div class="feat"><div class="ic">²</div><div><div class="ft">가맹비·가입비</div><div class="fd">개설할 때 한 번 받아요.</div></div></div>
+        <div class="feat"><div class="ic">³</div><div><div class="ft">CRM/ERP 구독</div><div class="fd">매달 받는 시스템 사용료예요.</div></div></div>
       </div>
     </div>
   </div>
@@ -524,7 +524,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="hq-grid">
     <div class="card pad">
       <div class="eyebrow">프론트 × 템플 수요 매트릭스 (전국)</div>
-      <div class="label" style="margin-bottom:12px">셀=조합 수요(조립 믹스용), 가장자리 %=프론트·템플 각각의 생산 비중. 프론트·템플을 따로 만드니 이 %로 생산 수량을 나눈다.</div>
+      <div class="label" style="margin-bottom:12px">칸은 앞판과 다리 조합별 수요, 가장자리 %는 앞판과 다리 각각의 생산 비중이에요.</div>
       <div id="ftMatrix"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap">
         <span class="label">월 총 생산량</span>
@@ -539,16 +539,16 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div id="ageBars"></div>
       <div class="label" style="margin:14px 0 2px">성별</div>
       <div class="gender"><div class="gm" style="width:54%">남 54%</div><div class="gf" style="width:46%">여 46%</div></div>
-      <div class="note" style="margin-top:14px"><b>활용.</b> 30·40대 남성이 핵심(재구매율 최고). 입지·제품·마케팅을 데이터로 결정 — 다비치엔 없는 연결된 고객 데이터.</div>
+      <div class="note" style="margin-top:14px"><b>활용.</b> 30~40대 남성 손님이 다시 오는 비율이 가장 높아요.</div>
     </div>
   </div>
 
   <!-- 브랜드·공급 관리 -->
   <div class="card pad" style="margin-top:18px">
-    <div class="eyebrow">브랜드 · 공급 관리 — 전 품목 본부 경유</div>
-    <div class="label" style="margin-bottom:6px">PB부터 명품까지 본부가 공급. 공급 품목·범위는 가맹계약서에 정하고, 변호사 확인 후 확정.</div>
+    <div class="eyebrow">브랜드와 공급</div>
+    <div class="label" style="margin-bottom:6px">PB부터 수입 브랜드까지 본부가 공급해요. 공급 품목은 가맹계약서에 적어요 (변호사 확인 예정).</div>
     <table class="tbl">
-      <thead><tr><th>브랜드 / 라인</th><th>포지션</th><th>공급가(본부→가맹)</th><th>권장 소비자가</th><th>공급 경로</th></tr></thead>
+      <thead><tr><th>브랜드 / 라인</th><th>포지션</th><th>매장 공급가</th><th>권장 소비자가</th><th>공급 경로</th></tr></thead>
       <tbody>
         <tr style="cursor:default"><td>BETTERVISION 로마 클래식 (PB)</td><td>자체 PB</td><td>60,000</td><td>189,000</td><td><span class="pill good">본부 공급</span></td></tr>
         <tr style="cursor:default"><td>BETTERVISION 로마 슬림 (PB)</td><td>자체 PB</td><td>60,000</td><td>189,000</td><td><span class="pill good">본부 공급</span></td></tr>
@@ -558,8 +558,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       </tbody>
     </table>
     <div class="hq-grid" style="margin-top:14px">
-      <div class="optbox" style="margin-top:0"><b>계약.</b> 본부 공급 품목과 그 이유(품질·측정 데이터·A/S 기준 통일)를 가맹계약서와 정보공개서에 적는다. 범위와 문구는 변호사 확인 후 확정 (1호점 전).</div>
-      <div class="optbox" style="margin-top:0"><b>시스템.</b> 본부 공급 품목은 입고 때 사이즈를 재서 데이터로 만들고 A/S·보증이 자동 연결된다. 매장이 쓰기 편해서 본부 경로를 쓰게 만든다.</div>
+      <div class="optbox" style="margin-top:0"><b>계약.</b> 공급 품목과 이유는 가맹계약서와 정보공개서에 적어요. 문구는 1호점 전에 변호사와 확정해요.</div>
+      <div class="optbox" style="margin-top:0"><b>시스템.</b> 본부에서 들어온 테는 사이즈가 등록돼 있고, A/S와 보증이 자동으로 연결돼요.</div>
     </div>
   </div>
 
@@ -570,11 +570,11 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="feat-list" style="margin-top:4px">
         <div class="feat"><div class="ic">⬡</div><div><div class="ft">데이터는 본부가 관리</div><div class="fd">고객·측정·처방·구매 기록을 본부 시스템에 보관. 어느 매장에서도 이어서 확인.</div></div></div>
         <div class="feat"><div class="ic">▤</div><div><div class="ft">본부 단일 공급</div><div class="fd">PB·수입 브랜드를 본부가 공급. 입고 때 사이즈 측정·A/S 연결.</div></div></div>
-        <div class="feat"><div class="ic">◷</div><div><div class="ft">시스템 의존</div><div class="fd">CRM·발주·POS·재무·인력·알림이 매장 운영 기본값.</div></div></div>
+        <div class="feat"><div class="ic">◷</div><div><div class="ft">시스템 의존</div><div class="fd">손님 관리부터 결제, 정산까지 매장 화면 하나로 해요.</div></div></div>
       </div>
     </div>
   </div>
-  <div class="note"><b>왜 핵심 무기인가.</b> 가맹점은 "고객을 기억하고 재방문을 부르고 돈 계산까지 해주는 시스템" 때문에 가입한다. 쓸수록 매장 운영이 쉬워지고, 본부는 전 매장의 측정·착용 기록으로 기준을 계속 고친다.</div>
+  <div class="note"><b>매장이 얻는 것</b> 손님 기억, 재방문 알림, 정산을 시스템이 챙겨서 매장 운영이 쉬워져요. 본부는 착용 기록을 보고 추천 기준을 계속 고쳐요.</div>
 </section>
 </div>
 
@@ -584,9 +584,9 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 </div>
 
 <script>
-window.__bvGuide={title:'가맹본부 가이드',sub:'데이터·공급·시스템 — 본부가 맡는 일.',points:[
+window.__bvGuide={title:'가맹본부 가이드',sub:'전 매장을 한 화면에서 봐요.',points:[
 {sel:'#dashGMV',t:'전사 대시보드',d:'실 GMV·지점 랭킹·PB 침투율 한눈에.'},
-{sel:'#pbHQ',t:'PB 마진 관리',d:'렌즈·콘택트 PB가 본부 수익의 실체.'},
+{sel:'#pbHQ',t:'PB 마진 관리',d:'렌즈·콘택트 PB가 PB 마진.'},
 {sel:'#belongSel',t:'고객 데이터 귀속',d:'이사·이탈해도 측정·처방·이력은 본부에 남아요.'},
 {sel:'#logiBox',t:'공급·물류 자동화',d:'전 지점 발주를 품목별 통합 출고.'},
 {sel:'#frRetail',t:'신규 가맹 시뮬레이터',d:'상권·평수로 매출·회수기간 즉시 계산.'}
@@ -632,7 +632,7 @@ function mxRecalc(){
   var fLines=MX_ROWS.map(function(r,ri){ return r+' '+(total?Math.round(totalQ*rowSum[ri]/total):0)+'개'; }).join(' · ');
   var tLines=MX_COLS.map(function(c,ci){ return c+' '+(total?Math.round(totalQ*colSum[ci]/total):0)+'개'; }).join(' · ');
   var out=document.getElementById('prodOut');
-  if(out) out.innerHTML='<b>생산 예측.</b> 총 '+totalQ.toLocaleString('ko-KR')+'개 기준 — 프론트: '+fLines+' / 템플: '+tLines+'. 셀 수요를 바꾸면 비중·생산량이 자동 갱신돼요.';
+  if(out) out.innerHTML='<b>생산 예측.</b> 총 '+totalQ.toLocaleString('ko-KR')+'개 기준 · 앞판 '+fLines+' / 템플: '+tLines+'. 셀 수요를 바꾸면 비중·생산량이 자동 갱신돼요.';
 }
 mxRender();
 /* demographics */
@@ -663,7 +663,7 @@ live.forEach((s,i)=>{const tr=document.createElement('tr');if(i===0)tr.classList
 function storeDetail(i){const s=live[i];const hmax=Math.max(...s.hours);
   const hrs=['10','11','12','13','14','15','16','17'];
   document.getElementById('storeDetail').innerHTML=`
-   <div class="sd-head"><div><div class="eyebrow" style="margin:0">매장 상세 · 드릴다운</div><div class="nm" style="font-family:var(--serif);font-size:26px">${s.n}</div><div class="statuson">${s.st} · ${s.staff}</div></div>
+   <div class="sd-head"><div><div class="eyebrow" style="margin:0">매장 상세</div><div class="nm" style="font-family:var(--serif);font-size:26px">${s.n}</div><div class="statuson">${s.st} · ${s.staff}</div></div>
      <button class="btn small" onclick="toast('${s.n} 발주 푸시 전송 (프로토타입)')">발주 푸시</button></div>
    <div class="sd-kpis"><div class="k"><div class="l">오늘 매출</div><div class="v">₩${s.sales}만</div></div><div class="k"><div class="l">방문 / 대기</div><div class="v">${s.visit} / ${s.wait}</div></div><div class="k"><div class="l">객단가</div><div class="v">${s.avg}</div></div></div>
    <div class="label">시간대별 매출 (10–17시)</div>
@@ -889,7 +889,7 @@ function belongMove(){
   var id=document.getElementById('belongSel').value, to=document.getElementById('belongTo').value;
   if(!id||!to)return;
   fetch('/api/customers/move',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:+id,toStore:to})})
-    .then(function(r){return r.json();}).then(function(){ toast(to+'으로 이동 — 이력 그대로 승계됨'); belongLoad(id); });
+    .then(function(r){return r.json();}).then(function(){ toast(to+'으로 옮겼어요. 기록은 그대로예요'); belongLoad(id); });
 }
 
 /* ===== 공급·물류 자동화 (출고센터) ===== */
@@ -915,7 +915,7 @@ function _ordStatusAll(fromStatus, toStatus){
     return Promise.all(os.map(function(o){return fetch('/api/orders/status',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:o.id,status:toStatus})});})).then(function(){return os.length;});
   });
 }
-function logiApproveAll(){ _ordStatusAll('대기','승인').then(function(n){ toast(n?(n+'건 출고 승인 — 배송 준비'):'대기 발주가 없어요'); logiLoad(); if(window.hqOrdLoad)window.hqOrdLoad(); }); }
+function logiApproveAll(){ _ordStatusAll('대기','승인').then(function(n){ toast(n?(n+'건 출고를 승인했어요'):'대기 발주가 없어요'); logiLoad(); if(window.hqOrdLoad)window.hqOrdLoad(); }); }
 function logiReceiveAll(){ _ordStatusAll('승인','입고완료').then(function(n){ toast(n?(n+'건 입고완료 · 지점 재고 자동 반영'):'배송중 발주가 없어요'); logiLoad(); if(window.hqOrdLoad)window.hqOrdLoad(); }); }
 
 /* ===== 본부 발주 푸시 ===== */
@@ -943,7 +943,7 @@ function pushSend(){
   fetch('/api/orders/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:store,sku:opt.value,name:opt.dataset.name,cat:opt.dataset.cat,qty:qty,deadline:dl})})
     .then(function(r){return r.json();}).then(function(j){
       if(!j.ok){toast('푸시 실패');return;}
-      toast(store+'에 '+opt.dataset.name+' '+qty+'개 발주 푸시 — 가맹 응답 대기');
+      toast(store+'에 '+opt.dataset.name+' '+qty+'개 발주 제안을 보냈어요. 매장 답을 기다려요');
       if(window.hqOrdLoad)window.hqOrdLoad();
     });
 }
@@ -967,7 +967,7 @@ function ppSave(sku){
     .then(function(r){return r.json();}).then(function(j){
       if(!j.ok){toast(j.error||'적용 실패');return;}
       var i=PP_ALL.findIndex(function(x){return x.sku===sku;}); if(i>=0){PP_ALL[i].list_price=j.list_price;PP_ALL[i].max_disc=j.max_disc;}
-      toast(sku+' 정책 적용 — 전 지점 반영');
+      toast(sku+' 권장가를 바꿨어요');
     });
 }
 
@@ -1021,12 +1021,12 @@ function fcPushStore(store){
   var st=FC.find(function(s){return s.store===store;}); if(!st)return;
   var list=st.items.filter(function(i){return i.push>0;}).map(function(i){return Object.assign({store:store},i);});
   if(!list.length){toast('푸시할 품목이 없어요');return;}
-  _pushItems(list).then(function(){ toast(store+' '+list.length+'종 푸시 발송 — 가맹 응답 대기'); if(window.hqOrdLoad)window.hqOrdLoad(); });
+  _pushItems(list).then(function(){ toast(store+' '+list.length+'종 발주 제안을 보냈어요'); if(window.hqOrdLoad)window.hqOrdLoad(); });
 }
 function fcPushAll(){
   var list=[]; FC.forEach(function(st){ st.items.filter(function(i){return i.push>0;}).forEach(function(i){ list.push(Object.assign({store:st.store},i)); }); });
   if(!list.length){toast('푸시할 품목이 없어요');return;}
-  _pushItems(list).then(function(){ toast('전 지점 '+list.length+'건 일괄 푸시 — 가맹 응답 대기'); if(window.hqOrdLoad)window.hqOrdLoad(); });
+  _pushItems(list).then(function(){ toast('전 지점 '+list.length+'건 발주 제안을 보냈어요'); if(window.hqOrdLoad)window.hqOrdLoad(); });
 }
 
 /* ===== 전 지점 실시간 활동 피드 ===== */
