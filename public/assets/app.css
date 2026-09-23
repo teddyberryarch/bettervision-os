@@ -6,9 +6,9 @@
   --good:#059669;--good-soft:#e7f6f0;--warn:#b45309;--warn-soft:#fef3e2;--bad:#dc2626;--bad-soft:#fdecec;
   --tile:#101010;--tile2:#1a1a1a;--on-dark-soft:#a1a1aa;
   --radius:12px;--shadow:0 1px 2px rgba(0,0,0,.04),0 1px 3px rgba(0,0,0,.06);
-  --sans:"Pretendard Variable","Pretendard",-apple-system,"Malgun Gothic",sans-serif;
-  --serif:"Pretendard Variable","Pretendard",-apple-system,"Malgun Gothic",sans-serif;
-  --kr:"Pretendard Variable","Pretendard",-apple-system,"Malgun Gothic",sans-serif;
+  --sans:"Inter","Pretendard Variable","Pretendard",system-ui,-apple-system,sans-serif;
+  --serif:"Inter","Pretendard Variable","Pretendard",system-ui,sans-serif;
+  --kr:"Pretendard Variable","Pretendard","Inter",system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--paper);color:var(--body);font-family:var(--kr);font-weight:400;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
