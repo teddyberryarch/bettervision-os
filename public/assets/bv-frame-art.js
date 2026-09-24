@@ -69,7 +69,7 @@
     var d=lensPath(shape,lw,lh);
     var g='<g transform="translate('+(W/2)+','+(H/2)+')">';
 
-    // 템플(다리) — 엔드피스에서 바깥으로 짧게
+    // 템플 — 엔드피스에서 바깥으로 짧게
     var edgeL=cxL-hw, edgeR=cxR+hw, ty=-hh*0.35;
     g+='<line x1="'+edgeL+'" y1="'+ty+'" x2="'+(edgeL-30)+'" y2="'+(ty-3)+'" stroke="'+color+'" stroke-width="'+(metal?2.2:5)+'" stroke-linecap="round"/>';
     g+='<line x1="'+edgeR+'" y1="'+ty+'" x2="'+(edgeR+30)+'" y2="'+(ty-3)+'" stroke="'+color+'" stroke-width="'+(metal?2.2:5)+'" stroke-linecap="round"/>';

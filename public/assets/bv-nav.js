@@ -20,6 +20,32 @@
   var mark = document.querySelector('.brand');
   if(mark && !mark.closest('a')){ mark.style.cursor='pointer'; mark.addEventListener('click', function(){ location.href='index.html'; }); }
 
+  // 0) 용어 설명: 오른쪽 아래 "용어" 버튼을 누르면 뜨는 작은 창
+  var TERMS=[
+    ['프론트','안경 앞부분. 렌즈를 끼우는 테예요. 9사이즈의 F(F1·F2·F3)가 프론트 폭이에요.'],
+    ['템플','안경다리. 귀에 걸리는 부분이에요. 9사이즈의 T(T1·T2·T3)가 템플 길이예요.'],
+    ['브리지','코 위에서 두 렌즈를 잇는 부분이에요.'],
+    ['코받침','코에 닿는 받침(노즈패드)이에요. 조절형과 일체형이 있어요.'],
+    ['벌림각','템플이 바깥으로 벌어진 각도예요. 얼굴 폭에 맞춰 휘어요.'],
+    ['PD','두 눈동자 사이 거리예요. 한쪽씩 잰 값이 단안 PD예요.'],
+    ['OH','동공 높이. 렌즈 아래 끝에서 눈동자까지 높이예요.'],
+    ['판토(경사각)','렌즈가 앞으로 기울어진 각도예요. 보통 8~12°예요.'],
+    ['정점거리(VD)','눈과 렌즈 뒷면 사이 거리예요. 보통 12mm 안팎이에요.'],
+    ['광학중심(OC)','렌즈에서 초점이 맞는 중심점이에요. 눈동자 앞에 와야 해요.'],
+    ['편심','렌즈 중심을 테 중심에서 옮기는 양이에요. PD에 맞추려고 해요.'],
+    ['블랭크','깎기 전 동그란 렌즈 원판이에요. 지름이 작으면 가공할 수 없어요.'],
+    ['평균 도수(SE)','구면 도수에 난시 도수의 절반을 더한 값이에요. 시력 변화를 볼 때 써요.'],
+    ['9사이즈','프론트 폭 3단계(F1~F3) × 템플 길이 3단계(T1~T3)로 나눈 PB 사이즈예요.']
+  ];
+  (function(){
+    var b=document.createElement('button'); b.type='button'; b.className='bv-gloss-btn'; b.textContent='용어'; b.setAttribute('aria-label','용어 설명 열기');
+    var d=document.createElement('div'); d.className='bv-gloss'; d.hidden=true;
+    d.innerHTML='<div class="bv-gloss-h"><b>용어 설명</b><button type="button" aria-label="닫기">닫기</button></div>'+TERMS.map(function(t){return '<div class="bv-gloss-r"><b>'+t[0]+'</b><span>'+t[1]+'</span></div>';}).join('');
+    b.addEventListener('click',function(){ d.hidden=!d.hidden; });
+    d.querySelector('button').addEventListener('click',function(){ d.hidden=true; });
+    document.body.appendChild(b); document.body.appendChild(d);
+  })();
+
   if(STORE_PAGES.indexOf(page) < 0) return;
 
   // 2) 가맹점 하위 메뉴
