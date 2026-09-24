@@ -216,7 +216,8 @@ async function init(){
     pd REAL, face_width REAL, nose_height REAL, nose_angle REAL, ear_l REAL, ear_r REAL, wrap_angle REAL,
     pow_json TEXT, confidence REAL, provisional BOOLEAN, method TEXT, operator TEXT, source TEXT)`);
   await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS ear_depth REAL');
-  await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS head_back REAL');   // [09.24] 귀 뒤 머리 폭
+  await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS head_back REAL');
+  await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS temple_curve TEXT');   // [09.24] 측정 때 계산한 템플 곡선(자체 브랜드 기준)   // [09.24] 귀 뒤 머리 폭
   await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS temple_w REAL');    // [09.24] 관자놀이 폭   // [09.24] 각막~귀 윗부분 앞뒤 거리
   await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS size_code TEXT');   // 이 측정으로 정한 9사이즈
   await pool.query(`CREATE TABLE IF NOT EXISTS notices(
@@ -1173,6 +1174,20 @@ async function createMeasureSession(b){
   var row={id:mem.msessions.length+1,customer_id:b.customer_id||null,device:device,store:b.store||null,operator:b.operator||null,status:'대기',created_at:new Date().toISOString()}; mem.msessions.push(row); return row;
 }
 async function getMeasureSession(id){ if(!/^\d+$/.test(String(id))) return null; if(ready){ const r=await pool.query('SELECT * FROM measure_sessions WHERE id=$1',[id]); return r.rows[0]||null; } return mem.msessions.find(function(x){return x.id===+id;})||null; }
+/* [09.24] 템플 곡선: 측정값(귀 간격·귀 앞뒤 거리·관자놀이 폭·귀 뒤 머리 폭)으로 시스템이 계산해 측정 기록에 저장.
+   기준은 손님 9사이즈의 자체 브랜드 테(CL). 다른 테는 피팅 화면이 같은 식으로 다시 계산. 조임·여유 값은 시작값(1호점에서 확정) */
+function templeCurveFor(m, code){
+  var p=String(code||'').match(/F(\d)\s*[×x·]\s*T(\d)/); if(!p) return null;
+  var fi=+p[1]-1, ti=+p[2]-1, eg=(m.ear_l!=null&&m.ear_r!=null)?(+m.ear_l + +m.ear_r):null; if(!eg) return null;
+  var sp=FRAME_SPECS['CL-'+['S','M','L'][fi]]||null; if(!sp) return null;
+  var tlen=[140,145,150][ti]||sp.temple, HH=sp.hw/2, off=10, tHalf=(eg-off)/2, vd=12;
+  var Lear=m.ear_depth!=null?Math.min(Math.round(+m.ear_depth+vd),tlen-5):Math.max(80,tlen-25);
+  var at=function(y){ return HH+(tHalf-HH)*y/Lear; }, r1=function(v){ return Math.round(v*10)/10; };
+  var bow=m.temple_w!=null?Math.max(0,r1(+m.temple_w/2+2-at(Lear*0.3))):null;
+  var tipIn=m.head_back!=null?Math.max(-6,Math.min(15,r1(at(tlen)-(+m.head_back/2-Math.max(0,eg/2-tHalf))))):null;
+  return {frame:'CL-'+['S','M','L'][fi], temple:tlen, gap:Math.round(eg-off), bend_at:Math.round(Lear), p1:Math.round(Lear*0.35), temple_out:bow, tip_in:tipIn,
+    missing:[m.temple_w==null?'관자놀이 폭':null, m.head_back==null?'귀 뒤 머리 폭':null, m.ear_depth==null?'귀 앞뒤 거리':null].filter(Boolean)};
+}
 async function saveMeasurement(sessionId, b, who){
   // 원칙: 영상·프레임은 받지 않는다(수치+메타만) / confidence<0.7 → provisional / 확정값만 고객 캐시 갱신
   var sess=null; if(sessionId && sessionId!=='adhoc'){ sess=await getMeasureSession(sessionId); if(!sess) return {ok:false,error:'세션이 없어요'}; }
@@ -1189,10 +1204,11 @@ async function saveMeasurement(sessionId, b, who){
   if(row.pd==null && row.face_width==null) return {ok:false,error:'측정값이 없어요'};
   var cust=await getCustomer(row.customer_id), sz=sizeFromMeasure(row.face_width,row.ear_depth,_num(b.vd),cust?cust.size:null);
   row.size_code=sz.code;
+  var tcv=templeCurveFor(row, sz.code); row.temple_curve=tcv?JSON.stringify(tcv):null;
   if(!row.store && cust) row.store=cust.store||null;
   var id;
-  if(ready){ const r=await pool.query('INSERT INTO measurements(customer_id,session_id,store,device,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,pow_json,confidence,provisional,method,operator,source,ear_depth,size_code,head_back,temple_w) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21) RETURNING id',
-      [row.customer_id,row.session_id,row.store,row.device,row.pd,row.face_width,row.nose_height,row.nose_angle,row.ear_l,row.ear_r,row.wrap_angle,row.pow_json,row.confidence,row.provisional,row.method,row.operator,row.source,row.ear_depth,row.size_code,row.head_back,row.temple_w]); id=r.rows[0].id;
+  if(ready){ const r=await pool.query('INSERT INTO measurements(customer_id,session_id,store,device,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,pow_json,confidence,provisional,method,operator,source,ear_depth,size_code,head_back,temple_w,temple_curve) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22) RETURNING id',
+      [row.customer_id,row.session_id,row.store,row.device,row.pd,row.face_width,row.nose_height,row.nose_angle,row.ear_l,row.ear_r,row.wrap_angle,row.pow_json,row.confidence,row.provisional,row.method,row.operator,row.source,row.ear_depth,row.size_code,row.head_back,row.temple_w,row.temple_curve]); id=r.rows[0].id;
     if(sess) await pool.query("UPDATE measure_sessions SET status='완료' WHERE id=$1",[sess.id]); }
   else { id=mem.measurements.length+1; row.id=id; row.measured_at=new Date().toISOString(); mem.measurements.push(row); if(sess) sess.status='완료'; }
   var cacheUpdated=false;
@@ -1205,10 +1221,10 @@ async function saveMeasurement(sessionId, b, who){
     cacheUpdated=true;
   }
   await logMeasureAccess(who?who.username:'(고객 앱)', row.customer_id, 'write');
-  return {ok:true, id:id, provisional:provisional, cache_updated:cacheUpdated, size:sz.code, prev_size:cust?cust.size:null, temple_need:sz.need};
+  return {ok:true, id:id, provisional:provisional, cache_updated:cacheUpdated, size:sz.code, prev_size:cust?cust.size:null, temple_need:sz.need, temple_curve:row.temple_curve?JSON.parse(row.temple_curve):null};
 }
 async function listMeasurements(customerId){
-  if(ready){ const r=await pool.query('SELECT id,session_id,store,device,measured_at,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,ear_depth,head_back,temple_w,size_code,confidence,provisional,method,operator,source FROM measurements WHERE customer_id=$1 ORDER BY id DESC',[customerId]); return r.rows; }
+  if(ready){ const r=await pool.query('SELECT id,session_id,store,device,measured_at,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,ear_depth,head_back,temple_w,temple_curve,size_code,confidence,provisional,method,operator,source FROM measurements WHERE customer_id=$1 ORDER BY id DESC',[customerId]); return r.rows; }
   return mem.measurements.filter(function(m){return m.customer_id===+customerId;}).slice().reverse();
 }
 async function measurementsForCustomer(customerId){
