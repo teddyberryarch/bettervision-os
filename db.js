@@ -212,6 +212,8 @@ async function init(){
     id SERIAL PRIMARY KEY, customer_id INT, session_id INT, store TEXT, device TEXT, measured_at TIMESTAMPTZ DEFAULT now(),
     pd REAL, face_width REAL, nose_height REAL, nose_angle REAL, ear_l REAL, ear_r REAL, wrap_angle REAL,
     pow_json TEXT, confidence REAL, provisional BOOLEAN, method TEXT, operator TEXT, source TEXT)`);
+  await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS ear_depth REAL');   // [09.24] 각막~귀 윗부분 앞뒤 거리
+  await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS size_code TEXT');   // 이 측정으로 정한 9사이즈
   await pool.query(`CREATE TABLE IF NOT EXISTS measure_access_log(
     id SERIAL PRIMARY KEY, username TEXT, customer_id INT, action TEXT, at TIMESTAMPTZ DEFAULT now())`);
   await pool.query('ALTER TABLE aftercare ADD COLUMN IF NOT EXISTS judge TEXT');   // 적응 중 / 다시 맞춤
@@ -1016,6 +1018,17 @@ async function careSummary(store){
 }
 /* 측정 (설계서 v0.3 §4·§5) */
 function _num(v){ var n=parseFloat(v); return isFinite(n)?Math.round(n*10)/10:null; }
+/* [09.24] 9사이즈 규칙 — public/assets/bv-size-engine.js 와 같은 값. 〔1호점에서 확인〕
+   프론트: 얼굴 가로폭 146 미만 F1 / 158 미만 F2 / 그 이상 F3
+   템플: 각막~귀 앞뒤 + 정점거리 12 + 귀 뒤 25 → 140(T1)·145(T2)·150(T3) 중 가까운 것 */
+var SIZE_RULE={front:[146,158], vd:12, tail:25, temples:[140,145,150]};
+function sizeFromMeasure(faceWidth, earDepth, vd, prev){
+  var p=String(prev||'').match(/F(\d)\s*[×x·]\s*T(\d)/)||[], F=p[1]||null, T=p[2]||null, need=null;
+  if(faceWidth!=null) F=faceWidth<SIZE_RULE.front[0]?1:(faceWidth<SIZE_RULE.front[1]?2:3);
+  if(earDepth!=null){ need=Math.round(earDepth+(vd||SIZE_RULE.vd)+SIZE_RULE.tail); var bi=0;
+    SIZE_RULE.temples.forEach(function(z,i){ if(Math.abs(z-need)<Math.abs(SIZE_RULE.temples[bi]-need)) bi=i; }); T=bi+1; }
+  return {code:(F&&T)?('F'+F+'×T'+T):null, need:need};
+}
 async function createMeasureSession(b){
   var device=['phone','ipad','rig'].indexOf(b.device)>=0?b.device:'ipad';
   if(ready){ const r=await pool.query('INSERT INTO measure_sessions(customer_id,device,store,operator) VALUES($1,$2,$3,$4) RETURNING id,customer_id,device,store,operator,status,created_at',[b.customer_id||null,device,b.store||null,b.operator||null]); return r.rows[0]; }
@@ -1031,14 +1044,17 @@ async function saveMeasurement(sessionId, b, who){
   var provisional = anon ? true : (conf<0.7 || b.provisional===true);
   var row={customer_id:+cid, session_id:sess?sess.id:null, store:sess?sess.store:(b.store||null), device:anon?'phone':(sess?sess.device:(['phone','ipad','rig'].indexOf(b.device)>=0?b.device:'ipad')),
     pd:_num(b.pd), face_width:_num(b.face_width), nose_height:_num(b.nose_height), nose_angle:_num(b.nose_angle),
-    ear_l:_num(b.ear_left), ear_r:_num(b.ear_right), wrap_angle:_num(b.wrap_angle),
+    ear_l:_num(b.ear_left), ear_r:_num(b.ear_right), wrap_angle:_num(b.wrap_angle), ear_depth:_num(b.ear_depth),
     pow_json:b.pow?JSON.stringify(b.pow).slice(0,2000):null, confidence:conf, provisional:provisional,
-    method:['truedepth','iris_scale','rig_stereo'].indexOf(b.method)>=0?b.method:'iris_scale',
+    method:['truedepth','iris_scale','rig_stereo','manual'].indexOf(b.method)>=0?b.method:'iris_scale',
     operator:who?who.username:null, source:anon?'고객 자가측정':'매장'};
   if(row.pd==null && row.face_width==null) return {ok:false,error:'측정값이 없어요'};
+  var cust=await getCustomer(row.customer_id), sz=sizeFromMeasure(row.face_width,row.ear_depth,_num(b.vd),cust?cust.size:null);
+  row.size_code=sz.code;
+  if(!row.store && cust) row.store=cust.store||null;
   var id;
-  if(ready){ const r=await pool.query('INSERT INTO measurements(customer_id,session_id,store,device,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,pow_json,confidence,provisional,method,operator,source) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING id',
-      [row.customer_id,row.session_id,row.store,row.device,row.pd,row.face_width,row.nose_height,row.nose_angle,row.ear_l,row.ear_r,row.wrap_angle,row.pow_json,row.confidence,row.provisional,row.method,row.operator,row.source]); id=r.rows[0].id;
+  if(ready){ const r=await pool.query('INSERT INTO measurements(customer_id,session_id,store,device,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,pow_json,confidence,provisional,method,operator,source,ear_depth,size_code) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING id',
+      [row.customer_id,row.session_id,row.store,row.device,row.pd,row.face_width,row.nose_height,row.nose_angle,row.ear_l,row.ear_r,row.wrap_angle,row.pow_json,row.confidence,row.provisional,row.method,row.operator,row.source,row.ear_depth,row.size_code]); id=r.rows[0].id;
     if(sess) await pool.query("UPDATE measure_sessions SET status='완료' WHERE id=$1",[sess.id]); }
   else { id=mem.measurements.length+1; row.id=id; row.measured_at=new Date().toISOString(); mem.measurements.push(row); if(sess) sess.status='완료'; }
   var cacheUpdated=false;
@@ -1046,15 +1062,15 @@ async function saveMeasurement(sessionId, b, who){
     var pdTxt=row.pd!=null?row.pd.toFixed(1)+'mm':null;
     var faceOf=function(face){ return row.face_width!=null ? (Math.round(row.face_width)+'mm'+(face&&face.indexOf('/')>=0?' /'+face.split('/').slice(1).join('/'):'')) : face; };
     if(ready){ const c=await pool.query('SELECT face FROM customers WHERE id=$1',[row.customer_id]);
-      await pool.query('UPDATE customers SET pd=COALESCE($2,pd), face=$3 WHERE id=$1',[row.customer_id,pdTxt,faceOf(c.rows[0]?c.rows[0].face:null)]); }
-    else { var mc=mem.customers.find(function(x){return x.id===row.customer_id;}); if(mc){ if(pdTxt)mc.pd=pdTxt; mc.face=faceOf(mc.face); } }
+      await pool.query('UPDATE customers SET pd=COALESCE($2,pd), face=$3, size=COALESCE($4,size) WHERE id=$1',[row.customer_id,pdTxt,faceOf(c.rows[0]?c.rows[0].face:null),sz.code]); }
+    else { var mc=mem.customers.find(function(x){return x.id===row.customer_id;}); if(mc){ if(pdTxt)mc.pd=pdTxt; mc.face=faceOf(mc.face); if(sz.code) mc.size=sz.code; } }
     cacheUpdated=true;
   }
   await logMeasureAccess(who?who.username:'(고객 앱)', row.customer_id, 'write');
-  return {ok:true, id:id, provisional:provisional, cache_updated:cacheUpdated};
+  return {ok:true, id:id, provisional:provisional, cache_updated:cacheUpdated, size:sz.code, prev_size:cust?cust.size:null, temple_need:sz.need};
 }
 async function listMeasurements(customerId){
-  if(ready){ const r=await pool.query('SELECT id,session_id,store,device,measured_at,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,confidence,provisional,method,operator,source FROM measurements WHERE customer_id=$1 ORDER BY id DESC',[customerId]); return r.rows; }
+  if(ready){ const r=await pool.query('SELECT id,session_id,store,device,measured_at,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,ear_depth,size_code,confidence,provisional,method,operator,source FROM measurements WHERE customer_id=$1 ORDER BY id DESC',[customerId]); return r.rows; }
   return mem.measurements.filter(function(m){return m.customer_id===+customerId;}).slice().reverse();
 }
 async function logMeasureAccess(username, customerId, action){
