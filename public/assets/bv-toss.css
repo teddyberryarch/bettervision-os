@@ -146,3 +146,28 @@ a,button,.chip,.subtab,.ptab,.rolecard{ transition:background 120ms ease-out, co
 .sb-5g{ font-size:13px; }
 .sb-bat{ display:inline-block; width:22px; height:11px; border:1.5px solid var(--t-900); border-radius:3px; position:relative; }
 .sb-bat::after{ content:""; position:absolute; left:1.5px; top:1.5px; bottom:1.5px; width:60%; background:var(--t-900); border-radius:1px; }
+
+/* ── 메뉴 3묶음 + 가맹점 하위 메뉴 (09.24) ── */
+.nav-links{ align-items:center; }
+.nav-div{ width:1px; height:18px; background:var(--t-200); margin:0 8px; }
+.nav-dd{ position:relative; display:inline-flex; }
+.nav-dd .nav-menu{ display:none; position:absolute; top:100%; left:0; z-index:50; min-width:150px; padding:6px; margin-top:4px;
+  background:#FFFFFF; border-radius:12px; box-shadow:0 8px 24px rgba(25,31,40,.12); flex-direction:column; }
+.nav-dd:hover .nav-menu,.nav-dd:focus-within .nav-menu{ display:flex; }
+.nav-dd::after{ content:""; position:absolute; left:0; right:0; top:100%; height:8px; }
+.nav-dd .nav-menu a{ display:block; white-space:nowrap; }
+.subnav{ background:#FFFFFF; border-top:1px solid var(--t-100); }
+.subnav-in{ max-width:1200px; margin:0 auto; padding:8px 24px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; font-size:15px; }
+.subnav a{ color:var(--t-600); font-weight:600; padding:7px 12px; border-radius:10px; text-decoration:none; }
+.subnav a b,.sn-wip b{ color:var(--t-navy); font-weight:600; margin-right:2px; }
+.subnav a:hover{ background:var(--t-100); color:var(--t-800); }
+.subnav a.active{ background:var(--t-navy-soft); color:var(--t-navy); }
+.subnav a.done::after{ content:" ✓"; color:var(--t-green); }
+.sn-div{ width:1px; height:16px; background:var(--t-200); margin:0 6px; }
+.sn-arrow{ color:var(--t-400); }
+.sn-wip{ color:var(--t-400); font-weight:600; padding:7px 12px; }
+.sn-done{ margin-left:auto; border:none; border-radius:10px; background:var(--t-navy); color:#FFFFFF; font:600 15px var(--sans); padding:9px 14px; cursor:pointer; }
+.sn-done:hover{ background:var(--t-navy-2); }
+.sn-gate{ background:var(--t-amber-soft); }
+.sn-gate .subnav-in{ justify-content:space-between; color:var(--t-800); padding:12px 24px; }
+@media(max-width:640px){ .subnav-in,.sn-gate .subnav-in{ padding:8px 16px; } .sn-done{ margin-left:0; } }
