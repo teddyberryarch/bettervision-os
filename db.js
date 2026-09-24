@@ -235,6 +235,7 @@ async function init(){
   const fc=await pool.query('SELECT COUNT(*)::int AS c FROM aftercare WHERE fit IS NOT NULL');
   if(fc.rows[0].c===0){ const d=_demoCare();
     for(const x of d.care.filter(function(x){return x.fit!=null&&x.status==='완료';})){ await pool.query('INSERT INTO aftercare(customer_id,store,sale_date,due_date,status,comfort,issues,note,source,done_at,fit,judge) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',[x.customer_id,x.store,x.sale_date,x.due_date,x.status,x.comfort,x.issues,x.note,x.source,x.done_at,x.fit,x.judge]); } }
+  await pool.query(`CREATE TABLE IF NOT EXISTS workorders(id SERIAL PRIMARY KEY, store TEXT, customer_id INT, sku TEXT, frame TEXT, lens TEXT, rx TEXT, calc TEXT, status TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   await pool.query(`CREATE TABLE IF NOT EXISTS vision_exams(id SERIAL PRIMARY KEY, customer_id INT, member TEXT, grp TEXT, date TEXT, rx TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   const vec=await pool.query('SELECT COUNT(*)::int AS c FROM vision_exams');
   if(vec.rows[0].c===0){ for(const x of _demoExams()) await pool.query('INSERT INTO vision_exams(customer_id,member,grp,date,rx) VALUES($1,$2,$3,$4,$5)',[x.customer_id,x.member,x.grp,x.date,x.rx]); }
@@ -859,6 +860,68 @@ async function visionFor(customerId){
   members.sort(function(a,b){return a.member==='본인'?-1:b.member==='본인'?1:0;});
   return {members:members, groups:CARE_GROUPS};
 }
+/* ===== [09.24] 테 판정 · 가공 지시서 (사업계획서 v2.1 §5.1, §5.5) =====
+   판정 기준값은 시작값이에요. 1호점 안경사와 자문 안경사가 확정하고 착용 결과로 고쳐요(D-04). */
+const FRAME_SPECS=(function(){
+  var o={}, base={CL:{a:[50,53,56],B:[40,41,42],dbl:[16,18,19]},WD:{a:[51,54,57],B:[38,39,40],dbl:[16,18,19]},SL:{a:[49,52,55],B:[36,37,38],dbl:[17,18,19]},RD:{a:[48,51,54],B:[46,47,48],dbl:[18,19,20]}};
+  Object.keys(base).forEach(function(k){ ['S','M','L'].forEach(function(z,i){ o[k+'-'+z]={a:base[k].a[i],B:base[k].B[i],dbl:base[k].dbl[i],temple:[140,145,150][i],pad:'조절형',mat:'아세테이트'}; }); });
+  o['Y1']={a:53,B:41,dbl:18,temple:145,pad:'조절형',mat:'티타늄'}; o['Y2']={a:51,B:43,dbl:19,temple:140,pad:'고정형',mat:'아세테이트'};
+  return o;
+})();
+const JUDGE_RULE={version:'v0.4', face:[4,8], temple:[0,5], blank:[70,75]};
+function _num1(v){ var m=String(v||'').match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):null; }
+function _rxFromText(t){ var m=String(t||'').match(/OD\s*([+-]?\d+(\.\d+)?).*OS\s*([+-]?\d+(\.\d+)?)/); return m?{R:{S:+m[1],C:0,A:0},L:{S:+m[3],C:0,A:0},ADD:0}:null; }
+function _idx(se){ var m=Math.abs(se); return m>=6?1.74:(m>=4?1.67:(m>=2?1.60:1.56)); }
+function _eyeCalc(e, monoPD, sp){
+  var se=e.S+(e.C||0)/2, dec=Math.round(((sp.a+sp.dbl)/2-monoPD)*10)/10, ED=Math.round(sp.a*1.1*10)/10; // 유효경은 입고 측정값으로 바꿔요
+  var mbs=Math.round((ED+2*Math.abs(dec)+2)*10)/10, n=_idx(se);
+  var r=ED/2+Math.abs(dec), edge= se<0 ? Math.round((1.2+Math.abs(se)*r*r/(2*(n-1)*1000))*10)/10 : 1.2;
+  return {S:e.S,C:e.C||0,A:e.A||0,se:Math.round(se*100)/100,pd:monoPD,dec:dec,ocH:Math.round(sp.B/2*10)/10,ed:ED,mbs:mbs,idx:n.toFixed(2),edge:edge};
+}
+function judgeFrame(c, rx, sp, pb){
+  var face=_num1(c.face), pd=_num1(c.pd)||63, t=(String(c.size||'').match(/T(\d)/)||[])[1], need=[140,145,150][(+t||2)-1];
+  var frameW=2*sp.a+sp.dbl+14, fd=face!=null?Math.round(frameW-face):0, td=sp.temple-need;
+  var R=_eyeCalc(rx.R,pd/2,sp), L=_eyeCalc(rx.L,pd/2,sp), mbs=Math.max(R.mbs,L.mbs);
+  var lv=0, why=[];
+  function mark(l,t){ if(l>lv) lv=l; if(l>0) why.push(t); }
+  var af=Math.abs(fd);
+  mark(af<=JUDGE_RULE.face[0]?0:(af<=JUDGE_RULE.face[1]?1:2), '앞판이 얼굴보다 '+af+'mm '+(fd>0?'넓어요':'좁아요')+(af<=JUDGE_RULE.face[1]?'. 다리 벌림으로 맞춰요':''));
+  var at=Math.abs(td);
+  if(pb && at>0){ why.push('PB라 다리를 T'+(+t||2)+' 길이로 바꿔 조립해요'); at=0; td=0; }
+  mark(at<=JUDGE_RULE.temple[0]?0:(at<=JUDGE_RULE.temple[1]?1:2), '다리가 '+at+'mm '+(td>0?'길어요':'짧아요')+(at<=JUDGE_RULE.temple[1]?'. 다리 끝 굽힘으로 맞춰요':''));
+  mark(mbs<=JUDGE_RULE.blank[0]?0:(mbs<=JUDGE_RULE.blank[1]?1:2), '최소 블랭크 '+mbs+'mm'+(mbs<=JUDGE_RULE.blank[1]?'. 큰 블랭크로 주문해요':'. 가공할 수 없어요'));
+  var score=Math.max(0,Math.min(100,Math.round(100-2.5*af-1.5*at-Math.max(0,mbs-65)*1.5)));
+  return {level:['가능','조정 필요','불가'][lv], lv:lv, why:why, score:score, frameW:frameW, faceDiff:fd, templeDiff:td, R:R, L:L, spec:sp};
+}
+async function _custRx(customerId){
+  var c=await getCustomer(customerId); if(!c) return {};
+  var ex=(await listExams(customerId)).filter(function(x){return x.member==='본인';});
+  var rx= ex.length ? (typeof ex[ex.length-1].rx==='string'?JSON.parse(ex[ex.length-1].rx):ex[ex.length-1].rx) : _rxFromText(c.rx);
+  return {c:c, rx:rx, rxDate: ex.length?ex[ex.length-1].date:null};
+}
+async function judgeFrames(customerId, store){
+  var o=await _custRx(customerId); if(!o.c) return {ok:false,error:'손님이 없어요'}; if(!o.rx) return {ok:false,error:'처방 기록이 없어요. 검안부터 해 주세요'};
+  var inv=(await getInventory(store||o.c.store)).filter(function(i){return i.cat==='테'&&FRAME_SPECS[i.sku];});
+  var items=inv.map(function(i){ return Object.assign({sku:i.sku,name:i.name,price:i.price,stock:i.stock,pb:isPBFrame(i.sku)}, judgeFrame(o.c,o.rx,FRAME_SPECS[i.sku],isPBFrame(i.sku))); });
+  items.sort(function(a,b){ return a.lv-b.lv || b.score-a.score; });
+  return {ok:true, customer:{id:o.c.id,name:o.c.name,size:o.c.size,face:o.c.face,pd:o.c.pd}, rx:o.rx, rxDate:o.rxDate, rule:JUDGE_RULE, items:items};
+}
+async function createWorkorder(b){
+  var o=await _custRx(b.customer_id); if(!o.c||!o.rx) return {ok:false,error:'손님이나 처방 기록이 없어요'};
+  var sp=FRAME_SPECS[b.sku]; if(!sp) return {ok:false,error:'치수를 모르는 테예요'};
+  var j=judgeFrame(o.c,o.rx,sp,isPBFrame(b.sku)); if(j.lv===2) return {ok:false,error:'가공할 수 없는 조합이에요: '+j.why.filter(function(w){return w.indexOf('PB라')<0;}).join(' / ')};
+  var item=CATALOG.find(function(x){return x.sku===b.sku;})||{name:b.sku};
+  var row={store:b.store||o.c.store, customer_id:o.c.id, sku:b.sku, frame:item.name, lens:String(b.lens||'').slice(0,60), rx:JSON.stringify(o.rx), calc:JSON.stringify(j), status:'발행', created_at:new Date().toISOString()};
+  if(ready){ const r=await pool.query('INSERT INTO workorders(store,customer_id,sku,frame,lens,rx,calc,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id,created_at',[row.store,row.customer_id,row.sku,row.frame,row.lens,row.rx,row.calc,row.status]); row.id=r.rows[0].id; row.created_at=r.rows[0].created_at; }
+  else { mem.workorders=mem.workorders||[]; row.id=mem.workorders.length+1; mem.workorders.push(row); }
+  return {ok:true, workorder:Object.assign({},row,{calc:j,rx:o.rx,name:o.c.name})};
+}
+async function listWorkorders(store){
+  var rows;
+  if(ready){ rows=(await pool.query('SELECT id,store,customer_id,sku,frame,lens,status,created_at FROM workorders WHERE ($1::text IS NULL OR store=$1) ORDER BY id DESC LIMIT 20',[store||null])).rows; }
+  else rows=(mem.workorders||[]).filter(function(x){return !store||x.store===store;}).slice().reverse();
+  var names=await _custNames(); return rows.map(function(x){ return {id:x.id,store:x.store,sku:x.sku,frame:x.frame,lens:x.lens,status:x.status,created_at:x.created_at,name:(names[x.customer_id]||{}).name||'-'}; });
+}
 /* ===== [09.24] 기준 보정 · 기준 관리 (구조기능도해 v2.1 6단계) ===== */
 function _demoStandards(){
   var d=function(n){return new Date(Date.now()-n*864e5).toISOString();};
@@ -987,7 +1050,7 @@ async function logMeasureAccess(username, customerId, action){
   mem.accesslog.push({username:username,customer_id:customerId,action:action,at:new Date().toISOString()});
 }
 
-module.exports={ init, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+module.exports={ init, judgeFrames, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,
