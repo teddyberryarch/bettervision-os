@@ -48,6 +48,35 @@
 
   if(STORE_PAGES.indexOf(page) < 0) return;
 
+  // [09.24] D-12 막지 않고 기록: 넘어가려면 사유 하나 선택 → 본사 기준 보정에 집계
+  var REASONS={
+    step_skip:['손님이 급함','다른 기기에서 이미 함','다시 온 손님','안경사 판단','기타'],
+    fit_below:['손님이 급함','손님이 이 테를 원함','안경사 판단','기타']
+  };
+  function askReason(anchor, kind, step, detail, title, onOk){
+    var old=document.querySelector('.bv-ovr'); if(old) old.remove();
+    var box=document.createElement('div'); box.className='bv-ovr';
+    box.innerHTML='<div class="subnav-in" style="flex-direction:column;align-items:stretch;gap:8px">'+
+      '<div><b>'+title+'</b>'+(detail?' <span style="color:var(--muted)">· '+detail+'</span>':'')+'</div>'+
+      '<div class="bv-ovr-r">'+REASONS[kind].map(function(r){return '<button type="button" class="chip" data-r="'+r+'">'+r+'</button>';}).join('')+'</div>'+
+      '<input class="bv-ovr-m" placeholder="메모 (선택)" maxlength="200">'+
+      '<div style="display:flex;gap:8px;align-items:center"><button type="button" class="btn small bv-ovr-ok" disabled>사유 남기고 넘어가기</button><button type="button" class="btn small ghost bv-ovr-x">취소</button>'+
+      '<span style="font-size:15px;color:var(--muted)">막지 않음. 사유는 본사 기준 보정에 쌓임</span></div></div>';
+    anchor.parentNode.insertBefore(box, anchor.nextSibling);
+    var pick=null, ok=box.querySelector('.bv-ovr-ok');
+    box.querySelectorAll('[data-r]').forEach(function(b){ b.addEventListener('click',function(){
+      box.querySelectorAll('[data-r]').forEach(function(x){x.classList.remove('active');}); b.classList.add('active'); pick=b.getAttribute('data-r'); ok.disabled=false; }); });
+    box.querySelector('.bv-ovr-x').addEventListener('click',function(){ box.remove(); });
+    ok.addEventListener('click',function(){
+      var rec=null; try{ rec=JSON.parse(sessionStorage.getItem('bv_active_record')||'null'); }catch(e){}
+      var body={kind:kind, step:step, reason:pick, detail:[detail,box.querySelector('.bv-ovr-m').value].filter(Boolean).join(' · '), customer_id:rec&&rec.customerId};
+      ok.disabled=true;
+      fetch('/api/overrides',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+        .catch(function(){}).then(function(){ box.remove(); onOk(); });
+    });
+  }
+  window.BVOverride={ask:askReason, reasons:REASONS};
+
   // 2) 가맹점 하위 메뉴
   function get(){ try{ return JSON.parse(sessionStorage.getItem('bv_steps')||'{}'); }catch(e){ return {}; } }
   function set(o){ try{ sessionStorage.setItem('bv_steps', JSON.stringify(o)); }catch(e){} }
@@ -73,14 +102,20 @@
       g.innerHTML = '<div class="subnav-in"><span><b>'+prev.t+' 먼저.</b> 응대 순서: 접객 → 검안 → 테 판정·가공 → 피팅</span>'+
         '<span style="display:flex;gap:8px"><a class="btn small" href="'+prev.p+'">'+prev.t+'으로 가기</a><button class="btn small ghost" type="button">건너뛰고 보기</button></span></div>';
       bar.parentNode.insertBefore(g, bar.nextSibling);
-      g.querySelector('button').addEventListener('click', function(){ g.remove(); });
+      g.querySelector('button').addEventListener('click', function(){ askReason(g, 'step_skip', prev.t+' 건너뜀 → '+STEPS[idx].t, '', prev.t+' 건너뛰는 사유', function(){ g.remove(); }); });
     }
   }
   var btn = bar.querySelector('.sn-done');
-  if(btn) btn.addEventListener('click', function(){
+  function finishStep(){
     var d = idx===0 ? {} : get();            // 접객을 마치면 새 손님으로 본다
     d[STEPS[idx].p.replace('.html','')] = 1; set(d);
     if(idx < STEPS.length-1){ location.href = STEPS[idx+1].p; }
     else { set({}); location.href = 'store.html#care'; }
+  }
+  // 페이지가 window.BV_STEP_CHECK()로 기준 미달을 알려 주면 사유를 받고 넘어간다 (예: 피팅)
+  if(btn) btn.addEventListener('click', function(){
+    var issue = (typeof window.BV_STEP_CHECK==='function') ? window.BV_STEP_CHECK() : null;
+    if(issue) askReason(bar, 'fit_below', STEPS[idx].t, issue, '기준 미달로 넘어가는 사유', finishStep);
+    else finishStep();
   });
 })();

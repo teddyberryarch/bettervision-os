@@ -171,6 +171,14 @@ a,button,.chip,.subtab,.ptab,.rolecard{ transition:background 120ms ease-out, co
 .sn-gate{ background:var(--t-amber-soft); }
 .sn-gate .subnav-in{ justify-content:space-between; color:var(--t-800); padding:12px 24px; }
 @media(max-width:640px){ .subnav-in,.sn-gate .subnav-in{ padding:8px 16px; } .sn-done{ margin-left:0; } }
+/* 사유 남기고 넘어가기 (09.24, D-12) */
+.bv-ovr{ background:var(--t-amber-soft); border-top:1px solid var(--t-200); }
+.bv-ovr .subnav-in{ padding:12px 24px; color:var(--t-800); }
+.bv-ovr-r{ display:flex; gap:6px; flex-wrap:wrap; }
+.bv-ovr-r .chip{ font-size:15px; padding:7px 12px; cursor:pointer; }
+.bv-ovr-m{ font:400 15px var(--sans); border:1px solid var(--t-200); border-radius:8px; padding:8px 10px; background:#fff; max-width:420px; }
+.bv-ovr-ok[disabled]{ opacity:.45; cursor:default; }
+@media print{ .bv-ovr{ display:none!important; } }
 
 /* 용어 설명 (09.24) */
 .bv-gloss-btn{position:fixed;right:20px;bottom:20px;z-index:60;border:none;border-radius:999px;background:var(--t-navy);color:#fff;font:600 15px var(--sans);padding:12px 18px;box-shadow:0 6px 18px rgba(25,31,40,.18);cursor:pointer}
