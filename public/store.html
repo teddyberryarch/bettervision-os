@@ -958,13 +958,13 @@ function rfLoad(){
     RF=j.sales||[];
     document.getElementById('rfList').innerHTML = RF.length? RF.map(function(s,i){
       return '<div class="posline"><span>'+s.name+' ×'+s.qty+' <span class="muted">'+won(s.amount)+' · '+s.date+'</span></span>'+
-        '<button class="btn small ghost" onclick="rfDo('+i+')">환불</button></div>';
+        '<button class="btn small ghost" onclick="rfDo('+i+',this)">환불</button></div>';
     }).join('') : '<div class="muted" style="font-size:14px;padding:6px 0">최근 결제 없음</div>';
   }).catch(function(){toast('불러오기 실패');});
 }
-function rfDo(i){
+function rfDo(i,btn){
   var s=RF[i]; if(!s)return;
-  if(!confirm(s.name+' ×'+s.qty+' 환불 진행?')) return;
+  if(btn && !btn.dataset.ok){ btn.dataset.ok='1'; btn.textContent='한 번 더 누르면 환불'; btn.classList.remove('ghost'); setTimeout(function(){ if(btn.isConnected){ delete btn.dataset.ok; btn.textContent='환불'; btn.classList.add('ghost'); } },4000); return; }
   fetch('/api/refund',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:curStore(),date:dnow(),method:s.method||'카드',lines:[{sku:s.sku,name:s.name,cat:s.cat,qty:s.qty,amount:s.amount,medical:false}]})})
     .then(function(r){return r.json();}).then(function(res){
       if(!res.ok){toast(res.error||'환불 실패');return;}

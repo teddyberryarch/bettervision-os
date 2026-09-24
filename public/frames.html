@@ -139,7 +139,7 @@ function parseNow(){
   return p;
 }
 function addFrame(){
-  var p=parseNow(); if(!p){alert('각인 형식 확인: 54□18-145');return;}
+  var p=parseNow(); if(!p){document.getElementById('parsed').textContent='각인 형식 확인: 54□18-145 (또는 54-18-145)';return;}
   db.unshift({brand:document.getElementById('brand').value||'(미입력)', model:document.getElementById('model').value||'-', color:'', eng:document.getElementById('eng').value, material:document.getElementById('mat').value});
   document.getElementById('eng').value='';document.getElementById('brand').value='';document.getElementById('model').value='';
   document.getElementById('parsed').textContent='추가 완료. 전체 목록·적합도 비교에 반영.';

@@ -215,7 +215,7 @@
                 <div class="scanstat" id="scanstat">카메라를 정면으로 바라보세요</div>
               </div>
               <button class="btn" style="width:100%;margin-top:12px" id="scanbtn" onclick="measureCamera()">카메라로 측정</button>
-              <button class="btn small ghost" style="width:100%;margin-top:6px" onclick="runDemo()">데모값 넣기</button>
+              <button class="btn small ghost" style="width:100%;margin-top:6px" onclick="runDemo()">예시값 넣기</button>
               <div class="label" style="margin-top:6px;font-size:13px">카메라 권한이 필요해요. 집에서 잰 값은 참고용이고, 정확한 값은 매장에서 다시 재요.</div>
 
               <div class="divider"></div>
@@ -681,7 +681,7 @@ function runDemo(){
   document.getElementById('inW').value=142; document.getElementById('inL').value=143; document.getElementById('inN').value=0;
   var sz=recompute();
   var w=document.getElementById('scanwrap'), st=document.getElementById('scanstat');
-  w.classList.add('done'); st.textContent='데모 측정값 · '+sz;
+  w.classList.add('done'); st.textContent='예시 측정값 · '+sz;
 }
 recompute();
 /* eye-health timeline */
@@ -999,7 +999,7 @@ function renderCat(c){
     return;
   }
   if(c==='contact'){
-    b.innerHTML=pbIntro('콘택트도 자체 PB로 공급해 가격을 낮췄어요. 도수·BC가 맞아야 하므로 매장 검안 후 구매가 원칙이에요(데모에선 측정 탭에서 주문 가능).')+
+    b.innerHTML=pbIntro('콘택트도 자체 PB로 공급해 가격을 낮췄어요. 도수·BC가 맞아야 하므로 매장 검안 후 구매가 원칙이에요(앱에선 측정 탭에서 주문 가능).')+
       CONTACTS.map(pcard).join('');
     return;
   }

@@ -43,7 +43,7 @@
 
 <div class="card pad">
   <div class="stat" id="stat"></div>
-  <div class="note">데모 손님 명단 기준. 친구톡(광고)은 동의한 손님에게만, 알림톡(정보성)은 모든 손님에게 발송 가능.</div>
+  <div class="note">예시 손님 명단 기준. 친구톡(광고)은 동의한 손님에게만, 알림톡(정보성)은 모든 손님에게 발송 가능.</div>
 </div>
 
 <div class="cols">
@@ -68,6 +68,7 @@
   <div id="legal"></div>
   <div class="btnrow" style="justify-content:center">
     <button class="kakao btn" onclick="send()">발송</button>
+    <div class="note" id="sendMsg" style="text-align:center;margin-top:8px"></div>
     <button class="btn ghost" onclick="toggleKind()">알림톡 ↔ 친구톡</button>
   </div>
  </div>
@@ -139,10 +140,13 @@ function preview(){
   ? '<div class="warn">친구톡(광고성)은 <b>채널 친구이면서 마케팅 수신에 동의한 손님에게만</b> 발송 가능. 동의 '+pool.filter(function(c){return c.consent;}).length+'/'+pool.length+'명.</div>'
   : '<div class="note" style="margin-top:8px;color:var(--good)">알림톡(정보성)은 전화번호만 있으면 발송 가능(수신동의 불필요). 광고 문구 금지.</div>';
 }
+function obPost(o){ return fetch('/api/outbox',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(o)}).then(function(r){return r.json();}).catch(function(){return {ok:false,error:'연결이 안 됨'};}); }
 function send(){
  var s=SEGS.find(function(x){return x.id===cur;});var pool=BASE.filter(s.f);
  var reach=isAd()?pool.filter(function(c){return c.consent;}).length:pool.length;
- alert('데모 발송: '+(isAd()?'친구톡':'알림톡')+', '+reach+'명에게 발송.\n실제는 카카오 비즈메시지 API 연동(채널 비즈인증·템플릿 검수 필요).');
+ obPost({channel:'카카오 알림톡',kind:(isAd()?'친구톡':'알림톡')+' · '+(s.nm||s.id),target:'',count:reach,body:document.getElementById('bbody').textContent}).then(function(j){
+  document.getElementById('sendMsg').textContent=j.ok?(reach+'명 발송 대기함에 기록. 카카오 연동 전이라 실제 발송은 아직 안 됨 (채널 비즈인증·템플릿 검수 필요)'):(j.error||'기록 실패');
+ });
 }
 counts();renderSegs();preview();
 </script>
