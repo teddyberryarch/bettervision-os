@@ -2,7 +2,7 @@
 // 테이블: bookings(예약), inventory(지점×SKU 재고), sales(결제 라인)
 let pool=null, ready=false;
 const mem={ bookings:[], inventory:[], sales:[], orders:[], customers:[], pickups:[], users:[], policy:{},
-  aftercare:[], ascases:[], msessions:[], measurements:[], accesslog:[], overrides:[] };
+  aftercare:[], ascases:[], msessions:[], measurements:[], accesslog:[], overrides:[], quotes:[] };
 try{
   if(process.env.DATABASE_URL){
     const { Pool } = require('pg');
@@ -214,6 +214,9 @@ async function init(){
     pow_json TEXT, confidence REAL, provisional BOOLEAN, method TEXT, operator TEXT, source TEXT)`);
   await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS ear_depth REAL');   // [09.24] 각막~귀 윗부분 앞뒤 거리
   await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS size_code TEXT');   // 이 측정으로 정한 9사이즈
+  await pool.query(`CREATE TABLE IF NOT EXISTS quotes(
+    id SERIAL PRIMARY KEY, no TEXT, customer_id INT, store TEXT, items TEXT, total INT, list_total INT,
+    status TEXT DEFAULT '발행', created_by TEXT, created_at TIMESTAMPTZ DEFAULT now(), valid_until TEXT, paid_at TIMESTAMPTZ)`);
   await pool.query(`CREATE TABLE IF NOT EXISTS overrides(
     id SERIAL PRIMARY KEY, kind TEXT, step TEXT, reason TEXT, detail TEXT, customer_id INT, store TEXT, username TEXT, at TIMESTAMPTZ DEFAULT now())`);
   await pool.query(`CREATE TABLE IF NOT EXISTS measure_access_log(
@@ -356,6 +359,44 @@ async function _policyMap(){
 async function listPricePolicy(){
   const m=await _policyMap();
   return CATALOG.map(function(it){ var pp=m[it.sku]||{list_price:it.price,max_disc:10}; return {sku:it.sku,name:it.name,cat:it.cat,list_price:pp.list_price,max_disc:pp.max_disc}; });
+}
+/* [09.24] 견적서: 본사 권장가에서 시작, 판매가는 매장이 정함. 할인 한도를 넘으면 표시만 한다(막지 않음, D-12) */
+const QUOTE_VALID_DAYS=14;
+async function createQuote(b, who){
+  var lines=Array.isArray(b.items)?b.items.slice(0,20):[]; if(!lines.length) return {ok:false,error:'품목이 없어요'};
+  var m=await _policyMap(), out=[], total=0, listTotal=0;
+  for(var i=0;i<lines.length;i++){ var l=lines[i], it=CATALOG.find(function(x){return x.sku===l.sku;}); if(!it) return {ok:false,error:'없는 품목: '+l.sku};
+    var pp=m[it.sku]||{list_price:it.price,max_disc:10}, qty=Math.max(1,Math.min(10,parseInt(l.qty)||1));
+    var disc=Math.max(0,Math.min(90,Math.round(+l.disc||0))), unit=Math.round(pp.list_price*(100-disc)/100/100)*100;
+    out.push({sku:it.sku,name:it.name,cat:it.cat,medical:!!it.medical,qty:qty,list:pp.list_price,disc:disc,maxDisc:pp.max_disc,over:disc>pp.max_disc,unit:unit,amount:unit*qty,note:String(l.note||'').slice(0,80)});
+    total+=unit*qty; listTotal+=pp.list_price*qty; }
+  var cust=b.customer_id?await getCustomer(b.customer_id):null, store=(who&&who.store)||(cust&&cust.store)||b.store||null;
+  var today=_iso(new Date()), valid=_addDays(today,QUOTE_VALID_DAYS), seq, no;
+  if(ready){ const c=await pool.query("SELECT COUNT(*)::int AS n FROM quotes WHERE created_at::date=now()::date"); seq=c.rows[0].n+1; }
+  else seq=mem.quotes.filter(function(q){return String(q.created_at).slice(0,10)===today;}).length+1;
+  no='Q-'+today.slice(2).replace(/-/g,'')+'-'+String(seq).padStart(3,'0');
+  var row={no:no,customer_id:cust?cust.id:null,store:store,items:JSON.stringify(out),total:total,list_total:listTotal,created_by:who?who.username:null,valid_until:valid};
+  if(ready){ const r=await pool.query('INSERT INTO quotes(no,customer_id,store,items,total,list_total,created_by,valid_until) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id,created_at',[row.no,row.customer_id,row.store,row.items,row.total,row.list_total,row.created_by,row.valid_until]); row.id=r.rows[0].id; row.created_at=r.rows[0].created_at; }
+  else { row.id=mem.quotes.length+1; row.created_at=new Date().toISOString(); row.status='발행'; mem.quotes.push(row); }
+  return {ok:true, quote:await getQuote(row.id)};
+}
+async function getQuote(id){
+  if(!/^\d+$/.test(String(id))) return null;
+  var q = ready ? (await pool.query('SELECT * FROM quotes WHERE id=$1',[id])).rows[0] : mem.quotes.find(function(x){return x.id===+id;});
+  if(!q) return null; var c=q.customer_id?await getCustomer(q.customer_id):null;
+  return Object.assign({},q,{items:JSON.parse(q.items||'[]'), customer:c?{id:c.id,name:c.name,size:c.size,rx:c.rx,pd:c.pd}:null});
+}
+async function listQuotes(store, customerId){
+  var rows = ready ? (await pool.query('SELECT id,no,customer_id,store,total,list_total,status,created_at,valid_until FROM quotes WHERE ($1::text IS NULL OR store=$1) AND ($2::int IS NULL OR customer_id=$2) ORDER BY id DESC LIMIT 50',[store||null,customerId?+customerId:null])).rows
+    : mem.quotes.filter(function(q){return (!store||q.store===store)&&(!customerId||q.customer_id===+customerId);}).slice().reverse().slice(0,50);
+  var names=await _custNames();
+  return rows.map(function(x){ var c=names[x.customer_id]||{}; return {id:x.id,no:x.no,customer_id:x.customer_id,name:c.name||'-',store:x.store,total:x.total,list_total:x.list_total,status:x.status||'발행',created_at:x.created_at,valid_until:x.valid_until}; });
+}
+async function markQuotePaid(id){
+  var q=await getQuote(id); if(!q) return {ok:false,error:'견적서가 없어요'}; if(q.status==='결제됨') return {ok:true,already:true};
+  if(ready) await pool.query("UPDATE quotes SET status='결제됨', paid_at=now() WHERE id=$1",[id]);
+  else { var r=mem.quotes.find(function(x){return x.id===+id;}); r.status='결제됨'; r.paid_at=new Date().toISOString(); }
+  return {ok:true};
 }
 async function setPricePolicy(sku, list_price, max_disc){
   list_price=Math.max(0,Math.round(+list_price||0)); max_disc=Math.min(90,Math.max(0,Math.round(+max_disc||0)));
@@ -1106,7 +1147,7 @@ async function logMeasureAccess(username, customerId, action){
   mem.accesslog.push({username:username,customer_id:customerId,action:action,at:new Date().toISOString()});
 }
 
-module.exports={ init, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+module.exports={ init, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,

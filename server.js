@@ -310,6 +310,16 @@ async function api(req, res, url){
       if(!scopeOK(cur.store)) return send(res,403,{ok:false,error:'다른 지점 건이에요'});
       const r=await db.closeAS(b.id, b.cause, b.action); return send(res, r.ok?200:400, r);
     }
+    // ===== [09.24] 견적서 =====
+    if(req.method==='GET' && url.pathname==='/api/quotes'){ return send(res,200,{ok:true, items:await db.listQuotes(url.searchParams.get('store'), url.searchParams.get('customer_id'))}); }
+    if(req.method==='POST' && url.pathname==='/api/quotes'){
+      const b=await body(req);
+      if(b.customer_id){ const c=await db.getCustomer(b.customer_id); if(!c) return send(res,404,{ok:false,error:'고객 없음'}); if(!scopeOK(c.store)) return send(res,403,{ok:false,error:'다른 지점 고객이에요'}); }
+      const r=await db.createQuote(b, U); return send(res, r.ok?201:400, r); }
+    { let qm=url.pathname.match(/^\/api\/quotes\/(\d+)(\/paid)?$/);
+      if(qm){ const q=await db.getQuote(qm[1]); if(!q) return send(res,404,{ok:false,error:'견적서가 없어요'}); if(!scopeOK(q.store)) return send(res,403,{ok:false,error:'다른 지점 견적서예요'});
+        if(req.method==='GET' && !qm[2]) return send(res,200,{ok:true, quote:q});
+        if(req.method==='POST' && qm[2]){ const r=await db.markQuotePaid(qm[1]); return send(res, r.ok?200:400, r); } } }
     // ===== [09.24] D-12 막지 않고 기록 =====
     if(req.method==='GET' && url.pathname==='/api/overrides/reasons'){ return send(res,200,{ok:true, reasons:db.OVERRIDE_REASONS}); }
     if(req.method==='POST' && url.pathname==='/api/overrides'){
