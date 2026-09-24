@@ -111,6 +111,8 @@ var _photo=null,_photoW=null,_photoH=null;
 function startCam(){var v=document.getElementById("cam");if(!navigator.mediaDevices){document.getElementById("cammsg").textContent="이 환경에서는 카메라를 쓸 수 없어요. https 서버에서 작동해요.";return;}navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}}).then(function(s){v.srcObject=s;v.style.display="block";document.getElementById("cammsg").textContent="촬영 버튼을 눌러 주세요.";}).catch(function(e){document.getElementById("cammsg").textContent="카메라를 쓸 수 없어요("+e.name+"). https 연결과 권한을 확인해 주세요.";});}
 function capture(){var v=document.getElementById("cam"),c=document.getElementById("cap");if(!v.videoWidth){document.getElementById("cammsg").textContent="먼저 카메라를 켜 주세요.";return;}var w=320,h=Math.round(v.videoHeight/v.videoWidth*320);c.width=w;c.height=h;c.getContext("2d").drawImage(v,0,0,w,h);_photo=c.toDataURL("image/jpeg",0.7);_photoW=w;_photoH=h;var img=document.getElementById("shot");img.src=_photo;img.style.display="block";if(v.srcObject){v.srcObject.getTracks().forEach(function(t){t.stop();});}v.style.display="none";document.getElementById("cammsg").textContent="촬영했어요. 사진은 이 기기 안에서만 쓰고 서버로 보내지 않아요.";}
 function result(){ return E.toCode({faceWidth:gv('FW'), earDepth:gv('ED'), vd:12}); }
+function tcText(t){ if(!t) return ''; var f=function(v,out){ return v==null?'?':(Math.abs(v)<0.5?'곧게':((v>0?out:(out==='바깥 '?'안 ':'바깥 '))+Math.abs(v)+'mm')); };
+  return ' 템플 곡선('+t.frame+' 기준, 시스템 계산): 귀 굽힘 '+t.bend_at+'mm · 관자놀이 '+f(t.temple_out,'바깥 ')+' · 끝 '+f(t.tip_in,'안 ')+(t.missing&&t.missing.length?' · 비어 있음: '+t.missing.join(', '):'')+'.'; }
 function proceed(){
   var c=curCust(), pd=gv('PD'), r=result(), msg=document.getElementById('savemsg');
   BVRecord.save({customerId:c?c.id:null, name:c?c.name:(document.getElementById('cname').value||'측정 손님'), faceWidth:gv('FW'), earGap:gv('EG'), earDepth:gv('ED'), noseH:gv('NH'), faceWrap:gv('WR'), templeW:numv('TW'), headBack:numv('HB'), templeW:numv('TW'), headBack:numv('HB'),
@@ -123,7 +125,7 @@ function proceed(){
     .then(function(r){return r.json().then(function(j){return {s:r.status,j:j};});}).then(function(o){
       var j=o.j; if(!j.ok){ msg.style.color='var(--warn)'; msg.textContent='저장하지 못했어요: '+(j.error||o.s); return; }
       if(j.provisional){ msg.style.color='var(--warn)'; msg.textContent='임시값으로 저장했어요(신뢰도 낮음). 손님 사이즈는 '+(j.prev_size||'그대로')+' 유지. 다시 재 주세요.'; }
-      else { msg.style.color='var(--good)'; msg.textContent='저장했어요. 9사이즈 '+(j.prev_size&&j.prev_size!==j.size?(j.prev_size+' → '):'')+(j.size||'-')+(j.temple_need?' (필요한 템플 '+j.temple_need+'mm)':'')+'. 검안·테 판정·피팅에 자동 적용돼요.'; loadCusts(); }
+      else { msg.style.color='var(--good)'; msg.textContent='저장했어요. 9사이즈 '+(j.prev_size&&j.prev_size!==j.size?(j.prev_size+' → '):'')+(j.size||'-')+(j.temple_need?' (필요한 템플 '+j.temple_need+'mm)':'')+'. 검안·테 판정·피팅에 자동 적용돼요.'+tcText(j.temple_curve); loadCusts(); }
       loadHist();
     }).catch(function(){ msg.style.color='var(--warn)'; msg.textContent='서버에 연결하지 못했어요. 이 기기 기록에는 남았어요.'; });
 }
