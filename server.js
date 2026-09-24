@@ -19,10 +19,10 @@ function send(res, code, obj, extraHeaders){ var h={'content-type':'application/
 // [09.24] 클로즈드 베타 동안 로그인 없이 운영 (지근 결정). 실제 손님 데이터를 넣기 전에 Railway에 AUTH_ON=true 추가
 const AUTH_ON = process.env.AUTH_ON === 'true';
 // 로그인 없이 열리는 페이지 (고객 대면·데모)
-const PUBLIC_PAGES = ['/index.html','/login.html','/customer.html','/catalog.html','/lookbook.html','/pricing.html','/receipt.html','/shop.html','/trust.html'];
+const PUBLIC_PAGES = ['/index.html','/login.html','/customer.html','/catalog.html','/lookbook.html','/pricing.html','/shop.html','/trust.html'];
 // [09.24] 서비스하지 않는 페이지 — 방향결정 v2.6 이전 내부 문서. 파일은 그대로 두고(삭제 금지) 404로 막음
 //  기준 문서는 구글드라이브 01_코어·02_문서세트
-function isBlockedPage(p){ return /^\/BETTERVISION_[^/]*\.html$/.test(p) || /^\/BETTERVISION_[^/.]*$/.test(p); }
+function isBlockedPage(p){ return p==='/receipt.html' || p==='/receipt' || /^\/BETTERVISION_[^/]*\.html$/.test(p) || /^\/BETTERVISION_[^/.]*$/.test(p); }
 // 본부 계정만 여는 페이지 (내부 전략·재무)
 const HQ_PAGES = ['/hq.html','/a.html','/finance.html','/insights.html','/todo.html','/painmap.html'];
 function isSecure(req){ return (req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https'; }
@@ -57,7 +57,7 @@ async function api(req, res, url){
       //  /api/customer(단건)는 공개 예외에서 제외
       const PUBLIC_ANY=['/api/catalog'];
       //  - 고객 앱: 7일째 착용 확인 응답(본인 건만), 자가측정 결과 제출(항상 임시값으로 저장)
-      const PUBLIC_GET=['/api/bookings','/api/aftercare/mine','/api/quotes/mine','/api/measurements/mine','/api/shop/items','/api/receipts/mine'];
+      const PUBLIC_GET=['/api/bookings','/api/aftercare/mine','/api/quotes/mine','/api/measurements/mine','/api/shop/items'];
       const PUBLIC_POST=['/api/bookings','/api/pickups','/api/aftercare/respond','/api/as/mine','/api/outbox/subscribe'];
       const isPublic = PUBLIC_ANY.indexOf(url.pathname)>=0
         || (req.method==='POST' && /^\/api\/measure\/sessions\/[^/]+\/result$/.test(url.pathname))
@@ -321,7 +321,6 @@ async function api(req, res, url){
       const r=await db.addOutbox({channel:'구독',kind:String(b.kind||'콘택트렌즈 정기 배송').slice(0,40),store:c.store,target:c.name,count:1,body:'손님 앱 신청'},null); return send(res, r.ok?201:400, r); }
     if(req.method==='POST' && url.pathname==='/api/as/mine'){ const b=await body(req); if(!b.customer_id||!String(b.symptom||'').trim()) return send(res,400,{ok:false,error:'증상을 적어 주세요'});
       const r=await db.openASByCustomer(b.customer_id,b.symptom); return send(res, r.ok?201:400, r); }
-    if(req.method==='GET' && url.pathname==='/api/receipts/mine'){ const r=await db.medicalReceipts(url.searchParams.get('customer_id'), url.searchParams.get('year')); return send(res, r.ok?200:400, r); }
     if(req.method==='GET' && url.pathname==='/api/production/plan'){ return send(res,200, await db.productionPlan()); }
     if(req.method==='GET' && url.pathname==='/api/measurements/mine'){
       const cid=url.searchParams.get('customer_id'); if(!cid) return send(res,400,{ok:false,error:'customer_id 필요'});

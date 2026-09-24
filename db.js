@@ -436,17 +436,10 @@ async function listOutbox(store){
   if(ready) return (await pool.query('SELECT id,channel,kind,store,target,count,status,created_at FROM outbox WHERE ($1::text IS NULL OR store=$1) ORDER BY id DESC LIMIT 30',[store||null])).rows;
   return mem.outbox.filter(function(o){return !store||o.store===store;}).slice().reverse().slice(0,30);
 }
-/* [09.24] 손님 앱: A/S 접수, 의료비 영수증 */
+/* [09.24] 손님 앱: A/S 접수 */
 async function openASByCustomer(customerId, symptom){
   var c=await getCustomer(customerId); if(!c) return {ok:false,error:'손님 정보가 없어요'};
   return openAS({customer_id:c.id, store:c.store, symptom:'[손님 앱] '+String(symptom||'').slice(0,280)});
-}
-async function medicalReceipts(customerId, year){
-  var c=await getCustomer(customerId); if(!c) return {ok:false,error:'손님 정보가 없어요'};
-  var y=String(year||new Date().getFullYear());
-  var rows = ready ? (await pool.query("SELECT date,store,name,qty,amount,method FROM sales WHERE customer_id=$1 AND medical=true AND qty>0 AND date LIKE $2 ORDER BY date",[c.id,y+'%'])).rows
-    : mem.sales.filter(function(x){return +x.customer_id===+c.id && x.medical && x.qty>0 && String(x.date).indexOf(y)===0;});
-  return {ok:true, year:y, name:c.name, items:rows.map(function(r){return {date:r.date,store:r.store,name:r.name,qty:r.qty,amount:r.amount,method:r.method};}), total:rows.reduce(function(a,r){return a+(r.amount||0);},0)};
 }
 /* [09.24] 본사 생산 발주서: 매장에서 팔린 PB 테(본사 조제 대기)를 모델·사이즈별로 */
 async function productionPlan(){
@@ -1228,7 +1221,7 @@ async function logMeasureAccess(username, customerId, action){
   mem.accesslog.push({username:username,customer_id:customerId,action:action,at:new Date().toISOString()});
 }
 
-module.exports={ init, addNotice, listNotices, addOutbox, listOutbox, OUTBOX_CH, openASByCustomer, medicalReceipts, productionPlan, measurementsForCustomer, quoteOverSummary, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+module.exports={ init, addNotice, listNotices, addOutbox, listOutbox, OUTBOX_CH, openASByCustomer, productionPlan, measurementsForCustomer, quoteOverSummary, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,
