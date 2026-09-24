@@ -70,7 +70,10 @@ function buildCatalog(){
   // [09.24] 기존 브랜드 테 (재고로 판다. 공급은 본사 경유, 입고 때 사이즈를 재서 기록)
   [{name:'수입 A 라인 티타늄', price:470000},{name:'국산 B 라인 아세테이트', price:210000}].forEach(function(f,i){
     out.push({ sku:'Y'+(i+1), name:f.name, cat:'테', price:f.price, medical:false }); });
-  return out; // PB 12 + 선글라스 6 + 단품 12 + 기존 브랜드 테 2
+  // [09.24] 굴절률별 단초점 렌즈 (양쪽). 샘플 권장가: 시세 참고, 1호점에서 확정. 1.60은 알도R 1.60(X1)
+  [{name:'1.50 렌즈', price:50000},{name:'1.56 렌즈', price:70000},{name:'1.67 렌즈', price:160000},{name:'1.74 렌즈', price:220000}].forEach(function(f,i){
+    out.push({ sku:'L'+(i+1), name:f.name, cat:'렌즈', price:f.price, medical:true, sample:true }); });
+  return out; // PB 12 + 선글라스 6 + 단품 12 + 기존 브랜드 테 2 + 굴절률 렌즈 4
 }
 function skuId(base,s){
   const map={'로마 클래식':'CL','로마 와이드':'WD','로마 슬림':'SL','로마 라운드':'RD','편광 선글라스':'SP','클립온 선글라스':'SC'};
@@ -99,7 +102,7 @@ function seedStock(sku, store){
   // 데모 시드: 지점별로 살짝 다르게, 디자인/사이즈별 편차
   let base = 8;
   if(/-M$/.test(sku)) base=14; else if(/-S$/.test(sku)) base=7; else if(/-L$/.test(sku)) base=6;
-  if(sku[0]==='X') base=16; // 렌즈/콘택트/액세서리 넉넉
+  if(sku[0]==='X'||sku[0]==='L') base=16; // 렌즈/콘택트/액세서리 넉넉
   if(isPBFrame(sku)) return 1; // PB 테는 견본 1개
   if(sku[0]==='Y') base=4;   // 기존 브랜드 테
   const bump = {'성수점':4,'홍대점':1,'판교점':-1}[store]||0;
@@ -250,9 +253,9 @@ async function init(){
   const stc=await pool.query('SELECT COUNT(*)::int AS c FROM standards');
   if(stc.rows[0].c===0){ for(const x of _demoStandards()) await pool.query('INSERT INTO standards(kind,version,note,released_at) VALUES($1,$2,$3,$4)',[x.kind,x.version,x.note,x.released_at]);
     for(const x of _demoDeploy()) await pool.query('INSERT INTO standard_deploy(store,kind,version) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',[x.store,x.kind,x.version]); }
-  for(const it of CATALOG.filter(function(x){return x.sku[0]==='Y';})){ for(const st of STORES){
+  for(const it of CATALOG.filter(function(x){return x.sku[0]==='Y'||x.sku[0]==='L';})){ for(const st of STORES){
     await pool.query('INSERT INTO inventory(store,sku,name,cat,price,medical,stock,sold) VALUES($1,$2,$3,$4,$5,$6,$7,0) ON CONFLICT DO NOTHING',[st,it.sku,it.name,it.cat,it.price,it.medical,seedStock(it.sku,st)]); }
-    await pool.query('INSERT INTO price_policy(sku,list_price,max_disc) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',[it.sku,it.price,DEFAULT_DISC['테']]); }
+    await pool.query('INSERT INTO price_policy(sku,list_price,max_disc) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',[it.sku,it.price,(DEFAULT_DISC[it.cat]!=null?DEFAULT_DISC[it.cat]:10)]); }
   // 기존 브랜드 테 판매 데모: 없으면 최근 45일에 조금 채운다 (PB 테 비중이 100%로 보이지 않게)
   const ys=await pool.query("SELECT COUNT(*)::int AS c FROM sales WHERE sku ~ '^Y'");
   if(ys.rows[0].c===0 && process.env.DEMO_TOPUP!=='off'){
