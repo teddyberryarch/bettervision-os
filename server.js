@@ -57,7 +57,7 @@ async function api(req, res, url){
       //  /api/customer(단건)는 공개 예외에서 제외
       const PUBLIC_ANY=['/api/catalog'];
       //  - 고객 앱: 7일째 착용 확인 응답(본인 건만), 자가측정 결과 제출(항상 임시값으로 저장)
-      const PUBLIC_GET=['/api/bookings','/api/aftercare/mine'];
+      const PUBLIC_GET=['/api/bookings','/api/aftercare/mine','/api/quotes/mine'];
       const PUBLIC_POST=['/api/bookings','/api/pickups','/api/aftercare/respond'];
       const isPublic = PUBLIC_ANY.indexOf(url.pathname)>=0
         || (req.method==='POST' && /^\/api\/measure\/sessions\/[^/]+\/result$/.test(url.pathname))
@@ -151,7 +151,7 @@ async function api(req, res, url){
     }
     // GET /api/catalog -> SKU 목록(공통)
     if(req.method==='GET' && url.pathname==='/api/catalog'){
-      return send(res,200,{ok:true, stores:db.STORES, catalog:db.CATALOG});
+      return send(res,200,{ok:true, stores:db.STORES, catalog:await db.catalogWithPolicy()});
     }
     // GET /api/inventory?store= -> 지점 재고
     if(req.method==='GET' && url.pathname==='/api/inventory'){
@@ -311,6 +311,9 @@ async function api(req, res, url){
       const r=await db.closeAS(b.id, b.cause, b.action); return send(res, r.ok?200:400, r);
     }
     // ===== [09.24] 견적서 =====
+    if(req.method==='GET' && url.pathname==='/api/quotes/mine'){
+      const cid=url.searchParams.get('customer_id'); if(!cid) return send(res,400,{ok:false,error:'customer_id 필요'});
+      return send(res,200,{ok:true, items:await db.quotesForCustomer(cid)}); }
     if(req.method==='GET' && url.pathname==='/api/quotes'){ return send(res,200,{ok:true, items:await db.listQuotes(url.searchParams.get('store'), url.searchParams.get('customer_id'))}); }
     if(req.method==='POST' && url.pathname==='/api/quotes'){
       const b=await body(req);

@@ -392,6 +392,20 @@ async function listQuotes(store, customerId){
   var names=await _custNames();
   return rows.map(function(x){ var c=names[x.customer_id]||{}; return {id:x.id,no:x.no,customer_id:x.customer_id,name:c.name||'-',store:x.store,total:x.total,list_total:x.list_total,status:x.status||'발행',created_at:x.created_at,valid_until:x.valid_until}; });
 }
+async function quotesForCustomer(customerId){
+  // 손님 앱용: 매장 내부 값(할인 한도·초과 여부·작성자)은 빼고 보낸다
+  if(!/^\d+$/.test(String(customerId||''))) return [];
+  var rows = ready ? (await pool.query('SELECT * FROM quotes WHERE customer_id=$1 ORDER BY id DESC LIMIT 10',[customerId])).rows
+    : mem.quotes.filter(function(q){return q.customer_id===+customerId;}).slice().reverse().slice(0,10);
+  var today=_iso(new Date());
+  return rows.map(function(q){ var st=q.status||'발행'; if(st==='발행' && q.valid_until && q.valid_until<today) st='기간 지남';
+    return {no:q.no, date:String(q.created_at instanceof Date?q.created_at.toISOString():q.created_at).slice(0,10), store:q.store, status:st, valid_until:q.valid_until, total:q.total, list_total:q.list_total,
+      items:JSON.parse(q.items||'[]').map(function(l){return {name:l.name, qty:l.qty, list:l.list, disc:l.disc, amount:l.amount, pb:/^(CL|WD|SL|RD)-/.test(l.sku)};})}; });
+}
+async function catalogWithPolicy(){
+  // 손님 앱 가격 계산용: 본사 권장가(정책)를 price로 덮어 보낸다
+  var m=await _policyMap(); return CATALOG.map(function(it){ var pp=m[it.sku]; return Object.assign({},it,{price:pp?pp.list_price:it.price}); });
+}
 async function markQuotePaid(id){
   var q=await getQuote(id); if(!q) return {ok:false,error:'견적서가 없어요'}; if(q.status==='결제됨') return {ok:true,already:true};
   if(ready) await pool.query("UPDATE quotes SET status='결제됨', paid_at=now() WHERE id=$1",[id]);
@@ -1147,7 +1161,7 @@ async function logMeasureAccess(username, customerId, action){
   mem.accesslog.push({username:username,customer_id:customerId,action:action,at:new Date().toISOString()});
 }
 
-module.exports={ init, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+module.exports={ init, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,
