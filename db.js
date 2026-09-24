@@ -215,7 +215,9 @@ async function init(){
     id SERIAL PRIMARY KEY, customer_id INT, session_id INT, store TEXT, device TEXT, measured_at TIMESTAMPTZ DEFAULT now(),
     pd REAL, face_width REAL, nose_height REAL, nose_angle REAL, ear_l REAL, ear_r REAL, wrap_angle REAL,
     pow_json TEXT, confidence REAL, provisional BOOLEAN, method TEXT, operator TEXT, source TEXT)`);
-  await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS ear_depth REAL');   // [09.24] 각막~귀 윗부분 앞뒤 거리
+  await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS ear_depth REAL');
+  await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS head_back REAL');   // [09.24] 귀 뒤 머리 폭
+  await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS temple_w REAL');    // [09.24] 관자놀이 폭   // [09.24] 각막~귀 윗부분 앞뒤 거리
   await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS size_code TEXT');   // 이 측정으로 정한 9사이즈
   await pool.query(`CREATE TABLE IF NOT EXISTS notices(
     id SERIAL PRIMARY KEY, kind TEXT, title TEXT, body TEXT, store TEXT, created_by TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
@@ -252,6 +254,7 @@ async function init(){
     for(const x of d.care.filter(function(x){return x.fit!=null&&x.status==='완료';})){ await pool.query('INSERT INTO aftercare(customer_id,store,sale_date,due_date,status,comfort,issues,note,source,done_at,fit,judge) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',[x.customer_id,x.store,x.sale_date,x.due_date,x.status,x.comfort,x.issues,x.note,x.source,x.done_at,x.fit,x.judge]); } }
   await pool.query(`CREATE TABLE IF NOT EXISTS workorders(id SERIAL PRIMARY KEY, store TEXT, customer_id INT, sku TEXT, frame TEXT, lens TEXT, rx TEXT, calc TEXT, status TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   await pool.query(`CREATE TABLE IF NOT EXISTS frame_db(id SERIAL PRIMARY KEY, brand TEXT, model TEXT, eng TEXT, a INT, dbl INT, temple INT, b REAL, face_angle REAL, pad TEXT, material TEXT, store TEXT, created_by TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
+  for(const c of ['hinge_w REAL','face_form REAL','temple_shape TEXT','spring BOOLEAN']) await pool.query('ALTER TABLE frame_db ADD COLUMN IF NOT EXISTS '+c);
   await pool.query(`CREATE TABLE IF NOT EXISTS vision_exams(id SERIAL PRIMARY KEY, customer_id INT, member TEXT, grp TEXT, date TEXT, rx TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   const vec=await pool.query('SELECT COUNT(*)::int AS c FROM vision_exams');
   if(vec.rows[0].c===0){ for(const x of _demoExams()) await pool.query('INSERT INTO vision_exams(customer_id,member,grp,date,rx) VALUES($1,$2,$3,$4,$5)',[x.customer_id,x.member,x.grp,x.date,x.rx]); }
@@ -976,8 +979,8 @@ async function visionFor(customerId){
    판정 기준값은 시작값이에요. 1호점 안경사와 자문 안경사가 확정하고 착용 결과로 고쳐요(D-04). */
 const FRAME_SPECS=(function(){
   var o={}, base={CL:{a:[50,53,56],B:[40,41,42],dbl:[16,18,19]},WD:{a:[51,54,57],B:[38,39,40],dbl:[16,18,19]},SL:{a:[49,52,55],B:[36,37,38],dbl:[17,18,19]},RD:{a:[48,51,54],B:[46,47,48],dbl:[18,19,20]}};
-  Object.keys(base).forEach(function(k){ ['S','M','L'].forEach(function(z,i){ o[k+'-'+z]={a:base[k].a[i],B:base[k].B[i],dbl:base[k].dbl[i],temple:[140,145,150][i],pad:'조절형',mat:'아세테이트'}; }); });
-  o['Y1']={a:53,B:41,dbl:18,temple:145,pad:'조절형',mat:'티타늄'}; o['Y2']={a:51,B:43,dbl:19,temple:140,pad:'고정형',mat:'아세테이트'};
+  Object.keys(base).forEach(function(k){ ['S','M','L'].forEach(function(z,i){ o[k+'-'+z]={a:base[k].a[i],B:base[k].B[i],dbl:base[k].dbl[i],temple:[140,145,150][i],pad:'조절형',mat:'아세테이트',hw:2*base[k].a[i]+base[k].dbl[i]+8,ff:4,tshape:'곧음',spring:false,est:['hw','ff']}; }); });
+  o['Y1']={a:53,B:41,dbl:18,temple:145,pad:'조절형',mat:'티타늄',hw:132,ff:5,tshape:'곧음',spring:true,est:['hw','ff']}; o['Y2']={a:51,B:43,dbl:19,temple:140,pad:'고정형',mat:'아세테이트',hw:129,ff:3,tshape:'곧음',spring:false,est:['hw','ff']};
   return o;
 })();
 const JUDGE_RULE={version:'v0.4', face:[4,8], temple:[0,5], blank:[70,75]};
@@ -1179,7 +1182,7 @@ async function saveMeasurement(sessionId, b, who){
   var provisional = anon ? true : (conf<0.7 || b.provisional===true);
   var row={customer_id:+cid, session_id:sess?sess.id:null, store:sess?sess.store:(b.store||null), device:anon?'phone':(sess?sess.device:(['phone','ipad','rig'].indexOf(b.device)>=0?b.device:'ipad')),
     pd:_num(b.pd), face_width:_num(b.face_width), nose_height:_num(b.nose_height), nose_angle:_num(b.nose_angle),
-    ear_l:_num(b.ear_left), ear_r:_num(b.ear_right), wrap_angle:_num(b.wrap_angle), ear_depth:_num(b.ear_depth),
+    ear_l:_num(b.ear_left), ear_r:_num(b.ear_right), wrap_angle:_num(b.wrap_angle), ear_depth:_num(b.ear_depth), head_back:_num(b.head_back), temple_w:_num(b.temple_w),
     pow_json:b.pow?JSON.stringify(b.pow).slice(0,2000):null, confidence:conf, provisional:provisional,
     method:['truedepth','iris_scale','rig_stereo','manual'].indexOf(b.method)>=0?b.method:'iris_scale',
     operator:who?who.username:null, source:anon?'고객 자가측정':'매장'};
@@ -1188,8 +1191,8 @@ async function saveMeasurement(sessionId, b, who){
   row.size_code=sz.code;
   if(!row.store && cust) row.store=cust.store||null;
   var id;
-  if(ready){ const r=await pool.query('INSERT INTO measurements(customer_id,session_id,store,device,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,pow_json,confidence,provisional,method,operator,source,ear_depth,size_code) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING id',
-      [row.customer_id,row.session_id,row.store,row.device,row.pd,row.face_width,row.nose_height,row.nose_angle,row.ear_l,row.ear_r,row.wrap_angle,row.pow_json,row.confidence,row.provisional,row.method,row.operator,row.source,row.ear_depth,row.size_code]); id=r.rows[0].id;
+  if(ready){ const r=await pool.query('INSERT INTO measurements(customer_id,session_id,store,device,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,pow_json,confidence,provisional,method,operator,source,ear_depth,size_code,head_back,temple_w) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21) RETURNING id',
+      [row.customer_id,row.session_id,row.store,row.device,row.pd,row.face_width,row.nose_height,row.nose_angle,row.ear_l,row.ear_r,row.wrap_angle,row.pow_json,row.confidence,row.provisional,row.method,row.operator,row.source,row.ear_depth,row.size_code,row.head_back,row.temple_w]); id=r.rows[0].id;
     if(sess) await pool.query("UPDATE measure_sessions SET status='완료' WHERE id=$1",[sess.id]); }
   else { id=mem.measurements.length+1; row.id=id; row.measured_at=new Date().toISOString(); mem.measurements.push(row); if(sess) sess.status='완료'; }
   var cacheUpdated=false;
@@ -1205,7 +1208,7 @@ async function saveMeasurement(sessionId, b, who){
   return {ok:true, id:id, provisional:provisional, cache_updated:cacheUpdated, size:sz.code, prev_size:cust?cust.size:null, temple_need:sz.need};
 }
 async function listMeasurements(customerId){
-  if(ready){ const r=await pool.query('SELECT id,session_id,store,device,measured_at,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,ear_depth,size_code,confidence,provisional,method,operator,source FROM measurements WHERE customer_id=$1 ORDER BY id DESC',[customerId]); return r.rows; }
+  if(ready){ const r=await pool.query('SELECT id,session_id,store,device,measured_at,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,ear_depth,head_back,temple_w,size_code,confidence,provisional,method,operator,source FROM measurements WHERE customer_id=$1 ORDER BY id DESC',[customerId]); return r.rows; }
   return mem.measurements.filter(function(m){return m.customer_id===+customerId;}).slice().reverse();
 }
 async function measurementsForCustomer(customerId){
@@ -1310,8 +1313,9 @@ async function addFrameDb(f, who){
   var m=String(f.eng||'').match(/(\d{2})\s*[□㏘oOx×\-\s]\s*(\d{2})\s*[-\s]\s*(\d{3})/); if(!m) return {ok:false,error:'각인 형식을 확인해 주세요 (54□18-145)'};
   var row={brand:String(f.brand||'(미입력)').slice(0,40), model:String(f.model||'-').slice(0,60), eng:m[1]+'□'+m[2]+'-'+m[3], a:+m[1], dbl:+m[2], temple:+m[3],
     b:(+f.b>20&&+f.b<70)?+f.b:null, face_angle:(+f.face_angle>=0&&+f.face_angle<=20&&f.face_angle!=='')?+f.face_angle:null, pad:['고정형','조절형'].indexOf(f.pad)>=0?f.pad:null,
-    material:FRAME_MATS.indexOf(f.material)>=0?f.material:'acet', store:(who&&who.store)||f.store||null, created_by:who?who.username:null};
-  if(ready){ const r=await pool.query('INSERT INTO frame_db(brand,model,eng,a,dbl,temple,b,face_angle,pad,material,store,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id,created_at',[row.brand,row.model,row.eng,row.a,row.dbl,row.temple,row.b,row.face_angle,row.pad,row.material,row.store,row.created_by]); row.id=r.rows[0].id; row.created_at=r.rows[0].created_at; }
+    material:FRAME_MATS.indexOf(f.material)>=0?f.material:'acet', store:(who&&who.store)||f.store||null, created_by:who?who.username:null,
+    hinge_w:(+f.hinge_w>90&&+f.hinge_w<170)?+f.hinge_w:null, face_form:(f.face_form!==''&&+f.face_form>=-5&&+f.face_form<=25)?+f.face_form:null, temple_shape:['곧음','휨'].indexOf(f.temple_shape)>=0?f.temple_shape:null, spring:f.spring===true||f.spring==='true'};
+  if(ready){ const r=await pool.query('INSERT INTO frame_db(brand,model,eng,a,dbl,temple,b,face_angle,pad,material,store,created_by,hinge_w,face_form,temple_shape,spring) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING id,created_at',[row.brand,row.model,row.eng,row.a,row.dbl,row.temple,row.b,row.face_angle,row.pad,row.material,row.store,row.created_by,row.hinge_w,row.face_form,row.temple_shape,row.spring]); row.id=r.rows[0].id; row.created_at=r.rows[0].created_at; }
   else { mem.framedb=mem.framedb||[]; row.id=mem.framedb.length+1; row.created_at=new Date().toISOString(); mem.framedb.push(row); }
   return {ok:true, frame:row};
 }
@@ -1331,12 +1335,14 @@ async function addExam(b, who){
 
 
 /* [09.24] 피팅 자동 입력: 손님 최신 측정값·처방, 가공 지시서에서 고른 테 치수 */
-async function fitPrefill(customerId){
+async function fitPrefill(customerId, frameDbId){
   var c=await getCustomer(customerId); if(!c) return {ok:false,error:'손님이 없어요'};
   var ms=await listMeasurements(c.id), m=ms[0]||null;
   var o=await _custRx(c.id), rx=o.rx||null;
-  var wos=(await _all('workorders')).filter(function(w){return +w.customer_id===+c.id;}).sort(function(a,b){return b.id-a.id;}), wo=wos[0]||null, spec=null;
-  if(wo){ try{ var calc=typeof wo.calc==='string'?JSON.parse(wo.calc):wo.calc; spec=calc&&calc.spec||null; }catch(e){} if(!spec) spec=FRAME_SPECS[wo.sku]||null; }
+  var wos=(await _all('workorders')).filter(function(w){return +w.customer_id===+c.id;}).sort(function(a,b){return b.id-a.id;}), wo=wos[0]||null, spec=null, fname=null, fsrc=null;
+  if(frameDbId){ var fd=(await _all('frame_db')).filter(function(x){return +x.id===+frameDbId;})[0];
+    if(fd){ spec={a:fd.a,B:fd.b||null,dbl:fd.dbl,temple:fd.temple,pad:fd.pad==='고정형'?'고정형':'조절형',mat:({titan:'티타늄',metal:'금속',tr:'TR',acet:'아세테이트'})[fd.material]||'아세테이트',hw:fd.hinge_w||null,ff:fd.face_form!=null?fd.face_form:(fd.face_angle!=null?fd.face_angle:null),tshape:fd.temple_shape||null,spring:!!fd.spring,est:[]}; fname=fd.brand+' '+fd.model; fsrc='타사 테 DB'; } }
+  else if(wo){ try{ var calc=typeof wo.calc==='string'?JSON.parse(wo.calc):wo.calc; spec=calc&&calc.spec||null; }catch(e){} spec=Object.assign({}, spec||{}, FRAME_SPECS[wo.sku]||{}); fname=wo.frame; fsrc='가공 지시서 No.'+String(wo.id).padStart(4,'0'); }
   var MATK={'티타늄':'titan','금속':'metal','메탈':'metal','TR':'tr','울템':'tr','아세테이트':'acet'};
   var out={ok:true, customer:{id:c.id,name:c.name,store:c.store,size:c.size}, filled:[], missing:[]};
   var f={name:c.name};
@@ -1346,10 +1352,14 @@ async function fitPrefill(customerId){
   f.earGap=(m&&m.ear_l&&m.ear_r)?Math.round((+m.ear_l+ +m.ear_r)*10)/10:null;
   f.earDepth=m&&m.ear_depth||null; f.noseH=m&&m.nose_height||null; f.faceWrap=(m&&m.wrap_angle!=null)?m.wrap_angle:null;
   if(rx){ f.sphMax=Math.max(Math.abs(rx.R.S||0),Math.abs(rx.L.S||0)); f.rxR=rx.R; f.rxL=rx.L; f.rxAdd=rx.ADD||''; }
-  if(spec){ f.frontA=2*spec.a+spec.dbl; f.dbl=spec.dbl; f.templeLen=spec.temple; f.lensH=spec.B; f.material=MATK[spec.mat]||'acet'; f.bridge=spec.pad==='고정형'?'fix':'adj'; out.frame={sku:wo.sku,name:wo.frame,workorder:wo.id}; }
+  if(spec&&spec.a){ f.frontA=2*spec.a+spec.dbl; f.dbl=spec.dbl; f.templeLen=spec.temple; f.lensH=spec.B||null; f.material=MATK[spec.mat]||'acet'; f.bridge=spec.pad==='고정형'?'fix':'adj';
+    f.hingeW=spec.hw||null; f.frameFF=spec.ff!=null?spec.ff:null; f.templeShape=spec.tshape||null; f.spring=!!spec.spring; f.frameEst=(spec.est||[]).join(',');
+    out.frame={sku:wo&&!frameDbId?wo.sku:null,name:fname,source:fsrc,workorder:wo&&!frameDbId?wo.id:null}; }
+  f.headBack=m&&m.head_back||null; f.templeW=m&&m.temple_w||null;
   Object.keys(f).forEach(function(k){ if(f[k]!=null&&f[k]!=='') out.filled.push(k); });
   ['faceW','pd','earGap','earDepth','noseH','faceWrap','sphMax','frontA','templeLen','material'].forEach(function(k){ if(f[k]==null||f[k]==='') out.missing.push(k); });
   out.missing.push('frameSpread'); // 테의 지금 템플 간격은 실제로 재야 함
+  if(!f.headBack) out.missing.push('headBack'); if(!f.templeW) out.missing.push('templeW');
   out.values=f; out.measuredAt=m?String(m.measured_at instanceof Date?m.measured_at.toISOString():m.measured_at).slice(0,10):null; out.rxDate=o.rxDate||null;
   return out;
 }
