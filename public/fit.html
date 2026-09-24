@@ -157,6 +157,9 @@ function view(id){
     '<div class="frow"><div class="fld"><label>테</label><select id="f_frame" onchange="fitFrame(this.value)">'+frameOpts()+'</select></div>'+
       '<div class="fld"><label>경첩 간격 (mm)</label><input id="f_hingeW" value="'+(F.hingeW||'')+'" placeholder="입고 실측"></div>'+
       '<div class="fld"><label>프론트 휨 (°)</label><input id="f_frameFF" value="'+(F.frameFF!=null?F.frameFF:'')+'" placeholder="테 기본값"></div></div>'+
+    '<div class="frow"><div class="fld"><label>템플 모양</label><select id="f_tshape"><option value="">모름</option><option value="곧음"'+(F.templeShape==='곧음'?' selected':'')+'>곧음</option><option value="휨"'+(F.templeShape==='휨'?' selected':'')+'>휨 (공장에서 휘어 나옴)</option></select></div>'+
+      '<div class="fld"><label>템플 휨 양 (mm)</label><input id="f_tcurve" value="'+(F.templeCurve!=null?F.templeCurve:'')+'" placeholder="휨 모델 · 귀 뒤 끝 안쪽"></div>'+
+      '<div class="fld"><label>스프링 경첩</label><select id="f_spring"><option value="">아니요</option><option value="1"'+((F.spring===true||F.spring==='true'||F.spring==='1')?' selected':'')+'>예</option></select></div></div>'+
     '<div class="frow"><div class="fld"><label>소재</label><select id="f_mat">'+matOpts()+'</select></div>'+
       '<div class="fld"><label>브리지</label><select id="f_bridge"><option value="adj"'+(F.bridge==='adj'?' selected':'')+'>코받침 조정형</option><option value="fix"'+(F.bridge==='fix'?' selected':'')+'>일체형(아세테이트)</option></select></div></div>'+
     '<div class="frow"><div class="fld"><label>프론트 폭 a×2+DBL</label><input id="f_frontA" value="'+F.frontA+'" placeholder="138"></div>'+
@@ -283,7 +286,7 @@ function collectAll(){
   // 입력 단계 값들은 각 단계 collect에서 이미 F에 반영됨
 }
 function collect(id){
-  if(id==='intake'){F.name=g('f_name');F.pd=g('f_pd');F.pdR=g('f_pdR');F.pdL=g('f_pdL');F.oh=g('f_oh');F.faceW=g('f_faceW');F.earGap=g('f_earGap');F.noseH=g('f_noseH');F.faceWrap=g('f_faceWrap');F.earDepth=g('f_earDepth');F.sphMax=g('f_sphMax');F.earBend=g('f_earBend');F.templeW=g('f_templeW');F.headBack=g('f_headBack');F.hingeW=g('f_hingeW');F.frameFF=g('f_frameFF');F.material=g('f_mat');F.bridge=g('f_bridge');F.frontA=g('f_frontA');F.frameSpread=g('f_spread');F.templeLen=g('f_temple');}
+  if(id==='intake'){F.name=g('f_name');F.pd=g('f_pd');F.pdR=g('f_pdR');F.pdL=g('f_pdL');F.oh=g('f_oh');F.faceW=g('f_faceW');F.earGap=g('f_earGap');F.noseH=g('f_noseH');F.faceWrap=g('f_faceWrap');F.earDepth=g('f_earDepth');F.sphMax=g('f_sphMax');F.earBend=g('f_earBend');F.templeW=g('f_templeW');F.headBack=g('f_headBack');F.hingeW=g('f_hingeW');F.frameFF=g('f_frameFF');F.templeShape=g('f_tshape');F.templeCurve=g('f_tcurve');F.spring=g('f_spring')==='1';F.material=g('f_mat');F.bridge=g('f_bridge');F.frontA=g('f_frontA');F.frameSpread=g('f_spread');F.templeLen=g('f_temple');}
   else if(id==='panto'){F._panto=g('p_panto');}
   else if(id==='vertex'){F.vd=g('v_vd');}
   else if(id==='nosepad'){F._npGap=g('n_gap');F._npAng=g('n_ang');}
@@ -403,6 +406,13 @@ function buildSheet(){
     var band=function(pts,w0,w1,wm){ var n=pts.length, lf=[], rt=[]; for(var i=0;i<n;i++){ var q1=pts[Math.max(0,i-1)], q2=pts[Math.min(n-1,i+1)], dx=q2[0]-q1[0], dy=q2[1]-q1[1], l=Math.hypot(dx,dy)||1, nx=-dy/l, ny=dx/l, t=i/(n-1), w=(wm!=null?(t<0.5?w0+(wm-w0)*t*2:wm+(w1-wm)*(t-0.5)*2):(w0+(w1-w0)*t))/2;
         lf.push([pts[i][0]+nx*w,pts[i][1]+ny*w]); rt.push([pts[i][0]-nx*w,pts[i][1]-ny*w]); }
       var ew=w1/2; return '<path d="'+P(lf)+' A'+ew+' '+ew+' 0 0 1 '+rt[n-1][0].toFixed(2)+' '+rt[n-1][1].toFixed(2)+' '+P(rt.slice().reverse()).replace(/^M/,'L')+'Z" fill="'+FILL+'" stroke="'+G1+'" stroke-width="0.26" stroke-linejoin="round"/>'; };
+    var shape=function(pts,wf,o){ o=o||{}; var n=pts.length, cum=[0]; for(var i=1;i<n;i++) cum.push(cum[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1])); var Lt=cum[n-1]||1, lf=[], rt=[], nv=[], tv=[], hw=[];
+      for(var i=0;i<n;i++){ var q1=pts[Math.max(0,i-1)], q2=pts[Math.min(n-1,i+1)], dx=q2[0]-q1[0], dy=q2[1]-q1[1], l=Math.hypot(dx,dy)||1, tx=dx/l, ty=dy/l, w=wf(cum[i]/Lt,cum[i])/2;
+        tv.push([tx,ty]); nv.push([-ty,tx]); hw.push(w); lf.push([pts[i][0]-ty*w,pts[i][1]+tx*w]); rt.push([pts[i][0]+ty*w,pts[i][1]-tx*w]); }
+      var cap=function(i,dir){ var c=[], p0=pts[i], N=nv[i], Tt=tv[i], w=hw[i]; for(var k=1;k<16;k++){ var th=Math.PI*k/16; c.push([p0[0]+N[0]*w*Math.cos(th)*dir+Tt[0]*w*Math.sin(th)*dir, p0[1]+N[1]*w*Math.cos(th)*dir+Tt[1]*w*Math.sin(th)*dir]); } return c; };
+      var endC=o.flatEnd?[]:cap(n-1,1), stC=o.flatStart?[]:cap(0,-1);
+      var all=lf.concat(endC, rt.slice().reverse(), stC);
+      return '<path d="'+P(all)+'Z" fill="'+(o.fill||FILL)+'" stroke="'+G1+'" stroke-width="'+(o.sw||0.26)+'" stroke-linejoin="round"/>'; };
     var tube=function(pts,W){ var d=P(pts); return '<path d="'+d+'" fill="none" stroke="'+G1+'" stroke-width="'+(W+0.5)+'" stroke-linecap="round" stroke-linejoin="round"/><path d="'+d+'" fill="none" stroke="'+FILL+'" stroke-width="'+W+'" stroke-linecap="round" stroke-linejoin="round"/>'; };
     var sec=function(y,num,title,right){ return T(0,y,num,{s:2.3,w:500,c:G3,ls:0.3})+T(7,y,title,{s:3.1,w:600})+(right?T(190,y,right,{s:2.1,a:'end',c:G2}):'')+L(0,y+2.1,190,y+2.1,{w:0.12,c:G4}); };
     var star=function(on){ return on?'*':''; };
@@ -420,35 +430,69 @@ function buildSheet(){
     var twIn=num(F.templeW), hbIn=num(F.headBack), CLR=2;
     var straightAt=function(y){ return HH+(tHalf-HH)*y/Lear; };
     var bow=twIn?Math.max(0,Math.round((twIn/2+CLR-straightAt(Lear*0.3))*10)/10):0;
-    var tipStraight=HH+(tHalf-HH)*tlen/Lear, tipIn=hbIn?Math.max(0,Math.min(15,Math.round((tipStraight-(hbIn/2+1))*10)/10)):6; if(!hbIn) EST.push('tip');
+    var tipStraight=HH+(tHalf-HH)*tlen/Lear; var egIn=num(F.earGap), tipIn=hbIn?Math.max(-6,Math.min(15,Math.round((tipStraight-(hbIn/2-(egIn?Math.max(0,egIn/2-tHalf):3)))*10)/10)):6; if(!hbIn) EST.push('tip');
     var ffIn=(F.frameFF!==''&&F.frameFF!=null)?num(F.frameFF):null, ff=ffIn!=null?ffIn:wrap, ffEst=ffIn==null||/ff/.test(F.frameEst||''); if(ffEst) EST.push('ff');
     s4+=sec(33.5,'01','템플 벌림','실제 크기');
-    // 프론트: 테의 휨을 곡선으로, 경첩 두 개
-    var dz=Math.max(0,(HH-dbl/2))*Math.tan(ff*R2), fpts=[]; for(var i=0;i<=60;i++){ var t=i/60, x=hL+(hR-hL)*t, u=(t-0.5)*2; fpts.push([x,AY-2.2-dz*(1-u*u)]); }
-    s4+=tube(fpts,2.8)+L(95,AY+2,95,yTip,{c:G4,w:0.1,d:'2 1.2'});
-    var tcl=function(sd,half,tipI,bw){ var H=[95+sd*HH,AY], E=[95+sd*half,yEar], dx=E[0]-H[0], dy=E[1]-H[1], l=Math.hypot(dx,dy), ux=dx/l, uy=dy/l, rest=tlen-Lear, pts=[];
-      for(var i=0;i<=60;i++){ var t=i/60, b2=(bw||0)*Math.sin(Math.PI*t); pts.push([H[0]+dx*t+sd*b2,H[1]+dy*t]); }
-      var C=[E[0]+ux*rest*0.45,E[1]+uy*rest*0.45], Tp=[E[0]+ux*rest-sd*tipI,E[1]+uy*rest];
-      for(var j=1;j<=40;j++){ var t2=j/40, k0=(1-t2)*(1-t2), k1=2*(1-t2)*t2, k2=t2*t2; pts.push([k0*E[0]+k1*C[0]+k2*Tp[0],k0*E[1]+k1*C[1]+k2*Tp[1]]); }
+    // 프론트·템플: 실제 테 모양 (위에서 본 모습)
+    var thin=(F.material==='titan'||F.material==='metal'), FT=thin?2.4:4.6, lxc=dbl/2+a/2;
+    var dz=Math.max(0,(HH-dbl/2))*Math.tan(ff*R2);
+    var yF=function(x){ var u=(x-95)/HH, d=Math.abs(x-95), b=Math.exp(-1.6*Math.pow((d-lxc)/(a/2),2)); return AY-3.2-FT-dz*(1-u*u)-1.7*b+0.9*Math.exp(-Math.pow(d/(dbl/2),2)*1.8); };
+    // 템플: 경첩 → 귀(관자놀이에서 바깥 휨) → 끝(머리 따라)
+    var tcl=function(sd,half,tipI,bw){ var H=[95+sd*HH,AY-1.2], E=[95+sd*half,yEar], dx=E[0]-H[0], dy=E[1]-H[1], l=Math.hypot(dx,dy), ux=dx/l, uy=dy/l, rest=tlen-Lear, pts=[];
+      for(var i=0;i<=70;i++){ var t=i/70, b2=(bw||0)*Math.sin(Math.PI*t)*(1-0.25*t); pts.push([H[0]+dx*t+sd*b2,H[1]+dy*t]); }
+      var C=[E[0]+ux*rest*0.4,E[1]+uy*rest*0.4], Tp=[E[0]+ux*rest-sd*tipI,E[1]+uy*rest];
+      for(var j=1;j<=46;j++){ var t2=j/46, k0=(1-t2)*(1-t2), k1=2*(1-t2)*t2, k2=t2*t2; pts.push([k0*E[0]+k1*C[0]+k2*Tp[0],k0*E[1]+k1*C[1]+k2*Tp[1]]); }
       return pts; };
-    [-1,1].forEach(function(sd){ var ox=95+sd*HH;
-      if(Math.abs(bHalf-tHalf)>0.5) s4+='<path d="'+P(tcl(sd,bHalf,0,0))+'" fill="none" stroke="'+G3+'" stroke-width="0.24" stroke-dasharray="0.6 1"/>';
-      s4+=tube(tcl(sd,tHalf,tipIn,bow),3.2)+'<rect x="'+(ox-1.6).toFixed(2)+'" y="'+(AY-2.2)+'" width="3.2" height="4" rx="0.8" fill="#fff" stroke="'+G1+'" stroke-width="0.26"/>'+ring(95+sd*tHalf,yEar);
+    var bentT=F.templeShape==='휨', tcF=(F.templeCurve!==''&&F.templeCurve!=null&&!isNaN(+F.templeCurve))?+F.templeCurve:null, springOn=(F.spring===true||F.spring==='true'||F.spring==='1');
+    var fe=Lear/tlen;
+    var sm=function(t){ t=Math.max(0,Math.min(1,t)); return t*t*(3-2*t); };
+    var tW=thin?function(f){ return 2.0-0.5*sm(f/0.3)+1.3*sm((f-fe)/0.12); }
+               :function(f){ return 4.2-1.2*sm(f/0.4)+0.8*sm((f-fe)/(1-fe)); };
+    [-1,1].forEach(function(sd){
+      if(Math.abs(bHalf-tHalf)>0.5||(bentT&&tcF)) s4+='<path d="'+P(tcl(sd,bHalf,bentT&&tcF?tcF:0,0))+'" fill="none" stroke="'+G3+'" stroke-width="0.24" stroke-dasharray="0.6 1"/>';
+      s4+=shape(tcl(sd,tHalf,tipIn,bow),tW,{flatStart:true});
     });
-    s4+=T(95-tHalf-2.8,yEar-2.2,'귀',{s:2,a:'end',c:G2})+T(95+tHalf+2.8,yEar-2.2,'귀',{s:2,c:G2});
+    // 프론트 외곽: 앞면 곡선 → 엔드피스 → 경첩
+    var xo=HH+2.2, xi=HH-2.1, fr=[], N=90, rC=3.4, rF=2.2;
+    for(var i=0;i<=N;i++){ var x=95-xo+rC+(2*xo-2*rC)*i/N; fr.push([x,yF(x)]); }
+    var qa=function(cx,cy,r,a0,a1){ var c=[]; for(var k=0;k<=12;k++){ var th=a0+(a1-a0)*k/12; c.push([cx+r*Math.cos(th),cy+r*Math.sin(th)]); } return c; };
+    var yRo=yF(95+xo-rC), yLo=yF(95-xo+rC), yRi=yF(95+xi-rF)+FT, yLi=yF(95-xi+rF)+FT;
+    var right=qa(95+xo-rC,yRo+rC,rC,-Math.PI/2,0).concat([[95+xo,AY+0.6],[95+xi,AY+0.6]],qa(95+xi-rF,yRi+rF,rF,0,-Math.PI/2));
+    var back=[]; for(var i=1;i<N;i++){ var x=95+xi-rF-(2*xi-2*rF)*i/N; back.push([x,yF(x)+FT]); }
+    var left=qa(95-xi+rF,yLi+rF,rF,-Math.PI/2,-Math.PI).concat([[95-xi,AY+0.6],[95-xo,AY+0.6]],qa(95-xo+rC,yLo+rC,rC,Math.PI,Math.PI*1.5));
+    s4+='<path d="'+P(fr.concat(right,back,left))+'Z" fill="'+FILL+'" stroke="'+G1+'" stroke-width="0.26" stroke-linejoin="round"/>';
+    // 경첩 이음선·코받침
+    [-1,1].forEach(function(sd){ s4+=L(95+sd*xi,AY-1.2,95+sd*xo,AY-1.2,{w:0.12,c:G2});
+      var px=95+sd*(dbl/2+(thin?2.2:0.9)), py=yF(95+sd*dbl/2)+FT+(thin?3.2:1.4);
+      s4+='<ellipse cx="'+px.toFixed(2)+'" cy="'+py.toFixed(2)+'" rx="'+(thin?1.1:0.9)+'" ry="'+(thin?2.4:1.5)+'" transform="rotate('+(sd*-18)+' '+px.toFixed(2)+' '+py.toFixed(2)+')" fill="'+FILL+'" stroke="'+G2+'" stroke-width="0.2"/>'+
+        (thin?L(95+sd*dbl/2,py-3.4,px-sd*0.3,py-2,{w:0.25,c:G2}):''); });
+    s4+=L(95,AY+3,95,yTip,{c:G4,w:0.1,d:'2 1.2'});
+    // 템플 곡선 표시점 ①②③ (오른쪽 템플)
+    var rpts=tcl(1,tHalf,tipIn,bow), st=[[Math.round(Lear*0.35),rpts[Math.round(70*0.35)]],[Math.round(Lear),rpts[70]],[tlen,rpts[rpts.length-1]]];
+    st.forEach(function(q,i){ var x=q[1][0], y=q[1][1]; s4+=L(x+2.4,y,x+5.2,y,{w:0.12,c:G2})+'<circle cx="'+(x+7).toFixed(2)+'" cy="'+y.toFixed(2)+'" r="1.5" fill="#fff" stroke="'+G2+'" stroke-width="0.16"/>'+T(x+7,y+0.75,String(i+1),{s:2,w:500,a:'middle'}); });
+    [-1,1].forEach(function(sd){ s4+=ring(95+sd*tHalf,yEar); });
+    s4+=T(95-tHalf-2.8,yEar-2.2,'귀',{s:2,a:'end',c:G2});
     s4+=ext(hL,AY+2.8,hL,AY+8.2)+ext(hR,AY+2.8,hR,AY+8.2)+dim(hL,AY+6.8,hR,AY+6.8,'경첩 '+Math.round(2*HH)+star(hwEst),2.5);
     s4+=ext(95-tHalf,yEar+2.2,95-tHalf,yEar+8.5)+ext(95+tHalf,yEar+2.2,95+tHalf,yEar+8.5)+dim(95-tHalf,yEar+7,95+tHalf,yEar+7,target,3);
     var ar=22, a1=(thT-90)*R2, arc=''; for(var k=0;k<=12;k++){ var aa=a1*k/12; arc+=(k?'L':'M')+(hR+Math.sin(aa)*ar).toFixed(2)+' '+(AY+Math.cos(aa)*ar).toFixed(2); }
     s4+=L(hR,AY+2.5,hR,AY+ar+3,{w:0.1,c:G3,d:'0.8 0.8'})+'<path d="'+arc+'" fill="none" stroke="'+G2+'" stroke-width="0.16"/>'+T(hR+Math.sin(a1/2)*(ar+4)+4,AY+Math.cos(a1/2)*(ar+4)+1,thT+'°',{s:2.6,w:500});
     // 가운데
-    var my=AY+Lear*0.4, notes=[];
-    notes.push('프론트 휨 테 '+ff+'°'+star(ffEst)+' · 얼굴 '+wrap+'°'+(Math.abs(ff-wrap)>=3?((F.bridge==='fix'||F.material==='acet')?' → 조정 어려움':' → 브리지에서 조정'):''));
-    notes.push((bow>=1?'귀 앞 바깥으로 '+bow+' mm · ':'')+(tipIn>=1?'귀 뒤 안으로 '+tipIn+' mm'+star(!hbIn):'귀 뒤 휨 없음'));
+    var my=AY+Lear*0.3;
+    var ffLine='프론트 휨  테 '+ff+'°'+star(ffEst)+' · 얼굴 '+wrap+'°'+(Math.abs(ff-wrap)>=3?((F.bridge==='fix'||F.material==='acet')?' → 조정 어려움':' → 브리지에서 조정'):'')+(springOn?' · 스프링 경첩':'');
     s4+=T(95,my,String(target),{s:14,w:300,a:'middle'})+T(95+String(target).length*4.2+1,my,'mm',{s:2.7,c:G2})+
       T(95,my+6.5,'템플 간격'+(Math.abs(bHalf-tHalf)>0.5?' · 지금 '+base+' mm':''),{s:2.3,a:'middle',c:G2})+
-      L(95-24,my+10.5,95+24,my+10.5,{w:0.1,c:G4})+
-      notes.map(function(t,i){ return T(95,my+15+i*4.3,t,{s:2.2,a:'middle',c:G2}); }).join('')+
-      L(95-19,my+26,95-13,my+26,{w:0.9})+T(95-11.8,my+26.8,'목표',{s:1.9,c:G2})+L(95+1,my+26,95+7,my+26,{c:G3,w:0.3,d:'0.6 1'})+T(95+8.2,my+26.8,'지금',{s:1.9,c:G2});
+      T(95,my+11.5,ffLine,{s:2.2,a:'middle',c:G2});
+    // 템플 곡선 표
+    var cv=function(v,e){ return Math.abs(v)<0.5?'곧게':((v>0?'바깥 ':'안 ')+Math.abs(v)+' mm'+star(e)); };
+    var ty0=my+20, tx0=95-27, tipCell=cv(-tipIn,!hbIn), tipNote='';
+    if(bentT){ if(tcF!=null){ var more=Math.round((tipIn-tcF)*10)/10; tipCell=Math.abs(more)<0.5?'그대로':(more>0?'더 안 '+more+' mm':'펴기 '+(-more)+' mm')+star(!hbIn); tipNote='휨 템플 · 끝은 지금 모양('+tcF+' mm)에서'; }
+      else { tipNote='휨 템플 · 끝은 최종 모양 · 휨 양 1호점에서 확인'; } }
+    s4+=T(tx0,ty0,'템플 곡선',{s:2.6,w:600})+T(tx0+54,ty0,'직선 기준 · 한쪽',{s:1.9,a:'end',c:G3})+L(tx0,ty0+1.6,tx0+54,ty0+1.6,{w:0.12,c:G4});
+    [['관자놀이',st[0][0],cv(bow,false)],['귀',st[1][0],'기준'],['끝',st[2][0],tipCell]].forEach(function(r,i){ var y=ty0+6+i*4.8;
+      s4+='<circle cx="'+(tx0+1.5).toFixed(2)+'" cy="'+(y-0.75).toFixed(2)+'" r="1.5" fill="#fff" stroke="'+G2+'" stroke-width="0.16"/>'+T(tx0+1.5,y,String(i+1),{s:2,w:500,a:'middle'})+
+        T(tx0+5,y,r[0],{s:2.3,c:G2})+T(tx0+22,y,'경첩에서 '+r[1],{s:2.1,c:G3})+T(tx0+54,y,r[2],{s:2.5,w:500,a:'end'}); });
+    if(tipNote) s4+=T(tx0+54,ty0+19.8,tipNote,{s:1.9,a:'end',c:G3});
+    s4+=L(95-19,ty0+24.5,95-13,ty0+24.5,{w:0.9})+T(95-11.8,ty0+25.3,'목표',{s:1.9,c:G2})+L(95+1,ty0+24.5,95+7,ty0+24.5,{c:G3,w:0.3,d:'0.6 1'})+T(95+8.2,ty0+25.3,'지금',{s:1.9,c:G2});
     // 02 귀 굽힘
     var eb=+F.earBend||EAR_BEND_START, ebEst=!(+F.earBend); if(ebEst) EST.push('eb');
     var by=yTip+23, bx0=16, bxB=bx0+bendAt, tail=tlen-bendAt, ea=eb*R2;
@@ -456,7 +500,10 @@ function buildSheet(){
     var RB=11, arcLen=RB*ea, sp2=[]; for(var i2=0;i2<=40;i2++) sp2.push([bx0+(bendAt-RB*Math.tan(ea/2))*i2/40,by]); var cX=sp2[sp2.length-1][0], cY=by+RB;
     for(var j2=1;j2<=30;j2++){ var aa2=ea*j2/30; sp2.push([cX+RB*Math.sin(aa2),cY-RB*Math.cos(aa2)]); }
     var lp=sp2[sp2.length-1], rest2=Math.max(0,tail-arcLen*0.5); for(var j3=1;j3<=20;j3++){ sp2.push([lp[0]+rest2*j3/20*Math.cos(ea),lp[1]+rest2*j3/20*Math.sin(ea)]); }
-    s4+=tube(sp2,3.4)+'<rect x="'+(bx0-3)+'" y="'+(by-2.4)+'" width="3.2" height="4.8" rx="0.8" fill="#fff" stroke="'+G1+'" stroke-width="0.26"/>'+
+    var sfe=bendAt/tlen, sW=thin?function(f){ return 2.6-0.8*sm(f/0.3)+1.0*sm((f-sfe+0.02)/0.1); }
+                         :function(f){ return 5.4-2.0*sm(f/0.35)+0.6*sm((f-sfe)/(1-sfe)); };
+    sp2[0]=[bx0-0.6,by];
+    s4+=shape(sp2,sW,{flatStart:true})+'<path d="M'+(bx0-4.2)+' '+(by-4.4)+' h3.4 a0.9 0.9 0 0 1 0.9 0.9 v7 a0.9 0.9 0 0 1 -0.9 0.9 h-3.4 z" fill="'+FILL+'" stroke="'+G1+'" stroke-width="0.26"/>'+L(bx0-0.3,by-2.6,bx0-0.3,by+2.6,{w:0.12,c:G2})+
       L(bxB,by,bxB+tail+3,by,{c:G3,w:0.1,d:'0.8 0.8'})+ring(bxB,by)+T(bxB,by+5.5,'굽힘',{s:2,a:'middle',c:G2});
     var arc2=''; for(var k2=0;k2<=eb;k2++){ var a3=k2*R2; arc2+=(k2?'L':'M')+(bxB+11*Math.cos(a3)).toFixed(2)+' '+(by+11*Math.sin(a3)).toFixed(2); }
     var tipE=sp2[sp2.length-1];
