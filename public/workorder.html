@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 테 판정·가공 지시서</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-toss.css">
+<style>
+.sec{margin-bottom:16px}.ctitle{font-size:19px;font-weight:600;color:var(--ink);margin:0 0 10px}
+.row{display:flex;gap:12px;flex-wrap:wrap}.fld{flex:1;min-width:160px}.fld label{display:block;font-size:15px;color:var(--muted);margin-bottom:4px}
+.fld select{width:100%;padding:10px;font-size:16px}
+.cinfo{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:16px}.cinfo span{color:var(--muted);margin-right:4px}
+.jgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}@media(max-width:900px){.jgrid{grid-template-columns:1fr}}
+.jcol h4{font-size:16px;margin:0 0 8px;display:flex;justify-content:space-between}
+.fr{background:var(--t-soft,#F9FAFB);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.fr .t{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:16px}.fr .t b{font-weight:600}
+.fr .w{font-size:15px;color:var(--muted);margin-top:4px;line-height:1.5}
+.fr button{margin-top:8px}
+.wt{width:100%;border-collapse:collapse;font-size:16px}.wt th,.wt td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left}.wt th{color:var(--muted);font-weight:600;font-size:15px}
+.wo-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.chk{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;font-size:15px}@media(max-width:700px){.chk{grid-template-columns:1fr}}
+.chk div{border:1px solid var(--line);border-radius:10px;padding:10px}
+@media print{ .topbar,.subnav,.sn-gate,.lead,.noprint,.foot{display:none!important} body,html{background:#fff!important} #woCard{box-shadow:none!important;border:1px solid #999!important} .wrap{max-width:none;padding:0} }
+</style>
+</head>
+<body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+  <div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <span class="nav-div" aria-hidden="true"></span>
+    <a href="customer.html">손님 앱</a>
+    <span class="nav-dd"><a href="store.html">가맹점</a><span class="nav-menu"><a href="store.html">매장 홈</a><a href="flow.html">1 접객</a><a href="exam.html">2 검안</a><a href="workorder.html">3 테 판정 · 가공</a><a href="fit.html">4 피팅</a></span></span>
+    <a href="hq.html">본사</a>
+  </div>
+</div></div>
+<div class="wrap"><section class="view active">
+  <div class="lead"><div>
+    <div class="eyebrow">가맹점 · 3 테 판정 · 가공</div>
+    <h2>측정값에 맞는 테를 고르고 가공 지시서를 만들어요</h2>
+    <div class="sub">손님의 얼굴 폭과 PD, 처방을 매장 재고 테의 치수와 비교해서 가능, 조정 필요, 불가로 나눠요. 고른 테로 편심과 블랭크, 두께를 계산하고, 안 되는 조합은 지시서를 만들지 않아요.</div>
+  </div></div>
+
+  <div class="card pad sec noprint">
+    <div class="row">
+      <div class="fld"><label>매장</label><select id="wStore"><option>성수점</option><option>홍대점</option><option>판교점</option></select></div>
+      <div class="fld"><label>손님</label><select id="wCust"></select></div>
+      <div class="fld"><label>렌즈</label><select id="wLens"><option>알도R 1.60 렌즈</option><option>청광 렌즈</option><option>변색 렌즈</option><option>누진 렌즈</option></select></div>
+    </div>
+    <div class="cinfo" id="wInfo"></div>
+  </div>
+
+  <div class="card pad sec noprint">
+    <div class="ctitle">테 판정 <span class="label" id="wRule" style="font-weight:400"></span></div>
+    <div class="jgrid" id="wJudge"></div>
+    <div class="label" style="margin-top:8px">판정 기준은 시작값이에요. 1호점 안경사와 자문 안경사가 확정하고 착용 결과로 고쳐요. 테 치수는 입고할 때 잰 값으로 바꿔요.</div>
+  </div>
+
+  <div class="card pad sec" id="woCard" style="display:none"></div>
+
+  <div class="card pad sec noprint">
+    <div class="ctitle">최근 지시서</div>
+    <div id="wList"></div>
+  </div>
+</section></div>
+<div class="foot"><span>BETTERVISION OS · 테 판정 · 가공 지시서</span><span>판정 규칙은 본사 기준 관리에서 배포돼요</span></div>
+<script>
+var J=null;
+function $(id){return document.getElementById(id);}
+function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function sgn(v){v=+v||0; return (v>0?'+':'')+v.toFixed(2);}
+function loadCust(){
+  fetch('/api/customers?store='+encodeURIComponent($('wStore').value)).then(function(r){return r.json();}).then(function(j){
+    $('wCust').innerHTML=(j.customers||[]).map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+' ('+esc(c.size||'-')+')</option>';}).join('');
+    judge(); listLoad();
+  });
+}
+function judge(){
+  var cid=$('wCust').value; $('woCard').style.display='none'; if(!cid){ $('wJudge').innerHTML='<div class="muted">손님이 없어요</div>'; return; }
+  fetch('/api/frames/judge?customer_id='+cid+'&store='+encodeURIComponent($('wStore').value)).then(function(r){return r.json();}).then(function(j){
+    if(!j.ok){ $('wJudge').innerHTML='<div class="muted">'+esc(j.error)+'</div>'; $('wInfo').innerHTML=''; return; }
+    J=j; var c=j.customer, rx=j.rx;
+    $('wInfo').innerHTML='<div><span>사이즈</span>'+esc(c.size)+'</div><div><span>얼굴</span>'+esc(c.face)+'</div><div><span>PD</span>'+esc(c.pd)+'</div><div><span>처방</span>R '+sgn(rx.R.S)+(rx.R.C?' '+sgn(rx.R.C):'')+' / L '+sgn(rx.L.S)+(rx.L.C?' '+sgn(rx.L.C):'')+(j.rxDate?' ('+j.rxDate.slice(0,7)+')':'')+'</div>';
+    $('wRule').textContent='· 판정 규칙 '+j.rule.version;
+    var cols=['가능','조정 필요','불가'], pill={'가능':'good','조정 필요':'warn','불가':'bad'};
+    $('wJudge').innerHTML=cols.map(function(lv){
+      var its=j.items.filter(function(x){return x.level===lv;});
+      return '<div class="jcol"><h4>'+lv+' <span class="pill '+pill[lv]+'">'+its.length+'</span></h4>'+its.map(function(x){
+        return '<div class="fr"><div class="t"><b>'+esc(x.name)+(x.pb?' <span class="pill">PB</span>':'')+'</b><span>적합도 '+x.score+'</span></div>'+
+          (x.why.length?'<div class="w">'+x.why.map(esc).join('<br>')+'</div>':'<div class="w">바로 맞아요</div>')+
+          (x.lv<2?'<button class="btn small'+(x.lv?' ghost':'')+'" onclick="makeWO(\''+x.sku+'\')">가공 지시서 만들기</button>':'')+'</div>';
+      }).join('')+'</div>';
+    }).join('');
+  });
+}
+function makeWO(sku){
+  fetch('/api/workorders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({customer_id:+$('wCust').value,store:$('wStore').value,sku:sku,lens:$('wLens').value})})
+    .then(function(r){return r.json();}).then(function(j){ if(!j.ok){ toast(j.error||'만들지 못했어요'); return; } showWO(j.workorder); listLoad(); });
+}
+function showWO(w){
+  var c=w.calc, R=c.R, L=c.L, sp=c.spec, d=new Date(w.created_at);
+  var row=function(k,a,b){return '<tr><td>'+k+'</td><td>'+a+'</td><td>'+b+'</td></tr>';};
+  $('woCard').style.display='block';
+  $('woCard').innerHTML='<div class="wo-h"><div><div class="eyebrow">가공 지시서 No. '+String(w.id).padStart(4,'0')+'</div><div class="ctitle" style="font-size:22px;margin-top:4px">'+esc(w.name)+' · '+esc(w.frame)+' + '+esc(w.lens)+'</div>'+
+    '<div class="label">'+esc(w.store)+' · '+d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()+' · 판정 '+c.level+' (적합도 '+c.score+')</div></div>'+
+    '<div class="noprint" style="display:flex;gap:8px"><button class="btn small ghost" onclick="window.print()">인쇄</button><a class="btn small" href="fit.html">피팅으로</a></div></div>'+
+    '<table class="wt" style="margin-top:12px"><thead><tr><th>항목</th><th>우안 R</th><th>좌안 L</th></tr></thead><tbody>'+
+    row('처방 S / C / A', sgn(R.S)+' / '+sgn(R.C)+' / '+R.A, sgn(L.S)+' / '+sgn(L.C)+' / '+L.A)+
+    row('단안 PD', R.pd+'mm', L.pd+'mm')+
+    row('편심 (안쪽으로)', R.dec+'mm', L.dec+'mm')+
+    row('광학중심 높이', R.ocH+'mm (피팅에서 확정)', L.ocH+'mm (피팅에서 확정)')+
+    row('유효경', R.ed+'mm', L.ed+'mm')+
+    row('최소 블랭크', '<b>'+R.mbs+'mm</b>', '<b>'+L.mbs+'mm</b>')+
+    row('권하는 굴절률', R.idx, L.idx)+
+    row('예상 가장자리 두께', R.edge+'mm', L.edge+'mm')+'</tbody></table>'+
+    '<table class="wt" style="margin-top:12px"><thead><tr><th>테</th><th>렌즈 가로 · 세로</th><th>브리지</th><th>다리</th><th>코받침 · 소재</th></tr></thead><tbody><tr><td>'+esc(w.frame)+'</td><td>'+sp.a+' · '+sp.B+'mm</td><td>'+sp.dbl+'mm</td><td>'+sp.temple+'mm</td><td>'+sp.pad+' · '+sp.mat+'</td></tr></tbody></table>'+
+    (c.why.length?'<div class="note" style="margin-top:12px">'+c.why.map(esc).join('<br>')+'</div>':'')+
+    '<div class="chk"><div>□ 렌즈미터로 도수·축 확인</div><div>□ 가공 후 좌우 높이 확인</div><div>□ 확인한 안경사 ________</div></div>';
+  $('woCard').scrollIntoView({behavior:'smooth'});
+}
+function listLoad(){
+  fetch('/api/workorders?store='+encodeURIComponent($('wStore').value)).then(function(r){return r.json();}).then(function(j){
+    $('wList').innerHTML=(j.items||[]).map(function(x){ var d=new Date(x.created_at); return '<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line2);font-size:16px"><span>No. '+String(x.id).padStart(4,'0')+' · '+esc(x.name)+' · '+esc(x.frame)+' + '+esc(x.lens)+'</span><span class="muted">'+(d.getMonth()+1)+'.'+d.getDate()+' · '+esc(x.status)+'</span></div>'; }).join('')||'<div class="muted">아직 만든 지시서가 없어요</div>';
+  });
+}
+$('wStore').addEventListener('change',loadCust); $('wCust').addEventListener('change',judge);
+loadCust();
+</script>
+<script src="/assets/app.js"></script>
+<script src="/assets/bv-nav.js"></script>
+</body>
+</html>
