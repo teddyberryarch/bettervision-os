@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BETTERVISION OS · 고객 앱</title>
+<title>BETTERVISION OS · 손님 앱</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
@@ -103,12 +103,10 @@
   <div class="nav-links">
     <a href="index.html">홈</a>
     <a href="a.html">사업 개요</a>
-    <a href="customer.html">고객 앱</a>
-    <a href="store.html">가맹점</a>
-    <a href="hq.html">가맹본부</a>
-    <a href="flow.html">접객</a>
-    <a href="exam.html">검안</a>
-    <a href="fit.html">피팅</a>
+    <span class="nav-div" aria-hidden="true"></span>
+    <a href="customer.html">손님 앱</a>
+    <span class="nav-dd"><a href="store.html">가맹점</a><span class="nav-menu"><a href="store.html">매장 홈</a><a href="flow.html">1 접객</a><a href="exam.html">2 검안</a><a href="fit.html">3 피팅</a></span></span>
+    <a href="hq.html">본사</a>
   </div>
 </div></div>
 
@@ -116,7 +114,7 @@
 <section class="view active" id="cust">
   <div class="lead">
     <div>
-      <div class="eyebrow">고객 앱</div>
+      <div class="eyebrow">손님 앱</div>
       <h2>손님 앱</h2>
       <div class="sub">얼굴을 재서 맞는 사이즈를 찾고, 새 안경을 받은 뒤 7일째에 착용감을 물어봐요. 교체 시기도 여기서 알려드려요.</div>
     </div>
@@ -150,7 +148,7 @@
             <div class="appcard">
               <h4>내 안경 정보</h4>
               <div class="label" style="margin:6px 0 10px">측정한 사이즈와 시력만 보여드려요. 상세 처방·구매 이력은 매장에서 확인하실 수 있어요.</div>
-              <div class="kv"><span class="label">내 사이즈 (프론트 × 템플)</span><span id="mySize">F2 × T2</span></div>
+              <div class="kv"><span class="label">내 사이즈 (앞판 × 다리)</span><span id="mySize">F2 × T2</span></div>
               <div class="kv"><span class="label">안면 폭</span><span id="myFace">142 mm</span></div>
               <div class="kv"><span class="label">동공 간 거리(PD)</span><span id="myPD">63.5 mm</span></div>
               <div class="kv"><span class="label">시력 (도수)</span><span id="myRx">OD -3.25 / OS -3.50</span></div>
@@ -223,14 +221,14 @@
               <div class="label" style="margin-bottom:8px">측정값 조절</div>
               <div class="mfield"><div class="mlabrow"><span>안면 폭</span><b id="vW">142 mm</b></div>
                 <input type="range" id="inW" min="120" max="155" value="142" oninput="recompute()"></div>
-              <div class="mfield"><div class="mlabrow"><span>관자(템플) 길이</span><b id="vL">143 mm</b></div>
+              <div class="mfield"><div class="mlabrow"><span>다리 길이</span><b id="vL">143 mm</b></div>
                 <input type="range" id="inL" min="130" max="155" value="143" oninput="recompute()"></div>
               <div class="mfield"><div class="mlabrow"><span>코받침 높이</span><b id="vN">낮음</b></div>
                 <input type="range" id="inN" min="0" max="2" value="0" oninput="recompute()"></div>
 
               <div class="divider"></div>
               <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-                <div><div class="label">AI 사이즈 (프론트 × 템플)</div>
+                <div><div class="label">AI 사이즈 (앞판 × 다리)</div>
                   <div class="sizebadge" id="sizeBadge">F2 × T2</div>
                   <div class="label" id="sizeSub" style="font-size:14px">안면 142 · 관자 143 · 낮은 코</div></div>
                 <button class="btn small" onclick="document.getElementById('recCard').scrollIntoView({behavior:'smooth'})">맞는 프레임 보기</button>
@@ -300,18 +298,11 @@
             <!-- [09.24] 판 다음까지 확인: 7일째 착용 확인 -->
             <div class="appcard" id="careCheckCard" style="display:none">
               <h4>착용 7일째 확인</h4>
-              <div class="label" id="ccLead" style="margin:6px 0 10px">새 안경을 쓴 지 7일째예요. 불편한 곳이 있나요?</div>
+              <div class="label" id="ccLead" style="margin:6px 0 10px">새 안경을 쓴 지 7일째예요. 세 가지만 답해 주세요.</div>
               <div id="ccBody">
-                <div style="display:flex;gap:8px;flex-wrap:wrap">
-                  <button class="btn small" onclick="ccSend('편함')">편해요</button>
-                  <button class="btn small ghost" onclick="ccShowIssues()">불편한 곳이 있어요</button>
-                </div>
-                <div id="ccIssues" style="display:none;margin-top:12px">
-                  <div class="label" style="margin-bottom:6px">어디가 불편한지 골라 주세요 (여러 개 가능)</div>
-                  <div id="ccChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-                  <input id="ccNote" class="finput" placeholder="한 줄로 적어 주세요 (선택)" style="width:100%;margin-top:10px;font-size:15px;padding:10px">
-                  <button class="btn small" style="margin-top:10px" onclick="ccSend('불편')">매장에 알리기</button>
-                </div>
+                <div id="ccQs"></div>
+                <input id="ccNote" class="finput" placeholder="더 적을 게 있으면 한 줄로 (선택)" style="width:100%;margin-top:10px;font-size:15px;padding:10px">
+                <button class="btn small" style="margin-top:10px;width:100%" onclick="ccSend()">보내기</button>
               </div>
             </div>
             <div class="appcard" id="remindCard">
@@ -411,7 +402,7 @@
           <div class="feat"><div class="ic">①</div><div><div class="ft">한 번 재면 계속 써요</div><div class="fd">얼굴 크기와 눈 사이 거리가 저장돼서 어느 매장에서든 이어서 써요.</div></div></div>
           <div class="feat"><div class="ic">②</div><div><div class="ft">맞는 사이즈로 골라요</div><div class="fd">9개 사이즈 중 얼굴에 맞는 걸 추천해요.</div></div></div>
           <div class="feat"><div class="ic">③</div><div><div class="ft">바꿀 때 알려드려요</div><div class="fd">렌즈와 콘택트렌즈 교체 시기에 맞춰 알림이 가요.</div></div></div>
-          <div class="feat"><div class="ic">④</div><div><div class="ft">7일째 다시 물어봐요</div><div class="fd">불편한 곳이 있으면 매장에서 연락드리고 조정해 드려요.</div></div></div>
+          <div class="feat"><div class="ic">④</div><div><div class="ft">7일째 다시 물어봐요</div><div class="fd">잘 보이는지, 흘러내리는지, 가까운 게 보이는지 물어봐요. 불편하면 적응 중인지 다시 맞출지 매장이 보고 연락드려요.</div></div></div>
         </div>
         <div class="note">기록이 쌓일수록 다음 안경을 더 잘 맞출 수 있어요.</div>
       </div>
@@ -421,12 +412,12 @@
 </div>
 
 <div class="foot">
-  <span>BETTERVISION OS · 고객 앱 · 더미 데이터</span>
+  <span>BETTERVISION OS · 손님 앱 · 더미 데이터</span>
   <span><a href="index.html">← 홈</a></span>
 </div>
 
 <script>
-window.__bvGuide={title:'고객 앱 가이드',sub:'안경 사는 불확실성을 없애는 게 목표.',points:[
+window.__bvGuide={title:'손님 앱 가이드',sub:'안경 사는 불확실성을 없애는 게 목표.',points:[
 {click:'.ptab[data-s="measure"]',sel:'#scanwrap',t:'얼굴 측정',d:'카메라로 안면폭·PD 측정 → 사이즈 자동 매칭.'},
 {click:'.ptab[data-s="measure"]',sel:'#tryonCard',t:'가상 피팅',d:'카메라 얼굴 위에 안경을 얹어 미리 써봐요.'},
 {click:'.ptab[data-s="products"]',sel:'#csub',t:'상품·견적',d:'투명 가격 시뮬레이터, 렌즈 굴절률·코팅, PB 안내.'},
@@ -534,12 +525,12 @@ var SIZE_CFG={ front:[['F1',134],['F2',144],['F3',9999]], temple:[['T1',140],['T
 var NOSE=['낮음','표준','높음'];
 
 /* ===== 적합도 튜닝값 (한 곳에서 조절) =====
-   endpiece: 렌즈폭*2+브릿지 에 더해 프론트 전체폭을 만드는 보정(엔드피스+림)
-   idealOffset: 프론트폭 - 안면폭 목표치 (0=딱맞게, +2=살짝 여유)
+   endpiece: 렌즈폭*2+브릿지 에 더해 앞판 전체 폭을 만드는 보정(엔드피스+림)
+   idealOffset: 앞판 폭 - 안면폭 목표치 (0=딱맞게, +2=살짝 여유)
    frontW/templeW: mm당 감점, wFront/wTemple/wNose: 가중치, tol: 적정 허용오차(mm) */
 var FIT={ endpiece:18, idealOffset:0, frontW:7, templeW:4, wFront:0.70, wTemple:0.25, wNose:0.05, tol:2 };
 
-/* ===== 본사 프레임 카탈로그 (실제 치수: 렌즈폭 □ 브릿지 - 템플 mm) ===== */
+/* ===== 본사 프레임 카탈로그 (실제 치수: 렌즈폭 □ 브릿지 - 다리 mm) ===== */
 var CATALOG=[
   {n:'로마 클래식',   line:'PB',   lens:52, bridge:18, temple:145, nose:'낮음', price:'189,000'},
   {n:'로마 슬림',     line:'PB',   lens:48, bridge:19, temple:140, nose:'낮음', price:'189,000'},
@@ -581,9 +572,9 @@ function scoreFrame(fr,faceW,templeLen,nose){
 function gradeOf(p){ return p>=90?['딱 맞음','best'] : p>=75?['잘 맞음','good'] : p>=55?['가능','ok'] : ['참고','low']; }
 function reasonOf(diffF, fr, templeLen){
   var r;
-  if(Math.abs(diffF)<=FIT.tol) r='프론트폭 적정';
-  else if(diffF>FIT.tol) r='프론트폭 약간 큼(+'+Math.round(diffF)+'mm)';
-  else r='프론트폭 약간 작음('+Math.round(diffF)+'mm)';
+  if(Math.abs(diffF)<=FIT.tol) r='앞판 폭 적정';
+  else if(diffF>FIT.tol) r='앞판 폭 약간 큼(+'+Math.round(diffF)+'mm)';
+  else r='앞판 폭 약간 작음('+Math.round(diffF)+'mm)';
   var dt=fr.temple-templeLen;
   if(Math.abs(dt)>6) r+=(dt>0?' · 다리 김':' · 다리 짧음');
   return r;
@@ -597,13 +588,13 @@ function renderRecs(faceW,templeLen,nose){
     var fr=x.fr, p=x.sc.total, g=gradeOf(p), spec=fr.lens+'□'+fr.bridge+'-'+fr.temple;
     return '<div class="recrow"><div>'+
       '<div class="rn">'+fr.n+' <span class="rtag">'+fr.line+'</span></div>'+
-      '<div class="rd">'+spec+' · 프론트폭 '+x.sc.fw+'mm · '+reasonOf(x.sc.diffF,fr,templeLen)+' · ₩'+fr.price+'</div>'+
+      '<div class="rd">'+spec+' · 앞판 폭 '+x.sc.fw+'mm · '+reasonOf(x.sc.diffF,fr,templeLen)+' · ₩'+fr.price+'</div>'+
       '</div><div style="text-align:right"><div class="rmatch '+g[1]+'">'+g[0]+' '+p+'%</div>'+
       '<button class="btn small ghost" data-n="'+fr.n+'" onclick="ordPick(this.dataset.n)" style="margin-top:6px">주문</button></div></div>';
   }).join('');
   document.getElementById('recList').innerHTML = html || '<div class="rd" style="color:var(--muted)">측정값에 맞는 프레임이 없어요. 값을 조절해 보세요.</div>';
 }
-var DEMO_CUSTOMER_ID=1; // 데모 고객(윤서진). 고객 로그인이 생기면 세션의 고객으로 바꾼다
+var DEMO_CUSTOMER_ID=1; // 데모 손님(윤서진). 손님 로그인이 생기면 세션의 손님으로 바꾼다
 /* 카메라 자동 측정(데모): 애니메이션 후 측정값 채우고 재계산 */
 function measureCamera(){
   var btn=document.getElementById('scanbtn'), w=document.getElementById('scanwrap'), st=document.getElementById('scanstat');
@@ -618,7 +609,7 @@ function measureCamera(){
     w.classList.remove('scanning'); w.classList.add('done');
     st.textContent='측정 완료 · PD '+res.pd+'mm · '+sz+' (관자=추정)';
     btn.disabled=false; btn.textContent='다시 측정';
-    // [09.24] 결과를 본부 측정 기록에 저장 (수치만, 영상 없음). 집에서 잰 값은 임시값 → 매장에서 정밀 측정으로 확정
+    // [09.24] 결과를 본사 측정 기록에 저장 (수치만, 영상 없음). 집에서 잰 값은 임시값 → 매장에서 정밀 측정으로 확정
     if(window.BVMeasure && window.__bvLastResult){
       BVMeasure.submit(DEMO_CUSTOMER_ID, window.__bvLastResult, {}).then(function(){
         st.textContent+=' · 임시값으로 저장됨, 매장에서 정밀 측정';
@@ -650,27 +641,34 @@ recompute();
 
 
 /* ===== [09.24] 착용 7일째 확인 (판 다음까지 확인) ===== */
-var CC_ITEM=null, CC_SEL={};
+var CC_ITEM=null, CC_ANS={}, CC_QS=[];
 function ccLoad(){
   fetch('/api/aftercare/mine?customer_id='+DEMO_CUSTOMER_ID).then(function(r){return r.json();}).then(function(j){
     var it=(j.items||[])[0]; var card=document.getElementById('careCheckCard'); if(!card) return;
     if(!it){ card.style.display='none'; return; }
-    CC_ITEM=it; card.style.display='block';
-    document.getElementById('ccChips').innerHTML=(j.issues||[]).map(function(k){return '<button class="chip" data-k="'+k+'" onclick="ccToggle(this)">'+k+'</button>';}).join('');
+    CC_ITEM=it; CC_QS=j.questions||[]; card.style.display='block';
+    document.getElementById('ccQs').innerHTML=CC_QS.map(function(q,i){
+      return '<div style="padding:8px 0;border-top:1px solid var(--line2)"><div style="font-size:16px;margin-bottom:8px">'+q.q+'</div><div style="display:flex;gap:6px">'+
+        '<button class="chip" data-i="'+i+'" data-v="y" onclick="ccPick(this)">네</button><button class="chip" data-i="'+i+'" data-v="n" onclick="ccPick(this)">아니요</button></div></div>';
+    }).join('');
   }).catch(function(){});
 }
-function ccShowIssues(){ document.getElementById('ccIssues').style.display='block'; }
-function ccToggle(el){ var k=el.dataset.k; CC_SEL[k]=!CC_SEL[k]; el.classList.toggle('active',!!CC_SEL[k]); }
-function ccSend(comfort){
+function ccPick(el){
+  var i=el.dataset.i; CC_ANS[i]=el.dataset.v;
+  [].forEach.call(document.querySelectorAll('#ccQs .chip[data-i="'+i+'"]'),function(b){ b.classList.toggle('active', b===el); });
+}
+function ccSend(){
   if(!CC_ITEM) return;
-  var issues=Object.keys(CC_SEL).filter(function(k){return CC_SEL[k];});
-  if(comfort==='불편' && !issues.length){ toast('불편한 곳을 하나 이상 골라 주세요'); return; }
-  fetch('/api/aftercare/respond',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:CC_ITEM.id,customer_id:DEMO_CUSTOMER_ID,comfort:comfort,issues:issues,note:(document.getElementById('ccNote')||{}).value||''})})
+  if(Object.keys(CC_ANS).length<CC_QS.length){ toast('세 가지 모두 답해 주세요'); return; }
+  var issues=CC_QS.filter(function(q,i){return CC_ANS[i]==='n';}).map(function(q){return q.k;});
+  var note=(document.getElementById('ccNote')||{}).value||'';
+  if(!issues.length && note.trim()) issues=['기타'];
+  fetch('/api/aftercare/respond',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:CC_ITEM.id,customer_id:DEMO_CUSTOMER_ID,issues:issues,note:note})})
     .then(function(r){return r.json();}).then(function(j){
       if(!j.ok){ toast(j.error||'보내지 못했어요. 다시 시도해 주세요'); return; }
-      document.getElementById('ccLead').textContent = comfort==='편함' ? '알려 주셔서 고마워요. 불편해지면 언제든 매장에 들러 주세요.' : '매장에 전달했어요. 매장에서 연락드리고 조정해 드릴게요.';
+      document.getElementById('ccLead').textContent = j.comfort==='편함' ? '알려 주셔서 고마워요. 불편해지면 언제든 매장에 들러 주세요.' : '매장에 전달했어요. 적응 중인지 다시 맞춰야 하는지 매장에서 보고 연락드릴게요.';
       document.getElementById('ccBody').style.display='none';
-    }).catch(function(){ toast('네트워크 오류. 다시 시도해 주세요'); });
+    }).catch(function(){ toast('연결이 안 됐어요. 다시 시도해 주세요'); });
 }
 ccLoad();
 /* ===== 방문 예약 (공통 BVBooking 사용) ===== */
@@ -734,7 +732,7 @@ function reorder(){
 }
 renderCart();
 
-/* 내 정보(로그인 고객=데모 id 1) — 사이즈·시력만, 구매이력/연락처 제외 */
+/* 내 정보(로그인 손님=데모 id 1) — 사이즈·시력만, 구매이력/연락처 제외 */
 (function(){
   fetch('/api/customer?id=1').then(function(r){return r.json();}).then(function(j){
     if(!j.ok||!j.customer)return; var c=j.customer;
@@ -781,10 +779,10 @@ function ordConfirm(){
 /* ===== 상품 카탈로그 ===== */
 var CAT_DATA={
   frame:[
-    {n:'로마 ACE-02',pb:true,price:'189,000',hero:true,desc:'BETTERVISION 대표 모델. 이탈리아 마쭈첼리 아세테이트를 한국에서 조립("Designed & Assembled in Korea"). 9사이즈 중 얼굴폭·관자에 맞는 사이즈로.',spec:[['렌즈폭','52mm'],['브릿지','18mm'],['템플','145mm'],['무게','18g'],['힌지','5배럴 스프링'],['사이즈','9종(F1~F3×T1~T3)']],colors:['#1a1a1a','#5b3a29','#c9b8a0']},
+    {n:'로마 ACE-02',pb:true,price:'189,000',hero:true,desc:'BETTERVISION 대표 모델. 이탈리아 마쭈첼리 아세테이트를 한국에서 조립("Designed & Assembled in Korea"). 9사이즈 중 얼굴폭·관자에 맞는 사이즈로.',spec:[['렌즈폭','52mm'],['브릿지','18mm'],['다리','145mm'],['무게','18g'],['힌지','5배럴 스프링'],['사이즈','9종(F1~F3×T1~T3)']],colors:['#1a1a1a','#5b3a29','#c9b8a0']},
     {n:'로마 클래식',pb:true,price:'189,000',desc:'이탈리아 아세테이트. 9사이즈 중 얼굴폭·관자에 맞춰 고름. 가장 무난한 데일리.'},
     {n:'로마 슬림',pb:true,price:'189,000',desc:'얇은 림·가벼운 무게. 작은 얼굴·미니멀 취향. F1~F2 사이즈 추천.'},
-    {n:'로마 와이드',pb:true,price:'189,000',desc:'넓은 프론트·또렷한 인상. F2~F3, 광대·얼굴폭 넓은 분께.'},
+    {n:'로마 와이드',pb:true,price:'189,000',desc:'넓은 앞판·또렷한 인상. F2~F3, 광대·얼굴폭 넓은 분께.'},
     {n:'로마 라운드',pb:true,price:'189,000',desc:'둥근 림·클래식 무드. 각진 얼굴과 대비로 부드럽게.'},
     {n:'수입 브랜드 A',pb:false,price:'390,000',desc:'수입 티타늄 라인 (예시). 초경량 프리미엄.'}
   ],
@@ -793,7 +791,7 @@ var CAT_DATA={
     {n:'클립온 선글라스',pb:true,price:'90,000',desc:'안경 위에 자석 탈착. 도수 안경 그대로 선글라스로. 가성비.'}
   ],
   goggle:[
-    // [09.24 숨김] {n:'NORM G1',pb:true,price:'290,000',hero:true,desc:'자체 브랜드 NORM 대표 모델. 오픈이어 오디오 템플 내장 — 귀를 막지 않고 통화·음악·번역. 무음 연결로 프리미엄 사용감.',spec:[['재생시간','약 7시간'],['블루투스','5.3'],['방수','IPX4 생활방수'],['무게','28g'],['연결음','무음 커스텀'],['BT명','NORM-G1']],colors:['#1a1a1a','#2b3a4a','#e8e4dd']},
+    // [09.24 숨김] {n:'NORM G1',pb:true,price:'290,000',hero:true,desc:'자체 브랜드 NORM 대표 모델. 오픈이어 오디오 다리 내장 — 귀를 막지 않고 통화·음악·번역. 무음 연결로 프리미엄 사용감.',spec:[['재생시간','약 7시간'],['블루투스','5.3'],['방수','IPX4 생활방수'],['무게','28g'],['연결음','무음 커스텀'],['BT명','NORM-G1']],colors:['#1a1a1a','#2b3a4a','#e8e4dd']},
     {n:'스포츠 고글',pb:true,price:'180,000',desc:'러닝·라이딩용 밀착 핏. 김서림 방지·교체 렌즈.'}
   ]
 };
@@ -969,5 +967,6 @@ function tryToggle(){
   if(pt) pt.addEventListener('click',function(e){var t=e.target.closest('.ptab'); if(t&&t.dataset.s!=='measure'&&tryOn){ if(window.bvTryStop)window.bvTryStop(); tryOn=false; var b=document.getElementById('tryBtn'); if(b)b.textContent='가상 피팅 시작'; }});
 })();
 </script>
+<script src="/assets/bv-nav.js"></script>
 </body>
 </html>

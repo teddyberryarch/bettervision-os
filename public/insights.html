@@ -17,7 +17,14 @@ ul{list-style:none;padding:0;margin:8px 0}li{position:relative;padding-left:16px
 </style></head><body>
 <script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
 <div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
-<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <span class="nav-div" aria-hidden="true"></span>
+    <a href="customer.html">손님 앱</a>
+    <span class="nav-dd"><a href="store.html">가맹점</a><span class="nav-menu"><a href="store.html">매장 홈</a><a href="flow.html">1 접객</a><a href="exam.html">2 검안</a><a href="fit.html">3 피팅</a></span></span>
+    <a href="hq.html">본사</a>
+  </div></div></div>
 <div class="wrap"><section class="view active">
 <div class="lead"><div><div class="eyebrow">전략 인사이트 · 모음</div><h2>왜 지금 안경 + 왜 우리가 병목인가</h2>
 <div class="sub">흩어지면 잊히는 핵심 논리를 한 데. 스마트안경의 빈틈 + AI 플랫폼 선점 + 안경사법 해자 = BETTERVISION의 자리.</div></div><span class="pill good">● 살아있는 메모</span></div>
@@ -78,4 +85,5 @@ ul{list-style:none;padding:0;margin:8px 0}li{position:relative;padding-left:16px
 <div class="note">이 페이지는 흩어지는 전략 인사이트를 모으는 곳. 새 인사이트 나오면 여기에 누적. (사업계획서·마스터설계도의 요약 메모 역할)</div>
 </section></div>
 <div class="foot"><span>BETTERVISION OS · 전략 인사이트 v0.1</span><span>병목에서 기다린다</span></div>
+<script src="/assets/bv-nav.js"></script>
 </body></html>

@@ -27,7 +27,14 @@
 </style></head><body>
 <script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
 <div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
-<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <span class="nav-div" aria-hidden="true"></span>
+    <a href="customer.html">손님 앱</a>
+    <span class="nav-dd"><a href="store.html">가맹점</a><span class="nav-menu"><a href="store.html">매장 홈</a><a href="flow.html">1 접객</a><a href="exam.html">2 검안</a><a href="fit.html">3 피팅</a></span></span>
+    <a href="hq.html">본사</a>
+  </div></div></div>
 <div class="wrap"><section class="view active">
 <div class="lead"><div><div class="eyebrow">재무 모델 · 시뮬레이터</div><h2>매출·영업이익이 어떤 가정에서 나오나</h2>
 <div class="sub">가정을 직접 흔들어 보세요. 본사 매출 = 가맹 공급(전 품목 본사 공급) + 로열티 + 온라인. 두 불변원칙(데이터·공급 본사 귀속)이 이 모델의 전제.</div></div><span class="pill good">● 투자 검토용</span></div>
@@ -92,4 +99,5 @@ function calc(){
 }
 calc();
 </script>
+<script src="/assets/bv-nav.js"></script>
 </body></html>

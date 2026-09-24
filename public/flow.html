@@ -52,17 +52,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="nav-links">
     <a href="index.html">홈</a>
     <a href="a.html">사업 개요</a>
-    <a href="customer.html">고객 앱</a>
-    <a href="store.html">가맹점</a>
-    <a href="hq.html">가맹본부</a>
-    <a href="flow.html">접객</a>
-    <a href="profile.html" style="font-size:15px;font-weight:700;color:var(--ink);text-decoration:none;display:block;margin-top:8px">통합 고객 프로필 (전화번호 조회) → </a>
-    <a href="kakao.html" style="font-size:15px;font-weight:700;color:var(--ink);text-decoration:none;display:block;margin-top:8px">카톡 마케팅 엔진 → </a>
-    <a href="catalog.html" style="font-size:15px;font-weight:700;color:var(--ink);text-decoration:none;display:block;margin-top:8px">온라인 카탈로그·사이즈매치 → </a>
-    <a href="pricing.html" style="font-size:15px;font-weight:700;color:var(--ink);text-decoration:none;display:block;margin-top:8px">렌즈·콘택트 가격 → </a>
-    <a href="manual.html" style="font-size:15px;font-weight:700;color:var(--ink);text-decoration:none;display:block;margin-top:8px">업셀·컴플레인 매뉴얼 → </a>
-    <a href="exam.html">검안</a>
-    <a href="fit.html">피팅</a>
+    <span class="nav-div" aria-hidden="true"></span>
+    <a href="customer.html">손님 앱</a>
+    <span class="nav-dd"><a href="store.html">가맹점</a><span class="nav-menu"><a href="store.html">매장 홈</a><a href="flow.html">1 접객</a><a href="exam.html">2 검안</a><a href="fit.html">3 피팅</a></span></span>
+    <a href="hq.html">본사</a>
   </div>
 </div></div>
 
@@ -73,6 +66,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="eyebrow">매장 표준 운영 · 접객 시퀀스</div>
       <h2>손님이 들어오면 — 이 순서대로</h2>
       <div class="sub">아무나(안경사 1 + 일반 직원) 따라가면 표준이 되는 매장 접객 절차. 각 단계가 어떤 시스템을 부르는지, 무슨 데이터가 남는지 표시. <b>이게 모든 시스템을 꿰는 한 흐름.</b></div>
+      <div class="label" style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap">같이 쓰는 도구: <a href="profile.html">손님 기록 조회</a><a href="catalog.html">카탈로그·사이즈 맞춤</a><a href="pricing.html">렌즈·콘택트 가격</a><a href="kakao.html">카톡 알림</a><a href="manual.html">상담·불만 응대 매뉴얼</a></div>
     </div>
     <span class="pill good">● 운영 런북 v0.1</span>
   </div>
@@ -221,5 +215,6 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 </div>
 
 <div class="foot"><span>BETTERVISION OS · 매장 접객 시퀀스 v0.1</span><span>한 흐름 = 모든 시스템의 글루</span></div>
+<script src="/assets/bv-nav.js"></script>
 </body>
 </html>

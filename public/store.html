@@ -67,12 +67,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="nav-links">
     <a href="index.html">홈</a>
     <a href="a.html">사업 개요</a>
-    <a href="customer.html">고객 앱</a>
-    <a href="store.html">가맹점</a>
-    <a href="hq.html">가맹본부</a>
-    <a href="flow.html">접객</a>
-    <a href="exam.html">검안</a>
-    <a href="fit.html">피팅</a>
+    <span class="nav-div" aria-hidden="true"></span>
+    <a href="customer.html">손님 앱</a>
+    <span class="nav-dd"><a href="store.html">가맹점</a><span class="nav-menu"><a href="store.html">매장 홈</a><a href="flow.html">1 접객</a><a href="exam.html">2 검안</a><a href="fit.html">3 피팅</a></span></span>
+    <a href="hq.html">본사</a>
   </div>
 </div></div>
 
@@ -92,16 +90,16 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="eyebrow" style="margin:0">오늘 할 일</div>
       <div class="label" id="runcount">2 / 5 완료</div>
     </div>
-    <div class="label" style="margin:6px 0 4px">본부 안내 항목은 참고용이에요. 할지 말지는 매장이 정해요.</div>
+    <div class="label" style="margin:6px 0 4px">본사 안내 항목은 참고용이에요. 할지 말지는 매장이 정해요.</div>
     <div id="runlist">
       <div class="runitem done" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">어제 매출 마감 확인</div></div>
-      <div class="runitem done" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">재고 부족 2품목 본부 발주 승인</div><span class="frombhq">본부 안내</span></div>
-      <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">재방문 권장 고객 4명 카톡 발송</div><span class="frombhq">원클릭</span></div>
-      <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">신규 프로모션 'F2 가을 컬러' 매대 세팅 (선택)</div><span class="frombhq">본부 안내</span></div>
+      <div class="runitem done" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">재고 부족 2품목 본사 발주 승인</div><span class="frombhq">본사 안내</span></div>
+      <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">재방문 권장 손님 4명 카톡 발송</div><span class="frombhq">원클릭</span></div>
+      <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">신규 프로모션 'F2 가을 컬러' 매대 세팅 (선택)</div><span class="frombhq">본사 안내</span></div>
       <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">안경사·일반인 오늘 스케줄 확인</div></div>
     </div>
     <div class="divider"></div>
-    <div class="eyebrow" style="margin:0 0 2px">원클릭 마케팅 <span class="locktag">본부 제작 · 우리 동네용 자동 변환</span></div>
+    <div class="eyebrow" style="margin:0 0 2px">원클릭 마케팅 <span class="locktag">본사 제작 · 우리 동네용 자동 변환</span></div>
     <div class="mkbtns">
       <button class="btn small" onclick="toast('성수점 단골 대상 카톡 발송 (프로토타입)')">카톡 단골 발송</button>
       <button class="btn small ghost" onclick="toast('인스타 스토리 게시 (프로토타입)')">SNS 게시</button>
@@ -110,7 +108,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   </div>
 
   <div class="subtabs" id="subtabs" style="max-width:680px">
-    <div class="subtab active" data-t="crm">고객 CRM</div>
+    <div class="subtab active" data-t="crm">손님 관리</div>
     <div class="subtab" data-t="erp">운영 ERP · POS</div>
     <div class="subtab" data-t="fin">재무</div>
     <div class="subtab" data-t="hr">인력 · 채용</div>
@@ -130,10 +128,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="store-grid">
       <div class="card pad">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div class="label">고객 목록</div><select id="crmStore" class="finput2"></select>
+          <div class="label">손님 목록</div><select id="crmStore" class="finput2"></select>
         </div>
-        <table class="tbl" id="custTable"><thead><tr><th>고객</th><th>사이즈</th><th>최근 방문</th><th>재구매 주기</th><th>상태</th></tr></thead><tbody></tbody></table>
-        <div class="sync">● 모든 변경이 본사 클라우드·고객 앱과 실시간 동기화</div>
+        <table class="tbl" id="custTable"><thead><tr><th>손님</th><th>사이즈</th><th>최근 방문</th><th>재구매 주기</th><th>상태</th></tr></thead><tbody></tbody></table>
+        <div class="sync">● 모든 변경이 본사 클라우드·손님 앱과 실시간 동기화</div>
       </div>
       <div class="card pad detail" id="detail"></div>
     </div>
@@ -153,9 +151,9 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <!-- POS -->
       <div class="card pad">
         <div class="eyebrow">결제</div>
-        <div class="locktag" style="display:inline-block;margin-bottom:8px">본부 권장가가 먼저 뜨고, 판매가는 매장이 정해요</div>
-        <div class="label" style="margin-bottom:8px">고객 <b style="color:var(--ink)">윤서진</b> · F2×T2 · 자동 연결됨</div>
-        <div class="label" style="margin:4px 0 5px">지점 선택 (본부가 전 지점 관리)</div>
+        <div class="locktag" style="display:inline-block;margin-bottom:8px">본사 권장가가 먼저 뜨고, 판매가는 매장이 정해요</div>
+        <div class="label" style="margin-bottom:8px">손님 <b style="color:var(--ink)">윤서진</b> · F2×T2 · 자동 연결됨</div>
+        <div class="label" style="margin:4px 0 5px">지점 선택 (본사가 전 지점 관리)</div>
         <select id="posStore" class="finput2" style="width:100%;margin-bottom:8px"></select>
         <div class="label" style="margin:4px 0 5px">손님 선택 (구매 기록에 연결돼요)</div>
         <select id="posCustomer" class="finput2" style="width:100%;margin-bottom:10px"></select>
@@ -171,7 +169,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <button class="btn small ghost" onclick="posPay('현금')">현금영수증</button>
           <button class="btn small ghost" onclick="posClear()">비우기</button>
         </div>
-        <div class="optbox" style="margin-top:14px"><b>POS 전략.</b> 결제 처리는 PG(토스페이먼츠 등)·스마트단말 임대로, <b>POS 소프트웨어는 BETTERVISION 자체</b>. 거래·고객 데이터가 본사에 귀속(원칙①). 시력보정 안경은 <b>의료비 세액공제(연 50만원)용 영수증 자동 발급</b>.</div>
+        <div class="optbox" style="margin-top:14px"><b>POS 전략.</b> 결제 처리는 PG(토스페이먼츠 등)·스마트단말 임대로, <b>POS 소프트웨어는 BETTERVISION 자체</b>. 거래·손님 데이터가 본사에 귀속(원칙①). 시력보정 안경은 <b>의료비 세액공제(연 50만원)용 영수증 자동 발급</b>.</div>
         <div class="divider"></div>
         <div class="eyebrow" style="margin-bottom:6px">환불 / 교환</div>
         <div class="label" style="font-size:13px;margin-bottom:6px">최근 결제를 불러와서 환불해요. 교환은 환불하고 다시 결제하면 돼요.</div>
@@ -193,7 +191,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <button class="btn small ghost" style="width:100%" onclick="suggestLoad()">제안 보기</button>
           <div id="sugBox" style="margin-top:8px"></div>
           <button class="btn ghost" style="margin-top:10px;width:100%" onclick="placeOrders()">재고 부족분 수동 발주</button>
-          <div class="eyebrow" style="margin:14px 0 6px">본부 발주 제안 <span class="label" style="font-weight:400">· 승인하면 발주 확정</span></div>
+          <div class="eyebrow" style="margin:14px 0 6px">본사 발주 제안 <span class="label" style="font-weight:400">· 승인하면 발주 확정</span></div>
           <div id="pushBox"></div>
           <div class="eyebrow" style="margin:14px 0 6px">내 발주 현황</div>
           <div id="ordBox"></div>
@@ -308,17 +306,17 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="eff" style="grid-template-columns:repeat(3,1fr)">
       <div class="effcard"><div class="el">인건비 중 안경사 비중</div><div class="ev">45<small> %</small></div><div class="eb"><s>70%</s>일반인 전환·AI 보조</div></div>
       <div class="effcard"><div class="el">안경사 1인당 일반인 보조</div><div class="ev">3<small> 명</small></div><div class="eb">처리량 64% 늘었어요</div></div>
-      <div class="effcard"><div class="el">채용 소요일 (안경사)</div><div class="ev">9<small> 일</small></div><div class="eb"><s>40일+</s>본부 인재풀 매칭</div></div>
+      <div class="effcard"><div class="el">채용 소요일 (안경사)</div><div class="ev">9<small> 일</small></div><div class="eb"><s>40일+</s>본사 인재풀 매칭</div></div>
     </div>
 
     <div class="store-grid">
       <div class="card pad">
         <div class="eyebrow">안경사 채용</div>
-        <div class="label" style="margin-bottom:8px">본부가 안경사 지원자를 모아서 매장에 연결해 드려요.</div>
+        <div class="label" style="margin-bottom:8px">본사가 안경사 지원자를 모아서 매장에 연결해 드려요.</div>
         <div class="rec"><div><div class="rn">안경사 A · 경력 6년</div><div class="rd">성동/광진 · 즉시 가능 · 누진·조제 강점</div></div><button class="btn small" onclick="toast('면접 요청 전송 (프로토타입)')">매칭 요청</button></div>
         <div class="rec"><div><div class="rn">안경사 B · 경력 3년</div><div class="rd">마포 · 2주 후 · 검안 강점</div></div><button class="btn small" onclick="toast('면접 요청 전송 (프로토타입)')">매칭 요청</button></div>
         <div class="rec"><div><div class="rn">안경사 C · 경력 11년 (점장급)</div><div class="rd">강남 · 협의 · 매장관리 경험</div></div><button class="btn small ghost" onclick="toast('프로필 열람 (프로토타입)')">프로필</button></div>
-        <div class="optbox" style="margin-top:14px"><b>본부 가치.</b> 공고와 서류 확인은 본부가 하고, 매장은 면접만 보면 돼요.</div>
+        <div class="optbox" style="margin-top:14px"><b>본사 가치.</b> 공고와 서류 확인은 본사가 하고, 매장은 면접만 보면 돼요.</div>
       </div>
 
       <div class="card pad">
@@ -345,10 +343,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- [09.24] 판 다음까지 확인: 7일째 착용 확인 · A/S 원인 기록 -->
   <div class="stab" id="t-care">
     <div class="lead"><div><div class="eyebrow">판 다음까지 확인</div><h2 style="font-size:30px">7일째 착용 확인 · A/S</h2>
-      <div class="sub">테·렌즈를 산 고객은 결제 7일 뒤 확인 목록에 자동으로 올라와요. 불편하다고 하면 A/S 건이 열리고, 원인을 골라야 종결돼요.</div></div></div>
+      <div class="sub">테·렌즈를 산 손님은 결제 7일 뒤 확인 목록에 자동으로 올라와요. 질문 3개 중 하나라도 아니요면 매장이 적응 중인지 다시 맞출지 가려요. 다시 맞춤이면 A/S 건이 열리고, 원인을 골라야 종결돼요.</div></div></div>
     <div class="store-grid">
       <div class="card pad">
-        <div class="eyebrow">확인할 고객 <span id="ccCount" class="muted"></span></div>
+        <div class="eyebrow">확인할 손님 <span id="ccCount" class="muted"></span></div>
         <div id="ccList" style="margin-top:8px"></div>
       </div>
       <div class="card pad">
@@ -450,10 +448,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 
 <script>
 window.__bvGuide={title:'가맹점 가이드',sub:'사장님 혼자 다 하던 걸 시스템이 대신.',points:[
-{click:'.subtab[data-t="crm"]',sel:'#custTable',t:'고객 CRM',d:'실고객·구매이력·검안 기반 자동 견적.'},
+{click:'.subtab[data-t="crm"]',sel:'#custTable',t:'손님 관리',d:'손님별 구매 기록과 검안 기록으로 견적을 바로 내요.'},
 {click:'.subtab[data-t="erp"]',sel:'#posCatalog',t:'POS·재고',d:'결제·환불·자동 발주 제안(재고+판매속도).'},
 {click:'.subtab[data-t="fin"]',sel:'#calGrid',t:'재무·세무',d:'일매출 달력 + 자동 정산·세무 리포트.'},
-{click:'.subtab[data-t="mkt"]',sel:'#autoMkBox',t:'단골 자동 마케팅',d:'교체주기 도래 고객 자동 발굴·카톡 예약.'}
+{click:'.subtab[data-t="mkt"]',sel:'#autoMkBox',t:'단골 자동 마케팅',d:'교체주기 도래 손님 자동 발굴·카톡 예약.'}
 ]};
 </script>
 <script src="/assets/app.js"></script>
@@ -464,23 +462,27 @@ document.getElementById('subtabs').addEventListener('click',e=>{const t=e.target
   document.querySelectorAll('.stab').forEach(s=>s.classList.remove('active'));document.getElementById('t-'+t.dataset.t).classList.add('active');});
 
 /* ===== [09.24] 사후 확인 (7일째 착용 확인 · A/S 원인 기록) ===== */
-var CC_ISSUES=[], AS_CAUSES=[];
+var CC_ISSUES=[], CC_Q=[], AS_CAUSES=[];
+function isPB(sku){ return /^(CL|WD|SL|RD)-/.test(String(sku||'')); }
 function _esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function careLoad(){
   var st=curStore(); var today=new Date(); var tiso=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
   fetch('/api/aftercare?store='+encodeURIComponent(st)).then(function(r){return r.json();}).then(function(j){
-    CC_ISSUES=j.issues||[]; var items=j.items||[];
-    var todo=items.filter(function(x){return x.status==='예정';}), done=items.filter(function(x){return x.status!=='예정';}).slice(0,6);
+    CC_ISSUES=j.issues||[]; CC_Q=j.questions||[]; var items=j.items||[];
+    var judge=items.filter(function(x){return x.status==='완료'&&x.comfort==='불편'&&!x.judge;});
+    var todo=judge.concat(items.filter(function(x){return x.status==='예정';})), done=items.filter(function(x){return x.status!=='예정'&&judge.indexOf(x)<0;}).slice(0,6);
     document.getElementById('ccCount').textContent='· 대기 '+todo.length+'건';
     var row=function(x){
       var late=x.status==='예정'&&x.due_date<tiso, due=x.status==='예정'&&x.due_date<=tiso;
       var right = x.status==='예정'
-        ? (due? '<span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn small" onclick="ccRec('+x.id+',\'편함\')">편함</button><button class="btn small ghost" onclick="ccUncomf('+x.id+')">불편</button><button class="btn small ghost" onclick="ccRec('+x.id+',null,\'연락 안 됨\')">연락 안 됨</button></span>' : '<span class="muted">'+x.due_date+' 예정</span>')
-        : '<span class="muted">'+(x.status==='완료'?x.comfort+(x.issues?' · '+_esc(x.issues):''):x.status)+' · '+(x.source||'')+'</span>';
-      return '<div class="pl-row" style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line2)"><span>'+_esc(x.name)+' <span class="muted">'+_esc(x.phone)+' · 결제 '+x.sale_date+(late?' · 기한 지남':'')+'</span></span>'+right+'</div>'+
+        ? (due? '<span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn small" onclick="ccAsk('+x.id+')">질문 3개 기록</button><button class="btn small ghost" onclick="ccRec('+x.id+',\'연락 안 됨\')">연락 안 됨</button></span>' : '<span class="muted">'+x.due_date+' 예정</span>')
+        : (x.status==='완료'&&x.comfort==='불편'&&!x.judge
+          ? '<span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center"><span class="pill warn">판별 필요 · '+_esc(x.issues||'불편')+'</span><button class="btn small ghost" onclick="ccJudge('+x.id+',\'적응 중\')">적응 중</button><button class="btn small" onclick="ccJudge('+x.id+',\'다시 맞춤\')">다시 맞춤</button></span>'
+          : '<span class="muted">'+(x.status==='완료'?x.comfort+(x.issues?' · '+_esc(x.issues):'')+(x.judge?' · '+x.judge:''):x.status)+' · '+(x.source||'')+'</span>');
+      return '<div class="pl-row" style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line2)"><span>'+_esc(x.name)+' <span class="muted">'+_esc(x.phone)+' · 결제 '+x.sale_date+(x.note==='적응 확인'?' · 적응 확인':'')+(late?' · 기한 지남':'')+'</span></span>'+right+'</div>'+
         '<div id="ccu_'+x.id+'" style="display:none;padding:8px 0 12px"></div>';
     };
-    document.getElementById('ccList').innerHTML=(todo.map(row).join('')||'<div class="muted">확인할 고객이 없어요</div>')+
+    document.getElementById('ccList').innerHTML=(todo.map(row).join('')||'<div class="muted">확인할 손님이 없어요</div>')+
       (done.length?'<div class="label" style="margin:14px 0 4px">최근 확인</div>'+done.map(row).join(''):'');
   });
   fetch('/api/as?store='+encodeURIComponent(st)).then(function(r){return r.json();}).then(function(j){
@@ -497,17 +499,31 @@ function careLoad(){
     document.getElementById('asCust').innerHTML=(j.customers||[]).map(function(c){return '<option value="'+c.id+'">'+_esc(c.name)+'</option>';}).join('');
   });
 }
-function ccUncomf(id){
+function ccAsk(id){
+  // 전화로 질문 3개를 묻고 기록한다. 하나라도 '아니요'면 바로 판별한다
   var box=document.getElementById('ccu_'+id); box.style.display='block';
-  box.innerHTML='<div class="label" style="margin-bottom:6px">불편한 곳</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+CC_ISSUES.map(function(k){return '<label style="display:flex;gap:4px;align-items:center;font-size:15px"><input type="checkbox" value="'+k+'" class="cci_'+id+'">'+k+'</label>';}).join('')+'</div>'+
-    '<input id="ccn_'+id+'" class="finput2" placeholder="메모 (선택)" style="width:100%;margin-top:8px"><button class="btn small" style="margin-top:8px" onclick="ccRec('+id+',\'불편\')">기록하고 A/S 열기</button>';
+  box.innerHTML=CC_Q.map(function(q,i){return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0"><span style="font-size:15px">'+(i+1)+'. '+q.q+'</span><span style="display:flex;gap:10px;font-size:15px"><label><input type="radio" name="ccq_'+id+'_'+i+'" value="y" checked> 네</label><label><input type="radio" name="ccq_'+id+'_'+i+'" value="n" data-k="'+q.k+'" class="ccn_'+id+'"> 아니요</label></span></div>';}).join('')+
+    '<input id="ccn_'+id+'" class="finput2" placeholder="메모 (선택)" style="width:100%;margin-top:8px">'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="btn small" onclick="ccRec('+id+')">모두 네 · 기록</button><button class="btn small ghost" onclick="ccRec('+id+',null,\'적응 중\')">불편 · 적응 중</button><button class="btn small ghost" onclick="ccRec('+id+',null,\'다시 맞춤\')">불편 · 다시 맞춤</button></div>'+
+    '<div class="label" style="margin-top:6px">적응 중이면 7일 뒤 한 번 더 묻고, 다시 맞춤이면 A/S 건이 열려요.</div>';
 }
-function ccRec(id, comfort, status){
-  var issues=[].slice.call(document.querySelectorAll('.cci_'+id+':checked')).map(function(x){return x.value;});
-  if(comfort==='불편'&&!issues.length){ toast('불편한 곳을 하나 이상 골라 주세요'); return; }
+function ccRec(id, status, judge){
+  var issues=[].slice.call(document.querySelectorAll('.ccn_'+id+':checked')).map(function(x){return x.dataset.k;});
+  if(judge && !issues.length){ toast('아니요로 답한 질문을 하나 이상 골라 주세요'); return; }
+  if(!judge && status!=='연락 안 됨' && issues.length){ toast('아니요가 있으면 적응 중 또는 다시 맞춤을 골라 주세요'); return; }
   var note=(document.getElementById('ccn_'+id)||{}).value||'';
-  fetch('/api/aftercare/record',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:id,comfort:comfort,issues:issues,note:note,status:status||'완료'})})
-    .then(function(r){return r.json();}).then(function(j){ if(!j.ok){toast(j.error||'기록 실패');return;} toast(j.as_id?'기록했어요 · A/S 건을 열었어요':'기록했어요'); careLoad(); });
+  fetch('/api/aftercare/record',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:id,issues:issues,note:note,judge:judge||null,status:status||'완료'})})
+    .then(function(r){return r.json();}).then(function(j){ if(!j.ok){toast(j.error||'기록하지 못했어요');return;} toast(ccMsg(j)); careLoad(); });
+}
+function ccJudge(id, judge){
+  fetch('/api/aftercare/judge',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:id,judge:judge})})
+    .then(function(r){return r.json();}).then(function(j){ if(!j.ok){toast(j.error||'판별하지 못했어요');return;} toast(ccMsg(j)); careLoad(); });
+}
+function ccMsg(j){
+  if(j.as_id) return '다시 맞춤으로 기록했어요. A/S 건을 열었어요';
+  if(j.recheck_due) return '적응 중으로 기록했어요. '+j.recheck_due+'에 한 번 더 물어봐요';
+  if(j.status==='연락 안 됨') return '연락 안 됨으로 기록했어요';
+  return '기록했어요';
 }
 function asOpen(){
   var cid=document.getElementById('asCust').value, sym=document.getElementById('asSym').value.trim();
@@ -522,6 +538,7 @@ function asClose(id){
     .then(function(r){return r.json();}).then(function(j){ if(!j.ok){toast(j.error||'종결 실패');return;} toast('종결했어요 · 원인 '+cause); careLoad(); });
 }
 document.querySelector('.subtab[data-t="care"]').addEventListener('click',careLoad);
+if(location.hash==='#care'){ var _ct=document.querySelector('.subtab[data-t="care"]'); if(_ct) _ct.click(); }
 var CRM_LIST=[], CRM_CUR=null;
 function dotName(st){return st==='재방문'?'재방문':st==='신규'?'신규':'안정';}
 (function(){
@@ -537,8 +554,8 @@ function crmLoad(){
     tb.innerHTML=CRM_LIST.map(function(c,i){
       var dot=c.seg==='재방문'?'due':c.seg==='신규'?'new':'ok';
       return '<tr data-i="'+i+'"'+(i===0?' class="sel"':'')+' onclick="crmSel('+i+')"><td>'+c.name+'</td><td>'+(c.size||'-')+'</td><td class="muted">'+(c.store||'')+'</td><td class="muted">'+(c.seg||'')+'</td><td><span class="dot '+dot+'"></span>'+(c.seg||'안정')+'</td></tr>';
-    }).join('') || '<tr><td colspan="5" class="muted">고객 없음</td></tr>';
-    if(CRM_LIST.length) crmSel(0); else document.getElementById('detail').innerHTML='<div class="muted">고객을 선택하세요</div>';
+    }).join('') || '<tr><td colspan="5" class="muted">손님이 없어요</td></tr>';
+    if(CRM_LIST.length) crmSel(0); else document.getElementById('detail').innerHTML='<div class="muted">손님을 골라 주세요</div>';
   });
 }
 function crmSel(i){
@@ -552,10 +569,10 @@ function crmSel(i){
       var box=document.getElementById('measBox'); if(!box) return; var it=(m.items||[]).slice(0,4);
       box.innerHTML = it.length ? it.map(function(x){ var d=String(x.measured_at||'').slice(0,10);
         return '<div class="hist"><span>PD '+(x.pd!=null?x.pd+'mm':'-')+' · 얼굴폭 '+(x.face_width!=null?Math.round(x.face_width)+'mm':'-')+(x.provisional?' <span class="pill warn">임시</span>':'')+'</span><span class="muted">'+d+' · '+(x.source||'')+' · 신뢰도 '+Math.round((x.confidence||0)*100)+'%</span></div>'; }).join('')
-        : '측정 기록 없음 (고객 앱 자가측정이나 매장 정밀 측정을 하면 쌓여요)';
+        : '측정 기록 없음 (손님 앱 자가측정이나 매장 정밀 측정을 하면 쌓여요)';
     }).catch(function(){});
     var histHtml = hist.length? hist.map(function(h){return '<div class="hist"><span>'+h.name+' <span class="muted">×'+h.qty+'</span></span><span class="muted">'+h.date+' · '+('₩'+h.amount.toLocaleString('ko-KR'))+'</span></div>';}).join('')
-      : '<div class="muted" style="font-size:14px">구매 이력 없음 (POS에서 이 고객으로 결제하면 쌓여요)</div>';
+      : '<div class="muted" style="font-size:14px">구매 이력 없음 (POS에서 이 손님으로 결제하면 쌓여요)</div>';
     document.getElementById('detail').innerHTML=
       '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="nm">'+cust.name+'</div><div class="label">사이즈 '+(cust.size||'-')+' · '+(cust.seg||'')+'</div></div><span class="pill '+(cust.seg==='재방문'?'warn':cust.seg==='신규'?'':'good')+'">'+(cust.seg||'안정')+'</span></div>'+
       '<div class="locktag" style="display:inline-block;margin-top:8px">매장과 본사만 볼 수 있어요</div>'+
@@ -634,12 +651,12 @@ function loadSummary(){
 function renderCatalog(){
   document.getElementById('posCatalog').innerHTML=cats().map(function(cat){
     return '<div class="poscat"><div class="poscat-h">'+cat+'</div>'+INVMAP[cat].map(function(it){
-      var out=it.stock<=0;
-      return '<button class="chip"'+(out?' disabled':'')+' onclick="posAdd(\''+it.sku+'\')">+ '+it.name+' <span class="muted">'+won(it.price)+(out?' · 품절':'')+'</span></button>';
+      var pb=isPB(it.sku), out=!pb&&it.stock<=0;
+      return '<button class="chip"'+(out?' disabled':'')+' onclick="posAdd(\''+it.sku+'\')">+ '+it.name+' <span class="muted">'+won(it.price)+(pb?' · 견본, 본사 조제':'')+(out?' · 품절':'')+'</span></button>';
     }).join('')+'</div>';
   }).join('');
 }
-// [09.24] 판매가는 매장이 정한다. 기본값 = 본부 권장가, 줄마다 수정 가능
+// [09.24] 판매가는 매장이 정한다. 기본값 = 본사 권장가, 줄마다 수정 가능
 var posPrice={};
 function unitOf(sku){return posPrice[sku]!=null?posPrice[sku]:skuFind(sku).price;}
 function posSetPrice(sku,v){var n=Math.max(0,Math.round(+v||0)); posPrice[sku]=n; renderPos();}
@@ -675,12 +692,14 @@ function posPay(method){
       if(!res.ok){toast(res.error||'결제 실패');return;}
       posCart={}; posPrice={}; renderPos();
       var nt=(res.notices&&res.notices.length)?' · 참고: '+res.notices.join(', '):'';
-      Promise.all([loadInventory(),loadSummary()]).then(function(){ toast(method+' 결제 '+won(total)+' 완료 · 본부에 반영됨'+nt); });
+      var pbn=lines.some(function(l){return isPB(l.sku);})?' · PB 테는 본사에 조제 요청했어요':'';
+      Promise.all([loadInventory(),loadSummary()]).then(function(){ toast(method+' 결제 '+won(total)+' 완료. 본사에도 바로 보여요'+pbn+nt); });
     }).catch(function(){toast('네트워크 오류');});
 }
 function renderInv(){
   document.getElementById('invBox').innerHTML=cats().map(function(cat){
-    var rows=INVMAP[cat].map(function(it){var low=it.stock<=LOWAT;
+    var rows=INVMAP[cat].map(function(it){ if(isPB(it.sku)) return '<div class="pr"><span>'+it.name+'</span><span class="muted">견본 '+it.stock+'</span></div>';
+      var low=it.stock<=LOWAT;
       return '<div class="pr'+(low?' warn':'')+'"><span>'+it.name+'</span><span>'+it.stock+(low?' (부족)':'')+'</span></div>';}).join('');
     return '<div class="invcat"><div class="ph">'+cat+'</div>'+rows+'</div>';
   }).join('');
@@ -689,7 +708,7 @@ function placeOrders(){
   fetch('/api/lowstock?store='+encodeURIComponent(curStore())+'&threshold='+LOWAT).then(function(r){return r.json();}).then(function(j){
     var items=j.items||[]; if(!items.length){toast('발주할 부족 재고가 없어요');return;}
     Promise.all(items.map(function(it){return fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:curStore(),sku:it.sku,name:it.name,cat:it.cat,qty:15})}).then(function(r){return r.json();});}))
-    .then(function(){ toast(items.length+'종 발주를 요청했어요. 본부 확인을 기다려요'); ordRender(); });
+    .then(function(){ toast(items.length+'종 발주를 요청했어요. 본사 확인을 기다려요'); ordRender(); });
   }).catch(function(){toast('발주 요청 실패');});
 }
 function _dlText(iso){
@@ -706,7 +725,7 @@ function pushRender(){
       return '<div class="pushrow"><div class="pri"><div class="pn">'+o.name+' <span class="muted">×'+o.qty+'</span></div><div class="pdl">'+_dlText(o.deadline)+' · 무응답 시 만료 (발주 안 됨)</div></div>'+
         '<div class="pacts"><button class="btn small" onclick="pushRespond('+o.id+',true)">승인</button>'+
         '<button class="btn small ghost" onclick="pushRespond('+o.id+',false)">거절</button></div></div>';
-    }).join('') : '<div class="muted" style="font-size:14px">본부에서 내려온 발주 제안이 없어요</div>';
+    }).join('') : '<div class="muted" style="font-size:14px">본사에서 내려온 발주 제안이 없어요</div>';
   });
 }
 function pushRespond(id, accept){
@@ -745,7 +764,7 @@ function mkChVal(){var a=document.querySelector('#mkCh .chip.active');return a?a
   var sel=document.getElementById('mkTarget'); if(!sel)return;
   fetch('/api/segcounts').then(function(r){return r.json();}).then(function(j){
     var c=(j.counts)||{};
-    MK_SEG=[{id:'단골',name:'단골',n:c['단골']||0},{id:'재방문',name:'재방문 권장',n:c['재방문']||0},{id:'신규',name:'신규 고객',n:c['신규']||0},{id:'전체',name:'전체 고객',n:c['전체']||0}];
+    MK_SEG=[{id:'단골',name:'단골',n:c['단골']||0},{id:'재방문',name:'재방문 권장',n:c['재방문']||0},{id:'신규',name:'신규 손님',n:c['신규']||0},{id:'전체',name:'전체 손님',n:c['전체']||0}];
     sel.innerHTML=MK_SEG.map(function(s){return '<option value="'+s.id+'">'+s.name+' · '+s.n+'명</option>';}).join('');
     mkCountUpd();
   });
@@ -874,7 +893,7 @@ function suggestLoad(){
 }
 function _placeOne(it){return fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:curStore(),sku:it.sku,name:it.name,cat:it.cat,qty:it.suggest})}).then(function(r){return r.json();});}
 function suggestOrder(i){var it=SUG[i]; if(!it)return; _placeOne(it).then(function(){toast(it.name+' '+it.suggest+'개 발주 요청(대기)'); ordRender();});}
-function suggestOrderAll(){if(!SUG.length)return; Promise.all(SUG.map(_placeOne)).then(function(){toast(SUG.length+'종 발주를 요청했어요. 본부 확인을 기다려요'); ordRender(); document.getElementById('sugBox').innerHTML='';});}
+function suggestOrderAll(){if(!SUG.length)return; Promise.all(SUG.map(_placeOne)).then(function(){toast(SUG.length+'종 발주를 요청했어요. 본사 확인을 기다려요'); ordRender(); document.getElementById('sugBox').innerHTML='';});}
 
 /* ===== 단골 자동 마케팅 (교체주기 도래) ===== */
 var AUTO_MK=[];
@@ -886,7 +905,7 @@ function autoMkLoad(){
     box.innerHTML = AUTO_MK.length? AUTO_MK.map(function(c,i){
       return '<div class="pl-row"><span>'+c.name+' <span class="muted">'+(c.store||'')+' · '+(c.size||'')+' · 교체주기 도래</span></span><button class="btn small" onclick="autoMkSend('+i+')">카톡 예약</button></div>';
     }).join('')+'<button class="btn" style="width:100%;margin-top:10px" onclick="autoMkSendAll()">전체 자동 카톡 예약 발송</button>'
-     : '<div class="muted" style="font-size:14px">지금 교체주기 도래 고객이 없어요</div>';
+     : '<div class="muted" style="font-size:14px">지금 교체주기 도래 손님이 없어요</div>';
   }).catch(function(){box.innerHTML='<div class="muted" style="font-size:14px">불러오기 실패</div>';});
 }
 function autoMkSend(i){var c=AUTO_MK[i]; if(!c)return;
@@ -907,7 +926,7 @@ function _rxMax(rx){ // "OD -3.25 / OS -3.50" -> 3.50
 }
 function _idxByRx(d){ if(d<=2)return {idx:'1.50',p:50000}; if(d<=3)return {idx:'1.56',p:80000}; if(d<=4)return {idx:'1.60',p:110000}; if(d<=6)return {idx:'1.67',p:150000}; return {idx:'1.74',p:210000}; }
 function autoQuote(){
-  var c=CRM_CUR; if(!c){toast('고객을 먼저 선택하세요');return;}
+  var c=CRM_CUR; if(!c){toast('손님을 먼저 선택하세요');return;}
   var d=_rxMax(c.rx); var lens=_idxByRx(d);
   var sizeF=(c.size||'F2×T2').split('×')[0]||'F2';
   var frameName='로마 ACE-02 ('+sizeF+')', framePrice=189000;
@@ -940,5 +959,6 @@ function settleLoad(from, to){
   }).catch(function(){});
 }
 </script>
+<script src="/assets/bv-nav.js"></script>
 </body>
 </html>

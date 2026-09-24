@@ -13,7 +13,14 @@
 .note{font-size:13px;color:var(--muted);font-style:italic}</style></head><body>
 <script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
 <div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
-<div class="nav-links"><a href="index.html">홈</a><a href="a.html">사업 개요</a><a href="customer.html">고객 앱</a><a href="store.html">가맹점</a><a href="hq.html">가맹본부</a><a href="flow.html">접객</a><a href="exam.html">검안</a><a href="fit.html">피팅</a></div></div></div>
+<div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <span class="nav-div" aria-hidden="true"></span>
+    <a href="customer.html">손님 앱</a>
+    <span class="nav-dd"><a href="store.html">가맹점</a><span class="nav-menu"><a href="store.html">매장 홈</a><a href="flow.html">1 접객</a><a href="exam.html">2 검안</a><a href="fit.html">3 피팅</a></span></span>
+    <a href="hq.html">본사</a>
+  </div></div></div>
 <div class="wrap"><section class="view active">
 <div class="lead"><div><div class="eyebrow">① · 안면 측정 (스캔)</div><h2>한 번 스캔 → 측정 5값 → 9사이즈</h2>
 <div class="sub">아이패드 트루뎁스로 얼굴을 스캔해 PD·얼굴폭·코높이·귀간격·안면각을 한 번에. 측정과 가상피팅이 같은 얼굴 메시에서 나온다. (데모는 슬라이더/자동 스캔)</div></div><span class="pill good">● 엔진 입력원</span></div>
@@ -68,4 +75,5 @@ function upd(){
   '<text x="'+cx+'" y="138" font-size="6" fill="#8a877f" text-anchor="middle" font-family="Pretendard">얼굴폭 '+fw+' · 귀간격 '+eg+' · 9사이즈 '+(r.code||'-')+'</text></svg>';
 }
 upd();
-</script></body></html>
+</script><script src="/assets/bv-nav.js"></script>
+</body></html>
