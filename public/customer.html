@@ -327,6 +327,7 @@
               <h4>시력 변화와 다음 검사</h4>
               <div class="label" style="margin:6px 0 4px">검사할 때마다 기록이 쌓여요. 가족 기록도 같이 봐요.</div>
               <div id="visionBox"><div class="label">불러오는 중이에요</div></div>
+              <a class="btn ghost" style="display:block;text-align:center;margin-top:10px" href="trust.html?customer_id=1">누가, 어떻게 쟀는지 보기</a>
             </div>
             <div class="appcard" id="remindCard">
               <h4>재구매 알림 </h4>
@@ -402,6 +403,7 @@
             <div class="appcard">
               <h4>상품</h4>
               <div class="label" style="margin:6px 0 12px">종류별 제품과 가격이에요. 도수 제품은 매장에서 맞춰요.</div>
+              <a class="btn ghost" style="display:block;text-align:center;margin:-4px 0 12px" href="shop.html">온라인 스토어 · 도수 없는 선글라스·소품 주문</a>
               <div class="csub" id="csub">
                 <div class="cs active" data-c="frame">테</div>
                 <div class="cs" data-c="sun">선글라스</div>
@@ -874,8 +876,8 @@ function ordConfirm(){
 /* ===== 상품 카탈로그 ===== */
 var CAT_DATA={
   frame:[
-    {n:'로마 ACE-02',pb:true,price:'189,000',hero:true,desc:'BETTERVISION 대표 모델. 이탈리아 마쭈첼리 아세테이트를 한국에서 조립("Designed & Assembled in Korea"). 9사이즈 중 얼굴폭·관자에 맞는 사이즈로.',spec:[['렌즈폭','52mm'],['브릿지','18mm'],['템플','145mm'],['무게','18g'],['힌지','5배럴 스프링'],['사이즈','9종(F1~F3×T1~T3)']],colors:['#1a1a1a','#5b3a29','#c9b8a0']},
-    {n:'로마 클래식',pb:true,price:'189,000',desc:'이탈리아 아세테이트. 9사이즈 중 얼굴폭·관자에 맞춰 고름. 가장 무난한 데일리.'},
+    {n:'로마 ACE-02',pb:true,price:'189,000',hero:true,desc:'BETTERVISION 대표 모델. 마쭈첼리 아세테이트(중국 공장 생산)로 만든 부품을 한국에서 조립해요. 9사이즈 중 얼굴폭·관자에 맞는 사이즈로.',spec:[['렌즈폭','52mm'],['브릿지','18mm'],['템플','145mm'],['무게','18g'],['힌지','5배럴 스프링'],['사이즈','9종(F1~F3×T1~T3)']],colors:['#1a1a1a','#5b3a29','#c9b8a0']},
+    {n:'로마 클래식',pb:true,price:'189,000',desc:'마쭈첼리 아세테이트(중국 공장 생산), 한국 조립. 9사이즈 중 얼굴폭·관자에 맞춰 고름. 가장 무난한 데일리.'},
     {n:'로마 슬림',pb:true,price:'189,000',desc:'얇은 림·가벼운 무게. 작은 얼굴·미니멀 취향. F1~F2 사이즈 추천.'},
     {n:'로마 와이드',pb:true,price:'189,000',desc:'넓은 프론트·또렷한 인상. F2~F3, 광대·얼굴폭 넓은 분께.'},
     {n:'로마 라운드',pb:true,price:'189,000',desc:'둥근 림·클래식 무드. 각진 얼굴과 대비로 부드럽게.'},
@@ -896,12 +898,12 @@ var CONTACTS=[
   {n:'난시용 (30P)',pb:true,price:'42,000',desc:'토릭 설계로 난시 축 보정. 시야 안정. 난시 있는 분 전용.'},
   {n:'컬러 (10P)',pb:true,price:'30,000',desc:'자연스러운 홍채 확장·컬러. 도수/무도수. 미용 목적.'}
 ];
-var LENS_IDX=[ // [09.24] 가격은 본사 상품 목록에서. 목록에 없는 굴절률은 "매장 문의"
-  {idx:'1.50',thick:'가장 두꺼움',rec:'약도수 ~ -2.00D'},
-  {idx:'1.56',thick:'두꺼움',rec:'~ -3.00D'},
+var LENS_IDX=[ // [09.24] 가격은 본사 상품 목록에서 (1.60 말고는 샘플 권장가)
+  {idx:'1.50',thick:'가장 두꺼움',rec:'약도수 ~ -2.00D',sku:'1.50 렌즈'},
+  {idx:'1.56',thick:'두꺼움',rec:'~ -3.00D',sku:'1.56 렌즈'},
   {idx:'1.60',thick:'얇음',rec:'-3.00 ~ -4.00D',sku:'알도R 1.60 렌즈'},
-  {idx:'1.67',thick:'더 얇음',rec:'-4.00 ~ -6.00D'},
-  {idx:'1.74',thick:'가장 얇음',rec:'-6.00D 이상'}
+  {idx:'1.67',thick:'더 얇음',rec:'-4.00 ~ -6.00D',sku:'1.67 렌즈'},
+  {idx:'1.74',thick:'가장 얇음',rec:'-6.00D 이상',sku:'1.74 렌즈'}
 ];
 var COATINGS=[
   {i:'청',n:'블루라이트(청광) 차단',d:'디지털 기기 청색광 완화. 눈 피로·수면 영향 줄임. 사무직·학생 추천.'},
@@ -955,7 +957,7 @@ function renderCat(c){
       lensCards+
       '<div class="catsec-h">굴절률(렌즈 두께)별 안내</div>'+
       '<table class="lenstbl"><thead><tr><th>굴절률</th><th>두께감</th><th>추천 도수</th><th>가격</th></tr></thead><tbody>'+rows+'</tbody></table>'+
-      '<div class="label" style="font-size:13px;margin-top:6px">굴절률이 높을수록 같은 도수에서 더 얇고 가벼워요. 도수가 높으면 1.60 이상을 권해요. 1.60 말고는 매장에서 가격을 알려드려요. 정확한 추천은 측정·검안 뒤에 해요.</div>'+
+      '<div class="label" style="font-size:13px;margin-top:6px">굴절률이 높을수록 같은 도수에서 더 얇고 가벼워요. 도수가 높으면 1.60 이상을 권해요. 양쪽 한 쌍 가격이에요. 정확한 추천은 측정·검안 뒤에 해요.</div>'+
       '<div class="catsec-h">기능 코팅</div>'+coat;
     return;
   }

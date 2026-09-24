@@ -132,18 +132,19 @@ function renderFrames(){
   document.getElementById('frameNote').textContent=no?('· 불가 '+no+'개는 뺌 (테 판정 기준)'):'';
   document.getElementById('frames').innerHTML=ok.map(function(f){
     var pb=/^(CL|WD|SL|RD)-/.test(f.sku);
-    return '<label class="opt'+(SEL.frame===f.sku?' sel':'')+'"><input type="radio" name="fr" '+(SEL.frame===f.sku?'checked':'')+' onchange="SEL.frame=\''+f.sku+'\';renderFrames();render()"><div><div>'+esc(f.name)+'<span class="qtag '+(f.lv===0?'good':'warn')+'">'+esc(f.level)+'</span>'+(pb?'<span class="qtag">PB · 본사 조제</span>':'')+'</div><div class="w">'+won(price(f.sku))+(f.why&&f.why.length?' · '+esc(f.why.join(', ')):'')+'</div></div></label>';
+    return '<label class="opt'+(SEL.frame===f.sku?' sel':'')+'"><input type="radio" name="fr" '+(SEL.frame===f.sku?'checked':'')+' onchange="SEL.frame=\''+f.sku+'\';SEL.lens=null;renderFrames();renderLenses();render()"><div><div>'+esc(f.name)+'<span class="qtag '+(f.lv===0?'good':'warn')+'">'+esc(f.level)+'</span>'+(pb?'<span class="qtag">PB · 본사 조제</span>':'')+'</div><div class="w">'+won(price(f.sku))+(f.why&&f.why.length?' · '+esc(f.why.join(', ')):'')+'</div></div></label>';
   }).join('');
 }
 function rxIdx(){ var f=(JUDGE&&JUDGE.items||[]).filter(function(x){return x.sku===SEL.frame;})[0]; if(!f||!f.R) return null; return [f.R.idx,f.L.idx].sort().pop(); }
 function renderLenses(){
   var lenses=CAT.filter(function(x){return x.cat==='렌즈';}), add=JUDGE&&JUDGE.rx&&+JUDGE.rx.ADD>0;
-  var rec=add?'누진 렌즈':'알도R 1.60 렌즈'; var recSku=(lenses.filter(function(x){return x.name===rec;})[0]||lenses[0]||{}).sku;
+  var ix=rxIdx(), byIdx={'1.50':'1.50 렌즈','1.56':'1.56 렌즈','1.60':'알도R 1.60 렌즈','1.67':'1.67 렌즈','1.74':'1.74 렌즈'};
+  var rec=add?'누진 렌즈':(byIdx[ix]||'알도R 1.60 렌즈'); var recSku=(lenses.filter(function(x){return x.name===rec;})[0]||lenses[0]||{}).sku;
   if(!SEL.lens) SEL.lens=recSku;
   document.getElementById('lenses').innerHTML=lenses.map(function(l){
     return '<label class="opt'+(SEL.lens===l.sku?' sel':'')+'"><input type="radio" name="ln" '+(SEL.lens===l.sku?'checked':'')+' onchange="SEL.lens=\''+l.sku+'\';renderLenses();render()"><div><div>'+esc(l.name)+(l.sku===recSku?'<span class="qtag good">처방 기준 추천</span>':'')+'</div><div class="w">'+won(price(l.sku))+' · 양쪽</div></div></label>';
   }).join('');
-  var ix=rxIdx(); document.getElementById('lensNote').textContent=(ix&&parseFloat(ix)>1.6)?('처방상 굴절률 '+ix+' 권장. 가격표에 없는 등급이라 본사 확인 필요.'):'';
+  document.getElementById('lensNote').textContent=(ix?('처방 기준 굴절률 '+ix+' 권장. '):'')+'1.50·1.56·1.67·1.74 권장가는 샘플(시세 참고), 1호점에서 확정.';
 }
 function renderExtras(){
   document.getElementById('extras').innerHTML=CAT.filter(function(x){return x.cat==='액세서리';}).map(function(a){
