@@ -44,7 +44,9 @@
 <div class="fld"><label>귀 윗부분 간격 (좌우) <b id="vEG">160</b>mm</label><input id="EG" type="range" min="144" max="180" step="0.5" value="160" oninput="upd()"></div>
 <div class="fld"><label>코 높이 <b id="vNH">12</b>mm</label><input id="NH" type="range" min="6" max="20" step="0.5" value="12" oninput="upd()"></div>
 <div class="fld"><label>안면각 <b id="vWR">5</b>°</label><input id="WR" type="range" min="0" max="20" step="0.5" value="5" oninput="upd()"></div>
-<div style="font-size:15px;color:var(--muted)">템플 길이는 각막~귀 앞뒤 거리로 정해요. 귀 간격은 템플 벌림에 써요.</div>
+<div class="fld"><label>관자놀이 폭 (좌우, 귀 앞 2~3cm) mm</label><input id="TW" type="number" step="0.5" min="100" max="175" placeholder="재면 입력"></div>
+<div class="fld"><label>귀 뒤 머리 폭 (좌우, 귀 뒤 2~3cm) mm</label><input id="HB" type="number" step="0.5" min="100" max="185" placeholder="재면 입력"></div>
+<div style="font-size:15px;color:var(--muted)">템플 길이는 각막~귀 앞뒤 거리로 정해요. 귀 간격은 템플 벌림에, 관자놀이 폭·귀 뒤 머리 폭은 템플을 휠 양에 써요.</div>
 </div>
 <div class="card pad sec"><div class="ctitle">3 · 사진 (가상 피팅용, 선택)</div>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small ghost" onclick="startCam()">카메라 켜기</button><button class="btn small ghost" onclick="capture()">촬영</button></div>
@@ -67,6 +69,7 @@
 <script>
 var E=window.BVSizeEngine, CUSTS=[], _cam=null; // _cam: 카메라 측정 결과(v0.3 스키마)
 function gv(id){return parseFloat(document.getElementById(id).value);}
+function numv(id){var v=parseFloat(document.getElementById(id).value);return isFinite(v)?v:null;}
 function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function loadCusts(){
   fetch('/api/customers').then(function(r){return r.json();}).then(function(j){
@@ -110,10 +113,10 @@ function capture(){var v=document.getElementById("cam"),c=document.getElementByI
 function result(){ return E.toCode({faceWidth:gv('FW'), earDepth:gv('ED'), vd:12}); }
 function proceed(){
   var c=curCust(), pd=gv('PD'), r=result(), msg=document.getElementById('savemsg');
-  BVRecord.save({customerId:c?c.id:null, name:c?c.name:(document.getElementById('cname').value||'측정 손님'), faceWidth:gv('FW'), earGap:gv('EG'), earDepth:gv('ED'), noseH:gv('NH'), faceWrap:gv('WR'),
+  BVRecord.save({customerId:c?c.id:null, name:c?c.name:(document.getElementById('cname').value||'측정 손님'), faceWidth:gv('FW'), earGap:gv('EG'), earDepth:gv('ED'), noseH:gv('NH'), faceWrap:gv('WR'), templeW:numv('TW'), headBack:numv('HB'), templeW:numv('TW'), headBack:numv('HB'),
     pd:pd, pdR:Math.round(pd/2*10)/10, pdL:Math.round(pd/2*10)/10, oh:22, size:r.nine, photo:_photo, photoW:_photoW, photoH:_photoH});
   if(!c){ msg.style.color='var(--good)'; msg.textContent='이 기기에만 기록했어요. 검안·테 판정·피팅이 이 값을 불러와요. 손님 기록에 남기려면 손님을 골라 주세요.'; return; }
-  var body={customer_id:c.id, device:'ipad', pd:pd, face_width:gv('FW'), nose_height:gv('NH'), wrap_angle:gv('WR'), ear_depth:gv('ED'), ear_left:gv('EG')/2, ear_right:gv('EG')/2, vd:12,
+  var body={customer_id:c.id, device:'ipad', pd:pd, face_width:gv('FW'), nose_height:gv('NH'), wrap_angle:gv('WR'), ear_depth:gv('ED'), temple_w:numv('TW'), head_back:numv('HB'), ear_left:gv('EG')/2, ear_right:gv('EG')/2, vd:12,
     method:_cam?(_cam.method||'iris_scale'):'manual', confidence:_cam?(_cam.confidence||0):0.9, provisional:_cam?!!_cam.provisional:false, pow:null};
   msg.style.color='var(--muted)'; msg.textContent='저장하고 있어요…';
   fetch('/api/measure/sessions/adhoc/result',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})

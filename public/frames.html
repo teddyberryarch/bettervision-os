@@ -80,6 +80,12 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="fld"><label>렌즈 세로(mm, 선택)</label><input id="bh" type="number" placeholder="예: 40"></div>
       <div class="fld"><label>안면각(°, 매장 실측)</label><input id="fa" type="number" placeholder="예: 6"></div>
       <div class="fld"><label>코받침</label><select id="pad"><option value="">모름</option><option>조절형</option><option>고정형</option></select></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="fld"><label>경첩 간격(mm, 입고 실측)</label><input id="hw" type="number" placeholder="예: 136"></div>
+      <div class="fld"><label>프론트 휨(°)</label><input id="ff" type="number" placeholder="예: 4"></div>
+      <div class="fld"><label>템플 모양</label><select id="tsh"><option value="">모름</option><option>곧음</option><option>휨</option></select></div>
+      <div class="fld"><label>스프링 경첩</label><select id="spr"><option value="false">아니요</option><option value="true">예</option></select></div>
       <div class="fld" style="flex:0"><button class="btn small" onclick="addFrame()">본사 DB에 저장</button></div>
     </div>
     <div class="parsed" id="parsed">각인 입력 시 프론트폭(a×2+DBL) 자동 계산.</div>
@@ -149,10 +155,11 @@ function parseNow(){
 function addFrame(){
   var p=parseNow(); if(!p){document.getElementById('parsed').textContent='각인 형식 확인: 54□18-145 (또는 54-18-145)';return;}
   var body={brand:document.getElementById('brand').value, model:document.getElementById('model').value, eng:document.getElementById('eng').value, material:document.getElementById('mat').value,
-    b:document.getElementById('bh').value, face_angle:document.getElementById('fa').value, pad:document.getElementById('pad').value};
+    b:document.getElementById('bh').value, face_angle:document.getElementById('fa').value, pad:document.getElementById('pad').value,
+    hinge_w:document.getElementById('hw').value, face_form:document.getElementById('ff').value, temple_shape:document.getElementById('tsh').value, spring:document.getElementById('spr').value};
   fetch('/api/framedb',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(j){
     if(!j.ok){ document.getElementById('parsed').textContent=j.error||'저장하지 못함'; return; }
-    ['eng','brand','model','bh','fa'].forEach(function(id){document.getElementById(id).value='';}); document.getElementById('pad').value='';
+    ['eng','brand','model','bh','fa','hw','ff'].forEach(function(id){document.getElementById(id).value='';}); document.getElementById('pad').value='';
     document.getElementById('parsed').textContent='본사 DB에 저장. 전 매장 목록·적합도 비교에 반영.'; dbLoad();
   }).catch(function(){ document.getElementById('parsed').textContent='연결이 안 됨. 다시 시도'; });
 }
