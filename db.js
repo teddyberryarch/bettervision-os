@@ -2,7 +2,7 @@
 // 테이블: bookings(예약), inventory(지점×SKU 재고), sales(결제 라인)
 let pool=null, ready=false;
 const mem={ bookings:[], inventory:[], sales:[], orders:[], customers:[], pickups:[], users:[], policy:{},
-  aftercare:[], ascases:[], msessions:[], measurements:[], accesslog:[], overrides:[], quotes:[] };
+  aftercare:[], ascases:[], msessions:[], measurements:[], accesslog:[], overrides:[], quotes:[], notices:[], outbox:[] };
 try{
   if(process.env.DATABASE_URL){
     const { Pool } = require('pg');
@@ -217,6 +217,10 @@ async function init(){
     pow_json TEXT, confidence REAL, provisional BOOLEAN, method TEXT, operator TEXT, source TEXT)`);
   await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS ear_depth REAL');   // [09.24] 각막~귀 윗부분 앞뒤 거리
   await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS size_code TEXT');   // 이 측정으로 정한 9사이즈
+  await pool.query(`CREATE TABLE IF NOT EXISTS notices(
+    id SERIAL PRIMARY KEY, kind TEXT, title TEXT, body TEXT, store TEXT, created_by TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS outbox(
+    id SERIAL PRIMARY KEY, channel TEXT, kind TEXT, store TEXT, target TEXT, count INT, body TEXT, status TEXT DEFAULT '연동 전', created_by TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   await pool.query(`CREATE TABLE IF NOT EXISTS quotes(
     id SERIAL PRIMARY KEY, no TEXT, customer_id INT, store TEXT, items TEXT, total INT, list_total INT,
     status TEXT DEFAULT '발행', created_by TEXT, created_at TIMESTAMPTZ DEFAULT now(), valid_until TEXT, paid_at TIMESTAMPTZ)`);
@@ -408,6 +412,47 @@ async function quotesForCustomer(customerId){
 async function catalogWithPolicy(){
   // 손님 앱 가격 계산용: 본사 권장가(정책)를 price로 덮어 보낸다
   var m=await _policyMap(); return CATALOG.map(function(it){ var pp=m[it.sku]; return Object.assign({},it,{price:pp?pp.list_price:it.price}); });
+}
+/* [09.24] 본사 → 매장 알림 (프로모션 안내, 진열 가이드, 자동 발주 기준, 확인 요청). 참여·적용은 매장이 정한다 */
+async function addNotice(n, who){
+  var row={kind:String(n.kind||'안내').slice(0,20), title:String(n.title||'').slice(0,80), body:String(n.body||'').slice(0,500), store:n.store||null, created_by:who?who.username:null};
+  if(!row.title) return {ok:false,error:'제목이 없어요'};
+  if(ready){ const r=await pool.query('INSERT INTO notices(kind,title,body,store,created_by) VALUES($1,$2,$3,$4,$5) RETURNING id,created_at',[row.kind,row.title,row.body,row.store,row.created_by]); return {ok:true,id:r.rows[0].id}; }
+  row.id=mem.notices.length+1; row.created_at=new Date().toISOString(); mem.notices.push(row); return {ok:true,id:row.id};
+}
+async function listNotices(store){
+  if(ready) return (await pool.query('SELECT id,kind,title,body,store,created_at FROM notices WHERE ($1::text IS NULL OR store IS NULL OR store=$1) ORDER BY id DESC LIMIT 20',[store||null])).rows;
+  return mem.notices.filter(function(n){return !store||!n.store||n.store===store;}).slice().reverse().slice(0,20);
+}
+/* [09.24] 외부 발송 대기함: 카카오·인스타·채용·교육·구독처럼 외부 계정이 있어야 나가는 것. 연결 전에는 여기 쌓아 둔다 */
+const OUTBOX_CH=['카카오 알림톡','문자','인스타그램','채용','교육','구독','전단'];
+async function addOutbox(o, who){
+  var ch=OUTBOX_CH.indexOf(o.channel)>=0?o.channel:null; if(!ch) return {ok:false,error:'채널이 없어요'};
+  var row={channel:ch, kind:String(o.kind||'').slice(0,40), store:(who&&who.store)||o.store||null, target:String(o.target||'').slice(0,120), count:Math.max(0,parseInt(o.count)||0), body:String(o.body||'').slice(0,1000), created_by:who?who.username:null};
+  if(ready){ const r=await pool.query('INSERT INTO outbox(channel,kind,store,target,count,body,created_by) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id',[row.channel,row.kind,row.store,row.target,row.count,row.body,row.created_by]); return {ok:true,id:r.rows[0].id,status:'연동 전'}; }
+  row.id=mem.outbox.length+1; row.status='연동 전'; row.created_at=new Date().toISOString(); mem.outbox.push(row); return {ok:true,id:row.id,status:'연동 전'};
+}
+async function listOutbox(store){
+  if(ready) return (await pool.query('SELECT id,channel,kind,store,target,count,status,created_at FROM outbox WHERE ($1::text IS NULL OR store=$1) ORDER BY id DESC LIMIT 30',[store||null])).rows;
+  return mem.outbox.filter(function(o){return !store||o.store===store;}).slice().reverse().slice(0,30);
+}
+/* [09.24] 손님 앱: A/S 접수, 의료비 영수증 */
+async function openASByCustomer(customerId, symptom){
+  var c=await getCustomer(customerId); if(!c) return {ok:false,error:'손님 정보가 없어요'};
+  return openAS({customer_id:c.id, store:c.store, symptom:'[손님 앱] '+String(symptom||'').slice(0,280)});
+}
+async function medicalReceipts(customerId, year){
+  var c=await getCustomer(customerId); if(!c) return {ok:false,error:'손님 정보가 없어요'};
+  var y=String(year||new Date().getFullYear());
+  var rows = ready ? (await pool.query("SELECT date,store,name,qty,amount,method FROM sales WHERE customer_id=$1 AND medical=true AND qty>0 AND date LIKE $2 ORDER BY date",[c.id,y+'%'])).rows
+    : mem.sales.filter(function(x){return +x.customer_id===+c.id && x.medical && x.qty>0 && String(x.date).indexOf(y)===0;});
+  return {ok:true, year:y, name:c.name, items:rows.map(function(r){return {date:r.date,store:r.store,name:r.name,qty:r.qty,amount:r.amount,method:r.method};}), total:rows.reduce(function(a,r){return a+(r.amount||0);},0)};
+}
+/* [09.24] 본사 생산 발주서: 매장에서 팔린 PB 테(본사 조제 대기)를 모델·사이즈별로 */
+async function productionPlan(){
+  var rows = ready ? (await pool.query("SELECT store,sku,name,qty FROM orders WHERE status='본사 조제'")).rows : mem.orders.filter(function(o){return o.status==='본사 조제';});
+  var by={}, stores={}; rows.forEach(function(r){ by[r.sku]=by[r.sku]||{sku:r.sku,name:r.name,qty:0}; by[r.sku].qty+=r.qty; stores[r.store]=(stores[r.store]||0)+r.qty; });
+  return {ok:true, lines:Object.keys(by).sort().map(function(k){return by[k];}), stores:stores, total:rows.reduce(function(a,r){return a+r.qty;},0)};
 }
 async function quoteOverSummary(store){
   // 본사용: 권장 할인 범위를 넘긴 견적 품목 (막지 않고 기록한 것, D-12)
@@ -1183,7 +1228,7 @@ async function logMeasureAccess(username, customerId, action){
   mem.accesslog.push({username:username,customer_id:customerId,action:action,at:new Date().toISOString()});
 }
 
-module.exports={ init, measurementsForCustomer, quoteOverSummary, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+module.exports={ init, addNotice, listNotices, addOutbox, listOutbox, OUTBOX_CH, openASByCustomer, medicalReceipts, productionPlan, measurementsForCustomer, quoteOverSummary, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,
