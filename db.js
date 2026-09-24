@@ -254,7 +254,7 @@ async function init(){
     for(const x of d.care.filter(function(x){return x.fit!=null&&x.status==='완료';})){ await pool.query('INSERT INTO aftercare(customer_id,store,sale_date,due_date,status,comfort,issues,note,source,done_at,fit,judge) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',[x.customer_id,x.store,x.sale_date,x.due_date,x.status,x.comfort,x.issues,x.note,x.source,x.done_at,x.fit,x.judge]); } }
   await pool.query(`CREATE TABLE IF NOT EXISTS workorders(id SERIAL PRIMARY KEY, store TEXT, customer_id INT, sku TEXT, frame TEXT, lens TEXT, rx TEXT, calc TEXT, status TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   await pool.query(`CREATE TABLE IF NOT EXISTS frame_db(id SERIAL PRIMARY KEY, brand TEXT, model TEXT, eng TEXT, a INT, dbl INT, temple INT, b REAL, face_angle REAL, pad TEXT, material TEXT, store TEXT, created_by TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
-  for(const c of ['hinge_w REAL','face_form REAL','temple_shape TEXT','spring BOOLEAN']) await pool.query('ALTER TABLE frame_db ADD COLUMN IF NOT EXISTS '+c);
+  for(const c of ['hinge_w REAL','face_form REAL','temple_shape TEXT','spring BOOLEAN','temple_curve REAL']) await pool.query('ALTER TABLE frame_db ADD COLUMN IF NOT EXISTS '+c);
   await pool.query(`CREATE TABLE IF NOT EXISTS vision_exams(id SERIAL PRIMARY KEY, customer_id INT, member TEXT, grp TEXT, date TEXT, rx TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   const vec=await pool.query('SELECT COUNT(*)::int AS c FROM vision_exams');
   if(vec.rows[0].c===0){ for(const x of _demoExams()) await pool.query('INSERT INTO vision_exams(customer_id,member,grp,date,rx) VALUES($1,$2,$3,$4,$5)',[x.customer_id,x.member,x.grp,x.date,x.rx]); }
@@ -1314,8 +1314,8 @@ async function addFrameDb(f, who){
   var row={brand:String(f.brand||'(미입력)').slice(0,40), model:String(f.model||'-').slice(0,60), eng:m[1]+'□'+m[2]+'-'+m[3], a:+m[1], dbl:+m[2], temple:+m[3],
     b:(+f.b>20&&+f.b<70)?+f.b:null, face_angle:(+f.face_angle>=0&&+f.face_angle<=20&&f.face_angle!=='')?+f.face_angle:null, pad:['고정형','조절형'].indexOf(f.pad)>=0?f.pad:null,
     material:FRAME_MATS.indexOf(f.material)>=0?f.material:'acet', store:(who&&who.store)||f.store||null, created_by:who?who.username:null,
-    hinge_w:(+f.hinge_w>90&&+f.hinge_w<170)?+f.hinge_w:null, face_form:(f.face_form!==''&&+f.face_form>=-5&&+f.face_form<=25)?+f.face_form:null, temple_shape:['곧음','휨'].indexOf(f.temple_shape)>=0?f.temple_shape:null, spring:f.spring===true||f.spring==='true'};
-  if(ready){ const r=await pool.query('INSERT INTO frame_db(brand,model,eng,a,dbl,temple,b,face_angle,pad,material,store,created_by,hinge_w,face_form,temple_shape,spring) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING id,created_at',[row.brand,row.model,row.eng,row.a,row.dbl,row.temple,row.b,row.face_angle,row.pad,row.material,row.store,row.created_by,row.hinge_w,row.face_form,row.temple_shape,row.spring]); row.id=r.rows[0].id; row.created_at=r.rows[0].created_at; }
+    hinge_w:(+f.hinge_w>90&&+f.hinge_w<170)?+f.hinge_w:null, face_form:(f.face_form!==''&&+f.face_form>=-5&&+f.face_form<=25)?+f.face_form:null, temple_shape:['곧음','휨'].indexOf(f.temple_shape)>=0?f.temple_shape:null, spring:f.spring===true||f.spring==='true', temple_curve:(f.temple_curve!==''&&f.temple_curve!=null&&+f.temple_curve>=0&&+f.temple_curve<=20)?+f.temple_curve:null};
+  if(ready){ const r=await pool.query('INSERT INTO frame_db(brand,model,eng,a,dbl,temple,b,face_angle,pad,material,store,created_by,hinge_w,face_form,temple_shape,spring,temple_curve) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING id,created_at',[row.brand,row.model,row.eng,row.a,row.dbl,row.temple,row.b,row.face_angle,row.pad,row.material,row.store,row.created_by,row.hinge_w,row.face_form,row.temple_shape,row.spring,row.temple_curve]); row.id=r.rows[0].id; row.created_at=r.rows[0].created_at; }
   else { mem.framedb=mem.framedb||[]; row.id=mem.framedb.length+1; row.created_at=new Date().toISOString(); mem.framedb.push(row); }
   return {ok:true, frame:row};
 }
@@ -1341,7 +1341,7 @@ async function fitPrefill(customerId, frameDbId){
   var o=await _custRx(c.id), rx=o.rx||null;
   var wos=(await _all('workorders')).filter(function(w){return +w.customer_id===+c.id;}).sort(function(a,b){return b.id-a.id;}), wo=wos[0]||null, spec=null, fname=null, fsrc=null;
   if(frameDbId){ var fd=(await _all('frame_db')).filter(function(x){return +x.id===+frameDbId;})[0];
-    if(fd){ spec={a:fd.a,B:fd.b||null,dbl:fd.dbl,temple:fd.temple,pad:fd.pad==='고정형'?'고정형':'조절형',mat:({titan:'티타늄',metal:'금속',tr:'TR',acet:'아세테이트'})[fd.material]||'아세테이트',hw:fd.hinge_w||null,ff:fd.face_form!=null?fd.face_form:(fd.face_angle!=null?fd.face_angle:null),tshape:fd.temple_shape||null,spring:!!fd.spring,est:[]}; fname=fd.brand+' '+fd.model; fsrc='타사 테 DB'; } }
+    if(fd){ spec={a:fd.a,B:fd.b||null,dbl:fd.dbl,temple:fd.temple,pad:fd.pad==='고정형'?'고정형':'조절형',mat:({titan:'티타늄',metal:'금속',tr:'TR',acet:'아세테이트'})[fd.material]||'아세테이트',hw:fd.hinge_w||null,ff:fd.face_form!=null?fd.face_form:(fd.face_angle!=null?fd.face_angle:null),tshape:fd.temple_shape||null,spring:!!fd.spring,tcurve:fd.temple_curve!=null?fd.temple_curve:null,est:[]}; fname=fd.brand+' '+fd.model; fsrc='타사 테 DB'; } }
   else if(wo){ try{ var calc=typeof wo.calc==='string'?JSON.parse(wo.calc):wo.calc; spec=calc&&calc.spec||null; }catch(e){} spec=Object.assign({}, spec||{}, FRAME_SPECS[wo.sku]||{}); fname=wo.frame; fsrc='가공 지시서 No.'+String(wo.id).padStart(4,'0'); }
   var MATK={'티타늄':'titan','금속':'metal','메탈':'metal','TR':'tr','울템':'tr','아세테이트':'acet'};
   var out={ok:true, customer:{id:c.id,name:c.name,store:c.store,size:c.size}, filled:[], missing:[]};
@@ -1353,7 +1353,7 @@ async function fitPrefill(customerId, frameDbId){
   f.earDepth=m&&m.ear_depth||null; f.noseH=m&&m.nose_height||null; f.faceWrap=(m&&m.wrap_angle!=null)?m.wrap_angle:null;
   if(rx){ f.sphMax=Math.max(Math.abs(rx.R.S||0),Math.abs(rx.L.S||0)); f.rxR=rx.R; f.rxL=rx.L; f.rxAdd=rx.ADD||''; }
   if(spec&&spec.a){ f.frontA=2*spec.a+spec.dbl; f.dbl=spec.dbl; f.templeLen=spec.temple; f.lensH=spec.B||null; f.material=MATK[spec.mat]||'acet'; f.bridge=spec.pad==='고정형'?'fix':'adj';
-    f.hingeW=spec.hw||null; f.frameFF=spec.ff!=null?spec.ff:null; f.templeShape=spec.tshape||null; f.spring=!!spec.spring; f.frameEst=(spec.est||[]).join(',');
+    f.hingeW=spec.hw||null; f.frameFF=spec.ff!=null?spec.ff:null; f.templeShape=spec.tshape||null; f.spring=!!spec.spring; f.templeCurve=spec.tcurve!=null?spec.tcurve:null; f.frameEst=(spec.est||[]).join(',');
     out.frame={sku:wo&&!frameDbId?wo.sku:null,name:fname,source:fsrc,workorder:wo&&!frameDbId?wo.id:null}; }
   f.headBack=m&&m.head_back||null; f.templeW=m&&m.temple_w||null;
   Object.keys(f).forEach(function(k){ if(f[k]!=null&&f[k]!=='') out.filled.push(k); });
