@@ -37,7 +37,7 @@ th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}th{backgroun
 
 <div class="card pad">
   <div class="sld"><label>총 생산 수량 (1배치) <b id="vB">1,000</b>개</label><input id="B" type="range" min="200" max="5000" step="100" value="1000" oninput="render()"></div>
-  <div class="eyebrow" style="margin:6px 0">9사이즈 분포별 생산 수량 (앞판 × 다리)</div>
+  <div class="eyebrow" style="margin:6px 0">9사이즈 분포별 생산 수량 (프론트 × 템플)</div>
   <div class="grid9" id="grid"></div>
   <div class="note">칸마다 분포(%)와 생산 수량을 보여 줘요. 진한 칸일수록 많이 만들어요. <b id="modeNote"></b></div>
 </div>
@@ -67,9 +67,9 @@ function render(){
   document.getElementById('vB').textContent=B.toLocaleString();
   var d=E.cellDist(); var mx=0,mi=1,mj=1;
   for(var i=0;i<3;i++)for(var j=0;j<3;j++){ if(d[i][j]>mx){mx=d[i][j];mi=i;mj=j;} }
-  var g='<div class="cellh"></div>'+L.map(function(x){return '<div class="cellh">다리 '+x+'</div>';}).join('');
+  var g='<div class="cellh"></div>'+L.map(function(x){return '<div class="cellh">템플 '+x+'</div>';}).join('');
   for(var i2=0;i2<3;i2++){
-    g+='<div class="cellr">앞판 '+L[i2]+'</div>';
+    g+='<div class="cellr">프론트 '+L[i2]+'</div>';
     for(var j2=0;j2<3;j2++){
       var p=d[i2][j2], qty=Math.round(p*B), isMode=(i2===mi&&j2===mj);
       g+='<div class="cell" style="background:'+shade(p,mx)+';border-color:'+(isMode?'var(--good)':'var(--line)')+'">'+

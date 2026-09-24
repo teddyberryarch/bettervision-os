@@ -152,7 +152,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="pt">조제 · 발주<span class="tm">~3분 + 제작 리드</span></div>
     <ul>
       <li>처방을 넣으면 조제값이 자동으로 나와요. 광학중심, 정점거리 보정(고도수), 인셋, 굴절률, 최소블랭크 호환까지 확인해요.</li>
-      <li>프레임이 맞지 않으면 경고가 떠요. 본사로 발주하면 조립(앞판+다리 모듈)해요. A4 피팅 시트 초안도 이때 만들어져요.</li>
+      <li>프레임이 맞지 않으면 경고가 떠요. 본사로 발주하면 조립(프론트+템플 모듈)해요. A4 피팅 시트 초안도 이때 만들어져요.</li>
     </ul>
     <div class="tools"><a class="tool" href="fit.html">피팅·A4 산출</a></div>
     <div class="data">데이터: 조제 파라미터 · 발주 · 박싱 좌표(9사이즈·②)</div>
@@ -164,8 +164,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="no">6</div>
     <div class="pt">피팅 · 인도<span class="tm">수령일 · ~8분</span></div>
     <ul>
-      <li>피팅 시스템이 측정값으로 얼마나 휠지 계산해요(다리벌림각, 판토, 정점거리, 코받침).</li>
-      <li>A4 피팅 시트로 1:1 검증해요(목표 점에 다리가 닿게 휨, 판토 웨지, 50mm 스케일바). 그다음 착용감을 확인해요.</li>
+      <li>피팅 시스템이 측정값으로 얼마나 휠지 계산해요(템플벌림각, 판토, 정점거리, 코받침).</li>
+      <li>A4 피팅 시트로 1:1 검증해요(목표 점에 템플이 닿게 휨, 판토 웨지, 50mm 스케일바). 그다음 착용감을 확인해요.</li>
       <li>휜 값과 조정 내역은 본사 DB에 남아서 재구매나 다른 매장에서도 똑같이 맞출 수 있어요. A4는 손님에게 "측정 증서"로 드려요.</li>
     </ul>
     <div class="tools"><a class="tool" href="fit.html">피팅 시스템 · A4</a></div>

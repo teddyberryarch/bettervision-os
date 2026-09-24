@@ -69,7 +69,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 
   <div class="card pad sec">
     <div class="ctitle">1 · 각인을 읽어 목록에 추가</div>
-    <div class="sdesc">각인 "렌즈 가로 □ 브리지 − 다리"(예: 54□18-145)만 넣으면 앞판폭과 소재를 자동으로 계산해요. 진열한 테가 곧 체험용 테이고, 첫 데이터가 돼요.</div>
+    <div class="sdesc">각인 "렌즈 가로 □ 브리지 − 템플"(예: 54□18-145)만 넣으면 프론트폭과 소재를 자동으로 계산해요. 진열한 테가 곧 체험용 테이고, 첫 데이터가 돼요.</div>
     <div class="row">
       <div class="fld"><label>각인</label><input id="eng" placeholder="54□18-145" oninput="parseNow()"></div>
       <div class="fld"><label>브랜드</label><input id="brand" placeholder="브랜드"></div>
@@ -77,7 +77,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="fld"><label>소재</label><select id="mat"></select></div>
       <div class="fld" style="flex:0"><button class="btn small" onclick="addFrame()">목록에 추가</button></div>
     </div>
-    <div class="parsed" id="parsed">각인을 입력하면 앞판폭(a×2+DBL)을 자동으로 계산해요.</div>
+    <div class="parsed" id="parsed">각인을 입력하면 프론트폭(a×2+DBL)을 자동으로 계산해요.</div>
     <div class="note">각인 자동 판독(촬영하면 AI가 읽기)은 다음 단계예요. 지금은 직접 입력해요. 각인에 없는 안면각과 코받침은 매장에서 2차로 실측해요.</div>
   </div>
 
@@ -134,7 +134,7 @@ document.getElementById('mat').innerHTML=matOpts();
 function parseNow(){
   var p=DB.parseEngraving(document.getElementById('eng').value);
   document.getElementById('parsed').textContent = p
-    ? ('읽은 값: 렌즈 가로 '+p.a+' · 브리지 '+p.dbl+' · 다리 '+p.temple+' · 앞판폭 '+p.frontSpan+'mm')
+    ? ('읽은 값: 렌즈 가로 '+p.a+' · 브리지 '+p.dbl+' · 템플 '+p.temple+' · 프론트폭 '+p.frontSpan+'mm')
     : '각인 형식: 54□18-145 (또는 54-18-145)';
   return p;
 }
@@ -160,7 +160,7 @@ function rankNow(){
   document.getElementById('rank').innerHTML=html;
 }
 function renderDB(){
-  var h='<tr><th>브랜드</th><th>모델</th><th>각인</th><th>앞판폭</th><th>소재</th></tr>';
+  var h='<tr><th>브랜드</th><th>모델</th><th>각인</th><th>프론트폭</th><th>소재</th></tr>';
   db.forEach(function(f){var p=DB.parseEngraving(f.eng)||{frontSpan:'?'};
     h+='<tr><td>'+f.brand+(f.pb?' <b style="color:var(--good)">PB</b>':'')+'</td><td>'+f.model+'</td><td>'+f.eng+'</td><td>'+p.frontSpan+'mm</td><td>'+DB.MAT[f.material].n+'</td></tr>';});
   document.getElementById('dbtbl').innerHTML=h;

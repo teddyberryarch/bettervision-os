@@ -169,7 +169,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <tr><td>렌즈 굴절률</td><td><span class="dft">〔확인〕</span> ~±2는 1.60 / ±2~4는 1.67 / ±4↑는 1.74</td><td>미용 고려 상향</td></tr>
       <tr><td>최소블랭크·유효경</td><td>프레임 a·DBL·PD로 가공 가능성</td><td>불가하면 프레임 교체 경고</td></tr>
       <tr><td>두께·무게</td><td>도수·굴절률·직경 기반</td><td>과하면 형태·굴절률 제안</td></tr>
-      <tr><td>박싱 좌표 연결</td><td>a □ DBL − 다리를 9사이즈·②에 연결</td><td>-</td></tr>
+      <tr><td>박싱 좌표 연결</td><td>a □ DBL − 템플을 9사이즈·②에 연결</td><td>-</td></tr>
     </table>
     <p class="note">박싱 좌표가 9사이즈(①), 타사 DB(②)와 같은 2층 코드로 연결되는 지점이에요. 조제값이 그대로 데이터 자산이 돼요.</p>
   </div>
@@ -179,15 +179,15 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="io"><b>입력</b> 측정 5값 + 안면각 + 소재 ｜ <b>앱</b> 표준 · 예비 · 정밀 3단계, 휜 값과 조정 기록은 본사 DB에 저장</div>
     <table class="bvt">
       <tr><th>요소</th><th>기준·표준치</th><th>이상치 처리</th></tr>
-      <tr><td>다리벌림각</td><td><span class="dft">〔확인〕</span> 목표 다리간격 = 귀윗간격 −15(유연금속)/−10(반강성)mm</td><td>계수 현장 검증</td></tr>
+      <tr><td>템플벌림각</td><td><span class="dft">〔확인〕</span> 목표 템플간격 = 귀윗간격 −15(유연금속)/−10(반강성)mm</td><td>계수 현장 검증</td></tr>
       <tr><td>판토스코픽 틸트</td><td><span class="dft">〔확인〕</span> 8~12°</td><td><span class="dft">〔확인〕</span> 8~12° 채택 (중앙 10°)</td></tr>
       <tr><td>정점간거리</td><td><span class="dft">〔확인〕</span> 12mm, 고도수일수록 짧게</td><td>편차가 있으면 코받침·틸트 조정</td></tr>
       <tr><td>안면각/랩각</td><td><span class="dft">〔확인〕</span> 안면각 5°는 BC4 / 10°는 BC6 / 15°+는 랩 전용</td><td>고도수 왜곡은 보정</td></tr>
       <tr><td>코받침</td><td>코 형태 기반, 수직 안착+정점거리</td><td>일체형 브리지는 조정 한계 있음</td></tr>
-      <tr><td>다리 꺾임·귀뒤</td><td>귀 위치/높이, 수평 유지</td><td>미끄러지면 재조정</td></tr>
+      <tr><td>템플 꺾임·귀뒤</td><td>귀 위치/높이, 수평 유지</td><td>미끄러지면 재조정</td></tr>
       <tr><td>소재별 최대벌림각</td><td><span class="dft">〔확인〕</span> 티탄±8 / 금속±6 / TR±4 / 경질아세테이트±1 mm</td><td>넘으면 "이 테는 못 맞춰요" 안내</td></tr>
     </table>
-    <p><b>A4 피팅시트는 인쇄해서 써요.</b> 각도를 종이에 직접 재지 않고 <b>선형값(mm)으로 환산</b>해서 재요. 평면도에 목표 다리간격 두 점을 찍고, 거기에 닿도록 휘어요. 측면도에는 판토 각도 웨지가 있어요. <b>50mm 스케일바(가로·세로)는 꼭 넣고</b>, "실제 크기 100%"로 인쇄해요. 휨 지그, 검증 게이지, 손님 설명까지 세 가지 역할을 해요. (구현 파일: bv-fitsheet-demo.pdf)</p>
+    <p><b>A4 피팅시트는 인쇄해서 써요.</b> 각도를 종이에 직접 재지 않고 <b>선형값(mm)으로 환산</b>해서 재요. 평면도에 목표 템플간격 두 점을 찍고, 거기에 닿도록 휘어요. 측면도에는 판토 각도 웨지가 있어요. <b>50mm 스케일바(가로·세로)는 꼭 넣고</b>, "실제 크기 100%"로 인쇄해요. 휨 지그, 검증 게이지, 손님 설명까지 세 가지 역할을 해요. (구현 파일: bv-fitsheet-demo.pdf)</p>
   </div>
 
   <div class="card pad b-sec" id="sd">
@@ -211,7 +211,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <li><b>양안시 정상범위</b>: 사위(원/근) Morgan 채택 여부, NPC·AMP·AC/A 기준, 억제·복시 의뢰 컷.</li>
       <li><b>ADD 연령 기준</b> 확정(작업거리 반영).</li>
       <li><b>조제 계수</b>: 정점거리 보정 적용 컷, 인셋 산출식, 굴절률 선택 기준.</li>
-      <li><b>피팅 계수</b>: 다리벌림각 −15/−10 검증, 판토 8~12 vs 8~15, 안면각별 베이스커브 매칭.</li>
+      <li><b>피팅 계수</b>: 템플벌림각 −15/−10 검증, 판토 8~12 vs 8~15, 안면각별 베이스커브 매칭.</li>
       <li><b>소재별 최대벌림각 표</b>(②와 공유) 수치.</li>
       <li><b>안전·의뢰</b>: 6세 이하 법규 확인, 질환 의심 소견 목록 확정.</li>
     </ul>

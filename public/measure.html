@@ -65,7 +65,7 @@ function upd(){
  ['PD','FW','NH','EG','WR'].forEach(function(k){document.getElementById('v'+k).textContent=gv(k);});
  var fw=gv('FW'),eg=gv('EG');var r=E.toCode({faceWidth:fw,earGap:eg});
  document.getElementById('code').textContent=r.code||'-';
- document.getElementById('sm').innerHTML='적합도 <b>'+r.fit+'%</b> · 앞판 '+r.front+' / 다리 '+r.temple+'<br>PD '+gv('PD')+' · 코 '+gv('NH')+' · 안면각 '+gv('WR')+'°';
+ document.getElementById('sm').innerHTML='적합도 <b>'+r.fit+'%</b> · 프론트 '+r.front+' / 템플 '+r.temple+'<br>PD '+gv('PD')+' · 코 '+gv('NH')+' · 안면각 '+gv('WR')+'°';
  var cx=100,cy=72,W=fw*0.62,H=W*1.28,pd=gv('PD')*0.62;
  document.getElementById('scan').innerHTML='<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">'+
   '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(W/2)+'" ry="'+(H/2)+'" fill="#f3efe9" stroke="#cbc7bb" stroke-width="0.8"/>'+

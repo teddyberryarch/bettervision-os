@@ -148,7 +148,7 @@
             <div class="appcard">
               <h4>내 안경 정보</h4>
               <div class="label" style="margin:6px 0 10px">측정한 사이즈와 시력만 보여드려요. 상세 처방·구매 이력은 매장에서 확인하실 수 있어요.</div>
-              <div class="kv"><span class="label">내 사이즈 (앞판 × 다리)</span><span id="mySize">F2 × T2</span></div>
+              <div class="kv"><span class="label">내 사이즈 (프론트 × 템플)</span><span id="mySize">F2 × T2</span></div>
               <div class="kv"><span class="label">안면 폭</span><span id="myFace">142 mm</span></div>
               <div class="kv"><span class="label">동공 간 거리(PD)</span><span id="myPD">63.5 mm</span></div>
               <div class="kv"><span class="label">시력 (도수)</span><span id="myRx">OD -3.25 / OS -3.50</span></div>
@@ -221,14 +221,14 @@
               <div class="label" style="margin-bottom:8px">측정값 조절</div>
               <div class="mfield"><div class="mlabrow"><span>안면 폭</span><b id="vW">142 mm</b></div>
                 <input type="range" id="inW" min="120" max="155" value="142" oninput="recompute()"></div>
-              <div class="mfield"><div class="mlabrow"><span>다리 길이</span><b id="vL">143 mm</b></div>
+              <div class="mfield"><div class="mlabrow"><span>템플 길이</span><b id="vL">143 mm</b></div>
                 <input type="range" id="inL" min="130" max="155" value="143" oninput="recompute()"></div>
               <div class="mfield"><div class="mlabrow"><span>코받침 높이</span><b id="vN">낮음</b></div>
                 <input type="range" id="inN" min="0" max="2" value="0" oninput="recompute()"></div>
 
               <div class="divider"></div>
               <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-                <div><div class="label">AI 사이즈 (앞판 × 다리)</div>
+                <div><div class="label">AI 사이즈 (프론트 × 템플)</div>
                   <div class="sizebadge" id="sizeBadge">F2 × T2</div>
                   <div class="label" id="sizeSub" style="font-size:14px">안면 142 · 관자 143 · 낮은 코</div></div>
                 <button class="btn small" onclick="document.getElementById('recCard').scrollIntoView({behavior:'smooth'})">맞는 프레임 보기</button>
@@ -392,7 +392,7 @@
             <div class="appcard">
               <h4>눈 건강 모니터링 <span class="phaseflag">Phase 3 · 예정</span></h4>
               <div class="audiorow"><div class="ai">◉</div><div>시선추적으로 <b>도수 변화 조기 감지</b> → 검안 시기 자동 알림</div></div>
-              <div class="audiorow"><div class="ai">⊙</div><div>코받침·다리 센서로 착용 습관·눈 피로 추정</div></div>
+              <div class="audiorow"><div class="ai">⊙</div><div>코받침·템플 센서로 착용 습관·눈 피로 추정</div></div>
               <div class="label" style="margin-top:8px;font-size:14px">감시가 아니라 "돕는 도구" — 기록하되 투명하게, 돕되 의존시키지 않게.</div>
             </div>
             -->
@@ -548,12 +548,12 @@ var SIZE_CFG={ front:[['F1',134],['F2',144],['F3',9999]], temple:[['T1',140],['T
 var NOSE=['낮음','표준','높음'];
 
 /* ===== 적합도 튜닝값 (한 곳에서 조절) =====
-   endpiece: 렌즈폭*2+브릿지 에 더해 앞판 전체 폭을 만드는 보정(엔드피스+림)
-   idealOffset: 앞판 폭 - 안면폭 목표치 (0=딱맞게, +2=살짝 여유)
+   endpiece: 렌즈폭*2+브릿지 에 더해 프론트 전체 폭을 만드는 보정(엔드피스+림)
+   idealOffset: 프론트 폭 - 안면폭 목표치 (0=딱맞게, +2=살짝 여유)
    frontW/templeW: mm당 감점, wFront/wTemple/wNose: 가중치, tol: 적정 허용오차(mm) */
 var FIT={ endpiece:18, idealOffset:0, frontW:7, templeW:4, wFront:0.70, wTemple:0.25, wNose:0.05, tol:2 };
 
-/* ===== 본사 프레임 카탈로그 (실제 치수: 렌즈폭 □ 브릿지 - 다리 mm) ===== */
+/* ===== 본사 프레임 카탈로그 (실제 치수: 렌즈폭 □ 브릿지 - 템플 mm) ===== */
 var CATALOG=[
   {n:'로마 클래식',   line:'PB',   lens:52, bridge:18, temple:145, nose:'낮음', price:'189,000'},
   {n:'로마 슬림',     line:'PB',   lens:48, bridge:19, temple:140, nose:'낮음', price:'189,000'},
@@ -595,11 +595,11 @@ function scoreFrame(fr,faceW,templeLen,nose){
 function gradeOf(p){ return p>=90?['딱 맞음','best'] : p>=75?['잘 맞음','good'] : p>=55?['가능','ok'] : ['참고','low']; }
 function reasonOf(diffF, fr, templeLen){
   var r;
-  if(Math.abs(diffF)<=FIT.tol) r='앞판 폭 적정';
-  else if(diffF>FIT.tol) r='앞판 폭 약간 큼(+'+Math.round(diffF)+'mm)';
-  else r='앞판 폭 약간 작음('+Math.round(diffF)+'mm)';
+  if(Math.abs(diffF)<=FIT.tol) r='프론트 폭 적정';
+  else if(diffF>FIT.tol) r='프론트 폭 약간 큼(+'+Math.round(diffF)+'mm)';
+  else r='프론트 폭 약간 작음('+Math.round(diffF)+'mm)';
   var dt=fr.temple-templeLen;
-  if(Math.abs(dt)>6) r+=(dt>0?' · 다리 김':' · 다리 짧음');
+  if(Math.abs(dt)>6) r+=(dt>0?' · 템플 김':' · 템플 짧음');
   return r;
 }
 // [09.24] 매장 재고 테를 본사 판정 규칙으로 판정해요. PB와 기존 브랜드를 같은 기준으로 보여주고, 쓸 수 없는 테는 빼요
@@ -613,7 +613,7 @@ function renderRecsServer(faceW,templeLen,nose){
       document.getElementById('recCount').textContent='· '+j.items.length+'개'+(j.hidden?' (안 맞는 '+j.hidden+'개는 뺐어요)':'');
       document.getElementById('recList').innerHTML=j.items.map(function(x){
         var sp=x.spec, g=x.lv===0?['바로 맞아요','best']:['매장에서 조정','good'];
-        var why=x.why.filter(function(w){return w.indexOf('블랭크')<0;}).map(function(w){return w.replace('. 다리 벌림으로 맞춰요','').replace('. 다리 끝 굽힘으로 맞춰요','').replace(/PB라 다리를 T\d 길이로 바꿔 조립해요/,'다리를 내 길이로 바꿔 끼워요');}).join(' · ');
+        var why=x.why.filter(function(w){return w.indexOf('블랭크')<0;}).map(function(w){return w.replace('. 템플 벌림으로 맞춰요','').replace('. 템플 끝 굽힘으로 맞춰요','').replace(/PB라 템플을 T\d 길이로 바꿔 조립해요/,'템플을 내 길이로 바꿔 끼워요');}).join(' · ');
         return '<div class="recrow"><div>'+
           '<div class="rn">'+x.name+' <span class="rtag">'+(x.pb?'PB':'기존 브랜드')+'</span></div>'+
           '<div class="rd">'+sp.a+'□'+sp.dbl+'-'+sp.temple+' · '+(why||'치수가 잘 맞아요')+' · ₩'+x.price.toLocaleString('ko-KR')+'</div>'+
@@ -631,7 +631,7 @@ function renderRecsLocal(faceW,templeLen,nose){
     var fr=x.fr, p=x.sc.total, g=gradeOf(p), spec=fr.lens+'□'+fr.bridge+'-'+fr.temple;
     return '<div class="recrow"><div>'+
       '<div class="rn">'+fr.n+' <span class="rtag">'+fr.line+'</span></div>'+
-      '<div class="rd">'+spec+' · 앞판 폭 '+x.sc.fw+'mm · '+reasonOf(x.sc.diffF,fr,templeLen)+' · ₩'+fr.price+'</div>'+
+      '<div class="rd">'+spec+' · 프론트 폭 '+x.sc.fw+'mm · '+reasonOf(x.sc.diffF,fr,templeLen)+' · ₩'+fr.price+'</div>'+
       '</div><div style="text-align:right"><div class="rmatch '+g[1]+'">'+g[0]+' '+p+'%</div>'+
       '<button class="btn small ghost" data-n="'+fr.n+'" onclick="ordPick(this.dataset.n)" style="margin-top:6px">주문</button></div></div>';
   }).join('');
@@ -874,10 +874,10 @@ function ordConfirm(){
 /* ===== 상품 카탈로그 ===== */
 var CAT_DATA={
   frame:[
-    {n:'로마 ACE-02',pb:true,price:'189,000',hero:true,desc:'BETTERVISION 대표 모델. 이탈리아 마쭈첼리 아세테이트를 한국에서 조립("Designed & Assembled in Korea"). 9사이즈 중 얼굴폭·관자에 맞는 사이즈로.',spec:[['렌즈폭','52mm'],['브릿지','18mm'],['다리','145mm'],['무게','18g'],['힌지','5배럴 스프링'],['사이즈','9종(F1~F3×T1~T3)']],colors:['#1a1a1a','#5b3a29','#c9b8a0']},
+    {n:'로마 ACE-02',pb:true,price:'189,000',hero:true,desc:'BETTERVISION 대표 모델. 이탈리아 마쭈첼리 아세테이트를 한국에서 조립("Designed & Assembled in Korea"). 9사이즈 중 얼굴폭·관자에 맞는 사이즈로.',spec:[['렌즈폭','52mm'],['브릿지','18mm'],['템플','145mm'],['무게','18g'],['힌지','5배럴 스프링'],['사이즈','9종(F1~F3×T1~T3)']],colors:['#1a1a1a','#5b3a29','#c9b8a0']},
     {n:'로마 클래식',pb:true,price:'189,000',desc:'이탈리아 아세테이트. 9사이즈 중 얼굴폭·관자에 맞춰 고름. 가장 무난한 데일리.'},
     {n:'로마 슬림',pb:true,price:'189,000',desc:'얇은 림·가벼운 무게. 작은 얼굴·미니멀 취향. F1~F2 사이즈 추천.'},
-    {n:'로마 와이드',pb:true,price:'189,000',desc:'넓은 앞판·또렷한 인상. F2~F3, 광대·얼굴폭 넓은 분께.'},
+    {n:'로마 와이드',pb:true,price:'189,000',desc:'넓은 프론트·또렷한 인상. F2~F3, 광대·얼굴폭 넓은 분께.'},
     {n:'로마 라운드',pb:true,price:'189,000',desc:'둥근 림·클래식 무드. 각진 얼굴과 대비로 부드럽게.'},
     {n:'수입 브랜드 A',pb:false,price:'390,000',desc:'수입 티타늄 라인 (예시). 초경량 프리미엄.'}
   ],
@@ -886,7 +886,7 @@ var CAT_DATA={
     {n:'클립온 선글라스',pb:true,price:'90,000',desc:'안경 위에 자석 탈착. 도수 안경 그대로 선글라스로. 가성비.'}
   ],
   goggle:[
-    // [09.24 숨김] {n:'NORM G1',pb:true,price:'290,000',hero:true,desc:'자체 브랜드 NORM 대표 모델. 오픈이어 오디오 다리 내장 — 귀를 막지 않고 통화·음악·번역. 무음 연결로 프리미엄 사용감.',spec:[['재생시간','약 7시간'],['블루투스','5.3'],['방수','IPX4 생활방수'],['무게','28g'],['연결음','무음 커스텀'],['BT명','NORM-G1']],colors:['#1a1a1a','#2b3a4a','#e8e4dd']},
+    // [09.24 숨김] {n:'NORM G1',pb:true,price:'290,000',hero:true,desc:'자체 브랜드 NORM 대표 모델. 오픈이어 오디오 템플 내장 — 귀를 막지 않고 통화·음악·번역. 무음 연결로 프리미엄 사용감.',spec:[['재생시간','약 7시간'],['블루투스','5.3'],['방수','IPX4 생활방수'],['무게','28g'],['연결음','무음 커스텀'],['BT명','NORM-G1']],colors:['#1a1a1a','#2b3a4a','#e8e4dd']},
     {n:'스포츠 고글',pb:true,price:'180,000',desc:'러닝·라이딩용 밀착 핏. 김서림 방지·교체 렌즈.'}
   ]
 };

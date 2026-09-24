@@ -82,7 +82,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="ctitle">3 · 경계값 조정 <span style="font-size:13px;color:var(--warn)">(본사 지식재산)</span></div>
     <div class="sdesc">경계 mm와 모집단 평균, 표준편차를 바꾸면 분포가 바로 바뀌어요. M·M이 가장 많아지도록 맞춘 값을 정본으로 써요.</div>
     <div class="tunecard">
-      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">앞판 폭 경계 (얼굴 가로)</div>
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">프론트 폭 경계 (얼굴 가로)</div>
       <div class="row">
         <div class="fld"><label>S | M 경계</label><input id="fb0" type="number" step="0.5" oninput="setB()"></div>
         <div class="fld"><label>M | L 경계</label><input id="fb1" type="number" step="0.5" oninput="setB()"></div>
@@ -91,7 +91,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       </div>
     </div>
     <div class="tunecard">
-      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">다리 경계 (귀 간격)</div>
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">템플 경계 (귀 간격)</div>
       <div class="row">
         <div class="fld"><label>S | M 경계</label><input id="tb0" type="number" step="0.5" oninput="setB()"></div>
         <div class="fld"><label>M | L 경계</label><input id="tb1" type="number" step="0.5" oninput="setB()"></div>
@@ -141,14 +141,14 @@ function upd(){
   document.getElementById('fwv').textContent=fw; document.getElementById('egv').textContent=eg;
   var r=E.toCode({faceWidth:fw, earGap:eg});
   document.getElementById('code').textContent=r.code||'-';
-  document.getElementById('codesm').innerHTML='적합도 <b>'+r.fit+'%</b><br>앞판 '+r.front+' ('+r.fitFront+'%) · 다리 '+r.temple+' ('+r.fitTemple+'%)';
+  document.getElementById('codesm').innerHTML='적합도 <b>'+r.fit+'%</b><br>프론트 '+r.front+' ('+r.fitFront+'%) · 템플 '+r.temple+' ('+r.fitTemple+'%)';
   // 분포 그리드
   var d=E.cellDist(), L=['S','M','L'];
   var maxv=0,mi=1,mj=1; for(var i=0;i<3;i++)for(var j=0;j<3;j++)if(d[i][j]>maxv){maxv=d[i][j];mi=i;mj=j;}
   var hereF=L.indexOf(r.front), hereT=L.indexOf(r.temple);
-  var html='<div class="h"></div><div class="h">다리 S</div><div class="h">다리 M</div><div class="h">다리 L</div>';
+  var html='<div class="h"></div><div class="h">템플 S</div><div class="h">템플 M</div><div class="h">템플 L</div>';
   for(var i=0;i<3;i++){
-    html+='<div class="h">앞판 '+L[i]+'</div>';
+    html+='<div class="h">프론트 '+L[i]+'</div>';
     for(var j=0;j<3;j++){
       var pct=(d[i][j]*100), op=0.08+0.85*(d[i][j]/(maxv||1));
       var cls='cell'+((i===mi&&j===mj)?' mode':'')+((i===hereF&&j===hereT)?' here':'');

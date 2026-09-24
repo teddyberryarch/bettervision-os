@@ -116,7 +116,7 @@ function showWO(w){
     row('최소 블랭크', '<b>'+R.mbs+'mm</b>', '<b>'+L.mbs+'mm</b>')+
     row('권하는 굴절률', R.idx, L.idx)+
     row('예상 가장자리 두께', R.edge+'mm', L.edge+'mm')+'</tbody></table>'+
-    '<table class="wt" style="margin-top:12px"><thead><tr><th>테</th><th>렌즈 가로 · 세로</th><th>브리지</th><th>다리</th><th>코받침 · 소재</th></tr></thead><tbody><tr><td>'+esc(w.frame)+'</td><td>'+sp.a+' · '+sp.B+'mm</td><td>'+sp.dbl+'mm</td><td>'+sp.temple+'mm</td><td>'+sp.pad+' · '+sp.mat+'</td></tr></tbody></table>'+
+    '<table class="wt" style="margin-top:12px"><thead><tr><th>테</th><th>렌즈 가로 · 세로</th><th>브리지</th><th>템플</th><th>코받침 · 소재</th></tr></thead><tbody><tr><td>'+esc(w.frame)+'</td><td>'+sp.a+' · '+sp.B+'mm</td><td>'+sp.dbl+'mm</td><td>'+sp.temple+'mm</td><td>'+sp.pad+' · '+sp.mat+'</td></tr></tbody></table>'+
     (c.why.length?'<div class="note" style="margin-top:12px">'+c.why.map(esc).join('<br>')+'</div>':'')+
     '<div class="chk"><div>□ 렌즈미터로 도수·축 확인</div><div>□ 가공 후 좌우 높이 확인</div><div>□ 확인한 안경사 ________</div></div>';
   $('woCard').scrollIntoView({behavior:'smooth'});

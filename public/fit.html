@@ -30,11 +30,20 @@
 .calc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:10px 0}
 .calc .big{font-size:22px;font-weight:700;color:var(--ink)}
 .calc .sm{font-size:13px;color:var(--muted)}
-.sheetwrap{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;margin:10px 0}
+.sheetgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}@media(max-width:800px){.sheetgrid{grid-template-columns:1fr}}
+.sheetwrap{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;margin:10px 0;padding:10px}
 .sheetwrap svg{display:block;width:100%;height:auto}
+#sheetPrint{display:none}
+@page{size:A4 portrait;margin:10mm}
 .printbtns{display:flex;gap:8px;margin:8px 0}
-@media print{ .topbar,.foot,.ex-presets,.prog,.navbtns,.printbtns,.lead,.eyebrow{display:none!important}
-  .wrap{max-width:none} .card{border:0;padding:0} body{background:#fff} }
+@media print{
+  body>*:not(#sheetPrint){display:none!important}
+  html,body{background:#fff!important;margin:0}
+  #sheetPrint{display:block!important}
+  .sheetpage{width:190mm;height:277mm;overflow:hidden;break-after:page;page-break-after:always}
+  .sheetpage:last-child{break-after:auto;page-break-after:auto}
+  .sheetpage svg{width:190mm!important;height:277mm!important;display:block}
+}
 </style>
 </head>
 <body>
@@ -61,7 +70,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div>
       <div class="eyebrow">가맹점 · 4 피팅 (가공 다음 단계)</div>
       <h2>측정값으로 조정값을 계산하고 A4 피팅 시트로 뽑아요</h2>
-      <div class="sub">9사이즈는 금형으로 고정하고, 각도는 측정값에 맞춰 휘어요. 다리벌림각, 판토, 정점거리, 코받침을 자동으로 계산하고, 소재가 휠 수 있는 한계와 비교해서 "못 맞추는 테"는 경고해요. 마지막에 <b>A4 시트(50mm 스케일바)로 1:1 검증해요.</b></div>
+      <div class="sub">9사이즈는 금형으로 고정하고, 각도는 측정값에 맞춰 휘어요. 템플벌림각, 판토, 정점거리, 코받침을 자동으로 계산하고, 소재가 휠 수 있는 한계와 비교해서 "못 맞추는 테"는 경고해요. 마지막에 <b>A4 세 장(템플 벌림, 판토, 정밀 측정)을 실제 크기로 뽑아 안경을 올려놓고 맞춰요.</b></div>
     </div>
     <span class="pill good">● v0.1 프로토타입</span>
   </div>
@@ -93,13 +102,13 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 var F, idx;
 function resetAll(){
   F={ // 검안·측정 입력
-    name:'', faceW:'', earGap:'', noseH:'', faceWrap:'', pd:'', pdR:'', pdL:'', oh:'', ph:'', sphMax:'', vd:'12',
+    name:'', faceW:'', earGap:'', earDepth:'', noseH:'', faceWrap:'', pd:'', pdR:'', pdL:'', oh:'', ph:'', sphMax:'', vd:'12',
     // 프레임 선택
     material:'titan', frontA:'', dbl:'', templeLen:'', frameSpread:'', bridge:'adj',
     // 산출
   };
   var _r=(window.BVRecord&&BVRecord.load)?BVRecord.load():null;
-  if(_r){ F.name=_r.name||F.name; if(_r.faceWidth)F.faceW=_r.faceWidth; if(_r.earGap)F.earGap=_r.earGap; if(_r.noseH)F.noseH=_r.noseH; if(_r.faceWrap!=null)F.faceWrap=_r.faceWrap; if(_r.pd)F.pd=_r.pd; if(_r.pdR)F.pdR=_r.pdR; if(_r.pdL)F.pdL=_r.pdL; if(_r.oh)F.oh=_r.oh; if(_r.rx&&_r.rx.vd)F.vd=_r.rx.vd; if(_r.sphMax!=null&&_r.sphMax!=="")F.sphMax=_r.sphMax; if(_r.rx){F.rxR=_r.rx.R;F.rxL=_r.rx.L;F.rxAdd=_r.rx.add;} }
+  if(_r){ F.name=_r.name||F.name; if(_r.faceWidth)F.faceW=_r.faceWidth; if(_r.earGap)F.earGap=_r.earGap; if(_r.earDepth)F.earDepth=_r.earDepth; if(_r.noseH)F.noseH=_r.noseH; if(_r.faceWrap!=null)F.faceWrap=_r.faceWrap; if(_r.pd)F.pd=_r.pd; if(_r.pdR)F.pdR=_r.pdR; if(_r.pdL)F.pdL=_r.pdL; if(_r.oh)F.oh=_r.oh; if(_r.rx&&_r.rx.vd)F.vd=_r.rx.vd; if(_r.sphMax!=null&&_r.sphMax!=="")F.sphMax=_r.sphMax; if(_r.rx){F.rxR=_r.rx.R;F.rxL=_r.rx.L;F.rxAdd=_r.rx.add;} }
   var _b=document.getElementById("fitbanner"); if(_b)_b.innerHTML=_r?BVRecord.banner(_r,"피팅"):"";
   idx=0; render();
 }
@@ -110,7 +119,7 @@ function g(id){var e=document.getElementById(id);return e?e.value:'';}
 
 /* 소재별 최대 벌림 조정폭 (mm) — 〔확인〕 초벌 */
 var MAT={titan:{n:'티탄',adj:8},metal:{n:'금속',adj:6},tr:{n:'TR·울템',adj:4},acet:{n:'경질 아세테이트',adj:1}};
-/* 다리벌림 오프셋: 유연(티탄·금속) −15, 반강성(TR) −12, 경질 −10 — 〔확인〕 */
+/* 템플벌림 오프셋: 유연(티탄·금속) −15, 반강성(TR) −12, 경질 −10 — 〔확인〕 */
 function splayOffset(m){return (m==='titan'||m==='metal')?15:(m==='tr'?12:10);}
 
 function render(){
@@ -132,28 +141,30 @@ function view(id){
       '<div class="fld"><label>동공높이 OH</label><input id="f_oh" value="'+F.oh+'" placeholder="22"></div></div>'+
     '<div class="sdesc" style="margin:8px 0 2px">측정 5값</div>'+
     '<div class="frow"><div class="fld"><label>얼굴 가로폭 (mm)</label><input id="f_faceW" value="'+F.faceW+'" placeholder="148"></div>'+
-      '<div class="fld"><label>귀 윗부분 간격 (mm)</label><input id="f_earGap" value="'+F.earGap+'" placeholder="160"></div></div>'+
+      '<div class="fld"><label>귀 윗부분 간격 (좌우, mm)</label><input id="f_earGap" value="'+F.earGap+'" placeholder="160"></div>'+
+      '<div class="fld"><label>각막에서 귀 윗부분까지 (앞뒤, mm)</label><input id="f_earDepth" value="'+(F.earDepth||'')+'" placeholder="105"></div></div>'+
+    '<div class="sdesc" style="margin:2px 0 6px">앞뒤 거리는 옆에서 자나 캘리퍼로 재요. 매장 리그가 생기면 측면 카메라가 채워요. 템플 길이 사이즈(T)와 귀 굽힘 위치를 이 값으로 정해요.</div>'+
     '<div class="frow"><div class="fld"><label>코 높이 (mm)</label><input id="f_noseH" value="'+F.noseH+'" placeholder="12"></div>'+
       '<div class="fld"><label>안면각 wrap (°)</label><input id="f_faceWrap" value="'+F.faceWrap+'" placeholder="5"></div>'+
       '<div class="fld"><label>최대 |구면 S|</label><input id="f_sphMax" value="'+F.sphMax+'" placeholder="2.5"></div></div>'+
     '<div class="sdesc" style="margin:10px 0 2px">선택 프레임</div>'+
     '<div class="frow"><div class="fld"><label>소재</label><select id="f_mat">'+matOpts()+'</select></div>'+
       '<div class="fld"><label>브리지</label><select id="f_bridge"><option value="adj"'+(F.bridge==='adj'?' selected':'')+'>코받침 조정형</option><option value="fix"'+(F.bridge==='fix'?' selected':'')+'>일체형(아세테이트)</option></select></div></div>'+
-    '<div class="frow"><div class="fld"><label>앞판 폭 a×2+DBL</label><input id="f_frontA" value="'+F.frontA+'" placeholder="138"></div>'+
-      '<div class="fld"><label>기본 다리 간격(mm)</label><input id="f_spread" value="'+F.frameSpread+'" placeholder="138"></div>'+
-      '<div class="fld"><label>다리 길이(mm)</label><input id="f_temple" value="'+F.templeLen+'" placeholder="145"></div></div>'+
+    '<div class="frow"><div class="fld"><label>프론트 폭 a×2+DBL</label><input id="f_frontA" value="'+F.frontA+'" placeholder="138"></div>'+
+      '<div class="fld"><label>기본 템플 간격(mm)</label><input id="f_spread" value="'+F.frameSpread+'" placeholder="138"></div>'+
+      '<div class="fld"><label>템플 길이(mm)</label><input id="f_temple" value="'+F.templeLen+'" placeholder="145"></div></div>'+
     '<div class="hint">실제 시스템에서는 검안 결과와 측정 DB에서 자동으로 불러와요. 지금은 직접 입력하거나 예시 상황을 눌러 채워요.</div>';
 
   if(id==='size'){ var r=sizeCalc();
-    return '<div class="eyebrow">2 · 9사이즈 매칭</div><div class="stitle">앞판 폭 × 다리 길이로 핏 등급 정하기</div>'+
-    '<div class="sdesc">생산은 9사이즈로 고정돼 있어요. 측정값을 등급에 맞추고 적합도를 봐요. 모듈식이라 앞판과 다리 등급을 따로 고를 수 있어요.</div>'+
-    '<div class="calc"><div class="big">'+r.code+'</div><div class="sm">앞판 '+r.fw+' · 다리 '+r.tw+' · 적합도 '+r.fit+'%</div></div>'+ r.note;
+    return '<div class="eyebrow">2 · 9사이즈 매칭</div><div class="stitle">프론트 폭 × 템플 길이로 핏 등급 정하기</div>'+
+    '<div class="sdesc">생산은 9사이즈로 고정돼 있어요. 측정값을 등급에 맞추고 적합도를 봐요. 모듈식이라 프론트와 템플 등급을 따로 고를 수 있어요.</div>'+
+    '<div class="calc"><div class="big">'+r.code+'</div><div class="sm">프론트 '+r.fw+' · 템플 '+r.tw+' · 적합도 '+r.fit+'%</div></div>'+ r.note;
   }
 
   if(id==='splay'){ var r=splayCalc();
-    return '<div class="eyebrow">3 · 다리벌림각</div><div class="stitle">목표 다리 간격 = 귀 간격 − 오프셋</div>'+
-    '<div class="sdesc">측정한 귀 간격으로 목표 다리 간격을 정하고, 프레임 기본값에서 얼마나 휠지 알려 줘요. 소재 한계를 넘으면 경고해요.</div>'+
-    '<div class="calc"><div class="big">'+r.target+' mm</div><div class="sm">목표 다리 간격 (오프셋 −'+r.off+'mm · '+MAT[F.material].n+')</div></div>'+
+    return '<div class="eyebrow">3 · 템플벌림각</div><div class="stitle">목표 템플 간격 = 귀 간격 − 오프셋</div>'+
+    '<div class="sdesc">측정한 귀 간격으로 목표 템플 간격을 정하고, 프레임 기본값에서 얼마나 휠지 알려 줘요. 소재 한계를 넘으면 경고해요.</div>'+
+    '<div class="calc"><div class="big">'+r.target+' mm</div><div class="sm">목표 템플 간격 (오프셋 −'+r.off+'mm · '+MAT[F.material].n+')</div></div>'+
     '<div class="kv"><div class="k">프레임 기본 간격</div><div class="v">'+(r.base!=null?r.base+'mm':'-')+'</div>'+
       '<div class="k">필요 조정량</div><div class="v">'+(r.adjNeed!=null?(r.adjNeed>0?'+':'')+r.adjNeed+'mm '+(r.adjNeed>0?'벌림':'좁힘'):'-')+'</div>'+
       '<div class="k">소재 최대 조정폭</div><div class="v">±'+MAT[F.material].adj+'mm</div></div>'+ r.note;
@@ -181,20 +192,27 @@ function view(id){
     (fix?'<div class="warn">일체형 브리지(아세테이트)는 코받침을 거의 조정할 수 없어요. 안착이 안 맞으면 다른 모델을 권해요.</div>':'<div class="hint">조정형이에요. 높이, 각도, 간격으로 안착과 정점거리를 함께 맞춰요.</div>');
   }
 
-  if(id==='sheet'){ collectAll(); return '<div class="eyebrow">7 · A4 피팅 시트</div><div class="stitle">조정값 + 1:1 도면 출력</div><div id="sheetbox"></div>'; }
+  if(id==='sheet'){ collectAll(); return '<div class="eyebrow">7 · A4 시트 세 장</div><div class="stitle">템플 벌림, 판토, 정밀 측정 (모두 실제 크기)</div><div id="sheetbox"></div>'; }
   return '';
 }
 function matOpts(){var o='';for(var k in MAT){o+='<option value="'+k+'"'+(F.material===k?' selected':'')+'>'+MAT[k].n+'</option>';}return o;}
 
 /* 계산 */
 function band(v,lo,hi){ if(v==null)return '?'; if(v<lo)return 'S'; if(v>hi)return 'L'; return 'M'; }
+/* 템플 쪽 초벌 규칙 〔확인〕: 렌즈 면에서 귀 윗부분까지 = 각막~귀 앞뒤 거리 + 정점거리.
+   귀 뒤로 굽는 부분 25mm를 더한 값이 필요한 템플 길이. 템플 사이즈는 140(T1) · 145(T2) · 150(T3) 중 가까운 것 */
+var EAR_TAIL=25, TEMPLE_SZ=[[140,'T1'],[145,'T2'],[150,'T3']];
+function templeNeed(){ var d=num(F.earDepth); if(d==null) return null; var vd=num(F.vd)||12; var bend=Math.round(d+vd); return {bend:bend, need:bend+EAR_TAIL}; }
 function sizeCalc(){
-  var fw=num(F.faceW), tl=num(F.earGap);
-  // 〔확인〕 경계: 앞판폭 146/158mm, 다리 156/168mm (engine 설정과 동기)
-  var fwB=band(fw,146,158), twB=band(tl,156,168);
+  var fw=num(F.faceW);
+  // 〔확인〕 프론트 경계: 얼굴 폭 146/158mm (engine 설정과 동기)
+  var fwB=band(fw,146,158), tn=templeNeed(), twB='?', tNote='';
+  if(tn){ var best=TEMPLE_SZ.reduce(function(a,b){return Math.abs(b[0]-tn.need)<Math.abs(a[0]-tn.need)?b:a;}); twB=['S','M','L'][TEMPLE_SZ.indexOf(best)];
+    tNote='필요한 템플 길이 '+tn.need+'mm (귀 굽힘 '+tn.bend+'mm + 귀 뒤 '+EAR_TAIL+'mm)라서 템플 '+best[0]+'mm('+best[1]+')예요.'; }
+  else tNote='각막에서 귀까지 앞뒤 거리를 넣어야 템플 길이 사이즈를 정할 수 있어요. 지금은 템플을 정하지 않았어요.';
   var fit = (fwB==='M'&&twB==='M')?96:(fwB==='M'||twB==='M')?88:80;
-  var note=(fwB!=='?'&&twB!=='?'&&fwB!==twB)?'<div class="hint">독립 조합('+fwB+'·'+twB+')이에요. 기성테로는 못 맞추는 경우지만, 모듈식이라 맞출 수 있어요.</div>':'<div class="hint">측정값을 9사이즈 코드로 바꿔요. 경계 mm값은 〔확인〕 초벌이에요.</div>';
-  return {code:fwB+'·'+twB, fw:fwB, tw:twB, fit:fit, note:note};
+  var note='<div class="hint">'+tNote+'</div>'+((fwB!=='?'&&twB!=='?'&&fwB!==twB)?'<div class="hint">독립 조합('+fwB+'·'+twB+')이에요. 기성테로는 못 맞추는 경우지만, 모듈식이라 맞출 수 있어요.</div>':'<div class="hint">경계 mm값은 〔확인〕 초벌이에요.</div>');
+  return {code:fwB+'·'+twB, fw:fwB, tw:twB, fit:fit, note:note, tn:tn};
 }
 function splayCalc(){
   var eg=num(F.earGap), off=splayOffset(F.material), base=num(F.frameSpread);
@@ -212,7 +230,7 @@ function collectAll(){
   // 입력 단계 값들은 각 단계 collect에서 이미 F에 반영됨
 }
 function collect(id){
-  if(id==='intake'){F.name=g('f_name');F.pd=g('f_pd');F.pdR=g('f_pdR');F.pdL=g('f_pdL');F.oh=g('f_oh');F.faceW=g('f_faceW');F.earGap=g('f_earGap');F.noseH=g('f_noseH');F.faceWrap=g('f_faceWrap');F.sphMax=g('f_sphMax');F.material=g('f_mat');F.bridge=g('f_bridge');F.frontA=g('f_frontA');F.frameSpread=g('f_spread');F.templeLen=g('f_temple');}
+  if(id==='intake'){F.name=g('f_name');F.pd=g('f_pd');F.pdR=g('f_pdR');F.pdL=g('f_pdL');F.oh=g('f_oh');F.faceW=g('f_faceW');F.earGap=g('f_earGap');F.noseH=g('f_noseH');F.faceWrap=g('f_faceWrap');F.earDepth=g('f_earDepth');F.sphMax=g('f_sphMax');F.material=g('f_mat');F.bridge=g('f_bridge');F.frontA=g('f_frontA');F.frameSpread=g('f_spread');F.templeLen=g('f_temple');}
   else if(id==='panto'){F._panto=g('p_panto');}
   else if(id==='vertex'){F.vd=g('v_vd');}
   else if(id==='nosepad'){F._npGap=g('n_gap');F._npAng=g('n_ang');}
@@ -220,145 +238,147 @@ function collect(id){
 function next(){ if(cur()==='sheet'){resetAll();return;} collect(cur()); if(idx<STEPS.length-1)idx++; render(); if(cur()==='sheet')buildSheet(); }
 function back(){ collect(cur()); if(idx>0)idx--; render(); }
 
-/* A4 피팅시트 SVG */
+/* A4 시트 2장 (1:1 실제 크기). SVG 1단위 = 1mm, 인쇄 영역 190×277mm (A4, 여백 10mm) */
+function sheetEsc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function svgOpen(){return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 277" width="190mm" height="277mm" font-family="Pretendard Variable,Pretendard,sans-serif">';}
+function T(x,y,t,o){o=o||{};return '<text x="'+x+'" y="'+y+'" font-size="'+(o.s||3.1)+'"'+(o.w?' font-weight="'+o.w+'"':'')+' fill="'+(o.c||'#111')+'"'+(o.a?' text-anchor="'+o.a+'"':'')+'>'+sheetEsc(t)+'</text>';}
+function L(x1,y1,x2,y2,o){o=o||{};return '<line x1="'+x1.toFixed(2)+'" y1="'+y1.toFixed(2)+'" x2="'+x2.toFixed(2)+'" y2="'+y2.toFixed(2)+'" stroke="'+(o.c||'#111')+'" stroke-width="'+(o.w||0.25)+'"'+(o.d?' stroke-dasharray="'+o.d+'"':'')+'/>';}
+function head(title,no,info){
+  var d=new Date(), ds=d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate();
+  return T(0,6,'BETTERVISION',{s:3.4,w:600})+T(190,6,no,{s:3.1,a:'end',c:'#555'})+
+    T(0,14,title,{s:5.2,w:600})+T(190,14,ds,{s:3.1,a:'end',c:'#555'})+
+    T(0,20.5,info,{s:3.1,c:'#333'})+L(0,23,190,23,{w:0.3});
+}
+function calib(y){ // 100mm 검증 자
+  var g=T(0,y,'인쇄 확인: 실제 크기(100%)로 인쇄한 뒤 아래 자를 재서 정확히 100mm인지 확인해요. 다르면 다시 인쇄해요.',{s:2.8,c:'#333'});
+  var x0=45, yy=y+4;
+  g+=L(x0,yy,x0+100,yy,{w:0.3});
+  for(var m=0;m<=100;m++){ var h=m%10===0?3:(m%5===0?2:1.2); g+=L(x0+m,yy,x0+m,yy+h,{w:m%10===0?0.3:0.15}); if(m%10===0) g+=T(x0+m,yy+6,m,{s:2.4,a:'middle',c:'#555'}); }
+  g+=T(x0+104,yy+2.8,'100 mm',{s:2.6,c:'#333'});
+  return g;
+}
+function hRuler(cx,y,half,step){ // 가운데 0에서 좌우로 mm 눈금
+  var g=L(cx-half,y,cx+half,y,{w:0.3});
+  for(var m=-half;m<=half;m++){ var am=Math.abs(m), h=am%10===0?3:(am%5===0?2:1); g+=L(cx+m,y,cx+m,y+h,{w:am%10===0?0.3:0.15}); if(am%(step||10)===0) g+=T(cx+m,y+6,am,{s:2.4,a:'middle',c:'#555'}); }
+  return g;
+}
+function box(x,y,w,h,rx,o){o=o||{};return '<rect x="'+x.toFixed(2)+'" y="'+y.toFixed(2)+'" width="'+w.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="'+(rx||0)+'" fill="none" stroke="'+(o.c||'#111')+'" stroke-width="'+(o.w||0.3)+'"'+(o.d?' stroke-dasharray="'+o.d+'"':'')+'/>';}
+function checkRow(y,k,tgt){ return T(2,y,k,{s:3.1})+T(62,y,tgt,{s:3.1,w:600})+L(112,y+0.8,160,y+0.8,{w:0.2,c:'#888'})+box(172,y-3,3.6,3.6,0.4,{w:0.3})+L(0,y+2.6,190,y+2.6,{w:0.15,c:'#bbb'}); }
+
 function buildSheet(){
-  var sp=splayCalc(), sz=sizeCalc();
-  function eyeRx(o){return (o&&o.S!==undefined&&o.S!=="")?((o.S||"")+" "+(o.C||"")+" "+(o.A||"")).trim():"-";}
-  function protr(hx,hy,R,inw,tgt){var s='';function pt(d,r){var t=d*Math.PI/180;return [hx+inw*r*Math.cos(t), hy+r*Math.sin(t)];}
-    for(var d=75;d<=110;d+=5){var i=pt(d,R-2.2),o=pt(d,R),l=pt(d,R+3);
-      s+='<line x1="'+i[0].toFixed(1)+'" y1="'+i[1].toFixed(1)+'" x2="'+o[0].toFixed(1)+'" y2="'+o[1].toFixed(1)+'" stroke="#0d0d0c" stroke-width="0.3"/>';
-      s+='<text x="'+l[0].toFixed(1)+'" y="'+(l[1]+0.7).toFixed(1)+'" font-size="1.8" fill="#8a877f" text-anchor="middle">'+d+'</text>';}
-    var z=pt(90,R);s+='<line x1="'+hx+'" y1="'+hy+'" x2="'+z[0].toFixed(1)+'" y2="'+z[1].toFixed(1)+'" stroke="#cbc7bb" stroke-width="0.4" stroke-dasharray="1.5 1.5"/>';
-    var f1=pt(80,R),f2=pt(85,R);s+='<line x1="'+hx+'" y1="'+hy+'" x2="'+f1[0].toFixed(1)+'" y2="'+f1[1].toFixed(1)+'" stroke="#e4e1da" stroke-width="0.6"/><line x1="'+hx+'" y1="'+hy+'" x2="'+f2[0].toFixed(1)+'" y2="'+f2[1].toFixed(1)+'" stroke="#e4e1da" stroke-width="0.6"/>';
-    var t=pt(tgt,R+1.5);s+='<line x1="'+hx+'" y1="'+hy+'" x2="'+t[0].toFixed(1)+'" y2="'+t[1].toFixed(1)+'" stroke="#dc2626" stroke-width="0.9"/>';return s;}
-  function hruler(x0,y0,len){var s='<line x1="'+x0+'" y1="'+y0+'" x2="'+(x0+len)+'" y2="'+y0+'" stroke="#0d0d0c" stroke-width="0.4"/>';
-    for(var m=0;m<=len;m+=5){var h=(m%10===0)?2.4:1.4;s+='<line x1="'+(x0+m)+'" y1="'+y0+'" x2="'+(x0+m)+'" y2="'+(y0+h)+'" stroke="#0d0d0c" stroke-width="0.3"/>';
-      if(m%20===0)s+='<text x="'+(x0+m)+'" y="'+(y0+5)+'" font-size="2" fill="#8a877f" text-anchor="middle">'+m+'</text>';}return s;}
-  var target=(sp.target==='-')?138:sp.target;
-  var panto=num(F._panto)||10, half=target/2;
-  var cx=100, frontW=num(F.frontA)||138, fhalf=frontW/2;
+  var sp=splayCalc(), sz=sizeCalc(), M=MAT[F.material]||MAT.titan;
   var pdT=num(F.pd)||63, monoR=num(F.pdR)||pdT/2, monoL=num(F.pdL)||pdT/2, oh=num(F.oh)||22;
-  var dbl=18, a=Math.max(40,(frontW-dbl)/2), lensH=40, wrap=num(F.faceWrap)||0;
-  var pL=cx-half, pR=cx+half;
-  var tlen=num(F.templeLen)||145;
-  var splayDeg=Math.round(Math.asin(Math.max(-0.34,Math.min(0.34,(half-fhalf)/tlen)))*180/Math.PI*10)/10;
-  var lensTop=116, lensBot=lensTop+lensH;
-  var lLcx=cx-(dbl/2)-(a/2), lRcx=cx+(dbl/2)+(a/2);
-  var ocy=lensBot-oh, ocR_x=cx-monoR, ocL_x=cx+monoL;
+  var fw=num(F.frontA)||138, base=num(F.frameSpread)||fw, target=(sp.target==='-')?fw:num(sp.target), tlen=num(F.templeLen)||145;
+  var panto=num(F._panto)||10, vd=num(F.vd)||12, wrap=num(F.faceWrap)||0;
+  var dbl=num(F.dbl)||18, a=Math.round(Math.max(40,(fw-dbl-10)/2)), lensH=num(F.lensH)||40;
+  var who='손님 '+(F.name||'________'), info=who+'   ·   9사이즈 '+sz.code+'   ·   소재 '+M.n+'   ·   프론트 폭 '+fw+'mm   ·   템플 '+tlen+'mm';
+  function rx(o){return (o&&o.S!==undefined&&o.S!=='')?[o.S,o.C,o.A].filter(function(v){return v!==''&&v!=null;}).join(' / '):'-';}
 
-  function qr(x,y,sz2){
-    var n=8, c=sz2/(n+2), o=x+c, oy=y+c, g='';
-    g+='<rect x="'+x+'" y="'+y+'" width="'+sz2+'" height="'+sz2+'" fill="#fff" stroke="#0d0d0c" stroke-width="0.4"/>';
-    function fnd(fx,fy){return '<rect x="'+fx+'" y="'+fy+'" width="'+(c*3)+'" height="'+(c*3)+'" fill="none" stroke="#0d0d0c" stroke-width="0.6"/><rect x="'+(fx+c)+'" y="'+(fy+c)+'" width="'+c+'" height="'+c+'" fill="#0d0d0c"/>';}
-    g+=fnd(o,oy)+fnd(o+c*(n-3),oy)+fnd(o,oy+c*(n-3));
-    var seed=7, nm=(F.name||'BV'); for(var k=0;k<nm.length;k++)seed=(seed*31+nm.charCodeAt(k))%9973;
-    for(var i2=0;i2<n;i2++)for(var j2=0;j2<n;j2++){ if((i2<3&&j2<3)||(i2<3&&j2>n-4)||(i2>n-4&&j2<3))continue; seed=(seed*1103515245+12345)&0x7fffffff; if(seed%2){g+='<rect x="'+(o+i2*c)+'" y="'+(oy+j2*c)+'" width="'+c+'" height="'+c+'" fill="#0d0d0c"/>';}}
-    return g;
-  }
+  var R2=Math.PI/180;
+  function arcTicks(ox,oy,r,from,to,step,dirFn,labelEvery){ var g=''; for(var d=from;d<=to;d+=step){ var p1=dirFn(d,r), p2=dirFn(d,r+((d%labelEvery===0)?3.5:2)); g+=L(ox+p1[0],oy+p1[1],ox+p2[0],oy+p2[1],{w:0.2}); if(d%labelEvery===0){ var p3=dirFn(d,r+6.5); g+=T(ox+p3[0],oy+p3[1]+1,d+'°',{s:2.4,a:'middle',c:'#555'}); } } return g; }
 
-  var svg=''+
-'<svg viewBox="0 0 200 272" xmlns="http://www.w3.org/2000/svg" font-family="Pretendard,sans-serif">'+
-'<rect x="0" y="0" width="200" height="272" fill="#ffffff" stroke="#0d0d0c" stroke-width="0.4"/>'+
-'<text x="8" y="12" font-size="6" font-weight="700" fill="#0d0d0c">BETTERVISION · 정밀 측정 · 피팅 시트</text>'+
-'<text x="8" y="19.5" font-size="3.4" fill="#8a877f">손님 '+(F.name||'____')+'\u3000|\u30009사이즈 '+sz.code+'\u3000|\u3000소재 '+MAT[F.material].n+'\u3000|\u3000인쇄: 실제크기 100% · 맞춤 끄기</text>'+
-'<line x1="8" y1="23" x2="192" y2="23" stroke="#e4e1da" stroke-width="0.3"/>'+
-'<text x="8" y="30" font-size="4" font-weight="700" fill="#0d0d0c">① 위에서 본 안경 (메인). 실물을 면이 바닥으로 오게 올리고 읽어요</text>'+
-'<text x="8" y="34.5" font-size="2.6" fill="#8a877f">앞테 폭은 룰러, 다리 벌림각은 각도기(힌지), 빨강은 목표예요. 다리 뒤 귀곡선은 무시해요</text>'+
-hruler(cx-80,42,160)+
-'<text x="'+(cx-80)+'" y="40" font-size="2" fill="#8a877f">앞테 폭 룰러 (mm)</text>'+
-'<rect x="'+(lLcx-a/2)+'" y="48" width="'+a+'" height="13" rx="5" fill="none" stroke="#cbc7bb" stroke-width="0.5" stroke-dasharray="2 1.5"/>'+
-'<rect x="'+(lRcx-a/2)+'" y="48" width="'+a+'" height="13" rx="5" fill="none" stroke="#cbc7bb" stroke-width="0.5" stroke-dasharray="2 1.5"/>'+
-'<line x1="'+(lLcx+a/2)+'" y1="54.5" x2="'+(lRcx-a/2)+'" y2="54.5" stroke="#cbc7bb" stroke-width="0.5" stroke-dasharray="2 1.5"/>'+
-'<text x="'+cx+'" y="55.5" font-size="2.3" fill="#cbc7bb" text-anchor="middle">앞테 놓는 자리</text>'+
-'<line x1="'+(cx-frontW/2)+'" y1="41" x2="'+(cx-frontW/2)+'" y2="62" stroke="#dc2626" stroke-width="0.5"/>'+
-'<line x1="'+(cx+frontW/2)+'" y1="41" x2="'+(cx+frontW/2)+'" y2="62" stroke="#dc2626" stroke-width="0.5"/>'+
-'<text x="'+cx+'" y="66.5" font-size="3" font-weight="700" fill="#dc2626" text-anchor="middle">목표 앞판 폭 '+frontW+' mm</text>'+
-'<circle cx="'+(cx-fhalf)+'" cy="60" r="1" fill="#0d0d0c"/><circle cx="'+(cx+fhalf)+'" cy="60" r="1" fill="#0d0d0c"/>'+
-protr(cx-fhalf,60,28,1,95)+
-protr(cx+fhalf,60,28,-1,95)+
-'<line x1="'+(cx-fhalf)+'" y1="60" x2="'+(cx-fhalf+28*Math.cos(95*Math.PI/180)).toFixed(1)+'" y2="'+(60+28*Math.sin(95*Math.PI/180)).toFixed(1)+'" stroke="#0d0d0c" stroke-width="0.8" stroke-dasharray="2 1.5"/>'+
-'<line x1="'+(cx+fhalf)+'" y1="60" x2="'+(cx+fhalf-28*Math.cos(95*Math.PI/180)).toFixed(1)+'" y2="'+(60+28*Math.sin(95*Math.PI/180)).toFixed(1)+'" stroke="#0d0d0c" stroke-width="0.8" stroke-dasharray="2 1.5"/>'+
-'<text x="'+cx+'" y="95" font-size="3.2" font-weight="700" fill="#dc2626" text-anchor="middle">목표 벌림각 95° (11자 평행) · 공장 기본 80~85°</text>'+
-'<text x="'+cx+'" y="99.5" font-size="2.4" fill="#8a877f" text-anchor="middle">앞테 기준 각도기에 다리를 올려 읽고 95°로 벌려요 · 다리 길이 '+tlen+'mm · 얼굴형에 따라 ±조정</text>'+
-'<rect x="'+(lLcx-a/2)+'" y="35" width="'+a+'" height="9" rx="4" fill="none" stroke="#0d0d0c" stroke-width="0.8" transform="rotate('+wrap+' '+lLcx+' 39.5)"/>'+
-'<rect x="'+(lRcx-a/2)+'" y="35" width="'+a+'" height="9" rx="4" fill="none" stroke="#0d0d0c" stroke-width="0.8" transform="rotate('+(-wrap)+' '+lRcx+' 39.5)"/>'+
-'<line x1="'+(lLcx+a/2)+'" y1="39.5" x2="'+(lRcx-a/2)+'" y2="39.5" stroke="#0d0d0c" stroke-width="0.8"/>'+
-'<text x="'+cx+'" y="33" font-size="2.6" fill="#8a877f" text-anchor="middle">\u25b2 얼굴 쪽 (앞테)</text>'+
-'<text x="'+(cx+fhalf+2)+'" y="40" font-size="2.8" fill="#3a5f44">안면각 '+(wrap||'__')+'\u00b0</text>'+
-'<circle cx="'+(cx-fhalf)+'" cy="44" r="1.1" fill="#0d0d0c"/><circle cx="'+(cx+fhalf)+'" cy="44" r="1.1" fill="#0d0d0c"/>'+
-'<line x1="'+(cx-fhalf)+'" y1="44" x2="'+(cx-fhalf)+'" y2="82" stroke="#cbc7bb" stroke-width="0.5" stroke-dasharray="1.5 1.5"/>'+
-'<line x1="'+(cx+fhalf)+'" y1="44" x2="'+(cx+fhalf)+'" y2="82" stroke="#cbc7bb" stroke-width="0.5" stroke-dasharray="1.5 1.5"/>'+
-'<line x1="'+(cx-fhalf)+'" y1="44" x2="'+pL+'" y2="82" stroke="#0d0d0c" stroke-width="1.5"/>'+
-'<line x1="'+(cx+fhalf)+'" y1="44" x2="'+pR+'" y2="82" stroke="#0d0d0c" stroke-width="1.5"/>'+
-'<text x="'+((cx-fhalf+pL)/2-2.5)+'" y="65" font-size="4.5" fill="#8a877f">\u2225</text>'+
-'<text x="'+((cx+fhalf+pR)/2+0.5)+'" y="65" font-size="4.5" fill="#8a877f">\u2225</text>'+
-'<circle cx="'+pL+'" cy="82" r="1.8" fill="#dc2626"/><circle cx="'+pR+'" cy="82" r="1.8" fill="#dc2626"/>'+
-'<text x="'+(cx-fhalf-2)+'" y="60" font-size="3" font-weight="700" fill="#0d0d0c" text-anchor="end">벌림각 '+(Math.round(Math.atan2((half-fhalf),(82-44))*180/Math.PI*10)/10)+'\u00b0</text>'+
-'<text x="'+cx+'" y="63" font-size="2.6" fill="#8a877f" text-anchor="middle">\u2225는 다리 길이 생략, 끝은 귀 뒤</text>'+
-'<line x1="'+pL+'" y1="88" x2="'+pR+'" y2="88" stroke="#b45309" stroke-width="0.5"/>'+
-'<line x1="'+pL+'" y1="86" x2="'+pL+'" y2="90" stroke="#b45309" stroke-width="0.5"/><line x1="'+pR+'" y1="86" x2="'+pR+'" y2="90" stroke="#b45309" stroke-width="0.5"/>'+
-'<text x="'+cx+'" y="87" font-size="3.6" font-weight="700" fill="#b45309" text-anchor="middle">목표 다리 간격 '+target+' mm</text>'+
-'<text x="'+cx+'" y="93.5" font-size="2.6" fill="#8a877f" text-anchor="middle">점선은 직진 기준, 실선은 목표 휨, 두 선 사이 각이 벌림각이에요. 다리 끝을 빨간 점에 맞춰 휘어요</text>'+
-'<line x1="8" y1="106" x2="192" y2="106" stroke="#e4e1da" stroke-width="0.3"/>'+
-'<text x="8" y="113" font-size="4" font-weight="700" fill="#0d0d0c">② 1:1 실측: 광학중심(OC) · 단안 PD (좌우 비대칭)</text>'+
-'<rect x="'+(lLcx-a/2)+'" y="'+lensTop+'" width="'+a+'" height="'+lensH+'" rx="6" fill="none" stroke="#0d0d0c" stroke-width="0.6"/>'+
-'<rect x="'+(lRcx-a/2)+'" y="'+lensTop+'" width="'+a+'" height="'+lensH+'" rx="6" fill="none" stroke="#0d0d0c" stroke-width="0.6"/>'+
-'<line x1="'+(lLcx+a/2)+'" y1="'+(lensTop+6)+'" x2="'+(lRcx-a/2)+'" y2="'+(lensTop+6)+'" stroke="#0d0d0c" stroke-width="0.6"/>'+
-'<line x1="'+cx+'" y1="'+(lensTop-2)+'" x2="'+cx+'" y2="'+(lensBot+10)+'" stroke="#e4e1da" stroke-width="0.3" stroke-dasharray="1 1.5"/>'+
-'<line x1="'+(ocR_x-2.5)+'" y1="'+ocy+'" x2="'+(ocR_x+2.5)+'" y2="'+ocy+'" stroke="#dc2626" stroke-width="0.5"/><line x1="'+ocR_x+'" y1="'+(ocy-2.5)+'" x2="'+ocR_x+'" y2="'+(ocy+2.5)+'" stroke="#dc2626" stroke-width="0.5"/>'+
-'<line x1="'+(ocL_x-2.5)+'" y1="'+ocy+'" x2="'+(ocL_x+2.5)+'" y2="'+ocy+'" stroke="#dc2626" stroke-width="0.5"/><line x1="'+ocL_x+'" y1="'+(ocy-2.5)+'" x2="'+ocL_x+'" y2="'+(ocy+2.5)+'" stroke="#dc2626" stroke-width="0.5"/>'+
-'<text x="'+ocR_x+'" y="'+(lensTop-3)+'" font-size="3" fill="#dc2626" text-anchor="middle">R</text>'+
-'<text x="'+ocL_x+'" y="'+(lensTop-3)+'" font-size="3" fill="#dc2626" text-anchor="middle">L</text>'+
-'<line x1="'+ocR_x+'" y1="'+(lensBot+6)+'" x2="'+ocL_x+'" y2="'+(lensBot+6)+'" stroke="#b45309" stroke-width="0.5"/>'+
-'<text x="'+cx+'" y="'+(lensBot+10)+'" font-size="3.4" font-weight="700" fill="#b45309" text-anchor="middle">PD '+pdT+'mm (R '+monoR+' / L '+monoL+') · OH '+oh+'mm</text>'+
-'<text x="'+cx+'" y="'+(lensBot+15)+'" font-size="3" fill="#3a3a37" text-anchor="middle">처방 R '+eyeRx(F.rxR)+'   L '+eyeRx(F.rxL)+(F.rxAdd?'   ADD '+F.rxAdd:'')+'</text>'+
-'<line x1="8" y1="178" x2="192" y2="178" stroke="#e4e1da" stroke-width="0.3"/>'+
-'<text x="8" y="184" font-size="4" font-weight="700" fill="#0d0d0c">③ 측면도: 판토스코픽 틸트 · 정점거리</text>'+
-'<line x1="26" y1="190" x2="26" y2="210" stroke="#e4e1da" stroke-width="0.4"/>'+
-'<line x1="26" y1="200" x2="'+(26+26*Math.cos(panto*Math.PI/180))+'" y2="'+(200+26*Math.sin(panto*Math.PI/180))+'" stroke="#0d0d0c" stroke-width="0.7"/>'+
-'<line x1="26" y1="200" x2="52" y2="200" stroke="#e4e1da" stroke-width="0.4" stroke-dasharray="2 2"/>'+
-'<text x="58" y="199" font-size="3.6" font-weight="700" fill="#0d0d0c">판토 '+panto+'°</text>'+
-'<text x="58" y="205" font-size="2.8" fill="#8a877f">렌즈를 이 각도에 포개 확인해요 (8~12°)</text>'+
-'<text x="120" y="195" font-size="3.4" fill="#0d0d0c">정점거리 VD '+(F.vd||12)+'mm</text>'+
-'<text x="120" y="201" font-size="3.4" fill="#0d0d0c">코받침 '+(F._npGap||'__')+'mm / '+(F._npAng||'__')+'°'+(F.bridge==='fix'?' (일체형)':'')+'</text>'+
-'<line x1="8" y1="215" x2="192" y2="215" stroke="#e4e1da" stroke-width="0.3"/>'+
-'<rect x="8" y="220" width="92" height="30" rx="2" fill="none" stroke="#e4e1da" stroke-width="0.4"/>'+
-'<text x="12" y="227" font-size="3.2" font-weight="700" fill="#0d0d0c">우안 R</text><text x="12" y="232.5" font-size="3" fill="#3a3a37">PD '+monoR+' · OH '+oh+'</text>'+
-'<text x="12" y="240" font-size="3.2" font-weight="700" fill="#0d0d0c">좌안 L</text><text x="12" y="245.5" font-size="3" fill="#3a3a37">PD '+monoL+' · OH '+oh+'</text>'+
-'<text x="55" y="227" font-size="3" fill="#3a3a37">9사이즈 '+sz.code+'</text><text x="55" y="232.5" font-size="3" fill="#3a3a37">소재 '+MAT[F.material].n+'</text><text x="55" y="238" font-size="3" fill="#3a3a37">벌림 '+(sp.adjNeed!=null?((sp.adjNeed>0?'+':'')+sp.adjNeed+'mm'):'-')+'</text><text x="55" y="243.5" font-size="3" fill="#3a3a37">판토 '+panto+'°</text>'+
-'<text x="105" y="226" font-size="3" fill="#8a877f">검증 스케일바 50mm (50.0이면 1:1)</text>'+
-'<line x1="105" y1="231" x2="155" y2="231" stroke="#0d0d0c" stroke-width="0.6"/>'+
-'<line x1="105" y1="228.5" x2="105" y2="233.5" stroke="#0d0d0c" stroke-width="0.6"/><line x1="155" y1="228.5" x2="155" y2="233.5" stroke="#0d0d0c" stroke-width="0.6"/><line x1="130" y1="229.5" x2="130" y2="232.5" stroke="#0d0d0c" stroke-width="0.4"/>'+
-qr(168,220,24)+
-'<text x="180" y="248" font-size="2.6" fill="#8a877f" text-anchor="middle">스캔하면 디지털 기록</text>'+
-'<line x1="8" y1="256" x2="192" y2="256" stroke="#e4e1da" stroke-width="0.3"/>'+
-'<text x="8" y="262" font-size="2.8" fill="#8a877f">측정자 ____________  ·  날짜 ____________  ·  기기ID BV-iPad-01  ·  본사 DB 귀속</text>'+
-'<text x="192" y="268" font-size="2.6" fill="#cbc7bb" text-anchor="end">Designed &amp; Assembled in Korea · BETTERVISION</text>'+
-'</svg>';
-  var matWarn = (Math.abs(sp.adjNeed||0)>MAT[F.material].adj)?'<div class="bad">소재가 휠 수 있는 한계를 넘어요. 이 테로는 목표 핏을 맞출 수 없어서 다른 모델을 권해요.</div>':'';
-  var html=''+
+  /* ===== 1장: 템플 벌림 (위에서 본 실제 크기, 안경 전체) ===== */
+  var tn=templeNeed(), earMeasured=!!tn, cx=95, fy=62, fHalf=fw/2, Lear=tn?Math.min(tn.bend,tlen-5):Math.max(80,tlen-EAR_TAIL), w=wrap*R2;
+  var tLenNote=tn?(tlen<tn.need-2?'템플이 '+(tn.need-tlen)+'mm 짧아요':(tlen>tn.need+7?'템플이 '+(tlen-tn.need)+'mm 길어요':'템플 길이 맞음')):'귀 위치 추정';
+  // 프론트: 브리지 + 좌우 렌즈 구간(안면각만큼 바깥쪽이 얼굴 쪽으로 꺾임) + 엔드피스 5mm
+  var segLen=fHalf-dbl/2, hxR=cx-dbl/2-segLen*Math.cos(w), hxL=cx+dbl/2+segLen*Math.cos(w), hyy=fy+segLen*Math.sin(w);
+  var earY=hyy+Lear, tipY=hyy+tlen, tHalf=target/2, bHalf=base/2;
+  var angT=Math.round(Math.atan2(tHalf-(cx-hxR),Lear)/R2*10)/10, angB=Math.round(Math.atan2(bHalf-(cx-hxR),Lear)/R2*10)/10;
+  function tempAt(hx,side,half,y){ return cx+side*(Math.abs(hx-cx)+(half-Math.abs(hx-cx))*(y-hyy)/Lear); }
+  var s1=svgOpen()+head('피팅 시트 1 · 템플 벌림','1 / 3',info)+calib(29)+
+    T(0,48,'위에서 본 실제 크기',{s:3.8,w:600})+
+    T(0,52.5,'안경을 뒤집어 프론트 윗면이 종이에 닿게 놓아요. 브리지를 가운데 점선에, 힌지를 두 점에 맞추고 템플을 굵은 선에 맞춰 휘어요.',{s:2.8,c:'#333'})+
+    L(cx,fy-8,cx,tipY+2,{c:'#bbb',d:'1.5 1.5'})+
+    L(cx-dbl/2,fy,cx+dbl/2,fy,{w:0.7})+L(cx-dbl/2,fy,hxR,hyy,{w:0.7})+L(cx+dbl/2,fy,hxL,hyy,{w:0.7})+
+    '<circle cx="'+hxR.toFixed(2)+'" cy="'+hyy.toFixed(2)+'" r="1.2" fill="#111"/><circle cx="'+hxL.toFixed(2)+'" cy="'+hyy.toFixed(2)+'" r="1.2" fill="#111"/>'+
+    T(cx,fy-3,'프론트 폭 '+fw+'mm',{s:3.1,a:'middle',c:'#333'})+
+    (wrap?T(hxL+3,hyy-2,'안면각 +'+wrap+'°',{s:2.8,c:'#333'}):'')+
+    L(hxR,hyy,hxR,tipY,{c:'#999',d:'1.5 1.5'})+L(hxL,hyy,hxL,tipY,{c:'#999',d:'1.5 1.5'})+
+    (Math.abs(base-fw)>0.5?L(hxR,hyy,tempAt(hxR,-1,bHalf,tipY),tipY,{c:'#777',d:'0.5 1'})+L(hxL,hyy,tempAt(hxL,1,bHalf,tipY),tipY,{c:'#777',d:'0.5 1'}):'')+
+    L(hxR,hyy,tempAt(hxR,-1,tHalf,tipY),tipY,{w:0.9})+L(hxL,hyy,tempAt(hxL,1,tHalf,tipY),tipY,{w:0.9})+
+    '<circle cx="'+(cx-tHalf).toFixed(2)+'" cy="'+earY.toFixed(2)+'" r="1.8" fill="#111"/><circle cx="'+(cx+tHalf).toFixed(2)+'" cy="'+earY.toFixed(2)+'" r="1.8" fill="#111"/>'+
+    T(cx-tHalf-3,earY-3,'귀 닿는 곳'+(earMeasured?'':' (추정)'),{s:2.6,a:'end',c:'#333'})+
+    T(cx,hyy+Lear/2-6,'귀 닿는 곳 템플 간격',{s:3.1,a:'middle',c:'#333'})+T(cx,hyy+Lear/2+1,target+' mm',{s:5.2,w:600,a:'middle'})+
+    T(cx,hyy+Lear/2+7,'벌림각 '+angT+'° (한쪽)',{s:3.1,a:'middle',c:'#333'})+
+    T(cx,hyy+Lear/2+12,(sp.adjNeed!=null?'지금 '+base+'mm에서 '+(sp.adjNeed>0?'+':'')+sp.adjNeed+'mm 벌려요':''),{s:2.8,a:'middle',c:'#555'})+
+    hRuler(cx,earY+4,Math.min(94,Math.ceil(tHalf+10)),10)+
+    T(cx,tipY+4,'템플 끝 ('+tlen+'mm) · '+tLenNote,{s:2.6,a:'middle',c:'#555'});
+  var c1=Math.max(tipY+12,238);
+  s1+=L(0,c1-5,190,c1-5,{w:0.3})+T(0,c1,'확인',{s:3.8,w:600})+T(62,c1,'목표',{s:2.8,c:'#555'})+T(112,c1,'실제',{s:2.8,c:'#555'})+T(172,c1,'확인',{s:2.8,c:'#555'});
+  [['프론트 폭',fw+' mm'],['안면각',(wrap?'+'+wrap:'0')+'°'],['템플 간격 (귀 닿는 곳)',target+' mm'],['벌림각 (한쪽)',angT+'°']].forEach(function(r,i){ s1+=checkRow(c1+6+i*5,r[0],r[1]); });
+  s1+=T(0,275,'피팅한 안경사 ________________   손님 확인 ________________',{s:3.1,c:'#333'})+'</svg>';
+
+  /* ===== 2장: 판토(경사각) (옆에서 본 실제 크기) ===== */
+  var hx2=28, hy2=90, up=8, down=Math.max(30,lensH-2), p=panto*R2, bendAt=Math.round(Lear), bendAng=55*R2;
+  var topX=hx2-up*Math.sin(p), topY=hy2-up*Math.cos(p), botX=hx2+down*Math.sin(p), botY=hy2+down*Math.cos(p);
+  var bx=hx2+bendAt, tailLen=tlen-bendAt;
+  var s3=svgOpen()+head('피팅 시트 2 · 판토(경사각)','2 / 3',info)+calib(29)+
+    T(0,48,'옆에서 본 실제 크기',{s:3.8,w:600})+
+    T(0,52.5,'안경을 옆으로 눕혀 템플을 가로선에, 힌지를 점에 맞춰요. 프론트 아래쪽이 얼굴 쪽(오른쪽)으로 기울어 굵은 선과 겹치면 맞아요.',{s:2.8,c:'#333'})+
+    T(hx2-4,hy2-16,'◀ 앞',{s:2.8,a:'end',c:'#555'})+T(185,hy2-16,'귀 쪽 ▶',{s:2.8,a:'end',c:'#555'})+
+    L(hx2,hy2,bx,hy2,{w:0.9})+L(bx,hy2,bx+tailLen*Math.cos(bendAng),hy2+tailLen*Math.sin(bendAng),{w:0.9})+
+    T((hx2+bx)/2,hy2-3,'템플 '+tlen+'mm',{s:3.1,a:'middle',c:'#333'})+
+    '<circle cx="'+bx.toFixed(2)+'" cy="'+hy2+'" r="1.4" fill="#111"/>'+T(bx,hy2-4,'귀 굽힘 시작 ('+bendAt+'mm'+(earMeasured?'':', 추정')+')',{s:2.6,a:'middle',c:'#333'})+
+    L(hx2,hy2-up-4,hx2,hy2+down+4,{c:'#999',d:'1.5 1.5'})+
+    L(topX,topY,botX,botY,{w:1.1})+
+    '<circle cx="'+hx2+'" cy="'+hy2+'" r="1.3" fill="#111"/>'+T(hx2-3,hy2+1,'힌지',{s:2.6,a:'end',c:'#333'})+
+    arcTicks(hx2,hy2,down+2,0,20,2,function(d,r){return [r*Math.sin(d*R2), r*Math.cos(d*R2)];},10)+
+    T(hx2+18,hy2+18,'판토 '+panto+'°',{s:5,w:600})+
+    T(hx2+18,hy2+25,'템플과 프론트 사이 각 '+(90-panto)+'°',{s:3.1,c:'#333'})+
+    T(hx2+18,hy2+31,'점선은 0°(수직). 보통 8~12°예요.',{s:2.8,c:'#555'})+
+    T(hx2+18,hy2+37,'정점거리 '+vd+'mm',{s:3.1,c:'#333'});
+  var c3=hy2+down+40;
+  s3+=L(0,c3-5,190,c3-5,{w:0.3})+T(0,c3,'확인',{s:3.8,w:600})+T(62,c3,'목표',{s:2.8,c:'#555'})+T(112,c3,'실제',{s:2.8,c:'#555'})+T(172,c3,'확인',{s:2.8,c:'#555'});
+  [['판토 (경사각)',panto+'°'],['템플과 프론트 사이 각',(90-panto)+'°'],['정점거리',vd+' mm'],['귀 굽힘 시작 (힌지에서)',bendAt+' mm'+(earMeasured?'':' (추정)')],['코받침 간격 / 각도',(F._npGap||'-')+' mm / '+(F._npAng||'-')+'°'+(F.bridge==='fix'?' (일체형)':'')]].forEach(function(r,i){ s3+=checkRow(c3+6+i*5,r[0],r[1]); });
+  s3+=T(0,275,'피팅한 안경사 ________________   손님 확인 ________________',{s:3.1,c:'#333'})+'</svg>';
+
+  /* ===== 2장: 정밀 측정 시트 (정면 1:1, 광학중심·PD) ===== */
+  var cx2=95, lt=62, lb=lt+lensH, gap=dbl, lx=cx2-gap/2-a, rx2=cx2+gap/2;
+  var ocY=lb-oh, ocRx=cx2-monoR, ocLx=cx2+monoL;
+  function cross(x,y,lab){ return '<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="1" fill="none" stroke="#111" stroke-width="0.35"/>'+L(x-4,y,x+4,y,{w:0.3})+L(x,y-4,x,y+4,{w:0.3})+T(x,y-6,lab,{s:3,w:600,a:'middle'}); }
+  var s2=svgOpen()+head('정밀 측정 시트','3 / 3',info)+calib(29)+
+    T(0,48,'① 광학중심과 PD (정면 실제 크기)',{s:3.8,w:600})+
+    T(0,52.5,'템플을 접고 안경 앞면이 위로 오게 놓아요. 브리지 가운데를 세로 점선에 맞춰요. 손님 오른눈(R)이 왼쪽에 와요.',{s:2.8,c:'#333'})+
+    box(lx,lt,a,lensH,7,{w:0.5})+box(rx2,lt,a,lensH,7,{w:0.5})+
+    L(cx2,lt-6,cx2,lb+18,{c:'#999',d:'1.5 1.5'})+
+    cross(ocRx,ocY,'R '+monoR)+cross(ocLx,ocY,'L '+monoL)+
+    L(ocRx,ocY,ocRx,lb+8,{c:'#999',w:0.2,d:'0.8 0.8'})+L(ocLx,ocY,ocLx,lb+8,{c:'#999',w:0.2,d:'0.8 0.8'})+
+    hRuler(cx2,lb+8,48,10)+T(cx2,lb+19,'PD '+pdT+'mm  (R '+monoR+' / L '+monoL+')',{s:3.8,w:600,a:'middle'});
+  var vx=rx2+a+6; s2+=L(vx,lb,vx,lb-35,{w:0.3});
+  for(var h=0;h<=35;h++){ var hh=h%10===0?3:(h%5===0?2:1); s2+=L(vx,lb-h,vx+hh,lb-h,{w:h%10===0?0.3:0.15}); if(h%10===0) s2+=T(vx+5,lb-h+1,h,{s:2.4,c:'#555'}); }
+  s2+=L(vx-2,ocY,vx+4,ocY,{w:0.5})+T(vx+9,ocY+1,'OH '+oh,{s:3,w:600})+T(vx,lb+4,'렌즈 아래 끝',{s:2.4,a:'middle',c:'#555'})+
+    T(0,lb+27,'렌즈에 찍은 점이 원(지름 2mm) 안에 들어오면 통과예요. 원 밖이면 가공 전에 다시 재요.',{s:2.8,c:'#333'});
+  var ty2=lb+36;
+  s2+=L(0,ty2-5,190,ty2-5,{w:0.3})+T(0,ty2,'② 측정값',{s:3.8,w:600});
+  var kv=[['처방 R (S / C / A)',rx(F.rxR)],['처방 L (S / C / A)',rx(F.rxL)],['ADD',F.rxAdd||'-'],['단안 PD R / L',monoR+' / '+monoL+' mm'],['OH (동공 높이)',oh+' mm'],
+          ['얼굴 폭',(F.faceW||'-')+' mm'],['귀 사이 간격 (좌우)',(F.earGap||'-')+' mm'],['각막~귀 (앞뒤)',(F.earDepth||'-')+' mm'],['코 높이',(F.noseH||'-')+' mm'],['안면각',(wrap||'-')+'°'],['정점거리 / 판토',vd+' mm / '+panto+'°'],
+          ['9사이즈',sz.code],['소재 / 브리지',M.n+' / '+(F.bridge==='fix'?'일체형':'조정형')]];
+  kv.forEach(function(r,i){ var col=i<7?0:96, row=i%7, y=ty2+7+row*6; s2+=T(col,y,r[0],{s:3,c:'#555'})+T(col+40,y,r[1],{s:3.2,w:600})+L(col,y+2.2,col+92,y+2.2,{w:0.15,c:'#bbb'}); });
+  s2+=T(0,275,'측정자 ________________   확인한 안경사 ________________',{s:3.1,c:'#333'})+'</svg>';
+
+  var warn=(Math.abs(sp.adjNeed||0)>M.adj)?'<div class="bad">조정량이 소재 한계(±'+M.adj+'mm)를 넘어요. 이 테로는 목표에 맞출 수 없어요. 다른 소재나 모델을 권해요.</div>':'';
+  document.getElementById('sheetbox').innerHTML=
     '<div class="kv">'+
       '<div class="k">9사이즈 / 적합도</div><div class="v">'+sz.code+' · '+sz.fit+'%</div>'+
-      '<div class="k">PD (R/L) · OH</div><div class="v">'+pdT+'mm (R '+monoR+' / L '+monoL+') · '+oh+'mm</div>'+
-      '<div class="k">목표 다리 간격</div><div class="v">'+target+'mm (오프셋 −'+sp.off+', '+MAT[F.material].n+')</div>'+
-      '<div class="k">목표 벌림각</div><div class="v">95° (11자 평행 · 공장 80~85°에서 벌림)</div>'+
-      '<div class="k">벌림 조정량</div><div class="v">'+(sp.adjNeed!=null?((sp.adjNeed>0?'+':'')+sp.adjNeed+'mm'):'-')+' / 한계 ±'+MAT[F.material].adj+'</div>'+
-      '<div class="k">판토 / VD</div><div class="v">'+panto+'° / '+(F.vd||12)+'mm</div>'+
-      '<div class="k">코받침</div><div class="v">간격 '+(F._npGap||'-')+' / 각도 '+(F._npAng||'-')+(F.bridge==='fix'?' (일체형 한계)':'')+'</div>'+
-    '</div>'+ matWarn +
-    '<div class="sheetwrap">'+svg+'</div>'+
-    '<div class="printbtns"><button class="btn small" onclick="window.print()">인쇄 (100%)</button></div>'+
-    '<div class="hint">① 실물 안경을 면이 바닥으로 오게 올려요. 앞테 폭은 룰러로, 다리 벌림각은 힌지 각도기로 읽어서 빨간 목표 눈금에 맞춰 휘어요. ② 렌즈 OC를 빨간 십자에 맞춰요(단안 PD, 동공높이). ③ 옆에서 판토와 정점을 봐요. 50mm 스케일바로 1:1 검증하고, QR로 디지털 측정 기록과 가상피팅을 연결해요. 휜 값은 본사 DB에 귀속돼요.</div>';
-  document.getElementById('sheetbox').innerHTML=html;
+      '<div class="k">목표 템플 간격</div><div class="v">'+target+'mm (지금 '+base+'mm, 조정 '+(sp.adjNeed!=null?((sp.adjNeed>0?'+':'')+sp.adjNeed):'-')+'mm, 한계 ±'+M.adj+')</div>'+
+      '<div class="k">벌림각 (한쪽)</div><div class="v">'+angT+'° (지금 '+angB+'°)</div>'+
+      '<div class="k">판토 / 정점거리</div><div class="v">'+panto+'° / '+vd+'mm</div>'+
+    '</div>'+warn+
+    '<div class="sheetgrid"><div class="sheetwrap">'+s1+'</div><div class="sheetwrap">'+s3+'</div><div class="sheetwrap">'+s2+'</div></div>'+
+    '<div class="printbtns"><button class="btn small" onclick="printSheets()">세 장 인쇄</button></div>'+
+    '<div class="hint">인쇄 창에서 크기를 "실제 크기(100%)"로 고르고 "페이지에 맞춤"은 꺼 주세요. 인쇄한 뒤 맨 위 100mm 자를 자로 재서 맞는지 먼저 확인해요.</div>';
+  var pr=document.getElementById('sheetPrint'); if(!pr){ pr=document.createElement('div'); pr.id='sheetPrint'; document.body.appendChild(pr); }
+  pr.innerHTML='<div class="sheetpage">'+s1+'</div><div class="sheetpage">'+s3+'</div><div class="sheetpage">'+s2+'</div>';
 }
+function printSheets(){ document.body.classList.add('printing-sheet'); window.print(); setTimeout(function(){ document.body.classList.remove('printing-sheet'); },500); }
 
 /* 시나리오 프리셋 */
 function preset(kind){
   resetAll();
-  if(kind==='std'){F.name='표준핏';F.pd='63';F.pdR='31.5';F.pdL='31.5';F.oh='22';F.faceW='147';F.earGap='160';F.noseH='12';F.faceWrap='5';F.sphMax='2.0';F.material='titan';F.bridge='adj';F.frontA='138';F.frameSpread='138';F.templeLen='145';F.vd='12';}
-  else if(kind==='indep'){F.name='독립조합';F.pd='66';F.pdR='33';F.pdL='33';F.oh='23';F.faceW='156';F.earGap='158';F.noseH='10';F.faceWrap='6';F.sphMax='3.0';F.material='metal';F.bridge='adj';F.frontA='150';F.frameSpread='150';F.templeLen='140';F.vd='12';}
-  else if(kind==='high'){F.name='고도수';F.pd='60';F.pdR='30';F.pdL='30';F.oh='21';F.faceW='144';F.earGap='156';F.noseH='14';F.faceWrap='4';F.sphMax='6.0';F.material='titan';F.bridge='adj';F.frontA='134';F.frameSpread='136';F.templeLen='145';F.vd='10';}
-  else if(kind==='wrap'){F.name='안면각큰';F.pd='64';F.pdR='32';F.pdL='32';F.oh='22';F.faceW='150';F.earGap='150';F.noseH='11';F.faceWrap='15';F.sphMax='2.5';F.material='acet';F.bridge='fix';F.frontA='148';F.frameSpread='150';F.templeLen='145';F.vd='12';}
+  if(kind==='std'){F.name='표준핏';F.pd='63';F.pdR='31.5';F.pdL='31.5';F.oh='22';F.faceW='147';F.earGap='160';F.earDepth='108';F.noseH='12';F.faceWrap='5';F.sphMax='2.0';F.material='titan';F.bridge='adj';F.frontA='138';F.frameSpread='138';F.templeLen='145';F.vd='12';}
+  else if(kind==='indep'){F.name='독립조합';F.pd='66';F.pdR='33';F.pdL='33';F.oh='23';F.faceW='156';F.earGap='158';F.earDepth='101';F.noseH='10';F.faceWrap='6';F.sphMax='3.0';F.material='metal';F.bridge='adj';F.frontA='150';F.frameSpread='150';F.templeLen='140';F.vd='12';}
+  else if(kind==='high'){F.name='고도수';F.pd='60';F.pdR='30';F.pdL='30';F.oh='21';F.faceW='144';F.earGap='156';F.earDepth='106';F.noseH='14';F.faceWrap='4';F.sphMax='6.0';F.material='titan';F.bridge='adj';F.frontA='134';F.frameSpread='136';F.templeLen='145';F.vd='10';}
+  else if(kind==='wrap'){F.name='안면각큰';F.pd='64';F.pdR='32';F.pdL='32';F.oh='22';F.faceW='150';F.earGap='150';F.earDepth='112';F.noseH='11';F.faceWrap='15';F.sphMax='2.5';F.material='acet';F.bridge='fix';F.frontA='148';F.frameSpread='150';F.templeLen='145';F.vd='12';}
   idx=0; render();
 }
 resetAll();

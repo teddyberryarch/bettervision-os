@@ -425,26 +425,26 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- 부품 ODM · 공급망 + 수요→생산 환산 -->
   <div class="hq-grid l" style="margin-top:18px">
     <div class="card pad">
-      <div class="eyebrow">부품 공급 (앞판, 다리, 렌즈)</div>
+      <div class="eyebrow">부품 공급 (프론트, 템플, 렌즈)</div>
       <div class="label" style="margin-bottom:6px">완성품이 아니라 부품 단위로 소싱·관리. "Designed &amp; Assembled in Korea".</div>
       <table class="tbl">
         <thead><tr><th>부품</th><th>공급사 / 허브</th><th>리드타임</th><th>발주 잔량</th><th>전국 재고</th><th>상태</th></tr></thead>
         <tbody>
-          <tr style="cursor:default"><td>앞판 (아세테이트)</td><td>대구 · 원저우</td><td>21일</td><td>1,200</td><td>3,400</td><td><span class="pill good">적정</span></td></tr>
-          <tr style="cursor:default"><td>다리 (메탈)</td><td>선전</td><td>18일</td><td>800</td><td>1,100</td><td><span class="pill warn">주의</span></td></tr>
-          <!-- [09.24 숨김] 오디오 다리 행 (방향결정 §0·§11) <tr style="cursor:default"><td>오디오 다리 (ZhuoHao)</td><td>선전</td><td>30일</td><td>500</td><td>300</td><td><span class="pill bad">부족</span></td></tr> -->
+          <tr style="cursor:default"><td>프론트 (아세테이트)</td><td>대구 · 원저우</td><td>21일</td><td>1,200</td><td>3,400</td><td><span class="pill good">적정</span></td></tr>
+          <tr style="cursor:default"><td>템플 (메탈)</td><td>선전</td><td>18일</td><td>800</td><td>1,100</td><td><span class="pill warn">주의</span></td></tr>
+          <!-- [09.24 숨김] 오디오 템플 행 (방향결정 §0·§11) <tr style="cursor:default"><td>오디오 템플 (ZhuoHao)</td><td>선전</td><td>30일</td><td>500</td><td>300</td><td><span class="pill bad">부족</span></td></tr> -->
           <tr style="cursor:default"><td>렌즈 (알도 R)</td><td>본사 공급</td><td>7일</td><td>5,000</td><td>12,000</td><td><span class="pill good">적정</span></td></tr>
         </tbody>
       </table>
-      <div class="note" style="font-size:15px"><b>관리.</b> 앞판과 다리는 입고 기간이 달라서 따로 챙겨요.</div>
+      <div class="note" style="font-size:15px"><b>관리.</b> 프론트와 템플은 입고 기간이 달라서 따로 챙겨요.</div>
     </div>
     <div class="card pad">
       <div class="eyebrow">생산 발주 수량</div>
-      <div class="label" style="margin-bottom:6px">앞판×다리 수요 매트릭스를 부품 생산 수량으로 자동 환산.</div>
-      <div class="asm"><span>앞판 F2</span><span><b>320</b> ea 추천</span></div>
-      <div class="asm"><span>앞판 F1 / F3</span><span><b>240 / 190</b> ea</span></div>
-      <div class="asm"><span>다리 T2</span><span><b>280</b> ea 추천</span></div>
-      <div class="asm"><span>다리 T1</span><span><b>220</b> ea</span></div>
+      <div class="label" style="margin-bottom:6px">프론트×템플 수요 매트릭스를 부품 생산 수량으로 자동 환산.</div>
+      <div class="asm"><span>프론트 F2</span><span><b>320</b> ea 추천</span></div>
+      <div class="asm"><span>프론트 F1 / F3</span><span><b>240 / 190</b> ea</span></div>
+      <div class="asm"><span>템플 T2</span><span><b>280</b> ea 추천</span></div>
+      <div class="asm"><span>템플 T1</span><span><b>220</b> ea</span></div>
       <div class="asm"><span>렌즈 알도 R 1.60</span><span><b>900</b> ea</span></div>
       <button class="btn" style="margin-top:14px;width:100%" onclick="toast('부품별 생산 발주서 생성 (프로토타입)')">생산 발주서 생성</button>
     </div>
@@ -531,11 +531,11 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     </div>
   </div>
 
-  <!-- 앞판×다리 매트릭스 + 사용자 데이터 -->
+  <!-- 프론트×템플 매트릭스 + 사용자 데이터 -->
   <div class="hq-grid">
     <div class="card pad">
-      <div class="eyebrow">앞판 × 다리 수요 매트릭스 (전국)</div>
-      <div class="label" style="margin-bottom:12px">칸은 앞판과 다리 조합별 수요, 가장자리 %는 앞판과 다리 각각의 생산 비중이에요.</div>
+      <div class="eyebrow">프론트 × 템플 수요 매트릭스 (전국)</div>
+      <div class="label" style="margin-bottom:12px">칸은 프론트와 템플 조합별 수요, 가장자리 %는 프론트와 템플 각각의 생산 비중이에요.</div>
       <div id="ftMatrix"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap">
         <span class="label">월 총 생산량</span>
@@ -619,13 +619,13 @@ var MX=[[14,22,8],[30,62,26],[12,28,16]];
 function mxRender(){
   var gt='grid-template-columns:38px repeat(3,1fr) 60px';
   var mp='display:flex;align-items:center;justify-content:center;height:46px;border-radius:8px;font-size:14px;font-weight:600;color:#111111;background:#f5f5f5';
-  var h='<div class="mhead" style="'+gt+'"><div class="mcorner">F/T</div>'+MX_COLS.map(function(c){return '<div class="mlab">'+c+'</div>';}).join('')+'<div class="mlab" style="font-weight:600;color:#111111">앞판%</div></div>';
+  var h='<div class="mhead" style="'+gt+'"><div class="mcorner">F/T</div>'+MX_COLS.map(function(c){return '<div class="mlab">'+c+'</div>';}).join('')+'<div class="mlab" style="font-weight:600;color:#111111">프론트%</div></div>';
   MX_ROWS.forEach(function(r,ri){
     h+='<div class="mrowg" style="'+gt+'"><div class="mlab row">'+r+'</div>';
     MX[ri].forEach(function(v,ci){ h+='<input class="mcellin" type="number" min="0" value="'+v+'" data-r="'+ri+'" data-c="'+ci+'" oninput="mxRecalc()">'; });
     h+='<div style="'+mp+'" id="frow'+ri+'"></div></div>';
   });
-  h+='<div class="mrowg" style="'+gt+'"><div class="mlab row" style="font-weight:600;color:#111111;white-space:nowrap">다리%</div>'+
+  h+='<div class="mrowg" style="'+gt+'"><div class="mlab row" style="font-weight:600;color:#111111;white-space:nowrap">템플%</div>'+
      MX_COLS.map(function(_,ci){return '<div style="'+mp+'" id="tcol'+ci+'"></div>';}).join('')+
      '<div style="'+mp+';background:#111111;color:#fff">100%</div></div>';
   document.getElementById('ftMatrix').innerHTML=h;
@@ -643,7 +643,7 @@ function mxRecalc(){
   var fLines=MX_ROWS.map(function(r,ri){ return r+' '+(total?Math.round(totalQ*rowSum[ri]/total):0)+'개'; }).join(' · ');
   var tLines=MX_COLS.map(function(c,ci){ return c+' '+(total?Math.round(totalQ*colSum[ci]/total):0)+'개'; }).join(' · ');
   var out=document.getElementById('prodOut');
-  if(out) out.innerHTML='<b>생산 예측.</b> 총 '+totalQ.toLocaleString('ko-KR')+'개 기준 · 앞판 '+fLines+' / 다리: '+tLines+'. 셀 수요를 바꾸면 비중·생산량이 자동 갱신돼요.';
+  if(out) out.innerHTML='<b>생산 예측.</b> 총 '+totalQ.toLocaleString('ko-KR')+'개 기준 · 프론트 '+fLines+' / 템플: '+tLines+'. 셀 수요를 바꾸면 비중·생산량이 자동 갱신돼요.';
 }
 mxRender();
 /* demographics */
