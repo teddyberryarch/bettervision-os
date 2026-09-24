@@ -230,7 +230,8 @@ async function init(){
     await pool.query("UPDATE aftercare SET judge='다시 맞춤' WHERE comfort='불편' AND judge IS NULL");
     await pool.query("UPDATE as_cases SET symptom=REPLACE(REPLACE(symptom,'코 (7일 확인)','흘러내림 (7일째 확인)'),'어지러움 (7일 확인)','가까운 곳 (7일째 확인)')"); }
   await pool.query("UPDATE aftercare SET source='손님 앱' WHERE source='고객 앱'");
-  await pool.query("UPDATE as_cases SET action=REPLACE(action,'템플','다리') WHERE action LIKE '%템플%'");
+  await pool.query("UPDATE as_cases SET action=REPLACE(action,'다리 끝','템플 끝') WHERE action LIKE '%다리 끝%'");
+  await pool.query("UPDATE as_cases SET symptom=REPLACE(symptom,'다리 흘러내림','안경 흘러내림') WHERE symptom LIKE '%다리 흘러내림%'");
   await pool.query("UPDATE as_cases SET symptom=REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(symptom,'귀 (7일 확인)','흘러내림 (7일째 확인)'),'흐림 (7일 확인)','먼 곳 (7일째 확인)'),'코 (7일 확인)','흘러내림 (7일째 확인)'),'어지러움 (7일 확인)','가까운 곳 (7일째 확인)'),'(7일 확인)','(7일째 확인)') WHERE symptom LIKE '%(7일 확인)%'");
   const fc=await pool.query('SELECT COUNT(*)::int AS c FROM aftercare WHERE fit IS NOT NULL');
   if(fc.rows[0].c===0){ const d=_demoCare();
@@ -768,7 +769,7 @@ function _demoCare(){
   var as=[
     {customer_id:3,store:'홍대점',symptom:'흘러내림 (7일째 확인) · 코받침이 눌리고 흘러내림',cause:null,action:null,status:'열림',closed_at:null},
     {customer_id:5,store:'판교점',symptom:'가까운 곳 (7일째 확인) · 누진 첫 착용',cause:'검안',action:'가입도 재측정 후 렌즈 재제작',status:'종결',closed_at:ago(3)},
-    {customer_id:2,store:'성수점',symptom:'다리 흘러내림',cause:'피팅',action:'다리 끝 재조정',status:'종결',closed_at:ago(20)}
+    {customer_id:2,store:'성수점',symptom:'안경 흘러내림',cause:'피팅',action:'템플 끝 재조정',status:'종결',closed_at:ago(20)}
   ];
   return {care:care, as:as};
 }
@@ -886,10 +887,10 @@ function judgeFrame(c, rx, sp, pb){
   var lv=0, why=[];
   function mark(l,t){ if(l>lv) lv=l; if(l>0) why.push(t); }
   var af=Math.abs(fd);
-  mark(af<=JUDGE_RULE.face[0]?0:(af<=JUDGE_RULE.face[1]?1:2), '앞판이 얼굴보다 '+af+'mm '+(fd>0?'넓어요':'좁아요')+(af<=JUDGE_RULE.face[1]?'. 다리 벌림으로 맞춰요':''));
+  mark(af<=JUDGE_RULE.face[0]?0:(af<=JUDGE_RULE.face[1]?1:2), '프론트가 얼굴보다 '+af+'mm '+(fd>0?'넓어요':'좁아요')+(af<=JUDGE_RULE.face[1]?'. 템플 벌림으로 맞춰요':''));
   var at=Math.abs(td);
-  if(pb && at>0){ why.push('PB라 다리를 T'+(+t||2)+' 길이로 바꿔 조립해요'); at=0; td=0; }
-  mark(at<=JUDGE_RULE.temple[0]?0:(at<=JUDGE_RULE.temple[1]?1:2), '다리가 '+at+'mm '+(td>0?'길어요':'짧아요')+(at<=JUDGE_RULE.temple[1]?'. 다리 끝 굽힘으로 맞춰요':''));
+  if(pb && at>0){ why.push('PB라 템플을 T'+(+t||2)+' 길이로 바꿔 조립해요'); at=0; td=0; }
+  mark(at<=JUDGE_RULE.temple[0]?0:(at<=JUDGE_RULE.temple[1]?1:2), '템플이 '+at+'mm '+(td>0?'길어요':'짧아요')+(at<=JUDGE_RULE.temple[1]?'. 템플 끝 굽힘으로 맞춰요':''));
   if(rx) mark(mbs<=JUDGE_RULE.blank[0]?0:(mbs<=JUDGE_RULE.blank[1]?1:2), '최소 블랭크 '+mbs+'mm'+(mbs<=JUDGE_RULE.blank[1]?'. 큰 블랭크로 주문해요':'. 가공할 수 없어요'));
   var score=Math.max(0,Math.min(100,Math.round(100-2.5*af-1.5*at-Math.max(0,mbs-65)*1.5)));
   return {level:['가능','조정 필요','불가'][lv], lv:lv, why:why, score:score, frameW:frameW, faceDiff:fd, templeDiff:td, R:R, L:L, spec:sp};
