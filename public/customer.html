@@ -602,7 +602,27 @@ function reasonOf(diffF, fr, templeLen){
   if(Math.abs(dt)>6) r+=(dt>0?' · 다리 김':' · 다리 짧음');
   return r;
 }
-function renderRecs(faceW,templeLen,nose){
+// [09.24] 매장 재고 테를 본사 판정 규칙으로 판정해요. PB와 기존 브랜드를 같은 기준으로 보여주고, 쓸 수 없는 테는 빼요
+var REC_T=null;
+function renderRecs(faceW,templeLen,nose){ clearTimeout(REC_T); REC_T=setTimeout(function(){ renderRecsServer(faceW,templeLen,nose); },250); }
+function renderRecsServer(faceW,templeLen,nose){
+  var pdEl=document.getElementById('myPD'), pd=parseFloat(pdEl&&pdEl.textContent)||63;
+  fetch('/api/frames/match?face='+faceW+'&temple='+templeLen+'&pd='+pd+'&customer_id='+DEMO_CUSTOMER_ID)
+    .then(function(r){return r.json();}).then(function(j){
+      if(!j.ok) throw new Error(j.error);
+      document.getElementById('recCount').textContent='· '+j.items.length+'개'+(j.hidden?' (안 맞는 '+j.hidden+'개는 뺐어요)':'');
+      document.getElementById('recList').innerHTML=j.items.map(function(x){
+        var sp=x.spec, g=x.lv===0?['바로 맞아요','best']:['매장에서 조정','good'];
+        var why=x.why.filter(function(w){return w.indexOf('블랭크')<0;}).map(function(w){return w.replace('. 다리 벌림으로 맞춰요','').replace('. 다리 끝 굽힘으로 맞춰요','').replace(/PB라 다리를 T\d 길이로 바꿔 조립해요/,'다리를 내 길이로 바꿔 끼워요');}).join(' · ');
+        return '<div class="recrow"><div>'+
+          '<div class="rn">'+x.name+' <span class="rtag">'+(x.pb?'PB':'기존 브랜드')+'</span></div>'+
+          '<div class="rd">'+sp.a+'□'+sp.dbl+'-'+sp.temple+' · '+(why||'치수가 잘 맞아요')+' · ₩'+x.price.toLocaleString('ko-KR')+'</div>'+
+          '</div><div style="text-align:right"><div class="rmatch '+g[1]+'">'+g[0]+' '+x.score+'%</div>'+
+          '<button class="btn small ghost" data-n="'+x.name+'" onclick="ordPick(this.dataset.n)" style="margin-top:6px">주문</button></div></div>';
+      }).join('') + '<div class="rd" style="margin-top:8px;color:var(--muted)">성수점 재고 기준이에요. '+(j.withRx?'처방까지 반영했어요. ':'')+'다른 브랜드 테도 같은 기준으로 판정해요.</div>';
+    }).catch(function(){ renderRecsLocal(faceW,templeLen,nose); });
+}
+function renderRecsLocal(faceW,templeLen,nose){
   var scored=CATALOG.map(function(fr){ var sc=scoreFrame(fr,faceW,templeLen,nose); return {fr:fr,sc:sc}; })
     .filter(function(x){return x.sc.total>=35;})
     .sort(function(a,b){return b.sc.total-a.sc.total;});
