@@ -40,8 +40,8 @@
 <div class="wrap"><section class="view active">
   <div class="lead"><div>
     <div class="eyebrow">가맹점 · 3 테 판정 · 가공</div>
-    <h2>측정값에 맞는 테를 고르고 가공 지시서를 만들어요</h2>
-    <div class="sub">손님의 얼굴 폭과 PD, 처방을 매장 재고 테의 치수와 비교해서 가능, 조정 필요, 불가로 나눠요. 고른 테로 편심과 블랭크, 두께를 계산하고, 안 되는 조합은 지시서를 만들지 않아요.</div>
+    <h2>측정값에 맞는 테 선택, 가공 지시서 작성</h2>
+    <div class="sub">손님 얼굴 폭·PD·처방을 매장 재고 테 치수와 비교해 가능, 조정 필요, 불가로 분류. 고른 테로 편심·블랭크·두께 계산. 안 되는 조합은 지시서 생성 안 함.</div>
   </div></div>
 
   <div class="card pad sec noprint">
@@ -56,7 +56,7 @@
   <div class="card pad sec noprint">
     <div class="ctitle">테 판정 <span class="label" id="wRule" style="font-weight:400"></span></div>
     <div class="jgrid" id="wJudge"></div>
-    <div class="label" style="margin-top:8px">판정 기준은 시작값이에요. 1호점 안경사와 자문 안경사가 확정하고 착용 결과로 고쳐요. 테 치수는 입고할 때 잰 값으로 바꿔요.</div>
+    <div class="label" style="margin-top:8px">판정 기준은 시작값. 1호점 안경사와 자문 안경사가 확정, 착용 결과로 수정. 테 치수는 입고 시 실측값으로 교체.</div>
   </div>
 
   <div class="card pad sec" id="woCard" style="display:none"></div>
@@ -66,7 +66,7 @@
     <div id="wList"></div>
   </div>
 </section></div>
-<div class="foot"><span>BETTERVISION OS · 테 판정 · 가공 지시서</span><span>판정 규칙은 본사 기준 관리에서 배포돼요</span></div>
+<div class="foot"><span>BETTERVISION OS · 테 판정 · 가공 지시서</span><span>판정 규칙은 본사 기준 관리에서 배포</span></div>
 <script>
 var J=null;
 function $(id){return document.getElementById(id);}
@@ -79,7 +79,7 @@ function loadCust(){
   });
 }
 function judge(){
-  var cid=$('wCust').value; $('woCard').style.display='none'; if(!cid){ $('wJudge').innerHTML='<div class="muted">손님이 없어요</div>'; return; }
+  var cid=$('wCust').value; $('woCard').style.display='none'; if(!cid){ $('wJudge').innerHTML='<div class="muted">손님 없음</div>'; return; }
   fetch('/api/frames/judge?customer_id='+cid+'&store='+encodeURIComponent($('wStore').value)).then(function(r){return r.json();}).then(function(j){
     if(!j.ok){ $('wJudge').innerHTML='<div class="muted">'+esc(j.error)+'</div>'; $('wInfo').innerHTML=''; return; }
     J=j; var c=j.customer, rx=j.rx;
@@ -90,7 +90,7 @@ function judge(){
       var its=j.items.filter(function(x){return x.level===lv;});
       return '<div class="jcol"><h4>'+lv+' <span class="pill '+pill[lv]+'">'+its.length+'</span></h4>'+its.map(function(x){
         return '<div class="fr"><div class="t"><b>'+esc(x.name)+(x.pb?' <span class="pill">PB</span>':'')+'</b><span>적합도 '+x.score+'</span></div>'+
-          (x.why.length?'<div class="w">'+x.why.map(esc).join('<br>')+'</div>':'<div class="w">바로 맞아요</div>')+
+          (x.why.length?'<div class="w">'+x.why.map(esc).join('<br>')+'</div>':'<div class="w">바로 맞음</div>')+
           (x.lv<2?'<button class="btn small'+(x.lv?' ghost':'')+'" onclick="makeWO(\''+x.sku+'\')">가공 지시서 만들기</button>':'')+'</div>';
       }).join('')+'</div>';
     }).join('');
@@ -98,7 +98,7 @@ function judge(){
 }
 function makeWO(sku){
   fetch('/api/workorders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({customer_id:+$('wCust').value,store:$('wStore').value,sku:sku,lens:$('wLens').value})})
-    .then(function(r){return r.json();}).then(function(j){ if(!j.ok){ toast(j.error||'만들지 못했어요'); return; } showWO(j.workorder); listLoad(); });
+    .then(function(r){return r.json();}).then(function(j){ if(!j.ok){ toast(j.error||'생성 실패'); return; } showWO(j.workorder); listLoad(); });
 }
 function showWO(w){
   var c=w.calc, R=c.R, L=c.L, sp=c.spec, d=new Date(w.created_at);
@@ -123,7 +123,7 @@ function showWO(w){
 }
 function listLoad(){
   fetch('/api/workorders?store='+encodeURIComponent($('wStore').value)).then(function(r){return r.json();}).then(function(j){
-    $('wList').innerHTML=(j.items||[]).map(function(x){ var d=new Date(x.created_at); return '<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line2);font-size:16px"><span>No. '+String(x.id).padStart(4,'0')+' · '+esc(x.name)+' · '+esc(x.frame)+' + '+esc(x.lens)+'</span><span class="muted">'+(d.getMonth()+1)+'.'+d.getDate()+' · '+esc(x.status)+'</span></div>'; }).join('')||'<div class="muted">아직 만든 지시서가 없어요</div>';
+    $('wList').innerHTML=(j.items||[]).map(function(x){ var d=new Date(x.created_at); return '<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line2);font-size:16px"><span>No. '+String(x.id).padStart(4,'0')+' · '+esc(x.name)+' · '+esc(x.frame)+' + '+esc(x.lens)+'</span><span class="muted">'+(d.getMonth()+1)+'.'+d.getDate()+' · '+esc(x.status)+'</span></div>'; }).join('')||'<div class="muted">작성한 지시서 없음</div>';
   });
 }
 $('wStore').addEventListener('change',loadCust); $('wCust').addEventListener('change',judge);

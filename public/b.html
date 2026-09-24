@@ -58,7 +58,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div>
       <div class="eyebrow">③ · 검안·맞춤·피팅 표준 매뉴얼</div>
       <h2>검안 · 사이즈 재기 · 조제 · 피팅, 시스템으로 표준화</h2>
-      <div class="sub">앱이 절차를 단계별로 띄워요. 안경사가 따라가기만 하면 표준을 지키게 돼요. AI가 기준값과 이상치를 보여주면 안경사는 확인하고 확정만 해요. <b>경력이 짧아도 베테랑처럼 하고, 숙련자끼리 판단이 갈리지 않아요.</b></div>
+      <div class="sub">앱이 절차를 단계별로 표시. 안경사는 따라가기만 하면 표준 준수. AI가 기준값·이상치 표시, 안경사는 확인·확정만. <b>경력이 짧아도 베테랑 수준, 숙련자끼리 판단 차이 없음.</b></div>
     </div>
     <span class="pill good">● v0.1 골격 · 계속 추가 중</span>
   </div>
@@ -77,20 +77,20 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <span><span class="dft">〔확인〕</span> 교과·표준 초벌값 (임상 검증 후 확정)</span>
       <span><span class="blk">〔＿＿〕</span> 임상·법규로 채울 빈칸</span>
     </div>
-    <p class="note">단계마다 입력원과 앱 동작을 한 줄로 적고 변수 표(항목 / 기준·정상범위 / 이상치 처리)를 붙였어요. "의뢰"는 안경사 업무 범위를 넘는 소견을 안과로 넘기는 안전장치예요(D).</p>
+    <p class="note">단계마다 입력원·앱 동작 한 줄 + 변수 표(항목 / 기준·정상범위 / 이상치 처리). "의뢰"는 안경사 업무 범위를 넘는 소견을 안과로 넘기는 안전장치(D).</p>
   </div>
 
   <div class="card pad b-sec" id="s0">
     <div class="eyebrow">0 · 전제</div>
     <div class="ctitle">장비값 받기 · 데이터 연결</div>
-    <p>모든 측정값은 원본 그대로 1층에 저장한 다음 본사 기준 코드(2층)로 환산해요. 기존 장비 값은 3가지 길로 받아요.</p>
+    <p>모든 측정값은 원본 그대로 1층에 저장 후 본사 기준 코드(2층)로 환산. 기존 장비 값은 3가지 경로로 수신.</p>
     <table class="bvt">
       <tr><th>경로</th><th>방식</th><th>적용</th></tr>
       <tr><td>① 표준 통신</td><td>자동굴절기·렌즈미터·포롭터 디지털 출력을 자동 입력</td><td>지원 기기 즉시</td></tr>
       <tr><td>② 시리얼/USB</td><td>RS-232/USB 원시 데이터, 기기별 파서를 한 번 만들면 계속 사용</td><td>주력 구형</td></tr>
       <tr><td>③ 촬영+AI</td><td>화면 숫자를 촬영하면 AI가 읽어 입력</td><td>데모·초기 즉시</td></tr>
     </table>
-    <p class="note">먼저 촬영+AI로 빠르게 시작하고, 이후 정식 연동으로 옮겨요. 수기 입력 0이 목표예요.</p>
+    <p class="note">촬영+AI로 빠르게 시작, 이후 정식 연동으로 전환. 목표는 수기 입력 0.</p>
   </div>
 
   <div class="card pad b-sec" id="sa">
@@ -133,7 +133,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <tr><td>정점간거리(VD)</td><td><span class="dft">〔확인〕</span> 12mm 표준</td><td><span class="dft">〔확인〕</span> ±4.00D↑ 환산 필수</td></tr>
       <tr><td>가입도 ADD</td><td><span class="dft">〔확인〕</span> 연령별 (아래 참고)</td><td>연령에 비해 많으면 재확인</td></tr>
     </table>
-    <p class="note"><span class="dft">〔확인〕</span> ADD 초안은 40대 +0.75~1.25 / 50대 +1.50~2.00 / 60대+ +2.25~2.50이에요. 작업거리와 잔여조절로 미세조정하고, 기준은 아직 확정해야 해요.</p>
+    <p class="note"><span class="dft">〔확인〕</span> ADD 초안: 40대 +0.75~1.25 / 50대 +1.50~2.00 / 60대+ +2.25~2.50. 작업거리·잔여조절로 미세조정. 기준은 확정 전.</p>
 
     <div class="ctitle" style="font-size:15px;margin-top:14px">A-5 양안균형·양안시 <span class="gw">양안시</span></div>
     <div class="io"><b>입력</b> 포롭터(로터리프리즘·편광) ｜ <b>앱</b> 사위·폭주·억제 자동 판정</div>
@@ -171,7 +171,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <tr><td>두께·무게</td><td>도수·굴절률·직경 기반</td><td>과하면 형태·굴절률 제안</td></tr>
       <tr><td>박싱 좌표 연결</td><td>a □ DBL − 템플을 9사이즈·②에 연결</td><td>-</td></tr>
     </table>
-    <p class="note">박싱 좌표가 9사이즈(①), 타사 DB(②)와 같은 2층 코드로 연결되는 지점이에요. 조제값이 그대로 데이터 자산이 돼요.</p>
+    <p class="note">박싱 좌표가 9사이즈(①)·타사 DB(②)와 같은 2층 코드로 연결되는 지점. 조제값이 그대로 데이터 자산.</p>
   </div>
 
   <div class="card pad b-sec" id="sc">
@@ -187,12 +187,12 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <tr><td>템플 꺾임·귀뒤</td><td>귀 위치/높이, 수평 유지</td><td>미끄러지면 재조정</td></tr>
       <tr><td>소재별 최대벌림각</td><td><span class="dft">〔확인〕</span> 티탄±8 / 금속±6 / TR±4 / 경질아세테이트±1 mm</td><td>넘으면 "이 테는 못 맞춰요" 안내</td></tr>
     </table>
-    <p><b>A4 피팅시트는 인쇄해서 써요.</b> 각도를 종이에 직접 재지 않고 <b>선형값(mm)으로 환산</b>해서 재요. 평면도에 목표 템플간격 두 점을 찍고, 거기에 닿도록 휘어요. 측면도에는 판토 각도 웨지가 있어요. <b>50mm 스케일바(가로·세로)는 꼭 넣고</b>, "실제 크기 100%"로 인쇄해요. 휨 지그, 검증 게이지, 손님 설명까지 세 가지 역할을 해요. (구현 파일: bv-fitsheet-demo.pdf)</p>
+    <p><b>A4 피팅시트는 인쇄해서 사용.</b> 각도는 종이에 직접 재지 않고 <b>선형값(mm)으로 환산</b>해서 측정. 평면도에 목표 템플간격 두 점 표시, 거기에 닿도록 휨. 측면도에 판토 각도 웨지. <b>50mm 스케일바(가로·세로) 필수</b>, "실제 크기 100%"로 인쇄. 역할 세 가지: 휨 지그, 검증 게이지, 손님 설명. (구현 파일: bv-fitsheet-demo.pdf)</p>
   </div>
 
   <div class="card pad b-sec" id="sd">
     <div class="eyebrow">D · 안전·의뢰 기준 <span class="gw">안경사법 경계, 매뉴얼의 안전장치</span></div>
-    <p>안경사의 업무는 도수 안경과 콘택트의 조제, 판매, 피팅이에요. 질환의 진단, 치료, 처방은 안과 영역이에요. 이 경계는 시스템이 자동으로 지켜요. "이상치면 의뢰" 트리거가 그 역할을 해요.</p>
+    <p>안경사 업무: 도수 안경·콘택트의 조제, 판매, 피팅. 질환의 진단, 치료, 처방은 안과 영역. 이 경계는 시스템이 자동으로 관리. "이상치면 의뢰" 트리거가 그 역할.</p>
     <table class="bvt">
       <tr><th>트리거</th><th>기준</th><th>처리</th></tr>
       <tr><td>연령 제한</td><td><b>6세 이하 = 의사 처방 필수</b> (의료기사법 시행령 별표1). 안경사 단독 조제·판매 불가</td><td>해당하면 안과 처방 안내</td></tr>
@@ -200,12 +200,12 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <tr><td>교정 불충분</td><td>최대교정에도 목표 미달</td><td>의뢰</td></tr>
       <tr><td>양안시 이상</td><td>억제·복시·큰 사위</td><td>프리즘 검토/의뢰</td></tr>
     </table>
-    <p class="note">"데이터 기록"과 "법적 안전"을 함께 챙겨요. 의뢰도 기록되면 본사 데이터가 돼요.</p>
+    <p class="note">"데이터 기록"과 "법적 안전"을 함께 확보. 의뢰도 기록되면 본사 데이터.</p>
   </div>
 
   <div class="card pad b-sec" id="se">
     <div class="eyebrow">E · 채울 칸 인덱스 <span class="gw">임상 작업 목록</span></div>
-    <p>아래만 채우면 v0.1 골격이 v1.0 정본이 돼요. <span class="dft">〔확인〕</span>은 검증해서 확정하고, <span class="blk">〔＿＿〕</span>은 새로 입력해요.</p>
+    <p>아래만 채우면 v0.1 골격이 v1.0 정본으로. <span class="dft">〔확인〕</span>은 검증 후 확정, <span class="blk">〔＿＿〕</span>은 새로 입력.</p>
     <ul class="b-li">
       <li><b>검안 컷값</b>: 나안·교정시력 정밀 기준, 고도수·고난시 주의 컷, 구도수 대비 허용 변화폭.</li>
       <li><b>양안시 정상범위</b>: 사위(원/근) Morgan 채택 여부, NPC·AMP·AC/A 기준, 억제·복시 의뢰 컷.</li>
@@ -215,7 +215,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <li><b>소재별 최대벌림각 표</b>(②와 공유) 수치.</li>
       <li><b>안전·의뢰</b>: 6세 이하 법규 확인, 질환 의심 소견 목록 확정.</li>
     </ul>
-    <p class="note">다음에 붙일 순서는 E 빈칸 임상값, ④ 콘택트 검안 플로우, 조제 계산식 상세, A4 피팅시트 데이터 연동이에요. 다 되면 중요한 내용만 사업 개요(A)에 담아요.</p>
+    <p class="note">다음 순서: E 빈칸 임상값, ④ 콘택트 검안 플로우, 조제 계산식 상세, A4 피팅시트 데이터 연동. 완료 후 핵심만 사업 개요(A)에 반영.</p>
   </div>
 </section>
 </div>

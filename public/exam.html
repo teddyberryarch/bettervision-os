@@ -74,14 +74,14 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="lead">
     <div>
       <div class="eyebrow">가맹점 · 2 검안</div>
-      <h2>화면을 따라 검안하면 기준이 같아지고, 조제에 쓸 값은 자동으로 나와요</h2>
-      <div class="sub">맨눈 검안 절차와 가져온 안경(렌즈미터) 측정을 단계별로 안내해요. 상황에 따라 다음 단계가 자동으로 달라지고, AI가 기준값과 이상치를 보여 줘요. 결과값은 조제, 피팅, 9사이즈로 넘어가요. <b>표준 매뉴얼(b)을 실제로 쓰는 도구예요.</b></div>
+      <h2>화면 따라 검안하면 같은 기준. 조제값은 자동 산출</h2>
+      <div class="sub">맨눈 검안 절차와 가져온 안경(렌즈미터) 측정을 단계별 안내. 상황에 따라 다음 단계 자동 분기. AI가 기준값과 이상치 표시. 결과값은 조제, 피팅, 9사이즈로 전달. <b>표준 매뉴얼(b)을 실제로 쓰는 도구.</b></div>
     </div>
     <span class="pill good">● v0.1 프로토타입</span>
   </div>
 
   <div class="card pad">
-    <div class="eyebrow" style="margin-bottom:4px">예시 상황 (누르면 자동으로 채워져요)</div>
+    <div class="eyebrow" style="margin-bottom:4px">예시 상황 (누르면 자동 입력)</div>
     <div class="ex-presets">
       <button class="chip" onclick="preset('myopia')">초진 · 단순 근시</button>
       <button class="chip" onclick="preset('presby')">재방문 · 노안</button>
@@ -139,9 +139,9 @@ function seedMachine(){
 }
 function mmBadge(id){
   if(!S.machineMode) return '';
-  if(MM_AUTO.indexOf(id)>=0) return '<div class="mmb auto">자동 수신 (기계가 채우고 안경사는 확인만 해요)</div>';
-  if(MM_JUDGE.indexOf(id)>=0) return '<div class="mmb judge">안경사 판단 (사람이 결정하는 단계예요)</div>';
-  if(id==='intake') return '<div class="mmb info">문진 (다음 단계를 정해요)</div>';
+  if(MM_AUTO.indexOf(id)>=0) return '<div class="mmb auto">자동 수신 (기계가 입력, 안경사는 확인만)</div>';
+  if(MM_JUDGE.indexOf(id)>=0) return '<div class="mmb judge">안경사 판단 (사람이 결정하는 단계)</div>';
+  if(id==='intake') return '<div class="mmb info">문진 (다음 단계 결정)</div>';
   if(id==='result') return '<div class="mmb info">처방 확정</div>';
   return '';
 }
@@ -150,7 +150,7 @@ function mmSummary(){
   var st=steps();
   var a=st.filter(function(s){return MM_AUTO.indexOf(s)>=0;}).length;
   var j=st.filter(function(s){return MM_JUDGE.indexOf(s)>=0;}).length;
-  return '<div class="mmsum">기계 연동: 자동 수신 <b>'+a+'</b> · 안경사 판단 <b>'+j+'</b>. 절차는 표준대로 다 거치고, 안경사가 직접 판단하는 건 '+j+'개예요.</div>';
+  return '<div class="mmsum">기계 연동: 자동 수신 <b>'+a+'</b> · 안경사 판단 <b>'+j+'</b>. 절차는 표준대로 모두 진행. 안경사 직접 판단 '+j+'개.</div>';
 }
 
 /* ---------- 렌더 ---------- */
@@ -178,7 +178,7 @@ function eyeInputs(pfx,obj,withAdd){
 function view(id){
   if(id==='intake') return ''+
     '<div class="eyebrow">1 · 문진</div><div class="stitle">기본 정보 · 분기</div>'+
-    '<div class="sdesc">여기서 받은 답에 따라 다음 단계가 자동으로 정해져요(렌즈미터, 노안, 의뢰).</div>'+
+    '<div class="sdesc">여기서 받은 답에 따라 다음 단계 자동 결정(렌즈미터, 노안, 의뢰).</div>'+
     '<div class="frow">'+
       '<div class="fld"><label>구분</label><select id="i_mode"><option value="new"'+(S.mode==='new'?' selected':'')+'>초진</option><option value="re"'+(S.mode==='re'?' selected':'')+'>재방문</option></select></div>'+
       '<div class="fld"><label>나이</label><input id="i_age" type="number" placeholder="예: 45" value="'+S.age+'"></div>'+
@@ -188,47 +188,47 @@ function view(id){
       '<div class="fld"><label>기존 안경 지참</label><select id="i_glass"><option value="no"'+(S.hasGlasses==='no'?' selected':'')+'>없음</option><option value="yes"'+(S.hasGlasses==='yes'?' selected':'')+'>있음 (렌즈미터)</option></select></div>'+
     '</div>'+
     '<label class="chk"><input type="checkbox" id="i_presby" '+(S.presby?'checked':'')+'> 노안 교정 필요 (40대 이상은 자동 체크)</label>'+
-    '<div class="sdesc" style="margin:10px 0 4px">위험 소견 (체크하면 의뢰 표시가 붙어요)</div>'+
+    '<div class="sdesc" style="margin:10px 0 4px">위험 소견 (체크 시 의뢰 표시)</div>'+
     chk('r_va','급격한 시력 저하')+chk('r_dip','복시(겹보임)')+chk('r_field','시야 결손')+chk('r_pain','충혈·통증')+chk('r_dm','당뇨 등 전신질환')+
-    '<div class="hint">앱이 용도에 맞는 렌즈와 코팅을 연결하고, 위험 소견이 있으면 안과 의뢰로 넘겨요.</div>';
+    '<div class="hint">앱이 용도에 맞는 렌즈와 코팅 연결. 위험 소견은 안과 의뢰로 전달.</div>';
 
   if(id==='lensmeter') return ''+
     '<div class="eyebrow">구도수 · 렌즈미터</div><div class="stitle">가져온 안경 측정</div>'+
-    '<div class="sdesc">기존 안경을 렌즈미터로 읽어 구도수 기준값을 잡아요(재구매나 도수 변화를 비교할 때 출발점이에요).</div>'+
+    '<div class="sdesc">기존 안경을 렌즈미터로 읽어 구도수 기준값 설정(재구매·도수 변화 비교의 출발점).</div>'+
     eyeInputs('lm',S.lm)+
     '<div class="frow"><div class="fld"><label>PD (mm)</label><input id="lm_PD" placeholder="예: 63" value="'+(S.lm.R.PD||'')+'"></div>'+
       '<div class="fld"><label>가입도 ADD</label><input id="lm_ADD" placeholder="예: +2.00" value="'+(S.lm.R.ADD||'')+'"></div></div>'+
-    '<div class="hint">렌즈미터를 연동하면 자동으로 입력돼요(③ 장비값 받는 3가지 방법). 지금은 직접 입력하거나 촬영 AI로 읽어요.</div>';
+    '<div class="hint">렌즈미터 연동 시 자동 입력(③ 장비값 받는 3가지 방법). 지금은 직접 입력 또는 촬영 AI로 판독.</div>';
 
   if(id==='va') return ''+
     '<div class="eyebrow">2 · 나안</div><div class="stitle">나안 / 현용 시력</div>'+
-    '<div class="sdesc">교정 전 시력이에요. 이후 타각식과 자각식의 기준이 돼요.</div>'+
+    '<div class="sdesc">교정 전 시력. 이후 타각식·자각식의 기준.</div>'+
     '<div class="frow"><div class="fld"><label>우안(R) 나안시력</label><input id="va_R" placeholder="예: 0.3" value="'+S.va.R+'"></div>'+
       '<div class="fld"><label>좌안(L) 나안시력</label><input id="va_L" placeholder="예: 0.4" value="'+S.va.L+'"></div></div>';
 
   if(id==='objective') return ''+
     '<div class="eyebrow">3 · 타각식</div><div class="stitle">자동굴절기 / 레티노</div>'+
-    '<div class="sdesc">기계가 읽은 값이에요. 자각식 시작값으로 자동으로 들어가요.</div>'+
+    '<div class="sdesc">기계가 읽은 값. 자각식 시작값으로 자동 입력.</div>'+
     eyeInputs('obj',S.obj)+
-    '<div class="hint">자동굴절기 값을 자각식 시작점으로 가져가요. (값이 없으면 비워 둬도 돼요)</div>';
+    '<div class="hint">자동굴절기 값을 자각식 시작점으로 사용. (값이 없으면 비워 둬도 됨)</div>';
 
   if(id==='subjective'){
     var hi=highPowerNote();
     return ''+
     '<div class="eyebrow">4 · 자각식</div><div class="stitle">포롭터 · 최종 굴절</div>'+
-    '<div class="sdesc">MPMVA(최고시력 최저 마이너스)로 시작해서 크로스실린더로 난시를 정밀하게 맞추고, 적녹 균형으로 마무리해요.</div>'+
+    '<div class="sdesc">MPMVA(최고시력 최저 마이너스)로 시작, 크로스실린더로 난시 정밀 조정, 적녹 균형으로 마무리.</div>'+
     eyeInputs('subj',S.subj)+
     '<div class="frow"><div class="fld"><label>정점간거리 VD (mm)</label><input id="subj_vd" value="'+S.subj.vd+'"></div></div>'+
-    '<div class="hint">표준 VD는 12mm예요. ±4.00D 이상이면 조제 단계에서 유효도수로 환산해요.</div>'+ hi;
+    '<div class="hint">표준 VD 12mm. ±4.00D 이상은 조제 단계에서 유효도수로 환산.</div>'+ hi;
   }
 
   if(id==='binocular'){
     return ''+
     '<div class="eyebrow">5 · 양안시</div><div class="stitle">양안균형 · 사위</div>'+
-    '<div class="sdesc">사위는 부호로 적어요. 외사위(+) / 내사위(−). 정상범위를 벗어나면 프리즘이나 의뢰로 넘어가요.</div>'+
+    '<div class="sdesc">사위는 부호로 기록. 외사위(+) / 내사위(−). 정상범위 밖이면 프리즘 또는 의뢰.</div>'+
     '<div class="frow"><div class="fld"><label>원거리 사위 (Δ)</label><input id="b_pD" placeholder="예: +1" value="'+S.bino.pD+'"></div>'+
       '<div class="fld"><label>근거리 사위 (Δ)</label><input id="b_pN" placeholder="예: +3" value="'+S.bino.pN+'"></div></div>'+
-    '<div class="hint">정상(초안·Morgan): 원거리 −1~+3, 근거리 0~+6. 벗어나면 경고가 떠요.</div>'+
+    '<div class="hint">정상(초안·Morgan): 원거리 −1~+3, 근거리 0~+6. 벗어나면 경고 표시.</div>'+
     phoriaNote();
   }
 
@@ -236,12 +236,12 @@ function view(id){
     var sug=addSuggest();
     return ''+
     '<div class="eyebrow">6 · 가입도</div><div class="stitle">노안 ADD</div>'+
-    '<div class="sdesc">근용 가입도예요. 나이로 추천값을 보여 주고, 작업거리에 맞춰 조금씩 조정해요.</div>'+
+    '<div class="sdesc">근용 가입도. 나이별 추천값 표시, 작업거리에 맞춰 미세 조정.</div>'+
     '<div class="frow"><div class="fld"><label>가입도 ADD</label><input id="a_add" placeholder="예: +1.75" value="'+S.add+'"></div></div>'+
-    (sug?'<div class="hint">나이 '+S.age+'세 추천 ADD: <b>'+sug+'</b> (초안이라 확정이 필요해요)</div>':'');
+    (sug?'<div class="hint">나이 '+S.age+'세 추천 ADD: <b>'+sug+'</b> (초안, 확정 필요)</div>':'');
   }
 
-  if(id==='result') return '<div class="eyebrow">7 · 처방 확정</div><div class="stitle">결과값을 조제, 피팅, 9사이즈로 넘겨요</div><div id="resbox"></div>';
+  if(id==='result') return '<div class="eyebrow">7 · 처방 확정</div><div class="stitle">결과값을 조제, 피팅, 9사이즈로 전달</div><div id="resbox"></div>';
   return '';
 }
 function chk(id,label){return '<label class="chk"><input type="checkbox" id="'+id+'" '+(S.risk.indexOf(id)>=0?'checked':'')+'> '+label+'</label>';}
@@ -249,14 +249,14 @@ function chk(id,label){return '<label class="chk"><input type="checkbox" id="'+i
 /* ---------- 라이브 노트 ---------- */
 function highPowerNote(){
   var m=Math.max(Math.abs(num(g('subj_R_S'))||0),Math.abs(num(g('subj_L_S'))||0));
-  if(m>=4) return '<div class="warn">고도수(|S|≥4.00D)예요. 정점거리 보정과 고굴절률 렌즈를 권해요.</div>';
+  if(m>=4) return '<div class="warn">고도수(|S|≥4.00D). 정점거리 보정과 고굴절률 렌즈 권장.</div>';
   return '';
 }
 function phoriaNote(){
   var d=num(g('b_pD')), n=num(g('b_pN')), out=[];
   if(d!==null&&(d<-1||d>3)) out.push('원거리 사위 '+d+'Δ 정상범위 벗어남');
   if(n!==null&&(n<0||n>6)) out.push('근거리 사위 '+n+'Δ 정상범위 벗어남');
-  if(out.length) return '<div class="warn">'+out.join(' · ')+'. 프리즘을 검토하거나 안과에 의뢰해요.</div>';
+  if(out.length) return '<div class="warn">'+out.join(' · ')+'. 프리즘 검토 또는 안과 의뢰.</div>';
   return '';
 }
 function addSuggest(){
@@ -334,7 +334,7 @@ function buildResult(){
     '<div class="eyebrow" style="margin:14px 0 4px">이상치 · 의뢰 점검</div>'+flHtml+
     '<div class="eyebrow" style="margin:16px 0 4px">넘겨줄 값 (조제·피팅·9사이즈)</div>'+
     '<div class="dump">'+JSON.stringify(bundle,null,2)+'</div>'+
-    '<div class="hint">이 값들이 조제(굴절률, 정점보정), 피팅(A4 시트), 9사이즈 매칭으로 그대로 넘어가요. 모든 값은 원본값(1층)과 본사 코드(2층)로 본사에 귀속돼요.</div>';
+    '<div class="hint">이 값들은 조제(굴절률, 정점보정), 피팅(A4 시트), 9사이즈 매칭으로 그대로 전달. 모든 값은 원본값(1층)과 본사 코드(2층)로 본사 귀속.</div>';
   try{BVRecord.save({rx:{R:S.subj.R,L:S.subj.L,add:(S.presby?S.add:''),vd:S.subj.vd}, sphMax:Math.max(Math.abs(parseFloat(S.subj.R.S)||0),Math.abs(parseFloat(S.subj.L.S)||0)), pd:(S.hasGlasses==='yes'?S.lm.R.PD:'')});}catch(e){}
   document.getElementById('resbox').innerHTML=html;
 }

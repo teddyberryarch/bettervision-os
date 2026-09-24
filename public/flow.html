@@ -64,19 +64,19 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="lead">
     <div>
       <div class="eyebrow">가맹점 · 1 접객</div>
-      <h2>손님이 들어오면 이 순서대로 해요</h2>
-      <div class="sub">누가 맡아도(안경사 1 + 일반 직원) 따라가기만 하면 기준대로 되는 접객 절차예요. 단계마다 어떤 시스템을 쓰는지, 어떤 데이터가 남는지 적어 두었어요. <b>모든 시스템이 이 흐름 하나로 이어져요.</b></div>
+      <h2>손님 입장 시 접객 순서</h2>
+      <div class="sub">누가 맡아도(안경사 1 + 일반 직원) 따라가기만 하면 기준대로 되는 접객 절차. 단계별 사용 시스템과 남는 데이터 정리. <b>모든 시스템이 이 흐름 하나로 연결.</b></div>
       <div class="label" style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap">같이 쓰는 도구: <a href="profile.html">손님 기록 조회</a><a href="catalog.html">카탈로그·사이즈 맞춤</a><a href="pricing.html">렌즈·콘택트 가격</a><a href="kakao.html">카톡 알림</a><a href="manual.html">상담·불만 응대 매뉴얼</a></div>
     </div>
     <span class="pill good">● 운영 순서 v0.1</span>
   </div>
 
   <div class="card pad">
-    <div class="eyebrow" style="margin-bottom:6px">입장 유형은 처음에 세 갈래로 나뉘어요</div>
+    <div class="eyebrow" style="margin-bottom:6px">입장 유형은 처음에 세 갈래</div>
     <div class="branchbar">
-      <div class="bc b1"><div class="bt">A · 신규 도수</div><div class="bd">전체 과정을 다 거쳐요. 측정 · 검안 · 추천 · 조제 · 피팅.</div></div>
-      <div class="bc b2"><div class="bt">B · 재방문 재구매</div><div class="bd">이전 데이터를 불러와요. 측정과 검안은 건너뛰고 바로 추천과 주문으로 가요. (다시 검사하고 싶으면 1만원, 구매하면 면제)</div></div>
-      <div class="bc b3"><div class="bt">C · 비도수</div><div class="bd">선글라스, 저도수 리딩. 검안 없이 측정 · 추천 · 피팅으로 가요. 온라인으로도 팔 수 있는 품목이에요.</div></div>
+      <div class="bc b1"><div class="bt">A · 신규 도수</div><div class="bd">전체 과정. 측정 · 검안 · 추천 · 조제 · 피팅.</div></div>
+      <div class="bc b2"><div class="bt">B · 재방문 재구매</div><div class="bd">이전 데이터 불러오기. 측정·검안 생략, 바로 추천·주문. (재검사 희망 시 1만원, 구매 시 면제)</div></div>
+      <div class="bc b3"><div class="bt">C · 비도수</div><div class="bd">선글라스, 저도수 리딩. 검안 없이 측정 · 추천 · 피팅. 온라인 판매 가능 품목.</div></div>
     </div>
   </div>
 
@@ -84,9 +84,9 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="no">0</div>
     <div class="pt">접수 · 맞이<span class="tm">~2분</span></div>
     <ul>
-      <li>연락처로 신규인지 재방문인지 확인하면 CRM이 자동으로 조회해요. 재방문이면 지난 측정, 구매, 도수 이력을 불러와요.</li>
-      <li>주로 어디에 쓰는지 들어요(원거리/근거리/VDT/운전). 위험 소견이 있는지 간단히 물어봐요.</li>
-      <li><b>기존 안경을 가져왔다면</b> 렌즈미터로 구도수(S/C/Ax/ADD/PD)를 읽어 기준값으로 삼아요.</li>
+      <li>연락처로 신규/재방문 확인 시 CRM 자동 조회. 재방문이면 지난 측정·구매·도수 이력 불러오기.</li>
+      <li>주 용도 확인(원거리/근거리/VDT/운전). 위험 소견 여부 간단히 문진.</li>
+      <li><b>기존 안경을 가져왔다면</b> 렌즈미터로 구도수(S/C/Ax/ADD/PD)를 읽어 기준값으로 사용.</li>
     </ul>
     <div class="tools"><a class="tool" href="store.html">가맹점 CRM 조회</a></div>
     <div class="data">데이터: 손님 식별 · 용도 · 구도수(렌즈미터)</div>
@@ -98,8 +98,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="no">1</div>
     <div class="pt">안면 측정<span class="tm">~3분</span></div>
     <ul>
-      <li>아이패드로 얼굴을 스캔하면 측정값 5개(PD, 얼굴폭, 코높이, 귀위치, 안면각)와 얼굴 메시가 나와요.</li>
-      <li>한 번 스캔으로 9사이즈 후보와 가상피팅용 얼굴 형태를 함께 얻어요.</li>
+      <li>아이패드 얼굴 스캔으로 측정값 5개(PD, 얼굴폭, 코높이, 귀위치, 안면각)와 얼굴 메시 생성.</li>
+      <li>한 번 스캔으로 9사이즈 후보와 가상피팅용 얼굴 형태 동시 확보.</li>
     </ul>
     <div class="tools"><a class="tool" href="customer.html">측정·가상피팅</a></div>
     <div class="data">데이터: 원본 5값 + 메시 + 사진(생체정보 동의), 본사 귀속</div>
@@ -111,12 +111,12 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="no">2</div>
     <div class="pt">검안<span class="tm">~7분 · 신규/도수만</span></div>
     <ul>
-      <li>검안 시스템이 절차를 단계별로 보여 줘서, 따라가기만 하면 기준대로 돼요. 문진 · 나안 · 타각(자동굴절기) · 자각 · 양안균형 · 처방 순서예요.</li>
-      <li>AI가 기준값과 이상치를 보여 주면 안경사가 확인하고 확정해요. 위험 소견이 있거나 6세 이하면 안과 의뢰로 자동 연결돼요.</li>
+      <li>검안 시스템이 절차를 단계별로 표시. 따라가기만 하면 기준대로. 문진 · 나안 · 타각(자동굴절기) · 자각 · 양안균형 · 처방 순서.</li>
+      <li>AI가 기준값·이상치 표시, 안경사가 확인 후 확정. 위험 소견 또는 6세 이하면 안과 의뢰로 자동 연결.</li>
     </ul>
     <div class="tools"><a class="tool" href="exam.html">검안 시스템 열기</a><a class="tool" href="b.html">표준 매뉴얼</a></div>
     <div class="data">데이터: 처방(S/C/Ax/ADD/PD) · 이상치·의뢰 플래그</div>
-    <div class="say">"검사 결과 이대로 처방 잡을게요." (재방문 단순 재구매면 건너뛰어요)</div>
+    <div class="say">"검사 결과 이대로 처방 잡을게요." (재방문 단순 재구매면 생략)</div>
     <div class="sys"><span class="tag ok">③A 검안 </span></div>
   </div>
 
@@ -124,9 +124,9 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="no">3</div>
     <div class="pt">추천 · 가상피팅<span class="tm">~7분</span></div>
     <ul>
-      <li>측정과 검안 결과로 9사이즈를 맞춰 보고 적합도(%) 순으로 보여 줘요. 얼굴형, 스타일, 용도, 트렌드, 이력 6변수로 객관적으로 추천해요.</li>
-      <li>다른 브랜드 진열품까지 적합도를 비교해요("젠몬 78% vs 우리 PB 96%"). 권하지 않아도 손님이 PB를 고르게 돼요.</li>
-      <li>고른 디자인을 얼굴 메시에 얹어 가상피팅으로 미리 확인해요.</li>
+      <li>측정·검안 결과로 9사이즈 매칭, 적합도(%) 순 표시. 얼굴형, 스타일, 용도, 트렌드, 이력 6변수로 객관적 추천.</li>
+      <li>다른 브랜드 진열품까지 적합도 비교("젠몬 78% vs 우리 PB 96%"). 권하지 않아도 손님이 PB 선택.</li>
+      <li>고른 디자인을 얼굴 메시에 얹어 가상피팅으로 사전 확인.</li>
     </ul>
     <div class="tools"><a class="tool" href="customer.html">가상피팅</a></div>
     <div class="data">데이터: 추천 근거 · 비교 적합도 · 손님 선택</div>
@@ -138,8 +138,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="no">4</div>
     <div class="pt">견적 · 결정<span class="tm">~5분</span></div>
     <ul>
-      <li>POS에 본사 권장가가 기본으로 떠서 가격 설명이 쉬워요 (판매가는 매장이 정해요).</li>
-      <li>렌즈 옵션(굴절률, 코팅), 멤버십 등급, 포인트를 반영해요. 도수 제품은 먼저 결제해요(또는 보증금).</li>
+      <li>POS에 본사 권장가 기본 표시, 가격 설명 용이 (판매가는 매장이 결정).</li>
+      <li>렌즈 옵션(굴절률, 코팅), 멤버십 등급, 포인트 반영. 도수 제품은 선결제(또는 보증금).</li>
     </ul>
     <div class="tools"><a class="tool" href="store.html">POS · 견적</a></div>
     <div class="data">데이터: 주문 · 결제 · 본사 매출 즉시 반영</div>
@@ -151,8 +151,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="no">5</div>
     <div class="pt">조제 · 발주<span class="tm">~3분 + 제작 리드</span></div>
     <ul>
-      <li>처방을 넣으면 조제값이 자동으로 나와요. 광학중심, 정점거리 보정(고도수), 인셋, 굴절률, 최소블랭크 호환까지 확인해요.</li>
-      <li>프레임이 맞지 않으면 경고가 떠요. 본사로 발주하면 조립(프론트+템플 모듈)해요. A4 피팅 시트 초안도 이때 만들어져요.</li>
+      <li>처방 입력 시 조제값 자동 산출. 광학중심, 정점거리 보정(고도수), 인셋, 굴절률, 최소블랭크 호환까지 확인.</li>
+      <li>프레임이 맞지 않으면 경고 표시. 본사 발주 시 조립(프론트+템플 모듈). A4 피팅 시트 초안도 이때 생성.</li>
     </ul>
     <div class="tools"><a class="tool" href="fit.html">피팅·A4 산출</a></div>
     <div class="data">데이터: 조제 파라미터 · 발주 · 박싱 좌표(9사이즈·②)</div>
@@ -164,13 +164,13 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="no">6</div>
     <div class="pt">피팅 · 인도<span class="tm">수령일 · ~8분</span></div>
     <ul>
-      <li>피팅 시스템이 측정값으로 얼마나 휠지 계산해요(템플벌림각, 판토, 정점거리, 코받침).</li>
-      <li>A4 피팅 시트로 1:1 검증해요(목표 점에 템플이 닿게 휨, 판토 웨지, 50mm 스케일바). 그다음 착용감을 확인해요.</li>
-      <li>휜 값과 조정 내역은 본사 DB에 남아서 재구매나 다른 매장에서도 똑같이 맞출 수 있어요. A4는 손님에게 "측정 증서"로 드려요.</li>
+      <li>피팅 시스템이 측정값으로 휨량 계산(템플벌림각, 판토, 정점거리, 코받침).</li>
+      <li>A4 피팅 시트로 1:1 검증(목표 점에 템플이 닿게 휨, 판토 웨지, 50mm 스케일바). 이후 착용감 확인.</li>
+      <li>휜 값·조정 내역은 본사 DB에 저장, 재구매·다른 매장에서도 똑같이 재현 가능. A4는 손님에게 "측정 증서"로 전달.</li>
     </ul>
     <div class="tools"><a class="tool" href="fit.html">피팅 시스템 · A4</a></div>
     <div class="data">데이터: 휨 값 · 최종 핏 · 인도 완료</div>
-    <div class="say">"이렇게까지 맞춰드려요." (A4 증서가 클래식하고 정밀하다는 믿음을 줘요)</div>
+    <div class="say">"이렇게까지 맞춰드려요." (A4 증서로 클래식하고 정밀하다는 믿음 전달)</div>
     <div class="sys"><span class="tag ok">③C 피팅·A4 </span></div>
   </div>
 
@@ -178,8 +178,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="no">7</div>
     <div class="pt">사후 · 재구매 케어<span class="tm">지속</span></div>
     <ul>
-      <li>모든 데이터는 본사에 귀속돼요. 교체 시기나 도수 변화가 예상되면 앱이 재방문 알림을 보내요.</li>
-      <li>재구매 때는 구도수를 비교하고 측정과 검안을 건너뛰어 빠르게 끝내요. 포인트와 등급 혜택이 재방문을 이끌어요.</li>
+      <li>모든 데이터는 본사 귀속. 교체 시기·도수 변화 예상 시 앱이 재방문 알림 발송.</li>
+      <li>재구매 시 구도수 비교, 측정·검안 생략으로 빠르게 종료. 포인트·등급 혜택으로 재방문 유도.</li>
     </ul>
     <div class="tools"><a class="tool" href="customer.html">손님 앱 · 케어</a></div>
     <div class="data">데이터: 손님 누적 가치 · 재구매 계기</div>
@@ -191,7 +191,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="eyebrow" style="margin-bottom:6px">이 순서에서 쓰는 시스템 (만든 것 / 만들 것)</div>
     <table>
       <tr><th>시스템</th><th>역할(어느 단계)</th><th>상태</th></tr>
-      <tr><td><a href="engine.html" style="color:var(--ink);font-weight:700">⑨ 9사이즈 환산엔진 ›</a></td><td>측정 원본값을 본사 코드로 바꿔요. <b>나머지 전부의 토대</b>(1·3·5)</td><td><span class="tag todo">코어 · 최우선</span></td></tr>
+      <tr><td><a href="engine.html" style="color:var(--ink);font-weight:700">⑨ 9사이즈 환산엔진 ›</a></td><td>측정 원본값을 본사 코드로 변환. <b>나머지 전부의 토대</b>(1·3·5)</td><td><span class="tag todo">코어 · 최우선</span></td></tr>
       <tr><td><a href="measure.html" style="color:var(--ink);font-weight:700">① 안면 측정 ›</a></td><td>5값+메시 스캔(1)</td><td><span class="tag todo">개발 중</span></td></tr>
       <tr><td>③A 검안</td><td>굴절·양안시(2)</td><td><span class="tag ok">exam.html</span></td></tr>
       <tr><td><a href="rx.html" style="color:var(--ink);font-weight:700">③B 조제 산출 ›</a></td><td>처방 · 가공값(5)</td><td><span class="tag todo">개발 중</span></td></tr>
@@ -205,7 +205,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="card pad" style="margin-top:12px">
     <div class="eyebrow" style="margin-bottom:4px">창업·운영 참고</div>
     <a href="equipment.html" style="font-size:15px;font-weight:700;color:var(--ink);text-decoration:none">장비 표준 · 본사 권장 패키지 › </a>
-    <div style="font-size:13px;color:var(--muted);margin-top:4px">검안, 가공, 피팅, 카메라 측정 기계와 채널별 필수 구성, 비용 컨설팅을 담았어요.</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px">검안, 가공, 피팅, 카메라 측정 기계와 채널별 필수 구성, 비용 컨설팅 수록.</div>
     <a href="insights.html" style="font-size:15px;font-weight:700;color:var(--ink);text-decoration:none;display:inline-block;margin-top:10px">전략 인사이트 (왜 지금인가, 해자) › </a>
     <a href="todo.html" style="font-size:15px;font-weight:700;color:var(--ink);text-decoration:none;display:block;margin-top:8px">병렬 트랙 보드 (할 일 전체 · 까먹지 않게) › </a>
     <a href="finance.html" style="font-size:15px;font-weight:700;color:var(--ink);text-decoration:none;display:block;margin-top:8px">재무 모델 시뮬레이터 (매출·영업이익 가정) › </a>

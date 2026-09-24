@@ -28,7 +28,7 @@
     <input id="p" class="lginput" type="password" placeholder="비밀번호" autocomplete="current-password">
     <button class="btn" style="width:100%;margin-top:14px" onclick="doLogin()">로그인</button>
     <div class="lgmsg" id="msg"></div>
-    <div class="lghint">계정은 본부에서 발급합니다.</div>
+    <div class="lghint">계정은 본부에서 발급.</div>
   </div>
 </div>
 <script src="/assets/app.js"></script>
@@ -36,7 +36,7 @@
 function qp(k){return new URLSearchParams(location.search).get(k);}
 function doLogin(){
   var u=document.getElementById('u').value.trim(), p=document.getElementById('p').value;
-  if(!u||!p){document.getElementById('msg').textContent='아이디·비밀번호를 입력하세요';return;}
+  if(!u||!p){document.getElementById('msg').textContent='아이디·비밀번호 입력';return;}
   fetch('/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:u,pass:p})})
     .then(function(r){return r.json();}).then(function(j){
       if(!j.ok){document.getElementById('msg').textContent=j.error||'로그인 실패';return;}

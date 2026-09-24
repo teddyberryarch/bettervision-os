@@ -69,14 +69,14 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="lead">
     <div>
       <div class="eyebrow">가맹점 · 4 피팅 (가공 다음 단계)</div>
-      <h2>측정값으로 조정값을 계산하고 A4 피팅 시트로 뽑아요</h2>
-      <div class="sub">9사이즈는 금형으로 고정하고, 각도는 측정값에 맞춰 휘어요. 템플벌림각, 판토, 정점거리, 코받침을 자동으로 계산하고, 소재가 휠 수 있는 한계와 비교해서 "못 맞추는 테"는 경고해요. 마지막에 <b>A4 세 장(템플 벌림, 판토, 정밀 측정)을 실제 크기로 뽑아 안경을 올려놓고 맞춰요.</b></div>
+      <h2>측정값으로 조정값 계산, A4 피팅 시트 출력</h2>
+      <div class="sub">9사이즈는 금형으로 고정, 각도는 측정값에 맞춰 조정. 템플벌림각, 판토, 정점거리, 코받침 자동 계산. 소재 한계와 비교해 "못 맞추는 테"는 경고. 마지막에 <b>A4 세 장(템플 벌림, 판토, 정밀 측정)을 실제 크기로 출력, 안경을 올려놓고 조정.</b></div>
     </div>
     <span class="pill good">● v0.1 프로토타입</span>
   </div>
 
   <div class="card pad">
-    <div class="eyebrow" style="margin-bottom:4px">예시 상황 (누르면 자동으로 채워져요)</div>
+    <div class="eyebrow" style="margin-bottom:4px">예시 상황 (누르면 자동 입력)</div>
     <div class="ex-presets">
       <button class="chip" onclick="preset('std')">표준핏 (M·M)</button>
       <button class="chip" onclick="preset('indep')">독립조합 (넓은 얼굴+짧은 귀)</button>
@@ -133,7 +133,7 @@ function render(){
 function view(id){
   if(id==='intake') return ''+
     '<div class="eyebrow">1 · 입력</div><div class="stitle">검안·측정값 + 프레임 선택</div>'+
-    '<div class="sdesc">검안에서 넘어온 처방, PD, 측정값 5개를 불러오고 고른 프레임을 지정해요.</div>'+
+    '<div class="sdesc">검안에서 넘어온 처방, PD, 측정값 5개 불러오기. 고른 프레임 지정.</div>'+
     '<div class="frow"><div class="fld"><label>손님</label><input id="f_name" value="'+F.name+'" placeholder="이름"></div>'+
       '<div class="fld"><label>PD (mm)</label><input id="f_pd" value="'+F.pd+'" placeholder="63"></div></div>'+
     '<div class="frow"><div class="fld"><label>단안 PD R</label><input id="f_pdR" value="'+F.pdR+'" placeholder="31.5"></div>'+
@@ -143,7 +143,7 @@ function view(id){
     '<div class="frow"><div class="fld"><label>얼굴 가로폭 (mm)</label><input id="f_faceW" value="'+F.faceW+'" placeholder="148"></div>'+
       '<div class="fld"><label>귀 윗부분 간격 (좌우, mm)</label><input id="f_earGap" value="'+F.earGap+'" placeholder="160"></div>'+
       '<div class="fld"><label>각막에서 귀 윗부분까지 (앞뒤, mm)</label><input id="f_earDepth" value="'+(F.earDepth||'')+'" placeholder="105"></div></div>'+
-    '<div class="sdesc" style="margin:2px 0 6px">앞뒤 거리는 옆에서 자나 캘리퍼로 재요. 매장 리그가 생기면 측면 카메라가 채워요. 템플 길이 사이즈(T)와 귀 굽힘 위치를 이 값으로 정해요.</div>'+
+    '<div class="sdesc" style="margin:2px 0 6px">앞뒤 거리는 옆에서 자나 캘리퍼로 측정. 매장 리그 도입 후엔 측면 카메라가 입력. 템플 길이 사이즈(T)와 귀 굽힘 위치를 이 값으로 결정.</div>'+
     '<div class="frow"><div class="fld"><label>코 높이 (mm)</label><input id="f_noseH" value="'+F.noseH+'" placeholder="12"></div>'+
       '<div class="fld"><label>안면각 wrap (°)</label><input id="f_faceWrap" value="'+F.faceWrap+'" placeholder="5"></div>'+
       '<div class="fld"><label>최대 |구면 S|</label><input id="f_sphMax" value="'+F.sphMax+'" placeholder="2.5"></div></div>'+
@@ -153,17 +153,17 @@ function view(id){
     '<div class="frow"><div class="fld"><label>프론트 폭 a×2+DBL</label><input id="f_frontA" value="'+F.frontA+'" placeholder="138"></div>'+
       '<div class="fld"><label>기본 템플 간격(mm)</label><input id="f_spread" value="'+F.frameSpread+'" placeholder="138"></div>'+
       '<div class="fld"><label>템플 길이(mm)</label><input id="f_temple" value="'+F.templeLen+'" placeholder="145"></div></div>'+
-    '<div class="hint">실제 시스템에서는 검안 결과와 측정 DB에서 자동으로 불러와요. 지금은 직접 입력하거나 예시 상황을 눌러 채워요.</div>';
+    '<div class="hint">실제 시스템은 검안 결과와 측정 DB에서 자동으로 불러옴. 지금은 직접 입력 또는 예시 상황으로 입력.</div>';
 
   if(id==='size'){ var r=sizeCalc();
     return '<div class="eyebrow">2 · 9사이즈 매칭</div><div class="stitle">프론트 폭 × 템플 길이로 핏 등급 정하기</div>'+
-    '<div class="sdesc">생산은 9사이즈로 고정돼 있어요. 측정값을 등급에 맞추고 적합도를 봐요. 모듈식이라 프론트와 템플 등급을 따로 고를 수 있어요.</div>'+
+    '<div class="sdesc">생산은 9사이즈 고정. 측정값을 등급에 맞추고 적합도 확인. 모듈식이라 프론트·템플 등급 따로 선택 가능.</div>'+
     '<div class="calc"><div class="big">'+r.code+'</div><div class="sm">프론트 '+r.fw+' · 템플 '+r.tw+' · 적합도 '+r.fit+'%</div></div>'+ r.note;
   }
 
   if(id==='splay'){ var r=splayCalc();
     return '<div class="eyebrow">3 · 템플벌림각</div><div class="stitle">목표 템플 간격 = 귀 간격 − 오프셋</div>'+
-    '<div class="sdesc">측정한 귀 간격으로 목표 템플 간격을 정하고, 프레임 기본값에서 얼마나 휠지 알려 줘요. 소재 한계를 넘으면 경고해요.</div>'+
+    '<div class="sdesc">측정한 귀 간격으로 목표 템플 간격 결정, 프레임 기본값 대비 조정량 표시. 소재 한계 초과 시 경고.</div>'+
     '<div class="calc"><div class="big">'+r.target+' mm</div><div class="sm">목표 템플 간격 (오프셋 −'+r.off+'mm · '+MAT[F.material].n+')</div></div>'+
     '<div class="kv"><div class="k">프레임 기본 간격</div><div class="v">'+(r.base!=null?r.base+'mm':'-')+'</div>'+
       '<div class="k">필요 조정량</div><div class="v">'+(r.adjNeed!=null?(r.adjNeed>0?'+':'')+r.adjNeed+'mm '+(r.adjNeed>0?'벌림':'좁힘'):'-')+'</div>'+
@@ -172,24 +172,24 @@ function view(id){
 
   if(id==='panto'){ 
     return '<div class="eyebrow">4 · 판토스코픽 틸트</div><div class="stitle">렌즈 상하 기울기</div>'+
-    '<div class="sdesc">표준은 8~12°예요. 틀리면 비점수차(난시)가 생겨서 도수 정확도에 바로 영향을 줘요. 얼굴 형태로 목표각을 알려 줘요.</div>'+
+    '<div class="sdesc">표준 8~12°. 틀리면 비점수차(난시) 발생, 도수 정확도에 직접 영향. 얼굴 형태로 목표각 표시.</div>'+
     '<div class="frow"><div class="fld"><label>목표 판토각 (°)</label><input id="p_panto" value="'+(F._panto||'10')+'"></div></div>'+
-    '<div class="hint">초안 표준은 8~12° (중앙 10°)예요. 측면도 웨지로 휜 정도를 확인해요.</div>';
+    '<div class="hint">초안 표준 8~12° (중앙 10°). 측면도 웨지로 휜 정도 확인.</div>';
   }
 
   if(id==='vertex'){ var hi=(num(F.sphMax)>=4);
     return '<div class="eyebrow">5 · 정점간거리</div><div class="stitle">눈 ~ 렌즈 거리</div>'+
-    '<div class="sdesc">표준은 12mm이고 짧을수록 좋아요. 고도수일수록 중요해서 코받침과 틸트로 맞춰요.</div>'+
+    '<div class="sdesc">표준 12mm, 짧을수록 유리. 고도수일수록 중요, 코받침과 틸트로 조정.</div>'+
     '<div class="frow"><div class="fld"><label>목표 VD (mm)</label><input id="v_vd" value="'+(F.vd||'12')+'"></div></div>'+
-    (hi?'<div class="warn">고도수(|S|≥4.00D)예요. VD를 표준보다 짧게(≈10~12mm) 잡고, 조제 단계에서 유효도수로 환산해요.</div>':'<div class="hint">표준 12mm를 유지해요.</div>');
+    (hi?'<div class="warn">고도수(|S|≥4.00D). VD는 표준보다 짧게(≈10~12mm), 조제 단계에서 유효도수로 환산.</div>':'<div class="hint">표준 12mm 유지.</div>');
   }
 
   if(id==='nosepad'){ var fix=(F.bridge==='fix');
     return '<div class="eyebrow">6 · 코받침</div><div class="stitle">수직 안착 + 정점거리</div>'+
-    '<div class="sdesc">코 높이, 각도, 폭으로 코받침 높이, 각도, 간격을 정해요. 일체형 브리지는 조정에 한계가 있어요.</div>'+
+    '<div class="sdesc">코 높이, 각도, 폭으로 코받침 높이, 각도, 간격 결정. 일체형 브리지는 조정 한계 있음.</div>'+
     '<div class="frow"><div class="fld"><label>코받침 간격(mm)</label><input id="n_gap" value="'+(F._npGap||'')+'" placeholder="코폭 기반"></div>'+
       '<div class="fld"><label>코받침 각도(°)</label><input id="n_ang" value="'+(F._npAng||'')+'" placeholder="20"></div></div>'+
-    (fix?'<div class="warn">일체형 브리지(아세테이트)는 코받침을 거의 조정할 수 없어요. 안착이 안 맞으면 다른 모델을 권해요.</div>':'<div class="hint">조정형이에요. 높이, 각도, 간격으로 안착과 정점거리를 함께 맞춰요.</div>');
+    (fix?'<div class="warn">일체형 브리지(아세테이트)는 코받침 조정 거의 불가. 안착이 안 맞으면 다른 모델 권장.</div>':'<div class="hint">조정형. 높이, 각도, 간격으로 안착과 정점거리 함께 조정.</div>');
   }
 
   if(id==='sheet'){ collectAll(); return '<div class="eyebrow">7 · A4 시트 세 장</div><div class="stitle">템플 벌림, 판토, 정밀 측정 (모두 실제 크기)</div><div id="sheetbox"></div>'; }
@@ -208,10 +208,10 @@ function sizeCalc(){
   // 〔확인〕 프론트 경계: 얼굴 폭 146/158mm (engine 설정과 동기)
   var fwB=band(fw,146,158), tn=templeNeed(), twB='?', tNote='';
   if(tn){ var best=TEMPLE_SZ.reduce(function(a,b){return Math.abs(b[0]-tn.need)<Math.abs(a[0]-tn.need)?b:a;}); twB=['S','M','L'][TEMPLE_SZ.indexOf(best)];
-    tNote='필요한 템플 길이 '+tn.need+'mm (귀 굽힘 '+tn.bend+'mm + 귀 뒤 '+EAR_TAIL+'mm)라서 템플 '+best[0]+'mm('+best[1]+')예요.'; }
-  else tNote='각막에서 귀까지 앞뒤 거리를 넣어야 템플 길이 사이즈를 정할 수 있어요. 지금은 템플을 정하지 않았어요.';
+    tNote='필요한 템플 길이 '+tn.need+'mm (귀 굽힘 '+tn.bend+'mm + 귀 뒤 '+EAR_TAIL+'mm) → 템플 '+best[0]+'mm('+best[1]+'). 귀 뒤 길이·템플 단계는 1호점에서 확인.'; }
+  else tNote='각막~귀 앞뒤 거리 입력 시 템플 길이 사이즈 결정 가능. 현재 템플 미정.';
   var fit = (fwB==='M'&&twB==='M')?96:(fwB==='M'||twB==='M')?88:80;
-  var note='<div class="hint">'+tNote+'</div>'+((fwB!=='?'&&twB!=='?'&&fwB!==twB)?'<div class="hint">독립 조합('+fwB+'·'+twB+')이에요. 기성테로는 못 맞추는 경우지만, 모듈식이라 맞출 수 있어요.</div>':'<div class="hint">경계 mm값은 〔확인〕 초벌이에요.</div>');
+  var note='<div class="hint">'+tNote+'</div>'+((fwB!=='?'&&twB!=='?'&&fwB!==twB)?'<div class="hint">독립 조합('+fwB+'·'+twB+'). 기성테로는 못 맞추는 경우. 모듈식이라 맞춤 가능.</div>':'<div class="hint">경계 mm값은 〔확인〕 초벌.</div>');
   return {code:fwB+'·'+twB, fw:fwB, tw:twB, fit:fit, note:note, tn:tn};
 }
 function splayCalc(){
@@ -220,8 +220,8 @@ function splayCalc(){
   var adjNeed=(target!=null&&base!=null)?Math.round((target-base)*10)/10:null;
   var note='';
   if(adjNeed!=null){
-    if(Math.abs(adjNeed)>MAT[F.material].adj) note='<div class="bad">필요 조정량 '+Math.abs(adjNeed)+'mm로 소재 한계 ±'+MAT[F.material].adj+'mm를 넘어요. 이 테로는 못 맞춰요. 다른 소재나 모델을 권해요.</div>';
-    else note='<div class="hint">조정할 수 있는 범위예요. A4 시트에 목표 간격 두 점을 찍고, 거기 닿게 휘어요.</div>';
+    if(Math.abs(adjNeed)>MAT[F.material].adj) note='<div class="bad">필요 조정량 '+Math.abs(adjNeed)+'mm로 소재 한계 ±'+MAT[F.material].adj+'mm 초과. 이 테로는 불가. 다른 소재나 모델 권장.</div>';
+    else note='<div class="hint">조정 가능 범위. A4 시트에 목표 간격 두 점 표시, 거기 닿게 조정.</div>';
   }
   return {target:(target!=null?Math.round(target):'-'), off:off, base:base, adjNeed:adjNeed, note:note};
 }
@@ -250,7 +250,7 @@ function head(title,no,info){
     T(0,20.5,info,{s:3.1,c:'#333'})+L(0,23,190,23,{w:0.3});
 }
 function calib(y){ // 100mm 검증 자
-  var g=T(0,y,'인쇄 확인: 실제 크기(100%)로 인쇄한 뒤 아래 자를 재서 정확히 100mm인지 확인해요. 다르면 다시 인쇄해요.',{s:2.8,c:'#333'});
+  var g=T(0,y,'인쇄 확인: 실제 크기(100%)로 인쇄 후 아래 자가 정확히 100mm인지 확인. 다르면 재인쇄.',{s:2.8,c:'#333'});
   var x0=45, yy=y+4;
   g+=L(x0,yy,x0+100,yy,{w:0.3});
   for(var m=0;m<=100;m++){ var h=m%10===0?3:(m%5===0?2:1.2); g+=L(x0+m,yy,x0+m,yy+h,{w:m%10===0?0.3:0.15}); if(m%10===0) g+=T(x0+m,yy+6,m,{s:2.4,a:'middle',c:'#555'}); }
@@ -279,7 +279,7 @@ function buildSheet(){
 
   /* ===== 1장: 템플 벌림 (위에서 본 실제 크기, 안경 전체) ===== */
   var tn=templeNeed(), earMeasured=!!tn, cx=95, fy=62, fHalf=fw/2, Lear=tn?Math.min(tn.bend,tlen-5):Math.max(80,tlen-EAR_TAIL), w=wrap*R2;
-  var tLenNote=tn?(tlen<tn.need-2?'템플이 '+(tn.need-tlen)+'mm 짧아요':(tlen>tn.need+7?'템플이 '+(tlen-tn.need)+'mm 길어요':'템플 길이 맞음')):'귀 위치 추정';
+  var tLenNote=tn?(tlen<tn.need-2?'템플 '+(tn.need-tlen)+'mm 짧음':(tlen>tn.need+7?'템플 '+(tlen-tn.need)+'mm 김':'템플 길이 맞음')):'귀 위치 추정';
   // 프론트: 브리지 + 좌우 렌즈 구간(안면각만큼 바깥쪽이 얼굴 쪽으로 꺾임) + 엔드피스 5mm
   var segLen=fHalf-dbl/2, hxR=cx-dbl/2-segLen*Math.cos(w), hxL=cx+dbl/2+segLen*Math.cos(w), hyy=fy+segLen*Math.sin(w);
   var earY=hyy+Lear, tipY=hyy+tlen, tHalf=target/2, bHalf=base/2;
@@ -287,7 +287,7 @@ function buildSheet(){
   function tempAt(hx,side,half,y){ return cx+side*(Math.abs(hx-cx)+(half-Math.abs(hx-cx))*(y-hyy)/Lear); }
   var s1=svgOpen()+head('피팅 시트 1 · 템플 벌림','1 / 3',info)+calib(29)+
     T(0,48,'위에서 본 실제 크기',{s:3.8,w:600})+
-    T(0,52.5,'안경을 뒤집어 프론트 윗면이 종이에 닿게 놓아요. 브리지를 가운데 점선에, 힌지를 두 점에 맞추고 템플을 굵은 선에 맞춰 휘어요.',{s:2.8,c:'#333'})+
+    T(0,52.5,'안경을 뒤집어 프론트 윗면이 종이에 닿게 놓기. 브리지는 가운데 점선, 힌지는 두 점에 맞추고 템플을 굵은 선에 맞춰 조정.',{s:2.8,c:'#333'})+
     L(cx,fy-8,cx,tipY+2,{c:'#bbb',d:'1.5 1.5'})+
     L(cx-dbl/2,fy,cx+dbl/2,fy,{w:0.7})+L(cx-dbl/2,fy,hxR,hyy,{w:0.7})+L(cx+dbl/2,fy,hxL,hyy,{w:0.7})+
     '<circle cx="'+hxR.toFixed(2)+'" cy="'+hyy.toFixed(2)+'" r="1.2" fill="#111"/><circle cx="'+hxL.toFixed(2)+'" cy="'+hyy.toFixed(2)+'" r="1.2" fill="#111"/>'+
@@ -300,7 +300,7 @@ function buildSheet(){
     T(cx-tHalf-3,earY-3,'귀 닿는 곳'+(earMeasured?'':' (추정)'),{s:2.6,a:'end',c:'#333'})+
     T(cx,hyy+Lear/2-6,'귀 닿는 곳 템플 간격',{s:3.1,a:'middle',c:'#333'})+T(cx,hyy+Lear/2+1,target+' mm',{s:5.2,w:600,a:'middle'})+
     T(cx,hyy+Lear/2+7,'벌림각 '+angT+'° (한쪽)',{s:3.1,a:'middle',c:'#333'})+
-    T(cx,hyy+Lear/2+12,(sp.adjNeed!=null?'지금 '+base+'mm에서 '+(sp.adjNeed>0?'+':'')+sp.adjNeed+'mm 벌려요':''),{s:2.8,a:'middle',c:'#555'})+
+    T(cx,hyy+Lear/2+12,(sp.adjNeed!=null?'지금 '+base+'mm에서 '+(sp.adjNeed>0?'+':'')+sp.adjNeed+'mm 벌림':''),{s:2.8,a:'middle',c:'#555'})+
     hRuler(cx,earY+4,Math.min(94,Math.ceil(tHalf+10)),10)+
     T(cx,tipY+4,'템플 끝 ('+tlen+'mm) · '+tLenNote,{s:2.6,a:'middle',c:'#555'});
   var c1=Math.max(tipY+12,238);
@@ -314,7 +314,7 @@ function buildSheet(){
   var bx=hx2+bendAt, tailLen=tlen-bendAt;
   var s3=svgOpen()+head('피팅 시트 2 · 판토(경사각)','2 / 3',info)+calib(29)+
     T(0,48,'옆에서 본 실제 크기',{s:3.8,w:600})+
-    T(0,52.5,'안경을 옆으로 눕혀 템플을 가로선에, 힌지를 점에 맞춰요. 프론트 아래쪽이 얼굴 쪽(오른쪽)으로 기울어 굵은 선과 겹치면 맞아요.',{s:2.8,c:'#333'})+
+    T(0,52.5,'안경을 옆으로 눕혀 템플은 가로선, 힌지는 점에 맞춤. 프론트 아래쪽이 얼굴 쪽(오른쪽)으로 기울어 굵은 선과 겹치면 통과.',{s:2.8,c:'#333'})+
     T(hx2-4,hy2-16,'◀ 앞',{s:2.8,a:'end',c:'#555'})+T(185,hy2-16,'귀 쪽 ▶',{s:2.8,a:'end',c:'#555'})+
     L(hx2,hy2,bx,hy2,{w:0.9})+L(bx,hy2,bx+tailLen*Math.cos(bendAng),hy2+tailLen*Math.sin(bendAng),{w:0.9})+
     T((hx2+bx)/2,hy2-3,'템플 '+tlen+'mm',{s:3.1,a:'middle',c:'#333'})+
@@ -325,7 +325,7 @@ function buildSheet(){
     arcTicks(hx2,hy2,down+2,0,20,2,function(d,r){return [r*Math.sin(d*R2), r*Math.cos(d*R2)];},10)+
     T(hx2+18,hy2+18,'판토 '+panto+'°',{s:5,w:600})+
     T(hx2+18,hy2+25,'템플과 프론트 사이 각 '+(90-panto)+'°',{s:3.1,c:'#333'})+
-    T(hx2+18,hy2+31,'점선은 0°(수직). 보통 8~12°예요.',{s:2.8,c:'#555'})+
+    T(hx2+18,hy2+31,'점선은 0°(수직). 보통 8~12°.',{s:2.8,c:'#555'})+
     T(hx2+18,hy2+37,'정점거리 '+vd+'mm',{s:3.1,c:'#333'});
   var c3=hy2+down+40;
   s3+=L(0,c3-5,190,c3-5,{w:0.3})+T(0,c3,'확인',{s:3.8,w:600})+T(62,c3,'목표',{s:2.8,c:'#555'})+T(112,c3,'실제',{s:2.8,c:'#555'})+T(172,c3,'확인',{s:2.8,c:'#555'});
@@ -338,7 +338,7 @@ function buildSheet(){
   function cross(x,y,lab){ return '<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="1" fill="none" stroke="#111" stroke-width="0.35"/>'+L(x-4,y,x+4,y,{w:0.3})+L(x,y-4,x,y+4,{w:0.3})+T(x,y-6,lab,{s:3,w:600,a:'middle'}); }
   var s2=svgOpen()+head('정밀 측정 시트','3 / 3',info)+calib(29)+
     T(0,48,'① 광학중심과 PD (정면 실제 크기)',{s:3.8,w:600})+
-    T(0,52.5,'템플을 접고 안경 앞면이 위로 오게 놓아요. 브리지 가운데를 세로 점선에 맞춰요. 손님 오른눈(R)이 왼쪽에 와요.',{s:2.8,c:'#333'})+
+    T(0,52.5,'템플을 접고 안경 앞면이 위로 오게 놓기. 브리지 가운데를 세로 점선에 맞춤. 손님 오른눈(R)이 왼쪽.',{s:2.8,c:'#333'})+
     box(lx,lt,a,lensH,7,{w:0.5})+box(rx2,lt,a,lensH,7,{w:0.5})+
     L(cx2,lt-6,cx2,lb+18,{c:'#999',d:'1.5 1.5'})+
     cross(ocRx,ocY,'R '+monoR)+cross(ocLx,ocY,'L '+monoL)+
@@ -347,7 +347,7 @@ function buildSheet(){
   var vx=rx2+a+6; s2+=L(vx,lb,vx,lb-35,{w:0.3});
   for(var h=0;h<=35;h++){ var hh=h%10===0?3:(h%5===0?2:1); s2+=L(vx,lb-h,vx+hh,lb-h,{w:h%10===0?0.3:0.15}); if(h%10===0) s2+=T(vx+5,lb-h+1,h,{s:2.4,c:'#555'}); }
   s2+=L(vx-2,ocY,vx+4,ocY,{w:0.5})+T(vx+9,ocY+1,'OH '+oh,{s:3,w:600})+T(vx,lb+4,'렌즈 아래 끝',{s:2.4,a:'middle',c:'#555'})+
-    T(0,lb+27,'렌즈에 찍은 점이 원(지름 2mm) 안에 들어오면 통과예요. 원 밖이면 가공 전에 다시 재요.',{s:2.8,c:'#333'});
+    T(0,lb+27,'렌즈에 찍은 점이 원(지름 2mm) 안이면 통과. 원 밖이면 가공 전 재측정.',{s:2.8,c:'#333'});
   var ty2=lb+36;
   s2+=L(0,ty2-5,190,ty2-5,{w:0.3})+T(0,ty2,'② 측정값',{s:3.8,w:600});
   var kv=[['처방 R (S / C / A)',rx(F.rxR)],['처방 L (S / C / A)',rx(F.rxL)],['ADD',F.rxAdd||'-'],['단안 PD R / L',monoR+' / '+monoL+' mm'],['OH (동공 높이)',oh+' mm'],
@@ -356,7 +356,7 @@ function buildSheet(){
   kv.forEach(function(r,i){ var col=i<7?0:96, row=i%7, y=ty2+7+row*6; s2+=T(col,y,r[0],{s:3,c:'#555'})+T(col+40,y,r[1],{s:3.2,w:600})+L(col,y+2.2,col+92,y+2.2,{w:0.15,c:'#bbb'}); });
   s2+=T(0,275,'측정자 ________________   확인한 안경사 ________________',{s:3.1,c:'#333'})+'</svg>';
 
-  var warn=(Math.abs(sp.adjNeed||0)>M.adj)?'<div class="bad">조정량이 소재 한계(±'+M.adj+'mm)를 넘어요. 이 테로는 목표에 맞출 수 없어요. 다른 소재나 모델을 권해요.</div>':'';
+  var warn=(Math.abs(sp.adjNeed||0)>M.adj)?'<div class="bad">조정량이 소재 한계(±'+M.adj+'mm) 초과. 이 테로는 목표에 맞출 수 없음. 다른 소재나 모델 권장.</div>':'';
   document.getElementById('sheetbox').innerHTML=
     '<div class="kv">'+
       '<div class="k">9사이즈 / 적합도</div><div class="v">'+sz.code+' · '+sz.fit+'%</div>'+
@@ -366,7 +366,7 @@ function buildSheet(){
     '</div>'+warn+
     '<div class="sheetgrid"><div class="sheetwrap">'+s1+'</div><div class="sheetwrap">'+s3+'</div><div class="sheetwrap">'+s2+'</div></div>'+
     '<div class="printbtns"><button class="btn small" onclick="printSheets()">세 장 인쇄</button></div>'+
-    '<div class="hint">인쇄 창에서 크기를 "실제 크기(100%)"로 고르고 "페이지에 맞춤"은 꺼 주세요. 인쇄한 뒤 맨 위 100mm 자를 자로 재서 맞는지 먼저 확인해요.</div>';
+    '<div class="hint">인쇄 창에서 크기는 "실제 크기(100%)", "페이지에 맞춤"은 끄기. 인쇄 후 맨 위 100mm 자를 자로 재서 먼저 확인.</div>';
   var pr=document.getElementById('sheetPrint'); if(!pr){ pr=document.createElement('div'); pr.id='sheetPrint'; document.body.appendChild(pr); }
   pr.innerHTML='<div class="sheetpage">'+s1+'</div><div class="sheetpage">'+s3+'</div><div class="sheetpage">'+s2+'</div>';
 }

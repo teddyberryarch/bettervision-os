@@ -38,12 +38,12 @@
     <a href="hq.html">본사</a>
   </div></div></div>
 <div class="wrap"><section class="view active">
-<div class="lead"><div><div class="eyebrow">P0 · 카톡 마케팅 엔진</div><h2>손님을 묶고, 보낼 때를 정해서 카톡으로 보내요</h2>
-<div class="sub">알림톡(정보성, 동의 없이 가능)과 친구톡(광고성, 동의 필요)을 나눠서 보내요. 모아 둔 전화번호가 매출로 이어져요.</div></div></div>
+<div class="lead"><div><div class="eyebrow">P0 · 카톡 마케팅 엔진</div><h2>손님 묶기 · 발송 시점 설정 · 카톡 발송</h2>
+<div class="sub">알림톡(정보성, 동의 없이 가능)과 친구톡(광고성, 동의 필요) 구분 발송. 모아 둔 전화번호가 매출로 연결.</div></div></div>
 
 <div class="card pad">
   <div class="stat" id="stat"></div>
-  <div class="note">데모 손님 명단 기준이에요. 친구톡(광고)은 동의한 손님에게만, 알림톡(정보성)은 모든 손님에게 보낼 수 있어요.</div>
+  <div class="note">데모 손님 명단 기준. 친구톡(광고)은 동의한 손님에게만, 알림톡(정보성)은 모든 손님에게 발송 가능.</div>
 </div>
 
 <div class="cols">
@@ -51,18 +51,18 @@
   <div class="eyebrow" style="margin-bottom:8px">① 손님 묶음 고르기</div>
   <div id="segs"></div>
   <div class="eyebrow" style="margin:14px 0 8px">② 자동 발송 (보낼 때)</div>
-  <div class="trg"><div class="t">안경 준비완료 <span class="kind info">알림톡</span></div><div class="s">안경이 완성되면 바로 "찾으러 오세요"를 보내요</div></div>
-  <div class="trg"><div class="t">1년 재검 리마인드 <span class="kind info">알림톡</span></div><div class="s">마지막 검안 후 12개월이 되면 보내요. 시력 변화를 살피고 다시 오시게 해요</div></div>
-  <div class="trg"><div class="t">A/S 만기 안내 <span class="kind info">알림톡</span></div><div class="s">무상 A/S가 끝나기 전에 점검을 권해요</div></div>
-  <div class="trg"><div class="t">생일 쿠폰 <span class="kind ad">친구톡</span></div><div class="s">생일이 있는 달에 할인 쿠폰을 보내요(동의한 손님만)</div></div>
-  <div class="trg"><div class="t">신상 입고 <span class="kind ad">친구톡</span></div><div class="s">좋아하는 형태·컬러에 맞는 신상을 알려요(동의한 손님만)</div></div>
+  <div class="trg"><div class="t">안경 준비완료 <span class="kind info">알림톡</span></div><div class="s">안경 완성 즉시 "찾으러 오세요" 발송</div></div>
+  <div class="trg"><div class="t">1년 재검 리마인드 <span class="kind info">알림톡</span></div><div class="s">마지막 검안 후 12개월 시점 발송. 시력 변화 확인·재방문 유도</div></div>
+  <div class="trg"><div class="t">A/S 만기 안내 <span class="kind info">알림톡</span></div><div class="s">무상 A/S 종료 전 점검 권유</div></div>
+  <div class="trg"><div class="t">생일 쿠폰 <span class="kind ad">친구톡</span></div><div class="s">생일월에 할인 쿠폰 발송(동의한 손님만)</div></div>
+  <div class="trg"><div class="t">신상 입고 <span class="kind ad">친구톡</span></div><div class="s">선호 형태·컬러에 맞는 신상 안내(동의한 손님만)</div></div>
  </div>
 
  <div class="card pad">
   <div class="eyebrow" style="margin-bottom:8px">③ 발송 미리보기</div>
   <div class="phone">
     <div class="kktop">BETTERVISION 채널</div>
-    <div class="bubble"><div class="hd" id="bhd">알림톡 · 정보성</div><div id="bbody">손님 묶음을 골라 주세요.</div></div>
+    <div class="bubble"><div class="hd" id="bhd">알림톡 · 정보성</div><div id="bbody">손님 묶음 선택</div></div>
   </div>
   <div id="reach" class="note" style="text-align:center;margin-top:10px"></div>
   <div id="legal"></div>
@@ -136,13 +136,13 @@ function preview(){
  var reach=ad?pool.filter(function(c){return c.consent;}).length:pool.length;
  document.getElementById('reach').innerHTML='받을 손님(추정) <b>'+reach+'명</b> / 묶음 '+pool.length+'명';
  document.getElementById('legal').innerHTML=ad
-  ? '<div class="warn">친구톡(광고성)은 <b>채널 친구이면서 마케팅 수신에 동의한 손님에게만</b> 보낼 수 있어요. 동의 '+pool.filter(function(c){return c.consent;}).length+'/'+pool.length+'명.</div>'
-  : '<div class="note" style="margin-top:8px;color:var(--good)">알림톡(정보성)은 전화번호만 있으면 보낼 수 있어요(수신동의 불필요). 광고 문구는 넣으면 안 돼요.</div>';
+  ? '<div class="warn">친구톡(광고성)은 <b>채널 친구이면서 마케팅 수신에 동의한 손님에게만</b> 발송 가능. 동의 '+pool.filter(function(c){return c.consent;}).length+'/'+pool.length+'명.</div>'
+  : '<div class="note" style="margin-top:8px;color:var(--good)">알림톡(정보성)은 전화번호만 있으면 발송 가능(수신동의 불필요). 광고 문구 금지.</div>';
 }
 function send(){
  var s=SEGS.find(function(x){return x.id===cur;});var pool=BASE.filter(s.f);
  var reach=isAd()?pool.filter(function(c){return c.consent;}).length:pool.length;
- alert('데모 발송: '+(isAd()?'친구톡':'알림톡')+', '+reach+'명에게 보내요.\n실제로는 카카오 비즈메시지 API와 연동해요(채널 비즈인증과 템플릿 검수가 필요해요).');
+ alert('데모 발송: '+(isAd()?'친구톡':'알림톡')+', '+reach+'명에게 발송.\n실제는 카카오 비즈메시지 API 연동(채널 비즈인증·템플릿 검수 필요).');
 }
 counts();renderSegs();preview();
 </script>

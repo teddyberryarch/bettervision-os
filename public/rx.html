@@ -31,7 +31,7 @@
   <div class="lead"><div>
     <div class="eyebrow">③B · 처방 · 조제 산출</div>
     <h2>감으로 넣던 가공값을 자동으로</h2>
-    <div class="sub">처방, 단안 PD, 프레임을 넣으면 편심, 정점거리 보정, 추천 굴절률, 최소블랭크, 호환 여부가 늘 같은 규칙으로 계산돼요. 검안과 피팅 사이에 비어 있던 단계를 채워요.</div>
+    <div class="sub">처방, 단안 PD, 프레임 입력 시 편심, 정점거리 보정, 추천 굴절률, 최소블랭크, 호환 여부를 늘 같은 규칙으로 계산. 검안과 피팅 사이 빈 단계를 채움.</div>
   </div><span class="pill good">● 조제 계산기</span></div>
 
   <div id="rxbanner"></div>
@@ -90,9 +90,9 @@ function calc(){
   ];
   var html='<table class="tbl"><tr><th>항목</th><th>우안 R</th><th>좌안 L</th></tr>'+
     rows.map(function(x){return '<tr><td>'+x[0]+'</td><td>'+x[1]+'</td><td>'+x[2]+'</td></tr>';}).join('')+'</table>';
-  if(!R.fit||!L.fit) html+='<div class="warn">최소블랭크('+Math.max(R.MBS,L.MBS)+'mm)가 블랭크 한계('+blank+'mm)보다 커요. 이 프레임과 PD로는 가공할 수 없어요. 프레임을 바꾸거나 편심을 다시 확인해 주세요.</div>';
-  else html+='<div class="ok">가공할 수 있어요. 최소블랭크가 한계 안이에요. 편심과 정점보정을 반영해서 발주해요.</div>';
-  html+='<div class="warn" style="background:var(--surface);color:var(--muted)">ED(유효경) '+Math.round(ED*10)/10+'mm · 프레임 기하중심 '+Math.round(geoHalf*10)/10+'mm 기준이에요. 〔확인〕 근사식이라 실제 가공 데이터로 보정해요.</div>';
+  if(!R.fit||!L.fit) html+='<div class="warn">최소블랭크('+Math.max(R.MBS,L.MBS)+'mm)가 블랭크 한계('+blank+'mm)보다 큼. 이 프레임과 PD로는 가공 불가. 프레임 교체 또는 편심 재확인.</div>';
+  else html+='<div class="ok">가공 가능. 최소블랭크가 한계 안. 편심과 정점보정 반영해 발주.</div>';
+  html+='<div class="warn" style="background:var(--surface);color:var(--muted)">ED(유효경) '+Math.round(ED*10)/10+'mm · 프레임 기하중심 '+Math.round(geoHalf*10)/10+'mm 기준. 〔확인〕 근사식이라 실제 가공 데이터로 보정.</div>';
   document.getElementById('out').innerHTML=html;
 }
 var _r=(window.BVRecord&&BVRecord.load)?BVRecord.load():null;

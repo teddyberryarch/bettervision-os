@@ -61,15 +61,15 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="lead">
     <div>
       <div class="eyebrow">② · 타사 안경 DB · 큐레이팅</div>
-      <h2>다른 브랜드 테도 같은 기준으로 재서 적합도를 비교해요</h2>
-      <div class="sub">진열된 다른 브랜드 테의 각인을 읽어 목록으로 만들고, 손님 얼굴 코드와 비교해 적합도(%)를 내요. PB를 억지로 권하는 게 아니라 <b>"모든 브랜드를 비교해 봤는데 PB가 제일 잘 맞더라"</b>가 되게 해요. 가맹점을 설득하는 핵심이에요.</div>
+      <h2>다른 브랜드 테도 같은 기준으로 측정, 적합도 비교</h2>
+      <div class="sub">진열된 다른 브랜드 테의 각인으로 목록 작성, 손님 얼굴 코드와 비교해 적합도(%) 산출. PB 강요가 아니라 <b>"모든 브랜드를 비교해 봤는데 PB가 제일 잘 맞더라"</b>가 목표. 가맹점 설득의 핵심.</div>
     </div>
     <span class="pill good">● 환산엔진 활용 1번</span>
   </div>
 
   <div class="card pad sec">
     <div class="ctitle">1 · 각인을 읽어 목록에 추가</div>
-    <div class="sdesc">각인 "렌즈 가로 □ 브리지 − 템플"(예: 54□18-145)만 넣으면 프론트폭과 소재를 자동으로 계산해요. 진열한 테가 곧 체험용 테이고, 첫 데이터가 돼요.</div>
+    <div class="sdesc">각인 "렌즈 가로 □ 브리지 − 템플"(예: 54□18-145)만 입력하면 프론트폭·소재 자동 계산. 진열한 테가 곧 체험용 테이자 첫 데이터.</div>
     <div class="row">
       <div class="fld"><label>각인</label><input id="eng" placeholder="54□18-145" oninput="parseNow()"></div>
       <div class="fld"><label>브랜드</label><input id="brand" placeholder="브랜드"></div>
@@ -77,13 +77,13 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="fld"><label>소재</label><select id="mat"></select></div>
       <div class="fld" style="flex:0"><button class="btn small" onclick="addFrame()">목록에 추가</button></div>
     </div>
-    <div class="parsed" id="parsed">각인을 입력하면 프론트폭(a×2+DBL)을 자동으로 계산해요.</div>
-    <div class="note">각인 자동 판독(촬영하면 AI가 읽기)은 다음 단계예요. 지금은 직접 입력해요. 각인에 없는 안면각과 코받침은 매장에서 2차로 실측해요.</div>
+    <div class="parsed" id="parsed">각인 입력 시 프론트폭(a×2+DBL) 자동 계산.</div>
+    <div class="note">각인 자동 판독(촬영하면 AI가 읽기)은 다음 단계. 현재는 직접 입력. 각인에 없는 안면각·코받침은 매장에서 2차 실측.</div>
   </div>
 
   <div class="card pad sec">
     <div class="ctitle">2 · 적합도 비교 ("젠몬 vs PB")</div>
-    <div class="sdesc">손님 측정값을 넣으면 목록 전체를 적합도순으로 보여 줘요. 소재가 휠 수 있는 한계를 넘으면 "못 맞춤"이라고 솔직하게 표시해요. 이 표시가 PB로 바꾸게 하는 무기예요.</div>
+    <div class="sdesc">손님 측정값 입력 → 목록 전체를 적합도순으로 표시. 소재가 휠 수 있는 한계를 넘으면 "못 맞춤"으로 솔직하게 표시. 이 표시가 PB 전환의 무기.</div>
     <div class="presets">
       <span style="font-size:13px;color:var(--muted);align-self:center">시나리오:</span>
       <button class="chip" onclick="faceP(152,160,5)">표준 M·M 손님</button>
@@ -97,27 +97,27 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     </div>
     <div class="rank" id="rank"></div>
     <div class="starbox">
-      <div class="h">왜 가맹점 설득에 힘이 되나요</div>
-      <p>PB만 강제하면 점주가 거부해요. 하지만 "모든 브랜드를 비교해 주는 도구"라면 안경에 관심 없는 점주도 들어와요. PB는 그중 "제일 잘 맞고 마진 좋은 선택지"로 자연스럽게 자리 잡아요. 손님은 객관적인 비교라 믿을 수 있고, 본사는 다른 브랜드 거래 데이터까지 가져가요.</p>
+      <div class="h">가맹점 설득에 힘이 되는 이유</div>
+      <p>PB만 강제하면 점주 거부. "모든 브랜드를 비교해 주는 도구"라면 안경에 관심 없는 점주도 참여. PB는 그중 "제일 잘 맞고 마진 좋은 선택지"로 자연스럽게 자리 잡음. 손님은 객관적 비교라 신뢰, 본사는 다른 브랜드 거래 데이터까지 확보.</p>
     </div>
   </div>
 
   <div class="card pad sec">
     <div class="ctitle">3 · 소재별 휨 한계 (또 하나의 본사 지식재산)</div>
-    <div class="sdesc">적합 판정은 사이즈 매칭에 한 가지를 더 봐요. 손님 안면각에 필요한 벌림이 그 테 소재의 최대 조정 범위 안에 드는지예요. 범위를 넘으면 "이 테 못 맞춤"으로 표시해요.</div>
+    <div class="sdesc">적합 판정은 사이즈 매칭 + 한 가지 추가 확인. 손님 안면각에 필요한 벌림이 그 테 소재의 최대 조정 범위 안에 드는지. 범위 초과 시 "이 테 못 맞춤" 표시.</div>
     <table class="tbl"><tr><th>소재</th><th>최대 벌림 조정폭</th><th>비고</th></tr>
       <tr><td>티탄</td><td>±8mm</td><td>조정 넓음</td></tr>
       <tr><td>금속</td><td>±6mm</td><td>넓음</td></tr>
       <tr><td>TR·울템</td><td>±4mm</td><td>중간</td></tr>
       <tr><td>경질 아세테이트</td><td>±1mm</td><td>거의 0, 안면각 큰 얼굴엔 부적합</td></tr>
     </table>
-    <div class="note">〔확인〕 초벌이에요. 엔진·매뉴얼과 같은 값을 쓰고, 실측으로 확정해요.</div>
+    <div class="note">〔확인〕 초벌. 엔진·매뉴얼과 같은 값 사용, 실측으로 확정.</div>
   </div>
 
   <div class="card pad sec">
     <div class="ctitle">4 · 전체 목록</div>
     <table class="tbl" id="dbtbl"></table>
-    <div class="note">다른 브랜드 테도 본사를 거쳐 공급해요(가맹계약 공급 조항은 변호사 확인 후 확정). 어떤 브랜드를 고를지는 자유이고, 공급은 본사 한 경로예요.</div>
+    <div class="note">다른 브랜드 테도 본사 경유 공급(가맹계약 공급 조항은 변호사 확인 후 확정). 브랜드 선택은 자유, 공급은 본사 단일 경로.</div>
   </div>
 </section>
 </div>
@@ -139,10 +139,10 @@ function parseNow(){
   return p;
 }
 function addFrame(){
-  var p=parseNow(); if(!p){alert('각인 형식을 확인해 주세요: 54□18-145');return;}
+  var p=parseNow(); if(!p){alert('각인 형식 확인: 54□18-145');return;}
   db.unshift({brand:document.getElementById('brand').value||'(미입력)', model:document.getElementById('model').value||'-', color:'', eng:document.getElementById('eng').value, material:document.getElementById('mat').value});
   document.getElementById('eng').value='';document.getElementById('brand').value='';document.getElementById('model').value='';
-  document.getElementById('parsed').textContent='추가했어요. 전체 목록과 적합도 비교에 반영돼요.';
+  document.getElementById('parsed').textContent='추가 완료. 전체 목록·적합도 비교에 반영.';
   renderDB(); rankNow();
 }
 function faceP(fw,eg,w){document.getElementById('fw').value=fw;document.getElementById('eg2').value=eg;document.getElementById('wrap').value=w;rankNow();}

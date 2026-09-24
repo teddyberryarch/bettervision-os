@@ -121,7 +121,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div>
       <div class="eyebrow">본사</div>
       <h2>전체 매장 현황</h2>
-      <div class="sub">전 매장 매출과 재고, 손님 기록을 한곳에서 봐요.</div>
+      <div class="sub">전 매장 매출·재고·손님 기록을 한곳에서.</div>
     </div>
   </div>
 
@@ -195,7 +195,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div>
         <div class="eyebrow" style="margin-bottom:8px">품목별 본사 마진</div>
         <div id="pbCat"></div>
-        <div class="label" style="font-size:13px;margin-top:6px">마진율은 데모 값이에요. 실제 값은 1호점에서 확인해요.</div>
+        <div class="label" style="font-size:13px;margin-top:6px">마진율은 데모 값. 실제 값은 1호점에서 확인.</div>
       </div>
       <div>
         <div class="eyebrow" style="margin-bottom:8px">매장별 본사 마진과 PB 테 비중</div>
@@ -207,7 +207,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- 손님 데이터 귀속 -->
   <div class="card pad" style="margin-bottom:6px">
     <div class="eyebrow">손님 기록</div>
-    <div class="label" style="font-size:13px;margin:6px 0 12px">손님이 다른 매장에 가도 측정값과 처방, 구매 기록을 이어서 볼 수 있어요.</div>
+    <div class="label" style="font-size:13px;margin:6px 0 12px">손님이 다른 매장에 가도 측정값·처방·구매 기록 이어 보기 가능.</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
       <div><div class="label" style="margin-bottom:4px">손님</div><select id="belongSel" class="hqsel" onchange="belongShow()"></select></div>
       <div><div class="label" style="margin-bottom:4px">지점 이동 (이사 시뮬)</div><select id="belongTo" class="hqsel"></select></div>
@@ -219,14 +219,14 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- 수요 예측 -> 푸시 발주 -->
   <div class="card pad" style="margin-bottom:6px">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-      <div class="eyebrow">발주 제안 <span class="label" style="font-weight:400">· 매장이 승인해요</span></div>
+      <div class="eyebrow">발주 제안 <span class="label" style="font-weight:400">· 매장 승인</span></div>
       <select id="fcDl" class="hqsel">
         <option value="tmw18">내일 18:00 마감</option>
         <option value="today18">오늘 18:00 마감</option>
         <option value="h3">3시간 후 마감</option>
       </select>
     </div>
-    <div class="label" style="font-size:13px;margin:8px 0 12px">최근 30일 판매량으로 다음 주에 부족할 품목을 찾아요. 발주안을 보내면 매장이 승인해요. 답이 없으면 만료돼요.</div>
+    <div class="label" style="font-size:13px;margin:8px 0 12px">최근 30일 판매량으로 다음 주 부족 품목 탐색. 발주안 발송 → 매장 승인. 무응답 시 만료.</div>
     <div id="fcBox"></div>
     <button class="btn" id="fcAllBtn" style="width:100%;margin-top:12px;display:none" onclick="fcPushAll()">권장 물량 전 지점 일괄 푸시</button>
   </div>
@@ -234,7 +234,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- 본사 분석 리포트 -->
   <div class="card pad" style="margin-bottom:6px">
     <div class="eyebrow">본사 분석 리포트 <span class="livedot">LIVE</span> <span class="label" style="font-weight:400">· 데이터로 생산·소싱 결정</span></div>
-    <div class="label" style="font-size:13px;margin:8px 0 12px">최근 30일 동안 어떤 사이즈와 디자인이 팔렸는지, 매장별로 PB 테가 얼마나 팔렸는지 봐요.</div>
+    <div class="label" style="font-size:13px;margin:8px 0 12px">최근 30일 판매 사이즈·디자인, 매장별 PB 테 판매량.</div>
     <div class="anagrid">
       <div class="anabox">
         <div class="anah">프레임 사이즈 분포 <span class="label">· 생산 비중 결정</span></div>
@@ -267,14 +267,14 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
         <option value="액세서리">액세서리</option>
       </select>
     </div>
-    <div class="label" style="font-size:13px;margin:8px 0 6px">권장가를 바꾸면 매장 결제 화면에 먼저 뜨는 가격이 바뀌어요. 판매가는 매장이 정하고, 권장 범위를 벗어나면 안내만 떠요.</div>
+    <div class="label" style="font-size:13px;margin:8px 0 6px">권장가 변경 시 매장 결제 화면의 기본 표시 가격 변경. 판매가는 매장 결정, 권장 범위 이탈 시 안내만 표시.</div>
     <div id="ppBox"></div>
   </div>
 
   <!-- 공급·물류 자동화 -->
   <div class="card pad" style="margin-bottom:6px">
     <div class="eyebrow">본사 출고 </div>
-    <div class="label" style="font-size:13px;margin:6px 0 12px">매장 발주를 품목별로 모아서 한 번에 보내요.</div>
+    <div class="label" style="font-size:13px;margin:6px 0 12px">매장 발주를 품목별로 모아 일괄 발송.</div>
     <div class="dash-top">
       <div class="dash-kpi"><div class="label">출고 대기 (대기+배송중)</div><div class="big kfig" id="logiCount">0건</div></div>
       <div class="dash-kpi"><div class="label">총 출고 수량</div><div class="big kfig" id="logiQty">0개</div></div>
@@ -300,7 +300,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       </select>
     </div>
     <div class="pushbox">
-      <div class="eyebrow" style="margin-bottom:8px">매장에 발주 제안 보내기 <span class="label" style="font-weight:400">매장이 승인해야 발주돼요</span></div>
+      <div class="eyebrow" style="margin-bottom:8px">매장에 발주 제안 보내기 <span class="label" style="font-weight:400">매장 승인 후 발주</span></div>
       <div class="pushgrid">
         <select id="pushStore" class="hqsel"></select>
         <select id="pushSku" class="hqsel"></select>
@@ -312,7 +312,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
         </select>
         <button class="btn small" onclick="pushSend()">푸시 발송</button>
       </div>
-      <div class="label" style="font-size:13px;margin-top:6px">마감까지 매장이 답하지 않으면 발주안은 만료돼요.</div>
+      <div class="label" style="font-size:13px;margin-top:6px">마감까지 매장 무응답 시 발주안 만료.</div>
     </div>
     <div id="hqOrders" style="margin-top:12px"></div>
   </div>
@@ -320,7 +320,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- 신규 가맹 시뮬레이터 -->
   <div class="card pad" style="margin-bottom:6px">
     <div class="eyebrow">새 매장 수익 계산</div>
-    <div class="label" style="font-size:13px;margin:6px 0 12px">상권과 평수를 넣으면 예상 매출과 회수 기간을 계산해요. 추정치예요.</div>
+    <div class="label" style="font-size:13px;margin:6px 0 12px">상권·평수 입력 → 예상 매출·회수 기간 계산. 추정치.</div>
     <div class="frgrid">
       <div><div class="label" style="margin-bottom:4px">상권 유형</div>
         <select id="frTrade" class="hqsel" style="width:100%" onchange="frCalc()">
@@ -370,17 +370,17 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="card pad" id="storeDetail"></div>
     <div class="card pad">
       <div class="eyebrow">전 매장 예약 현황 (오늘) <span class="livedot">LIVE</span></div>
-      <div class="label" style="margin:6px 0 10px">30분에 2명 기준이에요.</div>
+      <div class="label" style="margin:6px 0 10px">30분에 2명 기준.</div>
       <div id="hqBook"></div>
     </div>
     <div class="card pad">
       <div class="eyebrow">실시간 알림 (전 매장)</div>
-      <div class="stockrow"><span style="color:var(--warn)">● 성수점 · 알도 R 렌즈 재고 2개 남았어요</span><span class="muted">방금</span></div>
-      <div class="stockrow"><span style="color:var(--warn)">● 강남점 · 대기 3명, 직원이 부족해요</span><span class="muted">3분 전</span></div>
-      <div class="stockrow"><span style="color:var(--bad)">● 부산서면 · 재고 부족 3품목, 발주가 필요해요</span><span class="muted">8분 전</span></div>
-      <div class="stockrow"><span style="color:var(--good)">● 홍대점 · 목표 매출 102% 달성했어요</span><span class="muted">12분 전</span></div>
-      <div class="stockrow" style="border-bottom:0"><span class="muted">● 판교점 · 누진렌즈 검수 중이에요</span><span class="muted">21분 전</span></div>
-      <div class="note" style="margin-top:14px"><b>관제.</b> 매출, 방문, 대기, 재고를 매장별로 봐요. 문제가 있는 매장은 본사가 먼저 연락해요.</div>
+      <div class="stockrow"><span style="color:var(--warn)">● 성수점 · 알도 R 렌즈 재고 2개 남음</span><span class="muted">방금</span></div>
+      <div class="stockrow"><span style="color:var(--warn)">● 강남점 · 대기 3명, 직원 부족</span><span class="muted">3분 전</span></div>
+      <div class="stockrow"><span style="color:var(--bad)">● 부산서면 · 재고 부족 3품목, 발주 필요</span><span class="muted">8분 전</span></div>
+      <div class="stockrow"><span style="color:var(--good)">● 홍대점 · 목표 매출 102% 달성</span><span class="muted">12분 전</span></div>
+      <div class="stockrow" style="border-bottom:0"><span class="muted">● 판교점 · 누진렌즈 검수 중</span><span class="muted">21분 전</span></div>
+      <div class="note" style="margin-top:14px"><b>관제.</b> 매장별 매출, 방문, 대기, 재고. 문제 매장은 본사가 먼저 연락.</div>
     </div>
   </div>
 
@@ -397,7 +397,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <span class="label">프로모션 'F2 가을 컬러 10%'</span>
           <button class="btn small" onclick="toast('전 매장에 프로모션 안내 발송 · 참여는 매장 선택 (프로토타입)')">전 매장에 안내</button>
         </div>
-        <div class="note" style="margin-top:12px;font-size:15px"><b>원칙.</b> 판매가는 매장이 정해요. 본사는 권장가와 프로모션을 안내하고, 참여는 매장이 골라요.</div>
+        <div class="note" style="margin-top:12px;font-size:15px"><b>원칙.</b> 판매가는 매장 결정. 본사는 권장가·프로모션 안내, 참여는 매장 선택.</div>
       </div>
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2)">
@@ -405,7 +405,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <div class="switch" onclick="this.classList.toggle('off');toast('자동 발주 제안 설정 변경 (프로토타입)')"></div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2)">
-          <div><div style="font-size:16px">진열 가이드 배포</div><div class="label">이번 주 권장 진열은 'F2 가을 컬러'예요. 적용은 매장이 정해요</div></div>
+          <div><div style="font-size:16px">진열 가이드 배포</div><div class="label">이번 주 권장 진열 'F2 가을 컬러'. 적용은 매장 결정</div></div>
           <div class="switch" onclick="this.classList.toggle('off');toast('진열 가이드 배포 변경 (프로토타입)')"></div>
         </div>
         <div style="padding:9px 0">
@@ -416,10 +416,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <div class="qc-row"><span class="label">판교점</span><div class="qc-track"><div class="qc-fill" style="width:79%;background:var(--warn)"></div></div><span class="muted" style="text-align:right">79</span></div>
           <div class="qc-row"><span class="label">부산서면</span><div class="qc-track"><div class="qc-fill" style="width:71%;background:var(--warn)"></div></div><span class="muted" style="text-align:right">71</span></div>
         </div>
-        <div class="note" style="font-size:15px"><b>연결.</b> 점수가 낮은 매장에는 본사가 피팅 교육을 지원해요.</div>
+        <div class="note" style="font-size:15px"><b>연결.</b> 점수가 낮은 매장에 본사 피팅 교육 지원.</div>
       </div>
     </div>
-    <div class="note" style="margin-top:4px"><b>역할.</b> 가격과 발주는 매장이 최종으로 정해요.</div>
+    <div class="note" style="margin-top:4px"><b>역할.</b> 가격·발주의 최종 결정은 매장.</div>
   </div>
 
   <!-- 부품 ODM · 공급망 + 수요→생산 환산 -->
@@ -436,7 +436,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <tr style="cursor:default"><td>렌즈 (알도 R)</td><td>본사 공급</td><td>7일</td><td>5,000</td><td>12,000</td><td><span class="pill good">적정</span></td></tr>
         </tbody>
       </table>
-      <div class="note" style="font-size:15px"><b>관리.</b> 프론트와 템플은 입고 기간이 달라서 따로 챙겨요.</div>
+      <div class="note" style="font-size:15px"><b>관리.</b> 프론트와 템플은 입고 기간이 달라 따로 관리.</div>
     </div>
     <div class="card pad">
       <div class="eyebrow">생산 발주 수량</div>
@@ -453,7 +453,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- [09.24] 판 다음까지 확인 — 전 매장 -->
   <div class="card pad" style="margin-top:18px">
     <div class="eyebrow">판 다음 확인</div>
-    <div class="label" style="margin:6px 0 12px">안경을 건넨 뒤 7일째 물어본 결과와 A/S 원인이에요.</div>
+    <div class="label" style="margin:6px 0 12px">안경 전달 후 7일째 질문 결과와 A/S 원인.</div>
     <div class="hq-grid">
       <div><div id="careKpis"></div><div id="careStores" style="margin-top:12px"></div></div>
       <div><div class="label" style="margin-bottom:6px">A/S 종결 원인</div><div id="careCauses"></div>
@@ -465,12 +465,12 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="hq-grid" style="margin-top:18px">
     <div class="card pad">
       <div class="eyebrow">기준 보정</div>
-      <div class="label" style="margin:6px 0 12px">판매할 때 계산한 적합도와 7일째 실제로 편했는지를 비교해요. 차이가 크면 판정 규칙을 고쳐요.</div>
+      <div class="label" style="margin:6px 0 12px">판매 시 계산한 적합도 vs 7일째 실제 편안함 비교. 차이가 크면 판정 규칙 수정.</div>
       <div id="calBox"></div>
     </div>
     <div class="card pad">
       <div class="eyebrow">기준 관리</div>
-      <div class="label" style="margin:6px 0 12px">고친 판정 규칙과 안경테 DB를 버전으로 묶어 전 매장에 배포해요.</div>
+      <div class="label" style="margin:6px 0 12px">수정한 판정 규칙과 안경테 DB를 버전으로 묶어 전 매장 배포.</div>
       <div id="stdBox"></div>
     </div>
   </div>
@@ -492,10 +492,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="card pad">
       <div class="eyebrow">이상 탐지 (자동)</div>
       <div class="flagrow"><span class="supplybad">● 강남점 · 권장 범위 밖 판매 5건 (참고)</span><span class="pill">참고</span></div>
-      <div class="flagrow"><span class="supplybad">● 부산서면 · 판매 기록과 본사 출고 기록이 달라요</span><span class="pill warn">조사</span></div>
-      <div class="flagrow"><span class="supplywarn">● 판교점 · 운영 점수 94에서 79로 떨어졌어요</span><span class="pill warn">경고</span></div>
+      <div class="flagrow"><span class="supplybad">● 부산서면 · 판매 기록과 본사 출고 기록 불일치</span><span class="pill warn">조사</span></div>
+      <div class="flagrow"><span class="supplywarn">● 판교점 · 운영 점수 94 → 79 하락</span><span class="pill warn">경고</span></div>
       <div class="flagrow"><span class="muted">● 본사 공급 품목 기준 재고 대조 작동 중</span><span class="pill good">정상</span></div>
-      <div class="note" style="margin-top:14px"><b>목적.</b> 운영 점수나 공급 기록이 이상하면 매장과 같이 확인해요. 권장 범위 밖 판매는 참고로만 봐요.</div>
+      <div class="note" style="margin-top:14px"><b>목적.</b> 운영 점수·공급 기록 이상 시 매장과 함께 확인. 권장 범위 밖 판매는 참고용.</div>
     </div>
     <div class="card pad">
       <div class="eyebrow">본사 조치 (원클릭)</div>
@@ -516,18 +516,18 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
         <div class="label">최근 8개월 · 단위 억원</div>
       </div>
       <div class="trend" id="trend"></div>
-      <div class="note"><b>등락 읽기.</b> 1~2월에 줄었다가 3월부터 5개월 연속 늘었어요.</div>
+      <div class="note"><b>등락 읽기.</b> 1~2월 감소 후 3월부터 5개월 연속 증가.</div>
     </div>
     <div class="card pad">
       <div class="eyebrow">본사 수익</div>
-      <div class="label" style="margin:6px 0 10px">주 수익은 테와 렌즈, 콘택트렌즈를 공급하며 남기는 마진이에요.</div>
+      <div class="label" style="margin:6px 0 10px">주 수익은 테·렌즈·콘택트렌즈 공급 마진.</div>
       <table class="tbl"><thead><tr><th>수익원</th><th>성격</th><th>언제부터</th></tr></thead><tbody>
         <tr style="cursor:default"><td>가맹비, 보증금</td><td>한 번</td><td>초기 현금</td></tr>
         <tr style="cursor:default"><td>시스템 구독료</td><td>매달 정액</td><td>초기부터</td></tr>
         <tr style="cursor:default"><td>로열티</td><td>매출에 비례</td><td>가맹 시작 후</td></tr>
         <tr style="cursor:default"><td><b>공급 마진</b> (테, 렌즈, 콘택트렌즈)</td><td>반복, 수익의 중심</td><td>매장이 늘어난 뒤</td></tr>
       </tbody></table>
-      <div class="label" style="margin-top:10px">가맹점은 소매 마진을, 본사는 도매 마진을 가져가요. 많이 팔수록 둘 다 벌어요.</div>
+      <div class="label" style="margin-top:10px">가맹점은 소매 마진, 본사는 도매 마진. 많이 팔수록 둘 다 수익 증가.</div>
     </div>
   </div>
 
@@ -535,7 +535,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <div class="hq-grid">
     <div class="card pad">
       <div class="eyebrow">프론트 × 템플 수요 매트릭스 (전국)</div>
-      <div class="label" style="margin-bottom:12px">칸은 프론트와 템플 조합별 수요, 가장자리 %는 프론트와 템플 각각의 생산 비중이에요.</div>
+      <div class="label" style="margin-bottom:12px">칸은 프론트와 템플 조합별 수요, 가장자리 %는 프론트·템플 각각의 생산 비중.</div>
       <div id="ftMatrix"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap">
         <span class="label">월 총 생산량</span>
@@ -550,14 +550,14 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div id="ageBars"></div>
       <div class="label" style="margin:14px 0 2px">성별</div>
       <div class="gender"><div class="gm" style="width:54%">남 54%</div><div class="gf" style="width:46%">여 46%</div></div>
-      <div class="note" style="margin-top:14px"><b>활용.</b> 30~40대 남성 손님이 다시 오는 비율이 가장 높아요.</div>
+      <div class="note" style="margin-top:14px"><b>활용.</b> 30~40대 남성 손님의 재방문 비율이 가장 높음.</div>
     </div>
   </div>
 
   <!-- 브랜드·공급 관리 -->
   <div class="card pad" style="margin-top:18px">
     <div class="eyebrow">브랜드와 공급</div>
-    <div class="label" style="margin-bottom:6px">PB부터 수입 브랜드까지 본사가 공급해요. 공급 품목은 가맹계약서에 적어요 (변호사 확인 예정).</div>
+    <div class="label" style="margin-bottom:6px">PB부터 수입 브랜드까지 본사 공급. 공급 품목은 가맹계약서에 명시 (변호사 확인 예정).</div>
     <table class="tbl">
       <thead><tr><th>브랜드 / 라인</th><th>포지션</th><th>매장 공급가</th><th>권장 소비자가</th><th>공급 경로</th></tr></thead>
       <tbody>
@@ -569,8 +569,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       </tbody>
     </table>
     <div class="hq-grid" style="margin-top:14px">
-      <div class="optbox" style="margin-top:0"><b>계약.</b> 공급 품목과 이유는 가맹계약서와 정보공개서에 적어요. 문구는 1호점 전에 변호사와 확정해요.</div>
-      <div class="optbox" style="margin-top:0"><b>시스템.</b> 본사에서 들어온 테는 사이즈가 등록돼 있고, A/S와 보증이 자동으로 연결돼요.</div>
+      <div class="optbox" style="margin-top:0"><b>계약.</b> 공급 품목과 이유는 가맹계약서·정보공개서에 명시. 문구는 1호점 전 변호사와 확정.</div>
+      <div class="optbox" style="margin-top:0"><b>시스템.</b> 본사 입고 테는 사이즈 등록 완료, A/S·보증 자동 연결.</div>
     </div>
   </div>
 
@@ -581,11 +581,11 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="feat-list" style="margin-top:4px">
         <div class="feat"><div class="ic">⬡</div><div><div class="ft">데이터는 본사가 관리</div><div class="fd">손님·측정·처방·구매 기록을 본사 시스템에 보관. 어느 매장에서도 이어서 확인.</div></div></div>
         <div class="feat"><div class="ic">▤</div><div><div class="ft">본사 단일 공급</div><div class="fd">PB·수입 브랜드를 본사가 공급. 입고 때 사이즈 측정·A/S 연결.</div></div></div>
-        <div class="feat"><div class="ic">◷</div><div><div class="ft">시스템 의존</div><div class="fd">손님 관리부터 결제, 정산까지 매장 화면 하나로 해요.</div></div></div>
+        <div class="feat"><div class="ic">◷</div><div><div class="ft">시스템 의존</div><div class="fd">손님 관리부터 결제, 정산까지 매장 화면 하나로.</div></div></div>
       </div>
     </div>
   </div>
-  <div class="note"><b>매장이 얻는 것</b> 손님 기억, 재방문 알림, 정산을 시스템이 챙겨서 매장 운영이 쉬워져요. 본사는 착용 기록을 보고 추천 기준을 계속 고쳐요.</div>
+  <div class="note"><b>매장이 얻는 것</b> 손님 기억, 재방문 알림, 정산을 시스템이 처리해 매장 운영 간소화. 본사는 착용 기록으로 추천 기준 지속 개선.</div>
 </section>
 </div>
 
@@ -595,12 +595,12 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 </div>
 
 <script>
-window.__bvGuide={title:'본사 가이드',sub:'전 매장을 한 화면에서 봐요.',points:[
-{sel:'#dashGMV',t:'전체 매출',d:'전 매장 매출과 순위, PB 테 비중을 한 번에 봐요.'},
-{sel:'#pbHQ',t:'공급 마진',d:'테와 렌즈, 콘택트렌즈를 공급하며 남는 본사 몫이에요.'},
-{sel:'#belongSel',t:'손님 기록',d:'이사하거나 매장을 옮겨도 측정과 처방, 구매 기록은 본사에 남아요.'},
-{sel:'#logiBox',t:'본사 출고',d:'전 매장 발주를 품목별로 묶어서 내보내요.'},
-{sel:'#frRetail',t:'새 매장 수익 계산',d:'상권과 평수를 넣으면 매출과 회수 기간을 계산해요.'}
+window.__bvGuide={title:'본사 가이드',sub:'전 매장을 한 화면에서.',points:[
+{sel:'#dashGMV',t:'전체 매출',d:'전 매장 매출·순위·PB 테 비중을 한 번에.'},
+{sel:'#pbHQ',t:'공급 마진',d:'테·렌즈·콘택트렌즈 공급으로 남는 본사 몫.'},
+{sel:'#belongSel',t:'손님 기록',d:'이사·매장 변경에도 측정·처방·구매 기록은 본사에 보존.'},
+{sel:'#logiBox',t:'본사 출고',d:'전 매장 발주를 품목별로 묶어 출고.'},
+{sel:'#frRetail',t:'새 매장 수익 계산',d:'상권·평수 입력 → 매출·회수 기간 계산.'}
 ]};
 </script>
 <script src="/assets/app.js"></script>
@@ -643,7 +643,7 @@ function mxRecalc(){
   var fLines=MX_ROWS.map(function(r,ri){ return r+' '+(total?Math.round(totalQ*rowSum[ri]/total):0)+'개'; }).join(' · ');
   var tLines=MX_COLS.map(function(c,ci){ return c+' '+(total?Math.round(totalQ*colSum[ci]/total):0)+'개'; }).join(' · ');
   var out=document.getElementById('prodOut');
-  if(out) out.innerHTML='<b>생산 예측.</b> 총 '+totalQ.toLocaleString('ko-KR')+'개 기준 · 프론트 '+fLines+' / 템플: '+tLines+'. 셀 수요를 바꾸면 비중·생산량이 자동 갱신돼요.';
+  if(out) out.innerHTML='<b>생산 예측.</b> 총 '+totalQ.toLocaleString('ko-KR')+'개 기준 · 프론트 '+fLines+' / 템플: '+tLines+'. 셀 수요 변경 시 비중·생산량 자동 갱신.';
 }
 mxRender();
 /* demographics */
@@ -895,14 +895,14 @@ function belongShow(){
       '<div class="frrow"><span>측정(사이즈/PD)</span><b>'+(c.size||'-')+' · '+(c.pd||'-')+'</b></div>'+
       '<div class="frrow"><span>처방(시력)</span><b>'+(c.rx||'-')+'</b></div>'+
       '<div class="frrow"><span>구매 이력</span><b>'+h.length+'건 · ₩'+spent.toLocaleString('ko-KR')+'</b></div>'+
-      '<div class="label" style="font-size:13px;margin-top:8px">↑ 지점을 옮겨도 이 기록은 그대로 따라가요 (본사 클라우드 귀속).</div>';
+      '<div class="label" style="font-size:13px;margin-top:8px">↑ 지점을 옮겨도 이 기록은 그대로 유지 (본사 클라우드 귀속).</div>';
   });
 }
 function belongMove(){
   var id=document.getElementById('belongSel').value, to=document.getElementById('belongTo').value;
   if(!id||!to)return;
   fetch('/api/customers/move',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:+id,toStore:to})})
-    .then(function(r){return r.json();}).then(function(){ toast(to+'으로 옮겼어요. 기록은 그대로예요'); belongLoad(id); });
+    .then(function(r){return r.json();}).then(function(){ toast(to+'으로 이동 완료. 기록 유지'); belongLoad(id); });
 }
 
 /* ===== 공급·물류 자동화 (출고센터) ===== */
@@ -919,7 +919,7 @@ function logiLoad(){
     document.getElementById('logiBox').innerHTML = keys.length? keys.map(function(k){var x=bySku[k];
       var br=Object.keys(x.stores).map(function(st){return st.replace('점','')+' '+x.stores[st];}).join(' · ');
       return '<div class="pl-row"><span>'+x.name+' <span class="muted">'+br+'</span></span><b>'+x.total+'개</b></div>';
-    }).join('') : '<div class="muted" style="font-size:14px">출고할 발주가 없어요</div>';
+    }).join('') : '<div class="muted" style="font-size:14px">출고할 발주 없음</div>';
   });
 }
 function _ordStatusAll(fromStatus, toStatus){
@@ -928,8 +928,8 @@ function _ordStatusAll(fromStatus, toStatus){
     return Promise.all(os.map(function(o){return fetch('/api/orders/status',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:o.id,status:toStatus})});})).then(function(){return os.length;});
   });
 }
-function logiApproveAll(){ _ordStatusAll('대기','승인').then(function(n){ toast(n?(n+'건 출고를 승인했어요'):'대기 발주가 없어요'); logiLoad(); if(window.hqOrdLoad)window.hqOrdLoad(); }); }
-function logiReceiveAll(){ _ordStatusAll('승인','입고완료').then(function(n){ toast(n?(n+'건 입고완료 · 지점 재고 자동 반영'):'배송중 발주가 없어요'); logiLoad(); if(window.hqOrdLoad)window.hqOrdLoad(); }); }
+function logiApproveAll(){ _ordStatusAll('대기','승인').then(function(n){ toast(n?(n+'건 출고 승인 완료'):'대기 발주 없음'); logiLoad(); if(window.hqOrdLoad)window.hqOrdLoad(); }); }
+function logiReceiveAll(){ _ordStatusAll('승인','입고완료').then(function(n){ toast(n?(n+'건 입고완료 · 지점 재고 자동 반영'):'배송중 발주 없음'); logiLoad(); if(window.hqOrdLoad)window.hqOrdLoad(); }); }
 
 /* ===== 본사 발주 푸시 ===== */
 (function(){
@@ -950,13 +950,13 @@ function _dlISO(kind){
 }
 function pushSend(){
   var store=document.getElementById('pushStore').value;
-  var opt=document.getElementById('pushSku').selectedOptions[0]; if(!opt){toast('품목을 선택하세요');return;}
+  var opt=document.getElementById('pushSku').selectedOptions[0]; if(!opt){toast('품목 선택 필요');return;}
   var qty=+document.getElementById('pushQty').value||1;
   var dl=_dlISO(document.getElementById('pushDl').value);
   fetch('/api/orders/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:store,sku:opt.value,name:opt.dataset.name,cat:opt.dataset.cat,qty:qty,deadline:dl})})
     .then(function(r){return r.json();}).then(function(j){
       if(!j.ok){toast('푸시 실패');return;}
-      toast(store+'에 '+opt.dataset.name+' '+qty+'개 발주 제안을 보냈어요. 매장 답을 기다려요');
+      toast(store+'에 '+opt.dataset.name+' '+qty+'개 발주 제안 발송. 매장 응답 대기');
       if(window.hqOrdLoad)window.hqOrdLoad();
     });
 }
@@ -980,7 +980,7 @@ function ppSave(sku){
     .then(function(r){return r.json();}).then(function(j){
       if(!j.ok){toast(j.error||'적용 실패');return;}
       var i=PP_ALL.findIndex(function(x){return x.sku===sku;}); if(i>=0){PP_ALL[i].list_price=j.list_price;PP_ALL[i].max_disc=j.max_disc;}
-      toast(sku+' 권장가를 바꿨어요');
+      toast(sku+' 권장가 변경 완료');
     });
 }
 
@@ -1033,13 +1033,13 @@ function _pushItems(list){
 function fcPushStore(store){
   var st=FC.find(function(s){return s.store===store;}); if(!st)return;
   var list=st.items.filter(function(i){return i.push>0;}).map(function(i){return Object.assign({store:store},i);});
-  if(!list.length){toast('푸시할 품목이 없어요');return;}
-  _pushItems(list).then(function(){ toast(store+' '+list.length+'종 발주 제안을 보냈어요'); if(window.hqOrdLoad)window.hqOrdLoad(); });
+  if(!list.length){toast('푸시할 품목 없음');return;}
+  _pushItems(list).then(function(){ toast(store+' '+list.length+'종 발주 제안 발송'); if(window.hqOrdLoad)window.hqOrdLoad(); });
 }
 function fcPushAll(){
   var list=[]; FC.forEach(function(st){ st.items.filter(function(i){return i.push>0;}).forEach(function(i){ list.push(Object.assign({store:st.store},i)); }); });
-  if(!list.length){toast('푸시할 품목이 없어요');return;}
-  _pushItems(list).then(function(){ toast('전 지점 '+list.length+'건 발주 제안을 보냈어요'); if(window.hqOrdLoad)window.hqOrdLoad(); });
+  if(!list.length){toast('푸시할 품목 없음');return;}
+  _pushItems(list).then(function(){ toast('전 지점 '+list.length+'건 발주 제안 발송'); if(window.hqOrdLoad)window.hqOrdLoad(); });
 }
 
 /* ===== 전 지점 실시간 활동 피드 ===== */
@@ -1078,7 +1078,7 @@ function calLoad(){
     if(!j.ok) return;
     box.innerHTML='<table class="tbl"><thead><tr><th>계산 적합도</th><th>건수</th><th>7일째 편함</th><th>흘러내림</th></tr></thead><tbody>'+
       j.bands.map(function(b){return '<tr style="cursor:default"><td>'+b.name+'</td><td>'+b.n+'</td><td><b>'+(b.rate==null?'-':b.rate+'%')+'</b></td><td>'+b.slip+'</td></tr>';}).join('')+'</tbody></table>'+
-      '<div class="label" style="margin-top:10px">적합도가 있는 확인 '+j.total+'건 기준이에요. 적합도가 높을수록 편함 비율도 높아야 기준이 맞는 거예요.</div>';
+      '<div class="label" style="margin-top:10px">적합도가 있는 확인 '+j.total+'건 기준. 적합도가 높을수록 편함 비율도 높아야 기준이 맞음.</div>';
   }).catch(function(){});
 }
 function stdLoad(){
@@ -1096,7 +1096,7 @@ function stdLoad(){
 }
 function stdDeploy(kind){
   fetch('/api/standards/deploy',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({kind:kind})}).then(function(r){return r.json();}).then(function(j){
-    toast(j.ok? (kind+' '+j.version+'을 전 매장에 배포했어요') : (j.error||'배포하지 못했어요')); stdLoad();
+    toast(j.ok? (kind+' '+j.version+'을 전 매장에 배포 완료') : (j.error||'배포 실패')); stdLoad();
   });
 }
 calLoad(); stdLoad();
