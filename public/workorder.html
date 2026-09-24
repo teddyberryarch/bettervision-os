@@ -118,8 +118,23 @@ function showWO(w){
     row('예상 가장자리 두께', R.edge+'mm', L.edge+'mm')+'</tbody></table>'+
     '<table class="wt" style="margin-top:12px"><thead><tr><th>테</th><th>렌즈 가로 · 세로</th><th>브리지</th><th>템플</th><th>코받침 · 소재</th></tr></thead><tbody><tr><td>'+esc(w.frame)+'</td><td>'+sp.a+' · '+sp.B+'mm</td><td>'+sp.dbl+'mm</td><td>'+sp.temple+'mm</td><td>'+sp.pad+' · '+sp.mat+'</td></tr></tbody></table>'+
     (c.why.length?'<div class="note" style="margin-top:12px">'+c.why.map(esc).join('<br>')+'</div>':'')+
+    ocSvg(sp,R,L)+
     '<div class="chk"><div>□ 렌즈미터로 도수·축 확인</div><div>□ 가공 후 좌우 높이 확인</div><div>□ 확인한 안경사 ________</div></div>';
   $('woCard').scrollIntoView({behavior:'smooth'});
+}
+/* [09.24] 광학중심 확인 (실제 크기). 피팅 시트에서 옮겨 옴: 가공 전에 렌즈에 찍은 점이 원 안에 드는지 본다 */
+function ocSvg(sp,R,L){
+  var a=sp.a, B=sp.B, dbl=sp.dbl, W=2*a+dbl+24, H=B+30, cx=W/2, top=8, bot=top+B;
+  var ln=function(x1,y1,x2,y2,w,c,d){return '<line x1="'+x1.toFixed(2)+'" y1="'+y1.toFixed(2)+'" x2="'+x2.toFixed(2)+'" y2="'+y2.toFixed(2)+'" stroke="'+(c||'#111')+'" stroke-width="'+(w||0.25)+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';};
+  var tx=function(x,y,t,s,c,an,w){return '<text x="'+x.toFixed(2)+'" y="'+y.toFixed(2)+'" font-size="'+s+'" fill="'+(c||'#111')+'"'+(an?' text-anchor="'+an+'"':'')+(w?' font-weight="'+w+'"':'')+'>'+t+'</text>';};
+  var lens=function(x){return '<rect x="'+x.toFixed(2)+'" y="'+top+'" width="'+a+'" height="'+B+'" rx="6" fill="none" stroke="#111" stroke-width="0.45"/>';};
+  var oc=function(x,y,lab){return '<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="1" fill="none" stroke="#111" stroke-width="0.3"/>'+ln(x-3.5,y,x+3.5,y,0.25)+ln(x,y-3.5,x,y+3.5,0.25)+tx(x,y-5,lab,2.6,'#111','middle','600');};
+  var y=bot-(+R.ocH||B/2), g='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'mm" height="'+H+'mm" font-family="Pretendard Variable,Pretendard,sans-serif" style="display:block">';
+  g+=lens(cx-dbl/2-a)+lens(cx+dbl/2)+ln(cx,top-5,cx,bot+5,0.2,'#c9c9c9','1.2 1.2')+
+     oc(cx-R.pd,y,'R '+R.pd)+oc(cx+L.pd,y,'L '+L.pd);
+  for(var m=-50;m<=50;m++){ var am=Math.abs(m), h=am%10===0?2.2:(am%5===0?1.4:0.8); g+=ln(cx+m,bot+8,cx+m,bot+8+h,am%10===0?0.22:0.1); if(am%10===0) g+=tx(cx+m,bot+13,String(am),1.9,'#8a8a8a','middle'); }
+  g+=ln(cx-50,bot+8,cx+50,bot+8,0.2)+tx(0,bot+19,'브리지 가운데를 세로 점선에 맞춤. 렌즈에 찍은 점이 원(지름 2mm) 안이면 통과. 아래 자 100mm 확인',2.3,'#555')+'</svg>';
+  return '<div style="margin-top:14px"><div class="eyebrow" style="margin-bottom:6px">광학중심 확인 · 실제 크기 (인쇄 100%)</div>'+g+'</div>';
 }
 function listLoad(){
   fetch('/api/workorders?store='+encodeURIComponent($('wStore').value)).then(function(r){return r.json();}).then(function(j){
