@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 견적서</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-toss.css">
+<style>
+.sec{margin-bottom:16px}.ctitle{font-size:19px;font-weight:600;color:var(--ink);margin:0 0 10px}
+.row{display:flex;gap:12px;flex-wrap:wrap}.fld{flex:1;min-width:180px}.fld label{display:block;font-size:15px;color:var(--muted);margin-bottom:4px}
+.fld select{width:100%;padding:10px;font-size:17px}
+.cinfo{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:17px}.cinfo span{color:var(--muted);margin-right:4px}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}@media(max-width:800px){.opts{grid-template-columns:1fr}}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-size:17px;background:#fff}
+.opt input{margin-top:4px}.opt .w{font-size:15px;color:var(--muted);margin-top:2px}.opt.sel{border-color:var(--t-navy,#1f3a5f);background:var(--t-navy-soft,#eef2f8)}
+.opt.no{opacity:.5;cursor:default}
+.qtag{font-size:13px;border-radius:6px;padding:2px 6px;margin-left:6px;background:var(--t-100,#f2f4f6);color:var(--t-700,#333)}
+.qtag.good{background:#e8f5ee;color:#1b7a47}.qtag.warn{background:#fdf3e2;color:#9a5b00}
+.qt{width:100%;border-collapse:collapse;font-size:17px}.qt th,.qt td{border-bottom:1px solid var(--line);padding:9px 8px;text-align:left}.qt th{color:var(--muted);font-weight:600;font-size:15px}
+.qt td.n,.qt th.n{text-align:right}.qt input{width:70px;font-size:16px;padding:5px 6px;text-align:right}
+.qsum{display:flex;justify-content:flex-end;gap:24px;font-size:17px;margin-top:10px}.qsum b{font-size:22px}
+.ovw{font-size:15px;color:#9a5b00;margin-top:6px}
+.hl{font-size:15px;color:var(--muted)}
+/* 인쇄용 견적서 (A4 세로, 흑백 기준) */
+#qPrint{display:none}
+.qp{font-size:9pt;color:#000;line-height:1.45}
+.qp h1{font-size:18pt;font-weight:600;margin:0 0 2mm}.qp .brand{font-size:9pt;letter-spacing:.12em;font-weight:600}
+.qp .meta{display:grid;grid-template-columns:1fr 1fr;gap:1mm 8mm;margin:5mm 0;border-top:0.6pt solid #000;border-bottom:0.6pt solid #000;padding:3mm 0}
+.qp .meta div span{color:#555;display:inline-block;width:22mm}
+.qp table{width:100%;border-collapse:collapse;margin-top:3mm}.qp th,.qp td{border-bottom:0.4pt solid #999;padding:2mm 1.5mm;text-align:left}.qp th{border-bottom:0.8pt solid #000;font-weight:600}
+.qp td.n,.qp th.n{text-align:right}
+.qp .tot{display:flex;justify-content:flex-end;gap:10mm;margin-top:4mm;font-size:11pt}.qp .tot b{font-size:14pt}
+.qp .notes{margin-top:8mm;border-top:0.4pt solid #999;padding-top:3mm;color:#333}
+.qp .sign{margin-top:12mm;display:flex;justify-content:space-between}
+@page{size:A4 portrait;margin:15mm}
+@media print{ body>*:not(#qPrint){display:none!important} #qPrint{display:block!important} body,html{background:#fff!important} }
+</style>
+</head>
+<body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+  <div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <span class="nav-div" aria-hidden="true"></span>
+    <a href="customer.html">손님 앱</a>
+    <span class="nav-dd"><a href="store.html">가맹점</a><span class="nav-menu"><a href="store.html">매장 홈</a><a href="flow.html">1 접객</a><a href="exam.html">2 검안</a><a href="workorder.html">3 테 판정 · 가공</a><a href="fit.html">4 피팅</a></span></span>
+    <a href="hq.html">본사</a>
+  </div>
+</div></div>
+<div class="wrap"><section class="view active">
+  <div class="lead"><div>
+    <div class="eyebrow">가맹점 · 견적서</div>
+    <h2>본사 권장가로 견적, 판매가는 매장이 결정</h2>
+    <div class="sub">손님 측정값·처방에 맞는 테와 렌즈를 골라 견적서 발행. 발행한 견적서는 결제 화면으로 그대로 넘김. 할인 한도를 넘으면 표시만 하고 막지 않음.</div>
+  </div></div>
+
+  <div class="card pad sec">
+    <div class="ctitle">1 · 손님</div>
+    <div class="row"><div class="fld"><label>손님</label><select id="cust" onchange="pickCust()"><option>불러오는 중</option></select></div></div>
+    <div class="cinfo" id="cinfo"></div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">2 · 테 <span class="hl" id="frameNote"></span></div>
+    <div class="opts" id="frames"></div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">3 · 렌즈</div>
+    <div class="opts" id="lenses"></div>
+    <div class="ovw" id="lensNote"></div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">4 · 함께 (선택)</div>
+    <div class="opts" id="extras"></div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">5 · 견적</div>
+    <table class="qt"><thead><tr><th>품목</th><th class="n">권장가</th><th class="n">할인 %</th><th class="n">판매가</th></tr></thead><tbody id="lines"></tbody></table>
+    <div class="qsum"><span>권장가 합계 <span id="sumList">₩0</span></span><span>합계 <b id="sumTotal">₩0</b></span></div>
+    <div class="ovw" id="overNote"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn" onclick="issue()">견적서 발행</button>
+      <button class="btn ghost" id="btnPrint" onclick="window.print()" disabled>인쇄</button>
+      <a class="btn ghost" id="btnPay" href="#" style="pointer-events:none;opacity:.5">결제 화면으로</a>
+    </div>
+    <div id="issueMsg" style="font-size:15px;margin-top:8px"></div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">최근 견적서</div>
+    <div id="recent" class="hl">불러오는 중</div>
+  </div>
+</section></div>
+<div id="qPrint"></div>
+<script>
+var CUSTS=[], CAT=[], POL={}, JUDGE=null, CUR=null, SEL={frame:null,lens:null,extras:{}}, DISC={}, ISSUED=null;
+function won(n){return '₩'+(n||0).toLocaleString('ko-KR');}
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function qs(k){return new URLSearchParams(location.search).get(k);}
+function J(u){return fetch(u).then(function(r){return r.json();});}
+function price(sku){var p=POL[sku]; if(p) return p.list_price; var c=CAT.filter(function(x){return x.sku===sku;})[0]; return c?c.price:0;}
+function maxDisc(sku){var p=POL[sku]; return p?p.max_disc:10;}
+function item(sku){return CAT.filter(function(x){return x.sku===sku;})[0]||{sku:sku,name:sku};}
+function init(){
+  Promise.all([J('/api/customers'),J('/api/catalog'),J('/api/price-policy').catch(function(){return {policy:[]};})]).then(function(r){
+    CUSTS=r[0].customers||[]; CAT=r[1].catalog||[]; (r[2].policy||[]).forEach(function(p){POL[p.sku]=p;});
+    var want=qs('customer'); if(!want){ try{var rec=JSON.parse(sessionStorage.getItem('bv_active_record')||'null'); if(rec&&rec.customerId) want=rec.customerId;}catch(e){} }
+    document.getElementById('cust').innerHTML='<option value="">손님 선택</option>'+CUSTS.map(function(c){return '<option value="'+c.id+'"'+(String(c.id)===String(want)?' selected':'')+'>'+esc(c.name)+' · '+esc(c.store||'')+' · '+esc(c.size||'-')+'</option>';}).join('');
+    renderExtras(); pickCust(); loadRecent();
+    if(qs('quote')) openQuote(qs('quote'));
+  });
+}
+function pickCust(){
+  var id=document.getElementById('cust').value; CUR=CUSTS.filter(function(c){return String(c.id)===id;})[0]||null;
+  SEL.frame=null; SEL.lens=null; ISSUED=null; resetIssued();
+  document.getElementById('cinfo').innerHTML=CUR?('<div><span>사이즈</span>'+esc(CUR.size||'-')+'</div><div><span>PD</span>'+esc(CUR.pd||'-')+'</div><div><span>처방</span>'+esc(CUR.rx||'-')+'</div>'):'<div class="hl">손님을 고르면 맞는 테와 렌즈가 나옴</div>';
+  if(!CUR){ document.getElementById('frames').innerHTML=''; document.getElementById('lenses').innerHTML=''; render(); return; }
+  document.getElementById('frames').innerHTML='<div class="hl">판정 중</div>';
+  J('/api/frames/judge?customer_id='+CUR.id).then(function(j){ JUDGE=j; renderFrames(); renderLenses(); render(); })
+    .catch(function(){ JUDGE=null; renderFrames(); renderLenses(); render(); });
+}
+function renderFrames(){
+  var items=(JUDGE&&JUDGE.items)||[], ok=items.filter(function(x){return x.lv<2;}), no=items.length-ok.length;
+  if(!items.length){ items=CAT.filter(function(x){return x.cat==='테';}).map(function(x){return {sku:x.sku,name:x.name,level:'판정 없음',lv:1,why:[]};}); ok=items; no=0; }
+  if(!SEL.frame && ok[0]) SEL.frame=ok[0].sku;
+  document.getElementById('frameNote').textContent=no?('· 불가 '+no+'개는 뺌 (테 판정 기준)'):'';
+  document.getElementById('frames').innerHTML=ok.map(function(f){
+    var pb=/^(CL|WD|SL|RD)-/.test(f.sku);
+    return '<label class="opt'+(SEL.frame===f.sku?' sel':'')+'"><input type="radio" name="fr" '+(SEL.frame===f.sku?'checked':'')+' onchange="SEL.frame=\''+f.sku+'\';renderFrames();render()"><div><div>'+esc(f.name)+'<span class="qtag '+(f.lv===0?'good':'warn')+'">'+esc(f.level)+'</span>'+(pb?'<span class="qtag">PB · 본사 조제</span>':'')+'</div><div class="w">'+won(price(f.sku))+(f.why&&f.why.length?' · '+esc(f.why.join(', ')):'')+'</div></div></label>';
+  }).join('');
+}
+function rxIdx(){ var f=(JUDGE&&JUDGE.items||[]).filter(function(x){return x.sku===SEL.frame;})[0]; if(!f||!f.R) return null; return [f.R.idx,f.L.idx].sort().pop(); }
+function renderLenses(){
+  var lenses=CAT.filter(function(x){return x.cat==='렌즈';}), add=JUDGE&&JUDGE.rx&&+JUDGE.rx.ADD>0;
+  var rec=add?'누진 렌즈':'알도R 1.60 렌즈'; var recSku=(lenses.filter(function(x){return x.name===rec;})[0]||lenses[0]||{}).sku;
+  if(!SEL.lens) SEL.lens=recSku;
+  document.getElementById('lenses').innerHTML=lenses.map(function(l){
+    return '<label class="opt'+(SEL.lens===l.sku?' sel':'')+'"><input type="radio" name="ln" '+(SEL.lens===l.sku?'checked':'')+' onchange="SEL.lens=\''+l.sku+'\';renderLenses();render()"><div><div>'+esc(l.name)+(l.sku===recSku?'<span class="qtag good">처방 기준 추천</span>':'')+'</div><div class="w">'+won(price(l.sku))+' · 양쪽</div></div></label>';
+  }).join('');
+  var ix=rxIdx(); document.getElementById('lensNote').textContent=(ix&&parseFloat(ix)>1.6)?('처방상 굴절률 '+ix+' 권장. 가격표에 없는 등급이라 본사 확인 필요.'):'';
+}
+function renderExtras(){
+  document.getElementById('extras').innerHTML=CAT.filter(function(x){return x.cat==='액세서리';}).map(function(a){
+    return '<label class="opt'+(SEL.extras[a.sku]?' sel':'')+'"><input type="checkbox" '+(SEL.extras[a.sku]?'checked':'')+' onchange="if(this.checked)SEL.extras[\''+a.sku+'\']=1;else delete SEL.extras[\''+a.sku+'\'];renderExtras();render()"><div><div>'+esc(a.name)+'</div><div class="w">'+won(price(a.sku))+'</div></div></label>';
+  }).join('');
+}
+function lines(){ var out=[]; if(SEL.frame) out.push(SEL.frame); if(SEL.lens) out.push(SEL.lens); Object.keys(SEL.extras).forEach(function(k){out.push(k);}); return out; }
+function unit(sku){ var d=DISC[sku]||0; return Math.round(price(sku)*(100-d)/100/100)*100; }
+function render(){
+  var ls=lines(), sum=0, sumL=0, over=[];
+  document.getElementById('lines').innerHTML=ls.length?ls.map(function(sku){ var it=item(sku), d=DISC[sku]||0, u=unit(sku); sum+=u; sumL+=price(sku); if(d>maxDisc(sku)) over.push(it.name+' '+d+'% (한도 '+maxDisc(sku)+'%)');
+    return '<tr><td>'+esc(it.name)+'</td><td class="n">'+won(price(sku))+'</td><td class="n"><input type="number" min="0" max="90" value="'+d+'" onchange="DISC[\''+sku+'\']=Math.max(0,Math.min(90,+this.value||0));resetIssued();render()"></td><td class="n">'+won(u)+'</td></tr>'; }).join('')
+    :'<tr><td colspan="4" class="hl">품목 없음</td></tr>';
+  document.getElementById('sumList').textContent=won(sumL); document.getElementById('sumTotal').textContent=won(sum);
+  document.getElementById('overNote').textContent=over.length?('본사 안내 할인 한도 초과: '+over.join(', ')+'. 발행은 가능. 견적서 기록에 한도 초과로 남음.'):'';
+}
+function resetIssued(){ ISSUED=null; document.getElementById('btnPrint').disabled=true; var p=document.getElementById('btnPay'); p.style.pointerEvents='none'; p.style.opacity='.5'; p.href='#'; document.getElementById('issueMsg').textContent=''; }
+function issue(){
+  var ls=lines(); if(!CUR){ msg('손님 먼저 선택','warn'); return; } if(!ls.length){ msg('품목 없음','warn'); return; }
+  fetch('/api/quotes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer_id:CUR.id,items:ls.map(function(s){return {sku:s,qty:1,disc:DISC[s]||0};})})})
+    .then(function(r){return r.json();}).then(function(j){ if(!j.ok){ msg(j.error||'발행 실패','warn'); return; } showIssued(j.quote); loadRecent(); })
+    .catch(function(){ msg('서버 연결 실패','warn'); });
+}
+function msg(t,k){ var m=document.getElementById('issueMsg'); m.style.color=k==='warn'?'var(--warn)':'var(--good)'; m.textContent=t; }
+function showIssued(q){
+  ISSUED=q; document.getElementById('btnPrint').disabled=false; var p=document.getElementById('btnPay'); p.style.pointerEvents='auto'; p.style.opacity='1'; p.href='store.html?quote='+q.id;
+  msg('견적서 '+q.no+' 발행. 유효기간 '+q.valid_until+'까지.','good');
+  var c=q.customer||{}, d=String(q.created_at||'').slice(0,10);
+  document.getElementById('qPrint').innerHTML='<div class="qp"><div class="brand">BETTERVISION</div><h1>견적서</h1>'+
+    '<div class="meta"><div><span>견적 번호</span>'+esc(q.no)+'</div><div><span>매장</span>'+esc(q.store||'-')+'</div>'+
+    '<div><span>발행일</span>'+d+'</div><div><span>유효기간</span>'+esc(q.valid_until)+'까지</div>'+
+    '<div><span>손님</span>'+esc(c.name||'-')+'</div><div><span>사이즈</span>'+esc(c.size||'-')+'</div>'+
+    '<div><span>처방</span>'+esc(c.rx||'-')+'</div><div><span>PD</span>'+esc(c.pd||'-')+'</div></div>'+
+    '<table><thead><tr><th>품목</th><th class="n">수량</th><th class="n">권장가</th><th class="n">할인</th><th class="n">금액</th></tr></thead><tbody>'+
+    q.items.map(function(l){return '<tr><td>'+esc(l.name)+(/^(CL|WD|SL|RD)-/.test(l.sku)?' (본사 조제)':'')+'</td><td class="n">'+l.qty+'</td><td class="n">'+won(l.list)+'</td><td class="n">'+(l.disc?l.disc+'%':'-')+'</td><td class="n">'+won(l.amount)+'</td></tr>';}).join('')+
+    '</tbody></table><div class="tot"><span>권장가 합계 '+won(q.list_total)+'</span><span>합계 <b>'+won(q.total)+'</b></span></div>'+
+    '<div class="notes">부가가치세 포함. 판매가는 매장이 정한 가격이에요. 도수 렌즈는 검안 결과가 바뀌면 금액이 달라질 수 있어요. 본사 조제 테는 결제 후 본사에서 만들어 매장으로 보내요.</div>'+
+    '<div class="sign"><span>'+esc(q.store||'')+' 안경사 ____________</span><span>손님 확인 ____________</span></div></div>';
+}
+function openQuote(id){ J('/api/quotes/'+id).then(function(j){ if(!j.ok) return; var q=j.quote;
+  if(q.customer){ document.getElementById('cust').value=q.customer.id; }
+  showIssued(q); }).catch(function(){}); }
+function loadRecent(){
+  J('/api/quotes').then(function(j){ var it=j.items||[];
+    document.getElementById('recent').innerHTML=it.length?'<table class="qt"><thead><tr><th>번호</th><th>손님</th><th>매장</th><th class="n">합계</th><th>상태</th><th></th></tr></thead><tbody>'+it.slice(0,10).map(function(q){
+      return '<tr><td>'+esc(q.no)+'</td><td>'+esc(q.name)+'</td><td>'+esc(q.store||'-')+'</td><td class="n">'+won(q.total)+'</td><td>'+esc(q.status)+'</td><td><a href="#" onclick="openQuote('+q.id+');window.scrollTo(0,document.body.scrollHeight);return false">열기</a>'+(q.status==='발행'?' · <a href="store.html?quote='+q.id+'">결제</a>':'')+'</td></tr>';}).join('')+'</tbody></table>':'발행한 견적서 없음';
+  }).catch(function(){ document.getElementById('recent').textContent='불러오지 못함'; });
+}
+init();
+</script>
+<script src="/assets/app.js"></script>
+<script src="/assets/bv-nav.js"></script>
+</body>
+</html>

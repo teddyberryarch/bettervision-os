@@ -166,6 +166,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
         <div class="label" style="margin:4px 0 6px">상품 담기</div>
         <div id="posCatalog"></div>
         <div class="divider"></div>
+        <div id="posQuoteNote" style="font-size:15px;color:var(--t-navy,#1f3a5f);font-weight:600;margin-bottom:4px"></div>
         <div id="posLines"></div>
         <div class="postotal"><span class="muted" style="font-size:16px">합계</span><span class="kfig" id="posTotal">₩0</span></div>
         <div class="label" id="posMedical" style="margin-top:2px"></div>
@@ -612,7 +613,7 @@ function crmSel(i){
       '<div class="kv"><span class="label">최근 처방(시력)</span><span>'+(cust.rx||'-')+'</span></div>'+
       '<div class="label" style="margin:14px 0 6px">측정 기록</div><div id="measBox" class="muted" style="font-size:15px">불러오는 중</div>'+
       '<div class="label" style="margin:14px 0 6px">구매 이력 (매장·본사 전용)</div>'+histHtml+
-      '<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><button class="btn small" onclick="autoQuote()">검안 기반 자동 견적</button><button class="btn small ghost" onclick="toast(\''+cust.name+'님 재방문 카톡 발송 (프로토타입)\')">카톡 발송</button></div><div id="autoQuote" style="margin-top:12px"></div>';
+      '<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><a class="btn small" href="quote.html?customer='+cust.id+'">견적서 만들기</a><button class="btn small ghost" onclick="toast(\''+cust.name+'님 재방문 카톡 발송 (프로토타입)\')">카톡 발송</button></div>';
   });
 }
 function toggleRun(el){el.classList.toggle('done');
@@ -706,7 +707,7 @@ function renderPos(){
 }
 function loadPosCustomers(){
   var sel=document.getElementById('posCustomer'); if(!sel)return;
-  fetch('/api/customers?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
+  return fetch('/api/customers?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
     var cs=j.customers||[];
     sel.innerHTML='<option value="">비회원</option>'+cs.map(function(c){return '<option value="'+c.id+'">'+c.name+' ('+(c.size||'-')+')</option>';}).join('');
   });
@@ -719,6 +720,7 @@ function posPay(method){
     .then(function(r){return r.json();}).then(function(res){
       if(!res.ok){toast(res.error||'결제 실패');return;}
       posCart={}; posPrice={}; renderPos();
+      if(POS_QUOTE){ fetch('/api/quotes/'+POS_QUOTE+'/paid',{method:'POST'}).catch(function(){}); POS_QUOTE=null; var qb=document.getElementById('posQuoteNote'); if(qb) qb.textContent=''; }
       var nt=(res.notices&&res.notices.length)?' · 참고: '+res.notices.join(', '):'';
       var pbn=lines.some(function(l){return isPB(l.sku);})?' · PB 테는 본사에 조제 요청 완료':'';
       Promise.all([loadInventory(),loadSummary()]).then(function(){ toast(method+' 결제 '+won(total)+' 완료. 본사에도 즉시 반영'+pbn+nt); });
@@ -777,7 +779,25 @@ function ordRender(){
   ['성수점','홍대점','판교점'].forEach(function(s){var o=document.createElement('option');o.textContent=s;sel.appendChild(o);});
   sel.addEventListener('change',function(){ posCart={}; renderPos(); loadInventory(); loadSummary(); ordRender(); pushRender(); loadPosCustomers(); });
   loadInventory(); loadSummary(); ordRender(); pushRender(); loadPosCustomers();
+  var qid=new URLSearchParams(location.search).get('quote'); if(qid) importQuote(qid);
 })();
+/* [09.24] 견적서 → 결제: 견적서 품목과 판매가를 그대로 담는다 */
+var POS_QUOTE=null;
+function importQuote(id){
+  fetch('/api/quotes/'+id).then(function(r){return r.json();}).then(function(j){
+    if(!j.ok){ toast(j.error||'견적서 없음'); return; } var q=j.quote;
+    var tab=document.querySelector('.subtab[data-t="erp"]'); if(tab) tab.click();
+    var st=document.getElementById('posStore'); if(q.store) st.value=q.store;
+    Promise.all([loadInventory(), loadPosCustomers()]).then(function(){
+      posCart={}; posPrice={};
+      q.items.forEach(function(l){ if(skuFind(l.sku)){ posCart[l.sku]=(posCart[l.sku]||0)+l.qty; posPrice[l.sku]=l.unit; } });
+      if(q.customer_id) document.getElementById('posCustomer').value=q.customer_id;
+      POS_QUOTE=q.status==='결제됨'?null:q.id; renderPos();
+      var n=document.getElementById('posQuoteNote'); if(n) n.textContent='견적서 '+q.no+(q.status==='결제됨'?' (이미 결제됨)':'')+' 불러옴';
+      var pc=document.getElementById('posCatalog'); if(pc) pc.scrollIntoView({behavior:'smooth'});
+    });
+  });
+}
 
 /* ===== 매장 마케팅 (데모: 더미 세그먼트·이력) ===== */
 var MK_SEG=[];
