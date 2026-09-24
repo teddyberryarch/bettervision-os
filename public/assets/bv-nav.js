@@ -3,7 +3,7 @@
    접객 → 검안 → 피팅 순서는 이 브라우저 탭 안에서만 기억한다(sessionStorage). 막히면 "건너뛰고 보기"로 볼 수 있다. */
 (function(){
   var page = location.pathname.split('/').pop() || 'index.html';
-  var STORE_PAGES = ['store.html','flow.html','exam.html','workorder.html','fit.html'];
+  var STORE_PAGES = ['store.html','flow.html','exam.html','workorder.html','fit.html','quote.html'];
   var STEPS = [
     {p:'flow.html', n:'1', t:'접객', done:'접객 마치고 검안으로'},
     {p:'exam.html', n:'2', t:'검안', done:'검안 마치고 테 판정으로'},
