@@ -3,7 +3,7 @@
    접객 → 검안 → 피팅 순서는 이 브라우저 탭 안에서만 기억한다(sessionStorage). 막히면 "건너뛰고 보기"로 볼 수 있다. */
 (function(){
   var page = location.pathname.split('/').pop() || 'index.html';
-  var STORE_PAGES = ['store.html','flow.html','exam.html','workorder.html','fit.html','quote.html'];
+  var STORE_PAGES = ['store.html','flow.html','exam.html','workorder.html','fit.html','quote.html','counter.html'];
   var STEPS = [
     {p:'flow.html', n:'1', t:'접객', done:'접객 마치고 검안으로'},
     {p:'exam.html', n:'2', t:'검안', done:'검안 마치고 테 판정으로'},
@@ -83,7 +83,7 @@
   var done = get();
   var idx = -1; STEPS.forEach(function(s,i){ if(s.p===page) idx=i; });
 
-  var html = '<div class="subnav-in"><a href="store.html"'+(page==='store.html'?' class="active"':'')+'>매장 홈</a><span class="sn-div"></span>'+
+  var html = '<div class="subnav-in"><a href="store.html"'+(page==='store.html'?' class="active"':'')+'>매장 홈</a><a href="counter.html"'+(page==='counter.html'?' class="active"':'')+'>접객 데스크</a><a href="quote.html"'+(page==='quote.html'?' class="active"':'')+'>견적서</a><span class="sn-div"></span>'+
     STEPS.map(function(s){
       var cls = (s.p===page?'active ':'') + (done[s.p.replace('.html','')]?'done':'');
       return '<a href="'+s.p+'" class="'+cls+'"><b>'+s.n+'</b> '+s.t+'</a>';
