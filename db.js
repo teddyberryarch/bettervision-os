@@ -2,7 +2,7 @@
 // 테이블: bookings(예약), inventory(지점×SKU 재고), sales(결제 라인)
 let pool=null, ready=false;
 const mem={ bookings:[], inventory:[], sales:[], orders:[], customers:[], pickups:[], users:[], policy:{},
-  aftercare:[], ascases:[], msessions:[], measurements:[], accesslog:[] };
+  aftercare:[], ascases:[], msessions:[], measurements:[], accesslog:[], overrides:[] };
 try{
   if(process.env.DATABASE_URL){
     const { Pool } = require('pg');
@@ -214,6 +214,8 @@ async function init(){
     pow_json TEXT, confidence REAL, provisional BOOLEAN, method TEXT, operator TEXT, source TEXT)`);
   await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS ear_depth REAL');   // [09.24] 각막~귀 윗부분 앞뒤 거리
   await pool.query('ALTER TABLE measurements ADD COLUMN IF NOT EXISTS size_code TEXT');   // 이 측정으로 정한 9사이즈
+  await pool.query(`CREATE TABLE IF NOT EXISTS overrides(
+    id SERIAL PRIMARY KEY, kind TEXT, step TEXT, reason TEXT, detail TEXT, customer_id INT, store TEXT, username TEXT, at TIMESTAMPTZ DEFAULT now())`);
   await pool.query(`CREATE TABLE IF NOT EXISTS measure_access_log(
     id SERIAL PRIMARY KEY, username TEXT, customer_id INT, action TEXT, at TIMESTAMPTZ DEFAULT now())`);
   await pool.query('ALTER TABLE aftercare ADD COLUMN IF NOT EXISTS judge TEXT');   // 적응 중 / 다시 맞춤
@@ -969,11 +971,37 @@ async function calibration(){
   // 계산한 적합도와 실제 만족도(7일째 불편 없음 비율)를 구간별로 비교한다
   var rows=(await listAftercare(null,'완료')).filter(function(x){return x.fit!=null;});
   var bands=[{name:'90% 이상',min:90,max:101},{name:'80~89%',min:80,max:90},{name:'80% 미만',min:0,max:80}];
-  return {total:rows.length, bands:bands.map(function(b){
+  return {total:rows.length, overrides:await overrideSummary(), bands:bands.map(function(b){
     var r=rows.filter(function(x){return x.fit>=b.min&&x.fit<b.max;}); var ok=r.filter(function(x){return x.comfort==='편함';}).length;
     var slip=r.filter(function(x){return String(x.issues||'').indexOf('흘러내림')>=0;}).length;
     return {name:b.name, n:r.length, ok:ok, rate:r.length?Math.round(ok/r.length*100):null, slip:slip};
   })};
+}
+/* [09.24] D-12 본사는 막지 않고 기록한다: 순서 건너뛰기 · 기준 미달 건넴은 사유를 남기고 넘어간다 */
+const OVERRIDE_REASONS={
+  step_skip:['손님이 급함','다른 기기에서 이미 함','다시 온 손님','안경사 판단','기타'],
+  fit_below:['손님이 급함','손님이 이 테를 원함','안경사 판단','기타']
+};
+async function recordOverride(b, who){
+  var kind=OVERRIDE_REASONS[b.kind]?b.kind:null; if(!kind) return {ok:false,error:'종류가 없어요'};
+  var reason=OVERRIDE_REASONS[kind].indexOf(b.reason)>=0?b.reason:null; if(!reason) return {ok:false,error:'사유를 골라 주세요'};
+  var row={kind:kind, step:String(b.step||'').slice(0,40), reason:reason, detail:String(b.detail||'').slice(0,200),
+    customer_id:/^\d+$/.test(String(b.customer_id||''))?+b.customer_id:null, store:(who&&who.store)||b.store||null, username:who?who.username:null};
+  if(!row.store && row.customer_id){ var c=await getCustomer(row.customer_id); if(c) row.store=c.store||null; }
+  if(ready){ const r=await pool.query('INSERT INTO overrides(kind,step,reason,detail,customer_id,store,username) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id',[row.kind,row.step,row.reason,row.detail,row.customer_id,row.store,row.username]); return {ok:true,id:r.rows[0].id}; }
+  row.id=mem.overrides.length+1; row.at=new Date().toISOString(); mem.overrides.push(row); return {ok:true,id:row.id};
+}
+async function overrideSummary(){
+  var rows = ready ? (await pool.query('SELECT * FROM overrides ORDER BY id DESC LIMIT 2000')).rows : mem.overrides.slice().reverse();
+  var byReason={}; rows.forEach(function(x){ var k=x.kind+'|'+x.reason; byReason[k]=(byReason[k]||0)+1; });
+  // 기준 미달로 건넨 손님의 7일째 결과: 같은 손님, 기록 뒤에 완료된 확인
+  var done=(await listAftercare(null,'완료')), fb=rows.filter(function(x){return x.kind==='fit_below'&&x.customer_id;}), checked=0, ok=0;
+  fb.forEach(function(o){ var t=new Date(o.at).getTime(); var a=done.filter(function(c){return +c.customer_id===+o.customer_id && new Date(c.done_at||0).getTime()>=t;})[0];
+    if(a){ checked++; if(a.comfort==='편함') ok++; } });
+  return {total:rows.length, step_skip:rows.filter(function(x){return x.kind==='step_skip';}).length, fit_below:rows.filter(function(x){return x.kind==='fit_below';}).length,
+    reasons:Object.keys(byReason).map(function(k){var p=k.split('|'); return {kind:p[0],reason:p[1],n:byReason[k]};}).sort(function(a,b){return b.n-a.n;}),
+    fitBelow:{n:fb.length, checked:checked, ok:ok, rate:checked?Math.round(ok/checked*100):null},
+    recent:rows.slice(0,5).map(function(x){return {kind:x.kind,step:x.step,reason:x.reason,store:x.store,at:x.at};})};
 }
 async function pendingAftercareFor(customerId){
   // 고객 앱용: 개인정보 없이 날짜만
@@ -1078,7 +1106,7 @@ async function logMeasureAccess(username, customerId, action){
   mem.accesslog.push({username:username,customer_id:customerId,action:action,at:new Date().toISOString()});
 }
 
-module.exports={ init, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+module.exports={ init, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,

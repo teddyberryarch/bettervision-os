@@ -310,6 +310,11 @@ async function api(req, res, url){
       if(!scopeOK(cur.store)) return send(res,403,{ok:false,error:'다른 지점 건이에요'});
       const r=await db.closeAS(b.id, b.cause, b.action); return send(res, r.ok?200:400, r);
     }
+    // ===== [09.24] D-12 막지 않고 기록 =====
+    if(req.method==='GET' && url.pathname==='/api/overrides/reasons'){ return send(res,200,{ok:true, reasons:db.OVERRIDE_REASONS}); }
+    if(req.method==='POST' && url.pathname==='/api/overrides'){
+      const b=await body(req); const r=await db.recordOverride(b, U); return send(res, r.ok?201:400, r);
+    }
     // ===== [09.24] 기준 보정 · 기준 관리 (본사) =====
     if(req.method==='GET' && url.pathname==='/api/calibration'){ return send(res,200,Object.assign({ok:true}, await db.calibration())); }
     if(req.method==='GET' && url.pathname==='/api/standards'){ return send(res,200,Object.assign({ok:true}, await db.listStandards())); }
