@@ -406,6 +406,16 @@ async function catalogWithPolicy(){
   // 손님 앱 가격 계산용: 본사 권장가(정책)를 price로 덮어 보낸다
   var m=await _policyMap(); return CATALOG.map(function(it){ var pp=m[it.sku]; return Object.assign({},it,{price:pp?pp.list_price:it.price}); });
 }
+async function quoteOverSummary(store){
+  // 본사용: 권장 할인 범위를 넘긴 견적 품목 (막지 않고 기록한 것, D-12)
+  var rows = ready ? (await pool.query('SELECT id,no,customer_id,store,items,status,created_at FROM quotes WHERE ($1::text IS NULL OR store=$1) ORDER BY id DESC LIMIT 500',[store||null])).rows
+    : mem.quotes.filter(function(q){return !store||q.store===store;}).slice().reverse();
+  var total=rows.length, lines=[], byStore={};
+  rows.forEach(function(q){ var its=JSON.parse(q.items||'[]'), hit=false;
+    its.forEach(function(l){ if(l.over){ hit=true; lines.push({no:q.no,store:q.store,status:q.status||'발행',date:String(q.created_at instanceof Date?q.created_at.toISOString():q.created_at).slice(0,10),name:l.name,disc:l.disc,maxDisc:l.maxDisc,list:l.list,unit:l.unit}); } });
+    var b=byStore[q.store||'-']=byStore[q.store||'-']||{quotes:0,over:0}; b.quotes++; if(hit) b.over++; });
+  return {total:total, overQuotes:Object.keys(byStore).reduce(function(a,k){return a+byStore[k].over;},0), byStore:byStore, lines:lines.slice(0,30)};
+}
 async function markQuotePaid(id){
   var q=await getQuote(id); if(!q) return {ok:false,error:'견적서가 없어요'}; if(q.status==='결제됨') return {ok:true,already:true};
   if(ready) await pool.query("UPDATE quotes SET status='결제됨', paid_at=now() WHERE id=$1",[id]);
@@ -1156,12 +1166,21 @@ async function listMeasurements(customerId){
   if(ready){ const r=await pool.query('SELECT id,session_id,store,device,measured_at,pd,face_width,nose_height,nose_angle,ear_l,ear_r,wrap_angle,ear_depth,size_code,confidence,provisional,method,operator,source FROM measurements WHERE customer_id=$1 ORDER BY id DESC',[customerId]); return r.rows; }
   return mem.measurements.filter(function(m){return m.customer_id===+customerId;}).slice().reverse();
 }
+async function measurementsForCustomer(customerId){
+  // 손님 앱용(검안 신뢰): 누가·어떻게 쟀는지. 직원 계정 이름은 빼고 출처만
+  if(!/^\d+$/.test(String(customerId||''))) return [];
+  var rows=await listMeasurements(customerId);
+  var M={truedepth:'아이패드 깊이 카메라',iris_scale:'카메라(홍채 기준 환산)',rig_stereo:'측정 장비',manual:'자·캘리퍼'};
+  return rows.slice(0,10).map(function(m){ return {date:String(m.measured_at instanceof Date?m.measured_at.toISOString():m.measured_at).slice(0,10), where:m.source==='고객 자가측정'?'손님 휴대폰':(m.store||'매장'),
+    how:M[m.method]||m.method, checked:m.source!=='고객 자가측정'&&!m.provisional, provisional:!!m.provisional, confidence:m.confidence!=null?Math.round(m.confidence*100):null,
+    pd:m.pd, face_width:m.face_width, ear_depth:m.ear_depth, size:m.size_code||null}; });
+}
 async function logMeasureAccess(username, customerId, action){
   if(ready){ await pool.query('INSERT INTO measure_access_log(username,customer_id,action) VALUES($1,$2,$3)',[username||null,customerId||null,action]); return; }
   mem.accesslog.push({username:username,customer_id:customerId,action:action,at:new Date().toISOString()});
 }
 
-module.exports={ init, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+module.exports={ init, measurementsForCustomer, quoteOverSummary, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,

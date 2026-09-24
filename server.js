@@ -57,7 +57,7 @@ async function api(req, res, url){
       //  /api/customer(단건)는 공개 예외에서 제외
       const PUBLIC_ANY=['/api/catalog'];
       //  - 고객 앱: 7일째 착용 확인 응답(본인 건만), 자가측정 결과 제출(항상 임시값으로 저장)
-      const PUBLIC_GET=['/api/bookings','/api/aftercare/mine','/api/quotes/mine'];
+      const PUBLIC_GET=['/api/bookings','/api/aftercare/mine','/api/quotes/mine','/api/measurements/mine','/api/shop/items'];
       const PUBLIC_POST=['/api/bookings','/api/pickups','/api/aftercare/respond'];
       const isPublic = PUBLIC_ANY.indexOf(url.pathname)>=0
         || (req.method==='POST' && /^\/api\/measure\/sessions\/[^/]+\/result$/.test(url.pathname))
@@ -311,6 +311,13 @@ async function api(req, res, url){
       const r=await db.closeAS(b.id, b.cause, b.action); return send(res, r.ok?200:400, r);
     }
     // ===== [09.24] 견적서 =====
+    if(req.method==='GET' && url.pathname==='/api/measurements/mine'){
+      const cid=url.searchParams.get('customer_id'); if(!cid) return send(res,400,{ok:false,error:'customer_id 필요'});
+      return send(res,200,{ok:true, items:await db.measurementsForCustomer(cid)}); }
+    if(req.method==='GET' && url.pathname==='/api/shop/items'){
+      // 온라인 스토어: 도수 없는 품목만 (도수 안경·콘택트렌즈는 의료기사법상 온라인 판매 금지)
+      const all=await db.catalogWithPolicy(); return send(res,200,{ok:true, stores:db.STORES, items:all.filter(function(x){return x.cat==='선글라스'||x.cat==='액세서리';})}); }
+    if(req.method==='GET' && url.pathname==='/api/quotes/over'){ return send(res,200,Object.assign({ok:true}, await db.quoteOverSummary(url.searchParams.get('store')))); }
     if(req.method==='GET' && url.pathname==='/api/quotes/mine'){
       const cid=url.searchParams.get('customer_id'); if(!cid) return send(res,400,{ok:false,error:'customer_id 필요'});
       return send(res,200,{ok:true, items:await db.quotesForCustomer(cid)}); }
