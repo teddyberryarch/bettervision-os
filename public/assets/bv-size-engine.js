@@ -39,12 +39,24 @@ window.BVSizeEngine = (function(){
     var central = half>0 ? Math.max(0,1-Math.abs(v-c)/half) : 1;
     return Math.round(80+18*central);
   }
-  function toCode(m){ // m={faceWidth, earGap}
-    var f=band(m.faceWidth,'front'), t=band(m.earGap,'temple');
+  // [09.24] 템플 길이는 각막~귀 윗부분 앞뒤 거리로 정한다 (fit.html·서버와 같은 규칙).
+  //  필요 길이 = 각막~귀 + 정점거리 + 귀 뒤 25mm → 140/145/150 중 가까운 것. 〔1호점에서 확인〕
+  var depthRule = {vd:12, tail:25, sizes:[140,145,150], labels:['S','M','L']};
+  function templeByDepth(d, vd){
+    d=parseFloat(d); if(isNaN(d)) return null;
+    var need=Math.round(d+(parseFloat(vd)||depthRule.vd)+depthRule.tail), bi=0;
+    depthRule.sizes.forEach(function(z,i){ if(Math.abs(z-need)<Math.abs(depthRule.sizes[bi]-need)) bi=i; });
+    var diff=need-depthRule.sizes[bi];
+    return {label:depthRule.labels[bi], len:depthRule.sizes[bi], need:need, diff:diff, fit:Math.max(60,Math.round(98-Math.abs(diff)*4))};
+  }
+  function toCode(m){ // m={faceWidth, earDepth(우선) | earGap, vd}
+    var f=band(m.faceWidth,'front'), td=(m.earDepth!=null&&m.earDepth!=='')?templeByDepth(m.earDepth,m.vd):null;
+    var t=td?td.label:band(m.earGap,'temple');
     if(f==null||t==null) return {front:f,temple:t,code:null,fit:0};
-    return {front:f, temple:t, code:f+'·'+t,
-      fit: Math.round((axisFit(m.faceWidth,'front')+axisFit(m.earGap,'temple'))/2),
-      fitFront: axisFit(m.faceWidth,'front'), fitTemple: axisFit(m.earGap,'temple')};
+    var ft=td?td.fit:axisFit(m.earGap,'temple');
+    return {front:f, temple:t, code:f+'·'+t, nine:'F'+(['S','M','L'].indexOf(f)+1)+'×T'+(['S','M','L'].indexOf(t)+1),
+      fit: Math.round((axisFit(m.faceWidth,'front')+ft)/2), fitFront: axisFit(m.faceWidth,'front'), fitTemple: ft,
+      templeBy: td?'depth':'earGap', templeNeed: td?td.need:null, templeLen: td?td.len:null};
   }
 
   function axisDist(ax){ // 모집단의 [pS,pM,pL] %
@@ -60,5 +72,5 @@ window.BVSizeEngine = (function(){
   function setBound(ax,i,v){ config[ax].bounds[i]=parseFloat(v); }
   function setPop(key,field,v){ config.pop[key][field]=parseFloat(v); }
 
-  return {config, band, bandRange, axisFit, toCode, axisDist, cellDist, setBound, setPop, cdf};
+  return {config, depthRule, templeByDepth, band, bandRange, axisFit, toCode, axisDist, cellDist, setBound, setPop, cdf};
 })();
