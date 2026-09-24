@@ -235,6 +235,9 @@ async function init(){
   const fc=await pool.query('SELECT COUNT(*)::int AS c FROM aftercare WHERE fit IS NOT NULL');
   if(fc.rows[0].c===0){ const d=_demoCare();
     for(const x of d.care.filter(function(x){return x.fit!=null&&x.status==='완료';})){ await pool.query('INSERT INTO aftercare(customer_id,store,sale_date,due_date,status,comfort,issues,note,source,done_at,fit,judge) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',[x.customer_id,x.store,x.sale_date,x.due_date,x.status,x.comfort,x.issues,x.note,x.source,x.done_at,x.fit,x.judge]); } }
+  await pool.query(`CREATE TABLE IF NOT EXISTS vision_exams(id SERIAL PRIMARY KEY, customer_id INT, member TEXT, grp TEXT, date TEXT, rx TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
+  const vec=await pool.query('SELECT COUNT(*)::int AS c FROM vision_exams');
+  if(vec.rows[0].c===0){ for(const x of _demoExams()) await pool.query('INSERT INTO vision_exams(customer_id,member,grp,date,rx) VALUES($1,$2,$3,$4,$5)',[x.customer_id,x.member,x.grp,x.date,x.rx]); }
   const stc=await pool.query('SELECT COUNT(*)::int AS c FROM standards');
   if(stc.rows[0].c===0){ for(const x of _demoStandards()) await pool.query('INSERT INTO standards(kind,version,note,released_at) VALUES($1,$2,$3,$4)',[x.kind,x.version,x.note,x.released_at]);
     for(const x of _demoDeploy()) await pool.query('INSERT INTO standard_deploy(store,kind,version) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',[x.store,x.kind,x.version]); }
@@ -297,7 +300,7 @@ function genHistory(opts){
   return {sales:sales, orders:orders, pickups:pickups};
 }
 function seedMem(){
-  mem.standards=_demoStandards(); mem.deploy=_demoDeploy();
+  mem.standards=_demoStandards(); mem.deploy=_demoDeploy(); mem.exams=_demoExams();
   (function(){ var d=_demoCare(); d.care.forEach(function(x,i){ x.id=i+1; mem.aftercare.push(x); }); d.as.forEach(function(a,i){ a.id=i+1; a.opened_at=new Date().toISOString(); mem.ascases.push(a); }); })();
   SEED_USERS.forEach(function(u,i){ mem.users.push({id:i+1,username:u.username,pass:seedPassHash(u),role:u.role,store:u.store||null,token:null}); });
   CATALOG.forEach(function(it){ mem.policy[it.sku]={list_price:it.price, max_disc:(DEFAULT_DISC[it.cat]!=null?DEFAULT_DISC[it.cat]:10)}; });
@@ -562,10 +565,10 @@ async function segCounts(store){
 async function createPickup(o){
   if(ready){const r=await pool.query(
     `INSERT INTO pickups(store,customer_id,name,phone,kind,items,rx,date,time,pay_type,amount,deposit,status)
-     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'예약') RETURNING id`,
-    [o.store,o.customerId||null,o.name||'',o.phone||'',o.kind,o.items||'',o.rx||'',o.date||'',o.time||'',o.payType||'',o.amount||0,o.deposit||0]);
+     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id`,
+    [o.store,o.customerId||null,o.name||'',o.phone||'',o.kind,o.items||'',o.rx||'',o.date||'',o.time||'',o.payType||'',o.amount||0,o.deposit||0,(o.kind==='R'?'주문 접수':'예약')]);
     return r.rows[0].id;}
-  const id=mem.pickups.length+1; mem.pickups.push(Object.assign({id:id,status:'예약'},o)); return id;
+  const id=mem.pickups.length+1; mem.pickups.push(Object.assign({id:id,status:(o.kind==='R'?'주문 접수':'예약'),pay_type:o.payType},o)); return id;
 }
 async function listPickups(store, status){
   if(ready){const r=await pool.query('SELECT id,store,name,phone,kind,items,rx,date,time,pay_type,amount,deposit,status FROM pickups WHERE ($1::text IS NULL OR store=$1) AND ($2::text IS NULL OR status=$2) ORDER BY id DESC',[store||null,status||null]);return r.rows;}
@@ -824,6 +827,38 @@ async function _applyJudge(cur, judge){
   var nid=mem.aftercare.length+1; mem.aftercare.push({id:nid,customer_id:cur.customer_id,store:cur.store,sale_date:cur.sale_date,due_date:due,status:'예정',comfort:null,issues:null,note:'적응 확인',source:null,done_at:null,judge:null,fit:cur.fit});
   return {recheck_id:nid, recheck_due:due};
 }
+/* ===== [09.24] 시력 기록 · 검사 주기 (사업계획서 v2.1 §5.4, §10.2) ===== */
+// 손님층별 검사 주기(개월). 아이 근시 3~6개월, 노안·누진은 도수가 바뀔 때, 일반 안경 2~3년. 실제 주기는 1호점에서 정해요
+const CARE_GROUPS={'아이 근시':6,'노안·누진':12,'콘택트렌즈':12,'일반':24};
+function _demoExams(){
+  var d=function(m){var t=new Date(); t.setMonth(t.getMonth()-m); return _iso(t).slice(0,7)+'-10';};
+  var ex=function(cid,member,grp,m,rs,ls,rc,lc,add){return {customer_id:cid,member:member,grp:grp,date:d(m),rx:JSON.stringify({R:{S:rs,C:rc||0,A:180},L:{S:ls,C:lc||0,A:175},ADD:add||0})};};
+  return [
+    ex(1,'본인','일반',48,-2.50,-2.75,-0.50,-0.25), ex(1,'본인','일반',24,-3.00,-3.25,-0.50,-0.25), ex(1,'본인','일반',7,-3.25,-3.50,-0.50,-0.25),
+    ex(1,'딸 하린','아이 근시',31,-0.50,-0.50), ex(1,'딸 하린','아이 근시',25,-0.75,-0.75), ex(1,'딸 하린','아이 근시',19,-1.00,-1.25),
+    ex(1,'딸 하린','아이 근시',13,-1.50,-1.50), ex(1,'딸 하린','아이 근시',7,-1.75,-1.75),
+    ex(5,'본인','노안·누진',26,-1.00,-1.25,0,0,1.25), ex(5,'본인','노안·누진',14,-1.00,-1.25,0,0,1.50), ex(5,'본인','노안·누진',2,-1.00,-1.25,0,0,1.75)
+  ];
+}
+function _se(o){ return o.S+(o.C||0)/2; }
+async function listExams(customerId){
+  if(ready){ const r=await pool.query('SELECT member,grp,date,rx FROM vision_exams WHERE customer_id=$1 ORDER BY date',[customerId]); return r.rows; }
+  return (mem.exams||[]).filter(function(x){return +x.customer_id===+customerId;}).sort(function(a,b){return a.date<b.date?-1:1;});
+}
+async function visionFor(customerId){
+  var rows=await listExams(customerId), by={}, today=_iso(new Date());
+  rows.forEach(function(x){ (by[x.member]=by[x.member]||[]).push(x); });
+  var members=Object.keys(by).map(function(m){
+    var ex=by[m].map(function(x){var rx=typeof x.rx==='string'?JSON.parse(x.rx):x.rx; return {date:x.date, R:rx.R, L:rx.L, ADD:rx.ADD||0, se:Math.round((_se(rx.R)+_se(rx.L))/2*100)/100};});
+    var grp=by[m][by[m].length-1].grp, months=CARE_GROUPS[grp]||24, last=ex[ex.length-1];
+    var nd=new Date(last.date+'T00:00:00'); nd.setMonth(nd.getMonth()+months); var next=_iso(nd);
+    var first=ex[0], yrs=Math.max(0.5,(new Date(last.date)-new Date(first.date))/3.156e10);
+    return {member:m, grp:grp, months:months, exams:ex, last:last.date, next:next, due:next<=today,
+      change:Math.round((last.se-first.se)*100)/100, perYear:ex.length>1?Math.round((last.se-first.se)/yrs*100)/100:null};
+  });
+  members.sort(function(a,b){return a.member==='본인'?-1:b.member==='본인'?1:0;});
+  return {members:members, groups:CARE_GROUPS};
+}
 /* ===== [09.24] 기준 보정 · 기준 관리 (구조기능도해 v2.1 6단계) ===== */
 function _demoStandards(){
   var d=function(n){return new Date(Date.now()-n*864e5).toISOString();};
@@ -952,7 +987,7 @@ async function logMeasureAccess(username, customerId, action){
   mem.accesslog.push({username:username,customer_id:customerId,action:action,at:new Date().toISOString()});
 }
 
-module.exports={ init, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+module.exports={ init, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,
