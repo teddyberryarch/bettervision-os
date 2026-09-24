@@ -47,13 +47,13 @@
 <div class="wrap"><section class="view active">
   <div class="lead"><div>
     <div class="eyebrow">⑤ · 추천 · 가상피팅</div>
-    <h2>감이 아니라 6변수 — 객관 추천 + 얼굴 위 미리보기</h2>
-    <div class="sub">측정·검안 데이터로 9사이즈 적합도·얼굴형·트렌드·스타일·용도·이력 6변수를 점수화. "어울리실 것 같아요"가 아니라 "96% + 얼굴형 적합 + 시즌 3위 + 지적 인상".</div>
-  </div><span class="pill good">● 엔진 응용 #2</span></div>
+    <h2>기준 6가지로 추천하고, 얼굴 위에 미리 씌워 봐요</h2>
+    <div class="sub">측정과 검안 데이터로 9사이즈 적합도, 얼굴형, 유행, 스타일, 용도, 이력 6가지를 점수로 매겨요. "어울리실 것 같아요" 대신 "적합도 96%, 얼굴형에 맞음, 이번 시즌 3위, 지적인 인상"처럼 말해요.</div>
+  </div><span class="pill good">● 엔진 활용 2번</span></div>
 
   <div id="recbanner"></div>
   <div class="card pad sec">
-    <div class="ctitle">1 · 고객 조건</div>
+    <div class="ctitle">1 · 손님 조건</div>
     <div class="row">
       <div class="fld"><label>얼굴 가로폭</label><input id="fw" type="number" value="152" oninput="run()"></div>
       <div class="fld"><label>귀 간격</label><input id="eg" type="number" value="160" oninput="run()"></div>
@@ -66,16 +66,16 @@
     </div>
   </div>
 
-  <div class="card pad"><div class="prec"><div class="h">감이 아니라 측정값으로 답한다</div>
-    <p>PD·얼굴폭·귀간격·안면각을 측정 → 9사이즈로 환산 → 전 매장 판매 트렌드와 합산. 손님의 3대 질문(사이즈·유행·어울림)에 전부 수치로 답한다. 어느 안경사가 응대해도 같은 품질.</p></div></div>
+  <div class="card pad"><div class="prec"><div class="h">감이 아니라 측정값으로 답해요</div>
+    <p>PD, 얼굴폭, 귀 간격, 안면각을 재서 9사이즈로 바꾸고, 전 매장 판매 흐름과 합쳐요. 손님이 묻는 세 가지(사이즈, 유행, 어울림)에 전부 숫자로 답해요. 어느 안경사가 응대해도 품질이 같아요.</p></div></div>
   <div class="card pad sec">
     <div class="ctitle">2 · 추천 순위 (객관 점수)</div>
-    <div class="sdesc">행을 누르면 가상피팅·점수 분해가 바뀐다. PB는 강매가 아니라 "제일 잘 맞아서" 위로 온다.</div>
+    <div class="sdesc">줄을 누르면 가상피팅과 점수 내역이 바뀌어요. PB는 억지로 권해서가 아니라 "제일 잘 맞아서" 위로 올라와요.</div>
     <div id="rank"></div>
   </div>
 
   <div class="card pad sec">
-    <div class="ctitle">3 · 가상피팅 + 점수 분해</div>
+    <div class="ctitle">3 · 가상피팅과 점수 내역</div>
     <div class="tryon" id="tryon"></div>
     <div class="bars" id="bars"></div>
     <div class="note" id="reason"></div>
@@ -83,12 +83,12 @@
   </div>
 
   <div class="card pad sec">
-    <div class="ctitle">4 · BETTERVISION PB 카탈로그 (전 모델 9-size)</div>
-    <div class="note" style="margin-bottom:12px">추천된 사이즈로 우리 PB를 바로 본다. 색을 눌러 컬러웨이 확인. <a href="lookbook.html" style="color:var(--good);font-weight:700;text-decoration:none">전체 룩북 →</a></div>
+    <div class="ctitle">4 · BETTERVISION PB 카탈로그 (전 모델 9사이즈)</div>
+    <div class="note" style="margin-bottom:12px">추천된 사이즈로 베러비전 PB를 바로 볼 수 있어요. 색을 누르면 색상별 모습을 확인할 수 있어요. <a href="lookbook.html" style="color:var(--good);font-weight:700;text-decoration:none">전체 룩북 보기</a></div>
     <div id="pbcat" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px"></div>
   </div>
 </section></div>
-<div class="foot"><span>BETTERVISION OS · 추천·가상피팅 v0.1</span><span>6변수 객관화</span></div>
+<div class="foot"><span>BETTERVISION OS · 추천·가상피팅 v0.1</span><span>기준 6가지로 객관적으로</span></div>
 
 <script src="/assets/bv-size-engine.js"></script>
 <script src="/assets/bv-frame-db.js"></script>
@@ -127,7 +127,7 @@ function run(){
 function v(id){return document.getElementById(id).value;}
 function renderRank(){
   document.getElementById('rank').innerHTML=scored.map(function(r,i){
-    return '<div class="rk'+(r.c.pb?' pb':'')+(i===sel?' sel':'')+'" onclick="pick('+i+')"><div class="pct">'+r.total+'</div><div class="meta"><span class="b">'+r.c.brand+' '+r.c.model+'</span> '+(r.c.pb?'<span style="font-size:13px;color:var(--good);font-weight:700">PB</span>':'')+'<div class="s">'+r.c.shape+' · '+r.c.style.join('/')+' · '+DB.MAT[r.c.material].n+(r.m.splayOK?'':' · 소재 못맞춤')+'</div></div></div>';
+    return '<div class="rk'+(r.c.pb?' pb':'')+(i===sel?' sel':'')+'" onclick="pick('+i+')"><div class="pct">'+r.total+'</div><div class="meta"><span class="b">'+r.c.brand+' '+r.c.model+'</span> '+(r.c.pb?'<span style="font-size:13px;color:var(--good);font-weight:700">PB</span>':'')+'<div class="s">'+r.c.shape+' · '+r.c.style.join('/')+' · '+DB.MAT[r.c.material].n+(r.m.splayOK?'':' · 소재상 못 맞춤')+'</div></div></div>';
   }).join('');
 }
 function pick(i){sel=i;renderRank();renderDetail();}
@@ -136,11 +136,11 @@ function renderDetail(){
   var face={faceWidth:+v('fw'),earGap:+v('eg')};
   document.getElementById('tryon').innerHTML=tryonSVG(r.c, face);
   alignTryon();
-  var rows=[['사이즈 매칭',r.size],['얼굴형',r.shape],['트렌드',r.trend],['스타일',r.style],['용도',r.use],['재구매',r.rep]];
+  var rows=[['사이즈 매칭',r.size],['얼굴형',r.shape],['유행',r.trend],['스타일',r.style],['용도',r.use],['재구매',r.rep]];
   document.getElementById('bars').innerHTML=rows.map(function(x){
     return '<div class="l">'+x[0]+'</div><div class="track"><div class="fill" style="width:'+x[1]+'%"></div></div><div class="v">'+x[1]+'</div>';
   }).join('');
-  document.getElementById('reason').textContent='근거: '+r.c.model+' — 사이즈 '+r.size+'% + '+(r.shape>=100?'얼굴형 적합':'얼굴형 보통')+' + 시즌 '+r.c.trend+'위 + "'+v('style')+'" '+(r.style>=100?'부합':'보통')+'. '+r.m.reason;
+  document.getElementById('reason').textContent='근거: '+r.c.model+', 사이즈 '+r.size+'%, '+(r.shape>=100?'얼굴형 적합':'얼굴형 보통')+', 시즌 '+r.c.trend+'위, "'+v('style')+'" 인상 '+(r.style>=100?'부합':'보통')+'. '+r.m.reason;
   document.getElementById('verdict').innerHTML=verdictHTML(r);
 }
 function vtile(q,val,vd,cls){return '<div class="vt '+cls+'"><div class="vq">'+q+'</div><div class="va">'+val+'</div><div class="vv">'+vd+'</div></div>';}
@@ -150,9 +150,9 @@ function verdictHTML(r){
   var tr=r.c.trend<=2?['지금 가장 인기','g']:(r.c.trend<=4?['꾸준한 스테디','w']:['개성·클래식','w']);
   var su=r.shape>=100?['얼굴형 적합','g']:['무난','w'];
   var tiles=vtile('사이즈 맞나?',r.size+'%',sz[0],sz[1])+vtile('유행인가?','시즌 '+r.c.trend+'위',tr[0],tr[1])+vtile('어울리나?',(r.shape>=100?'적합':'보통'),su[0],su[1]);
-  var sug=(r.c===top.c)?'현재 선택이 종합 1순위입니다.':('종합 1순위는 '+top.c.brand+' '+top.c.model+' ('+top.total+'점). 같이 비교해 보세요.');
+  var sug=(r.c===top.c)?'지금 고른 테가 종합 1순위예요.':('종합 1순위: '+top.c.brand+' '+top.c.model+' ('+top.total+'점). 같이 비교해 보세요.');
   var ment='"'+r.c.model+', 사이즈 '+r.size+'%로 '+sz[0]+'이고, '+(r.shape>=100?'얼굴형에도 맞고':'무난하게 어울리고')+', '+(r.c.trend<=2?'요즘 제일 인기':'클래식하게 꾸준한')+' 모델이에요."';
-  return '<div class="vrow">'+tiles+'</div><div class="ment">제안 멘트 — '+ment+'</div><div class="sug">▶ 능동 제안: '+sug+'</div>';
+  return '<div class="vrow">'+tiles+'</div><div class="ment">제안 멘트: '+ment+'</div><div class="sug">▶ 먼저 제안하기: '+sug+'</div>';
 }
 function alignTryon(){
   try{
@@ -203,7 +203,7 @@ function tryonSVG(c, face){
    '<line x1="'+(lx+a/2)+'" y1="'+(ly-3)+'" x2="'+(rx-a/2)+'" y2="'+(ly-3)+'" stroke="'+col+'" stroke-width="1.6"/>'+
    '<line x1="'+(lx-a/2)+'" y1="'+(ly-lensH/2+3)+'" x2="'+(lx-a/2-16)+'" y2="'+(ly-lensH/2+1)+'" stroke="'+col+'" stroke-width="1.4"/>'+
    '<line x1="'+(rx+a/2)+'" y1="'+(ly-lensH/2+3)+'" x2="'+(rx+a/2+16)+'" y2="'+(ly-lensH/2+1)+'" stroke="'+col+'" stroke-width="1.4"/>'+
-   '<text x="'+cx+'" y="135" font-size="7" fill="#8a877f" text-anchor="middle" font-family="Pretendard">'+c.model+' · '+c.shape+' · 프론트폭 '+(p.frontSpan)+'mm</text>'+
+   '<text x="'+cx+'" y="135" font-size="7" fill="#8a877f" text-anchor="middle" font-family="Pretendard">'+c.model+' · '+c.shape+' · 앞판폭 '+(p.frontSpan)+'mm</text>'+
    '</svg>';
 }
 var _r=(window.BVRecord&&BVRecord.load)?BVRecord.load():null;
@@ -249,7 +249,7 @@ window.BVFace = { detect: async (img)=>{ try{ const m=await ensure(); const r=m.
    el.innerHTML='<div style="height:96px;display:flex;align-items:center;justify-content:center">'+fr(m,first)+'</div>'+
      '<div style="font-size:13px;letter-spacing:1px;color:var(--good);font-weight:700">'+m.id+'</div>'+
      '<div style="font-size:16px;font-weight:600;color:var(--ink)">'+m.name+'</div>'+
-     '<div style="font-size:13px;color:var(--muted);margin:2px 0 8px">'+m.shape+(m.metal?' · 메탈':' · 아세테이트')+' · 9-size</div>'+
+     '<div style="font-size:13px;color:var(--muted);margin:2px 0 8px">'+m.shape+(m.metal?' · 메탈':' · 아세테이트')+' · 9사이즈</div>'+
      '<div class="pbsw" style="display:flex;gap:6px">'+sw+'</div>';
    el.querySelectorAll('.pbsw span').forEach(function(sp){sp.addEventListener('click',function(){
      el.querySelector('div').innerHTML=fr(m,sp.getAttribute('data-c'));

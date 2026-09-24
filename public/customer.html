@@ -418,7 +418,7 @@
 
 <script>
 window.__bvGuide={title:'손님 앱 가이드',sub:'안경 사는 불확실성을 없애는 게 목표.',points:[
-{click:'.ptab[data-s="measure"]',sel:'#scanwrap',t:'얼굴 측정',d:'카메라로 안면폭·PD 측정 → 사이즈 자동 매칭.'},
+{click:'.ptab[data-s="measure"]',sel:'#scanwrap',t:'얼굴 측정',d:'카메라로 얼굴 폭과 PD를 재면 맞는 사이즈를 바로 찾아요.'},
 {click:'.ptab[data-s="measure"]',sel:'#tryonCard',t:'가상 피팅',d:'카메라 얼굴 위에 안경을 얹어 미리 써봐요.'},
 {click:'.ptab[data-s="products"]',sel:'#csub',t:'상품·견적',d:'투명 가격 시뮬레이터, 렌즈 굴절률·코팅, PB 안내.'},
 {click:'.ptab[data-s="care"]',sel:'#remindCard',t:'재구매·위시',d:'교체주기 알림(도수=방문/소모품=바로구매)·위시리스트.'}
@@ -810,7 +810,7 @@ var LENS_IDX=[
 ];
 var COATINGS=[
   {i:'청',n:'블루라이트(청광) 차단',d:'디지털 기기 청색광 완화. 눈 피로·수면 영향 줄임. 사무직·학생 추천.'},
-  {i:'변',n:'변색(포토크로믹)',d:'실내 투명 → 야외 햇빛에 자동으로 짙어짐. 안경+선글라스 하나로.'},
+  {i:'변',n:'변색(포토크로믹)',d:'실내에서는 투명하고 햇빛 아래에서는 짙어져요. 안경과 선글라스를 하나로 써요.'},
   {i:'누',n:'누진(다초점)',d:'한 렌즈에 원·근거리. 노안·원근 동시 교정. 40대+ 추천.'},
   {i:'코',n:'발수·반사방지 멀티코팅',d:'기본 적용. 김서림·물방울·빛반사 줄여 시야 또렷. 내구성↑.'}
 ];
@@ -889,8 +889,8 @@ function simCalc(){
   var fn=document.getElementById('simFrame').selectedOptions[0].text.split(' · ')[0];
   var ln=document.getElementById('simLens').selectedOptions[0].text.split(' · ')[0];
   document.getElementById('simBreak').innerHTML=
-    '<div class="sbrow"><span>테 — '+fn+'</span><span>₩'+comma(f)+'</span></div>'+
-    '<div class="sbrow"><span>렌즈 — '+ln+'</span><span>₩'+comma(l)+'</span></div>'+
+    '<div class="sbrow"><span>테 · '+fn+'</span><span>₩'+comma(f)+'</span></div>'+
+    '<div class="sbrow"><span>렌즈 · '+ln+'</span><span>₩'+comma(l)+'</span></div>'+
     '<div class="sbrow"><span>코팅 '+(coatSum?('×'+coats.length):'기본')+'</span><span>₩'+comma(coatSum)+'</span></div>';
   document.getElementById('simTotal').textContent='₩'+comma(total);
 }

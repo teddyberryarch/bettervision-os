@@ -37,32 +37,32 @@
   </div></div></div>
 <div class="wrap"><section class="view active">
 <div class="lead"><div><div class="eyebrow">재무 모델 · 시뮬레이터</div><h2>매출·영업이익이 어떤 가정에서 나오나</h2>
-<div class="sub">가정을 직접 흔들어 보세요. 본사 매출 = 가맹 공급(전 품목 본사 공급) + 로열티 + 온라인. 두 불변원칙(데이터·공급 본사 귀속)이 이 모델의 전제.</div></div><span class="pill good">● 투자 검토용</span></div>
+<div class="sub">가정을 직접 바꿔 보세요. 본사 매출은 가맹 공급(전 품목 본사 공급), 로열티, 온라인을 더한 값이에요. 데이터와 공급은 본사에 귀속된다는 두 원칙을 전제로 해요.</div></div><span class="pill good">● 투자 검토용</span></div>
 
 <div class="grid">
   <div class="card pad">
-    <div class="eyebrow" style="margin-bottom:8px">가정 (슬라이드)</div>
+    <div class="eyebrow" style="margin-bottom:8px">가정 (슬라이더)</div>
     <div class="sld"><label>가맹점 수 <b id="vN">150</b>개</label><input id="N" type="range" min="30" max="300" step="5" value="150" oninput="calc()"></div>
     <div class="sld"><label>점당 월 소매매출 <b id="vR">4,000</b>만원</label><input id="R" type="range" min="2000" max="8000" step="100" value="4000" oninput="calc()"><div class="hint">점포 1곳의 월 소매 판매액</div></div>
     <div class="sld"><label>본사 공급가 비율 <b id="vH">40</b>%</label><input id="H" type="range" min="30" max="50" step="1" value="40" oninput="calc()"><div class="hint">소매가 대비 본사가 공급으로 가져가는 비중(전 품목 본사 공급)</div></div>
-    <div class="sld"><label>PB 침투율 <b id="vP">70</b>%</label><input id="P" type="range" min="40" max="95" step="1" value="70" oninput="calc()"><div class="hint">PB 비중 ↑ → 본사 마진(영업이익률) ↑</div></div>
-    <div class="sld"><label>로열티율 <b id="vRoy">3</b>% <span style="font-weight:400;color:var(--muted)">(소매 GMV 대비)</span></label><input id="Roy" type="range" min="0" max="6" step="0.5" value="3" oninput="calc()"></div>
+    <div class="sld"><label>PB 침투율 <b id="vP">70</b>%</label><input id="P" type="range" min="40" max="95" step="1" value="70" oninput="calc()"><div class="hint">PB 비중이 높을수록 본사 마진(영업이익률)이 높아져요</div></div>
+    <div class="sld"><label>로열티율 <b id="vRoy">3</b>% <span style="font-weight:400;color:var(--muted)">(소매 총매출 대비)</span></label><input id="Roy" type="range" min="0" max="6" step="0.5" value="3" oninput="calc()"></div>
     <div class="sld"><label>온라인 직접 연매출 <b id="vO">50</b>억</label><input id="O" type="range" min="0" max="150" step="5" value="50" oninput="calc()"></div>
   </div>
 
   <div class="card pad">
     <div class="eyebrow" style="margin-bottom:8px">결과</div>
     <div class="big">
-      <div class="kpi"><div class="l">소매 GMV (전 매장 합)</div><div class="v" id="oGMV">—</div></div>
-      <div class="kpi tg"><div class="l">본사 매출</div><div class="v" id="oHQ">—</div><span class="badge" id="bHQ"></span>
+      <div class="kpi"><div class="l">소매 총매출 (전 매장 합)</div><div class="v" id="oGMV">-</div></div>
+      <div class="kpi tg"><div class="l">본사 매출</div><div class="v" id="oHQ">-</div><span class="badge" id="bHQ"></span>
         <div class="bd" id="bdHQ"></div></div>
-      <div class="kpi tg"><div class="l">영업이익 <span style="font-weight:400;color:var(--muted)">(영업이익률 <b id="oOPM">—</b>)</span></div><div class="v" id="oOP">—</div><span class="badge" id="bOP"></span></div>
+      <div class="kpi tg"><div class="l">영업이익 <span style="font-weight:400;color:var(--muted)">(영업이익률 <b id="oOPM">-</b>)</span></div><div class="v" id="oOP">-</div><span class="badge" id="bOP"></span></div>
     </div>
-    <div class="note">목표: 본사 매출 360~390억 · 영업이익 90~120억. 기본 가정(150점·점당 4천만·공급 40%·PB 70%)에서 목표 안착.</div>
+    <div class="note">목표는 본사 매출 360~390억, 영업이익 90~120억이에요. 기본 가정(가맹점 150개, 점당 4천만, 공급 40%, PB 70%)에서 목표 범위에 들어와요.</div>
   </div>
 </div>
 <div class="card pad"><div class="eyebrow" style="margin-bottom:4px">모델 논리</div>
-<div style="font-size:14px;color:var(--ink);line-height:1.7">본사 매출 = <b>가맹 공급매출</b>(GMV × 공급비율) + <b>로열티</b>(GMV × 로열티율) + <b>온라인</b>. 영업이익률은 PB 침투율에 연동(PB 마진이 높아 침투율↑ = 이익률↑). 전 품목 본사 공급이 원칙이라 GMV의 일정 비율이 그대로 본사 매출로 귀속 — 이게 모델의 핵심.</div></div>
+<div style="font-size:14px;color:var(--ink);line-height:1.7">본사 매출 = <b>가맹 공급매출</b>(소매 총매출 × 공급비율) + <b>로열티</b>(소매 총매출 × 로열티율) + <b>온라인</b>. 영업이익률은 PB 침투율에 따라 움직여요. PB 마진이 높아서 침투율이 오르면 이익률도 올라가요. 전 품목을 본사가 공급하는 게 원칙이라, 소매 총매출의 일정 비율이 그대로 본사 매출이 돼요. 이 모델에서 가장 중요한 부분이에요.</div></div>
 </section></div>
 <div class="foot"><span>BETTERVISION OS · 재무 모델 v0.1</span><span>가정 공개 · 직접 검증</span></div>
 <script>
@@ -92,8 +92,8 @@ function calc(){
     '<div class="row"><span>로열티</span><b>'+Math.round(roy).toLocaleString()+'억</b></div>'+
     '<div class="row"><span>온라인</span><b>'+Math.round(O).toLocaleString()+'억</b></div>';
   function badge(el,val,lo,hi){var e=document.getElementById(el);
-    if(val>=lo&&val<=hi){e.className='badge ok';e.textContent='목표 '+lo+'~'+hi+'억 안착 ✓';}
-    else if(val<lo){e.className='badge no';e.textContent='목표('+lo+'~'+hi+'억) 미달 — 가정 상향 필요';}
+    if(val>=lo&&val<=hi){e.className='badge ok';e.textContent='목표 '+lo+'~'+hi+'억 범위 안 ✓';}
+    else if(val<lo){e.className='badge no';e.textContent='목표('+lo+'~'+hi+'억)에 못 미쳐요. 가정을 올려 보세요';}
     else{e.className='badge ok';e.textContent='목표('+lo+'~'+hi+'억) 초과 ✓';}}
   badge('bHQ',hq,360,390); badge('bOP',op,90,120);
 }

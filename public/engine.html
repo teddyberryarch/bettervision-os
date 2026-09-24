@@ -54,16 +54,16 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 <section class="view active">
   <div class="lead">
     <div>
-      <div class="eyebrow">⑨ · 9사이즈 환산엔진 (본사 핵심 IP)</div>
-      <h2>측정 raw → S/M/L 등급 → 9코드 + 적합도</h2>
-      <div class="sub">측정·추천·피팅·생산이 전부 이 위에 선다. 경계 mm값이 곧 IP — 평균 근처에서 1mm가 분포를 크게 바꾼다. 여기서 경계를 맞춰 <b>M·M이 최빈(재고 효율)</b>이 되게 한다.</div>
+      <div class="eyebrow">⑨ · 9사이즈 환산엔진 (본사 핵심 지식재산)</div>
+      <h2>측정값을 S/M/L 등급으로 나누고, 9개 코드와 적합도로 바꿔요</h2>
+      <div class="sub">측정, 추천, 피팅, 생산이 전부 이 엔진 위에서 돌아가요. 경계 mm값이 곧 본사 지식재산이에요. 평균 근처에서는 1mm만 달라져도 분포가 크게 바뀌어요. 여기서 경계를 맞춰 <b>M·M이 가장 많아지게(재고 효율)</b> 해요.</div>
     </div>
-    <span class="pill good">● 코어 · 튜닝 가능</span>
+    <span class="pill good">● 핵심 · 조정 가능</span>
   </div>
 
   <div class="card pad sec">
-    <div class="ctitle">1 · 단일 측정 테스터</div>
-    <div class="sdesc">한 사람 측정값을 넣으면 등급·코드·적합도가 나온다. 아래 분포표에 위치도 표시.</div>
+    <div class="ctitle">1 · 한 사람 측정해 보기</div>
+    <div class="sdesc">한 사람의 측정값을 넣으면 등급, 코드, 적합도가 나와요. 아래 분포표에도 위치를 표시해요.</div>
     <div class="row">
       <div class="fld"><label>얼굴 가로폭 (mm) · <b id="fwv">152</b></label><input id="fw" type="range" min="132" max="170" step="0.5" value="152" oninput="upd()"></div>
       <div class="fld"><label>귀 윗부분 간격 (mm) · <b id="egv">160</b></label><input id="eg" type="range" min="144" max="180" step="0.5" value="160" oninput="upd()"></div>
@@ -73,16 +73,16 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 
   <div class="card pad sec">
     <div class="ctitle">2 · 9사이즈 분포 (수요표)</div>
-    <div class="sdesc">모집단 분포 × 현재 경계 → 9칸 비율. 초록 테두리 = 최빈(목표는 M·M). 검은 테두리 = 위 테스터 위치.</div>
+    <div class="sdesc">모집단 분포에 현재 경계를 적용해 9칸 비율을 계산해요. 초록 테두리는 가장 많은 칸(목표는 M·M)이고, 검은 테두리는 위에서 넣은 측정값의 위치예요.</div>
     <div class="grid3" id="grid"></div>
     <div id="modeline" class="note"></div>
   </div>
 
   <div class="card pad sec">
-    <div class="ctitle">3 · 경계값 튜너 <span style="font-size:13px;color:var(--warn)">= 본사 IP</span></div>
-    <div class="sdesc">경계 mm와 모집단 평균·표준편차를 바꾸면 분포가 즉시 갱신된다. M·M이 최대가 되도록 맞춘 값이 정본.</div>
+    <div class="ctitle">3 · 경계값 조정 <span style="font-size:13px;color:var(--warn)">(본사 지식재산)</span></div>
+    <div class="sdesc">경계 mm와 모집단 평균, 표준편차를 바꾸면 분포가 바로 바뀌어요. M·M이 가장 많아지도록 맞춘 값을 정본으로 써요.</div>
     <div class="tunecard">
-      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">프론트 폭 경계 (얼굴 가로)</div>
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">앞판 폭 경계 (얼굴 가로)</div>
       <div class="row">
         <div class="fld"><label>S | M 경계</label><input id="fb0" type="number" step="0.5" oninput="setB()"></div>
         <div class="fld"><label>M | L 경계</label><input id="fb1" type="number" step="0.5" oninput="setB()"></div>
@@ -91,7 +91,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       </div>
     </div>
     <div class="tunecard">
-      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">템플 경계 (귀 간격)</div>
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">다리 경계 (귀 간격)</div>
       <div class="row">
         <div class="fld"><label>S | M 경계</label><input id="tb0" type="number" step="0.5" oninput="setB()"></div>
         <div class="fld"><label>M | L 경계</label><input id="tb1" type="number" step="0.5" oninput="setB()"></div>
@@ -99,18 +99,18 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
         <div class="fld"><label>표준편차</label><input id="ts" type="number" step="0.1" oninput="setB()"></div>
       </div>
     </div>
-    <div class="note">현재값은 〔확인〕 초벌(사이즈코리아 추정). 실데이터 쌓이면 만족도 기반으로 경계 자기교정 → 이 화면에서 갱신.</div>
+    <div class="note">지금 값은 〔확인〕 초벌이에요(사이즈코리아 기준 추정). 실제 데이터가 쌓이면 만족도를 바탕으로 경계를 스스로 고치고, 이 화면에서 갱신해요.</div>
   </div>
 
   <div class="card pad sec">
     <div class="ctitle">4 · 엔진 설정 출력</div>
-    <div class="sdesc">이 설정이 단일 진실 공급원. 그대로 <code>/assets/bv-size-engine.js</code>의 config로. 측정·추천·피팅이 전부 이걸 호출.</div>
+    <div class="sdesc">모든 화면이 이 설정 하나를 기준으로 써요. 그대로 <code>/assets/bv-size-engine.js</code>의 설정값(config)이 되고, 측정, 추천, 피팅이 전부 이 값을 불러와요.</div>
     <div class="dump" id="dump"></div>
   </div>
 </section>
 </div>
 
-<div class="foot"><span>BETTERVISION OS · 9사이즈 환산엔진 v0.1</span><span>경계값 = 본사 IP</span></div>
+<div class="foot"><span>BETTERVISION OS · 9사이즈 환산엔진 v0.1</span><span>경계값은 본사 지식재산</span></div>
 
 <script src="/assets/bv-size-engine.js"></script>
 <script>
@@ -140,15 +140,15 @@ function upd(){
   var fw=parseFloat(document.getElementById('fw').value), eg=parseFloat(document.getElementById('eg').value);
   document.getElementById('fwv').textContent=fw; document.getElementById('egv').textContent=eg;
   var r=E.toCode({faceWidth:fw, earGap:eg});
-  document.getElementById('code').textContent=r.code||'—';
-  document.getElementById('codesm').innerHTML='적합도 <b>'+r.fit+'%</b><br>프론트 '+r.front+' ('+r.fitFront+'%) · 템플 '+r.temple+' ('+r.fitTemple+'%)';
+  document.getElementById('code').textContent=r.code||'-';
+  document.getElementById('codesm').innerHTML='적합도 <b>'+r.fit+'%</b><br>앞판 '+r.front+' ('+r.fitFront+'%) · 다리 '+r.temple+' ('+r.fitTemple+'%)';
   // 분포 그리드
   var d=E.cellDist(), L=['S','M','L'];
   var maxv=0,mi=1,mj=1; for(var i=0;i<3;i++)for(var j=0;j<3;j++)if(d[i][j]>maxv){maxv=d[i][j];mi=i;mj=j;}
   var hereF=L.indexOf(r.front), hereT=L.indexOf(r.temple);
-  var html='<div class="h"></div><div class="h">템플 S</div><div class="h">템플 M</div><div class="h">템플 L</div>';
+  var html='<div class="h"></div><div class="h">다리 S</div><div class="h">다리 M</div><div class="h">다리 L</div>';
   for(var i=0;i<3;i++){
-    html+='<div class="h">프론트 '+L[i]+'</div>';
+    html+='<div class="h">앞판 '+L[i]+'</div>';
     for(var j=0;j<3;j++){
       var pct=(d[i][j]*100), op=0.08+0.85*(d[i][j]/(maxv||1));
       var cls='cell'+((i===mi&&j===mj)?' mode':'')+((i===hereF&&j===hereT)?' here':'');
@@ -158,8 +158,8 @@ function upd(){
   document.getElementById('grid').innerHTML=html;
   var modePct=(maxv*100).toFixed(1);
   var ml=document.getElementById('modeline');
-  if(mi===1&&mj===1) ml.innerHTML='최빈 = M·M ('+modePct+'%) — 재고 효율 기준 충족.';
-  else ml.innerHTML='주의: 최빈 = '+L[mi]+'·'+L[mj]+' ('+modePct+'%). 경계를 조정해 M·M이 최대가 되게 맞추세요.';
+  if(mi===1&&mj===1) ml.innerHTML='가장 많은 칸은 M·M('+modePct+'%)이에요. 재고 효율 기준을 충족해요.';
+  else ml.innerHTML='주의: 지금 가장 많은 칸은 '+L[mi]+'·'+L[mj]+' ('+modePct+'%)예요. 경계를 조정해서 M·M이 가장 많아지게 맞춰 주세요.';
   // 출력
   document.getElementById('dump').textContent=JSON.stringify({front:C.front,temple:C.temple,pop:C.pop},null,2);
 }

@@ -22,8 +22,8 @@
     <a href="hq.html">본사</a>
   </div></div></div>
 <div class="wrap"><section class="view active">
-<div class="lead"><div><div class="eyebrow">① · 안면 측정 (스캔)</div><h2>한 번 스캔 → 측정 5값 → 9사이즈</h2>
-<div class="sub">아이패드 트루뎁스로 얼굴을 스캔해 PD·얼굴폭·코높이·귀간격·안면각을 한 번에. 측정과 가상피팅이 같은 얼굴 메시에서 나온다. (데모는 슬라이더/자동 스캔)</div></div><span class="pill good">● 엔진 입력원</span></div>
+<div class="lead"><div><div class="eyebrow">① · 안면 측정 (스캔)</div><h2>한 번 스캔해서 측정값 5개로 9사이즈를 찾아요</h2>
+<div class="sub">아이패드 트루뎁스로 얼굴을 스캔해 PD, 얼굴폭, 코 높이, 귀 간격, 안면각을 한 번에 재요. 측정과 가상피팅이 같은 얼굴 입체 데이터에서 나와요. (데모에서는 슬라이더나 자동 스캔을 써요)</div></div><span class="pill good">● 엔진 입력값</span></div>
 <div class="card pad sec">
 <div class="ctitle">1 · 측정 (데모)</div>
 <div class="fld" style="margin-bottom:8px"><label style="display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px">손님 이름</label><input id="cname" placeholder="이름" style="width:100%;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:#fff"></div>
@@ -35,7 +35,7 @@
 <div class="fld"><label>안면각 <b id="vWR">5</b>°</label><input id="WR" type="range" min="0" max="20" step="0.5" value="5" oninput="upd()"></div>
 </div>
 <div class="card pad sec"><div class="ctitle">1.5 · 카메라 촬영 (실측·가상피팅용)</div>
-<div class="sdesc" style="font-size:14px;color:var(--muted);margin-bottom:8px">손님 얼굴을 촬영하면 사진이 레코드에 저장되고, 추천에서 사진 위 가상피팅에 쓰인다.</div>
+<div class="sdesc" style="font-size:14px;color:var(--muted);margin-bottom:8px">손님 얼굴을 촬영하면 사진이 손님 기록에 저장되고, 추천 화면에서 사진 위 가상피팅에 쓰여요.</div>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" onclick="startCam()">카메라 켜기</button><button class="btn small ghost" onclick="capture()">촬영 ●</button></div>
 <video id="cam" autoplay playsinline muted style="width:100%;max-width:320px;border-radius:10px;margin:8px 0;display:none;background:#000"></video>
 <canvas id="cap" style="display:none"></canvas>
@@ -44,9 +44,9 @@
 <div class="card pad sec"><div class="ctitle">2 · 환산 결과</div>
 <div class="scan" id="scan"></div>
 <div class="bigout"><div class="code" id="code">M·M</div><div class="sm" id="sm"></div></div>
-<button class="btn" onclick="proceed()" style="margin:4px 0 10px">이 측정으로 진행 ▶ 전 단계 자동 적용</button><div id="savemsg" style="font-size:13px;color:var(--good);font-weight:600;margin-bottom:8px"></div>
-<div class="links"><a href="exam.html">→ 검안</a><a href="recommend.html">→ 추천·가상피팅</a><a href="fit.html">→ 피팅</a></div>
-<div class="note">측정값은 raw 1층 + 본사 코드 2층으로 본부 귀속. 검안·추천·피팅이 이 한 번의 스캔을 공유.</div></div>
+<button class="btn" onclick="proceed()" style="margin:4px 0 10px">이 측정으로 진행 ▶ 모든 단계에 자동 적용</button><div id="savemsg" style="font-size:13px;color:var(--good);font-weight:600;margin-bottom:8px"></div>
+<div class="links"><a href="exam.html">검안으로</a><a href="recommend.html">추천·가상피팅으로</a><a href="fit.html">피팅으로</a></div>
+<div class="note">측정값은 원래 값(1층)과 본사 코드(2층)로 나눠 본사에 쌓여요. 검안, 추천, 피팅이 이 한 번의 스캔을 같이 써요.</div></div>
 </section></div>
 <div class="foot"><span>BETTERVISION OS · 안면 측정 v0.1</span><span>한 번 스캔, 다 공유</span></div>
 <script src="/assets/bv-size-engine.js"></script>
@@ -55,17 +55,17 @@
 var E=window.BVSizeEngine;
 function gv(id){return parseFloat(document.getElementById(id).value);}
 var _photo=null,_photoW=null,_photoH=null;
-function startCam(){var v=document.getElementById("cam");if(!navigator.mediaDevices){document.getElementById("cammsg").textContent="이 환경은 카메라 미지원(https 실서버에서 작동).";return;}navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}}).then(function(s){v.srcObject=s;v.style.display="block";document.getElementById("cammsg").textContent="촬영 버튼을 누르세요.";}).catch(function(e){document.getElementById("cammsg").textContent="카메라 사용 불가("+e.name+") — https·권한 확인.";});}
-function capture(){var v=document.getElementById("cam"),c=document.getElementById("cap");if(!v.videoWidth){document.getElementById("cammsg").textContent="먼저 카메라를 켜세요.";return;}var w=320,h=Math.round(v.videoHeight/v.videoWidth*320);c.width=w;c.height=h;c.getContext("2d").drawImage(v,0,0,w,h);_photo=c.toDataURL("image/jpeg",0.7);_photoW=w;_photoH=h;var img=document.getElementById("shot");img.src=_photo;img.style.display="block";if(v.srcObject){v.srcObject.getTracks().forEach(function(t){t.stop();});}v.style.display="none";document.getElementById("cammsg").textContent="촬영됨 — 진행 시 레코드에 저장됩니다.";}
-function proceed(){ var pd=gv("PD"); BVRecord.save({name:(document.getElementById("cname").value||"측정 손님"),faceWidth:gv("FW"),earGap:gv("EG"),noseH:gv("NH"),faceWrap:gv("WR"),pd:pd,pdR:Math.round(pd/2*10)/10,pdL:Math.round(pd/2*10)/10,oh:22,photo:_photo,photoW:_photoW,photoH:_photoH}); document.getElementById("savemsg").textContent="저장됨 — 검안·추천·조제·피팅이 이 값을 자동으로 불러옵니다."; }
+function startCam(){var v=document.getElementById("cam");if(!navigator.mediaDevices){document.getElementById("cammsg").textContent="이 환경에서는 카메라를 쓸 수 없어요. https 실제 서버에서 작동해요.";return;}navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}}).then(function(s){v.srcObject=s;v.style.display="block";document.getElementById("cammsg").textContent="촬영 버튼을 눌러 주세요.";}).catch(function(e){document.getElementById("cammsg").textContent="카메라를 쓸 수 없어요("+e.name+"). https 연결과 권한을 확인해 주세요.";});}
+function capture(){var v=document.getElementById("cam"),c=document.getElementById("cap");if(!v.videoWidth){document.getElementById("cammsg").textContent="먼저 카메라를 켜 주세요.";return;}var w=320,h=Math.round(v.videoHeight/v.videoWidth*320);c.width=w;c.height=h;c.getContext("2d").drawImage(v,0,0,w,h);_photo=c.toDataURL("image/jpeg",0.7);_photoW=w;_photoH=h;var img=document.getElementById("shot");img.src=_photo;img.style.display="block";if(v.srcObject){v.srcObject.getTracks().forEach(function(t){t.stop();});}v.style.display="none";document.getElementById("cammsg").textContent="촬영했어요. 진행하면 손님 기록에 저장돼요.";}
+function proceed(){ var pd=gv("PD"); BVRecord.save({name:(document.getElementById("cname").value||"측정 손님"),faceWidth:gv("FW"),earGap:gv("EG"),noseH:gv("NH"),faceWrap:gv("WR"),pd:pd,pdR:Math.round(pd/2*10)/10,pdL:Math.round(pd/2*10)/10,oh:22,photo:_photo,photoW:_photoW,photoH:_photoH}); document.getElementById("savemsg").textContent="저장했어요. 검안, 추천, 조제, 피팅이 이 값을 자동으로 불러와요."; }
 function autoScan(){function r(a,b){return Math.round((a+Math.random()*(b-a))*2)/2;}
  set('PD',r(58,68));set('FW',r(142,160));set('NH',r(9,15));set('EG',r(152,168));set('WR',r(2,12));upd();}
 function set(id,v){document.getElementById(id).value=v;}
 function upd(){
  ['PD','FW','NH','EG','WR'].forEach(function(k){document.getElementById('v'+k).textContent=gv(k);});
  var fw=gv('FW'),eg=gv('EG');var r=E.toCode({faceWidth:fw,earGap:eg});
- document.getElementById('code').textContent=r.code||'—';
- document.getElementById('sm').innerHTML='적합도 <b>'+r.fit+'%</b> · 프론트 '+r.front+' / 템플 '+r.temple+'<br>PD '+gv('PD')+' · 코 '+gv('NH')+' · 안면각 '+gv('WR')+'°';
+ document.getElementById('code').textContent=r.code||'-';
+ document.getElementById('sm').innerHTML='적합도 <b>'+r.fit+'%</b> · 앞판 '+r.front+' / 다리 '+r.temple+'<br>PD '+gv('PD')+' · 코 '+gv('NH')+' · 안면각 '+gv('WR')+'°';
  var cx=100,cy=72,W=fw*0.62,H=W*1.28,pd=gv('PD')*0.62;
  document.getElementById('scan').innerHTML='<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">'+
   '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(W/2)+'" ry="'+(H/2)+'" fill="#f3efe9" stroke="#cbc7bb" stroke-width="0.8"/>'+

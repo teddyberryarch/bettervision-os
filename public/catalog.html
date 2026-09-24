@@ -37,8 +37,8 @@
     <a href="hq.html">본사</a>
   </div></div></div>
 <div class="wrap"><section class="view active">
-<div class="lead"><div><div class="eyebrow">고객 3·8 · 온라인 카탈로그</div><h2>전 모델 게시 + 나에게 맞는지·벌림각으로 되는지</h2>
-<div class="sub">측정값 입력 → PB는 9사이즈로 당신 사이즈 제공. 메이커(고정 사이즈)는 매치%와 벌림각 커버 여부 판정.</div></div></div>
+<div class="lead"><div><div class="eyebrow">손님 3·8 · 온라인 카탈로그</div><h2>모든 모델을 올려 두고, 나에게 맞는지와 벌림각으로 되는지 보여 줘요</h2>
+<div class="sub">측정값을 넣으면 PB는 9사이즈 중 내 사이즈로 나와요. 메이커테(고정 사이즈)는 매치%와 벌림각으로 맞출 수 있는지를 알려 줘요.</div></div></div>
 
 <div class="card pad">
   <div class="inrow">
@@ -49,15 +49,15 @@
   <div class="note" id="mysize" style="margin-top:8px"></div>
 </div>
 
-<div class="sec-h">BETTERVISION PB — 9사이즈</div>
-<div class="sec-s">모든 모델이 당신 사이즈로 제공됨. 매치%는 얼굴형 적합도. 색 눌러 컬러 변경.</div>
+<div class="sec-h">BETTERVISION PB · 9사이즈</div>
+<div class="sec-s">모든 모델이 내 사이즈로 나와요. 매치%는 얼굴형에 얼마나 어울리는지예요. 색을 누르면 컬러가 바뀌어요.</div>
 <div class="grid" id="pb"></div>
 
-<div class="sec-h">취급 메이커 — 고정 사이즈</div>
-<div class="sec-s">메이커테는 사이즈가 고정. 앞테 폭이 맞아야 하고, 다리 폭은 벌림각(공장 80~85°→95°)으로 일부 커버.</div>
+<div class="sec-h">취급 메이커 · 고정 사이즈</div>
+<div class="sec-s">메이커테는 사이즈가 정해져 있어요. 앞판 폭이 맞아야 하고, 다리 폭은 벌림각(공장 80~85°에서 95°까지)으로 어느 정도 맞출 수 있어요.</div>
 <div class="grid" id="mk"></div>
 </section></div>
-<div class="foot"><span>BETTERVISION · 온라인 카탈로그 v0.1</span><span>9사이즈 = 당신 사이즈 항상 있음</span></div>
+<div class="foot"><span>BETTERVISION · 온라인 카탈로그 v0.1</span><span>9사이즈라 내 사이즈가 늘 있어요</span></div>
 <script>
 var C={black:['#1a1a1a','rgba(0,0,0,0.05)','블랙'],gold:['#b8902e','rgba(184,144,46,0.06)','골드'],silver:['#9a9a9a','rgba(120,140,160,0.07)','실버'],havana:['#6b4423','rgba(107,68,35,0.08)','하바나'],crystal:['#c2beb6','rgba(0,0,0,0.03)','크리스탈'],brown:['#3a2c22','rgba(58,44,34,0.06)','브라운'],navy:['#1e2a44','rgba(30,42,68,0.06)','네이비'],wine:['#5a1a2a','rgba(90,26,42,0.07)','와인'],rose:['#c08a6a','rgba(192,138,106,0.06)','로즈골드'],gun:['#4a4a4a','rgba(0,0,0,0.06)','건메탈'],smoke:['#565656','rgba(0,0,0,0.05)','스모크']};
 var PB=[
@@ -93,7 +93,7 @@ function frontClass(fw){return fw<146?'S':(fw>158?'L':'M');}
 function render(){
  var fw=+document.getElementById('fw').value, eg=+document.getElementById('eg').value, face=document.getElementById('face').value;
  var fc=frontClass(fw);
- document.getElementById('mysize').innerHTML='당신 9사이즈 ≈ <b>프론트 '+fc+' · 템플 M</b> (얼굴폭 '+fw+' / 귀간격 '+eg+'). PB는 이 사이즈로 바로 제공.';
+ document.getElementById('mysize').innerHTML='내 9사이즈 ≈ <b>앞판 '+fc+' · 다리 M</b> (얼굴폭 '+fw+' / 귀간격 '+eg+'). PB는 이 사이즈로 바로 나와요.';
  // PB
  document.getElementById('pb').innerHTML='';
  PB.forEach(function(m){
@@ -118,8 +118,8 @@ function render(){
   var frontDiff=Math.abs(fw-m.frontW);
   var verd, vc, pct;
   if(frontDiff<=3){verd='잘 맞음';vc='v-ok';pct=Math.round(96-frontDiff*2);}
-  else if(frontDiff<=7){verd='벌림각 조정으로 커버';vc='v-adj';pct=Math.round(82-(frontDiff-3)*4);}
-  else {verd='커버 불가 (앞테 고정)';vc='v-no';pct=Math.max(28,Math.round(58-(frontDiff-7)*3));}
+  else if(frontDiff<=7){verd='벌림각 조정으로 맞춤';vc='v-adj';pct=Math.round(82-(frontDiff-3)*4);}
+  else {verd='맞출 수 없음 (앞판 고정)';vc='v-no';pct=Math.max(28,Math.round(58-(frontDiff-7)*3));}
   return {m:m,pct:pct,verd:verd,vc:vc,diff:frontDiff};
  }).sort(function(a,b){return b.pct-a.pct;});
  document.getElementById('mk').innerHTML='';
@@ -127,9 +127,9 @@ function render(){
   var el=document.createElement('div');el.className='fc';
   el.innerHTML='<div class="fr">'+BVFrameArt.frameSVG({shape:m.shape,metal:m.metal,brow:m.brow,lw:m.lw,lh:m.lh,dbl:m.dbl,color:C[first][0],tint:C[first][1],browColor:C[first][0],w:300,h:120})+'</div>'+
    '<div class="id">'+m.brand+' · '+m.id+'</div><div class="nm">'+m.name+'</div>'+
-   '<div class="sp">앞테폭 '+m.frontW+'mm · '+won(m.price)+'</div>'+
+   '<div class="sp">앞판 폭 '+m.frontW+'mm · '+won(m.price)+'</div>'+
    '<div class="match"><div class="bar"><i style="width:'+r.pct+'%;background:'+barColor(r.pct)+'"></i></div><div class="pct" style="color:'+barColor(r.pct)+'">'+r.pct+'%</div></div>'+
-   '<span class="verd '+r.vc+'">'+r.verd+'</span> <span class="sp">Δ앞테 '+r.diff+'mm</span>';
+   '<span class="verd '+r.vc+'">'+r.verd+'</span> <span class="sp">Δ앞판 '+r.diff+'mm</span>';
   document.getElementById('mk').appendChild(el);
  });
 }

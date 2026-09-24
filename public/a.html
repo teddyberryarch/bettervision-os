@@ -9,35 +9,20 @@
 <link rel="stylesheet" href="/assets/app.css">
 <link rel="stylesheet" href="/assets/bv-toss.css">
 <style>
-.a-sec{margin-bottom:16px}
-.a-sec .ctitle{font-size:19px;font-weight:600;color:var(--ink);letter-spacing:-.3px;margin:2px 0 8px}
-.a-sec p{font-size:15px;line-height:1.65;color:var(--ink);margin:8px 0}
-.a-sec p.muted{color:var(--muted)}
-.a-li{list-style:none;padding:0;margin:8px 0}
-.a-li li{position:relative;padding-left:26px;font-size:15px;line-height:1.6;margin:8px 0;color:var(--ink)}
-.a-li li .mk{position:absolute;left:0;top:1px;font-weight:700;font-size:13px}
-.a-li li .x{color:var(--bad)} .a-li li .o{color:var(--good)}
-.a-flow{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px;
-  font-size:16px;font-weight:600;color:var(--ink);text-align:center;margin:12px 0}
-.a-quote{border-left:3px solid var(--ink);padding:6px 0 6px 14px;margin:12px 0;font-size:15px;line-height:1.6}
-.a-quote b{color:var(--ink)}
-.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin:10px 0}
-@media(max-width:760px){.tri{grid-template-columns:1fr}}
-.tri .tc{border:1px solid var(--line);border-radius:12px;padding:14px}
-.tri .tc .tk{font-size:14px;font-weight:700;margin-bottom:5px}
-.tri .tc .tv{font-size:14px;line-height:1.55;color:var(--ink)}
-.tri .tc.cust{border-top:3px solid var(--good)} .tri .tc.cust .tk{color:var(--good)}
-.tri .tc.fran{border-top:3px solid var(--warn)} .tri .tc.fran .tk{color:var(--warn)}
-.tri .tc.hq{border-top:3px solid var(--ink)} .tri .tc.hq .tk{color:var(--ink)}
-.bvt{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}
-.bvt th,.bvt td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
-.bvt th{background:var(--surface);font-weight:600;font-size:13px;color:var(--muted)}
-.bvt td:first-child{font-weight:600}
-.bvt .o{color:var(--good);font-weight:700} .bvt .x{color:var(--bad);font-weight:700}
-.bvt tr.us{background:rgba(0,0,0,.03)}
-.punch{background:var(--ink);color:#fff;border-radius:14px;padding:18px 20px;margin:16px 0 6px;
-  text-align:left;font-size:16px;font-weight:500;line-height:1.6}
-.punch span{color:var(--warn)}
+.ov{margin-bottom:16px}
+.ov h3{font-size:22px;font-weight:600;color:var(--ink);margin:0 0 10px}
+.ov p{font-size:17px;line-height:1.7;color:var(--body);margin:8px 0}
+.ov .lede{font-size:19px;line-height:1.7;color:var(--ink)}
+.ovt{width:100%;border-collapse:collapse;font-size:16px;margin:10px 0}
+.ovt th,.ovt td{border-bottom:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top;line-height:1.6}
+.ovt th{color:var(--muted);font-weight:600;font-size:15px}
+.ovt td:first-child{font-weight:600;color:var(--ink);white-space:nowrap}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:12px 0}
+@media(max-width:760px){.nums{grid-template-columns:1fr 1fr}}
+.nums div{background:var(--t-soft,#F9FAFB);border-radius:12px;padding:16px}
+.nums b{display:block;font-size:26px;font-weight:600;color:var(--ink)}
+.nums span{font-size:15px;color:var(--muted)}
+.ov .src{font-size:15px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -58,123 +43,102 @@
   <div class="lead">
     <div>
       <div class="eyebrow">사업 개요</div>
-      <h2>맞춤안경을 프랜차이즈로 복제한다</h2>
-      <div class="sub">맞춤을 '출력'이 아니라 <b>측정(SW) + 모듈(기성 소재) + 피팅지시(매뉴얼)</b>로 분해해, 처음으로 복제 가능한 사업으로 만든다. 3D프린터가 못 하는 걸 우리가 한다.</div>
+      <h2>안경원들을 같은 기준으로 묶는 본사예요</h2>
+      <div class="sub">사업계획서 v2.1을 화면용으로 줄였어요. 자세한 내용과 근거는 사업계획서에 있어요.</div>
     </div>
-    <span class="pill good">● 측정·모듈·매뉴얼</span>
   </div>
 
-  <div class="card pad a-sec">
-    <div class="eyebrow">01 · 문제</div>
-    <div class="ctitle">시장의 빈칸 — 가운데가 비어 있다</div>
-    <ul class="a-li">
-      <li><span class="mk x">✕</span><b>맞춤은 비싸다.</b> 3D프린팅 맞춤안경(브리즘)은 객단가 약 42만 — 한 명당 한 벌을 깎아 출력하는 구조라 대중가가 불가능.</li>
-      <li><span class="mk x">✕</span><b>싼 건 안 맞는다.</b> 대형 체인(다비치)·일반 기성테는 사실상 원사이즈 — 한국인 얼굴 다양성(폭·코·귀 위치)을 못 받아냄.</li>
-      <li><span class="mk x">✕</span><b>스마트안경은 한국인 얼굴·도수가 안 된다.</b> 빅테크 제품 = 원사이즈 + 도수 미지원. 멋있어도 못 쓰는 사람이 대다수.</li>
-    </ul>
-    <p><b>빈칸 = 대중가로 맞고, 도수 되고, 확장 가능한 안경.</b> 이 자리가 우리 자리.</p>
+  <div class="card pad ov">
+    <p class="lede">도수 안경은 온라인 판매가 법으로 금지돼 있고, 안경사 한 명이 매장 하나만 열 수 있어요. 그래서 누가 무슨 안경을 만들든 마지막은 안경원을 거쳐야 해요. 베러비전은 그 안경원들을 같은 기준으로 묶는 본사예요.</p>
+    <p>얼굴과 눈을 재고, 그 데이터로 안경을 고르고 맞춘 뒤, 판 다음까지 확인하는 안경원 프랜차이즈예요. 사이즈와 렌즈, 가공값, 피팅 목표값은 시스템이 계산하고 안경사가 확인해서 확정해요.</p>
   </div>
 
-  <div class="card pad a-sec">
-    <div class="eyebrow">02 · 통념 반박</div>
-    <div class="ctitle">왜 3D프린터가 답이 아닌가</div>
-    <ul class="a-li">
-      <li><span class="mk x">✕</span><b>소재 한계.</b> SLS 나일론은 아세테이트·티탄의 손맛·내구·수리성을 못 따라감. 패션재인데 프린팅 질감이 티난다.</li>
-      <li><span class="mk x">✕</span><b>단가·속도.</b> 1개 출력+후가공에 비용 폭증 → 객단가 42만이어야 수지 → 대중화 구조적 불가.</li>
-      <li><span class="mk x">✕</span><b>확장 불가.</b> "맞춤=출력"은 한 명에 한 출력이 묶이는 1대1 종속 → 프랜차이즈 복제 불가.</li>
-    </ul>
-    <div class="a-quote"><b>우리 판단.</b> 미래는 프린터가 소재를 대체하는 게 아니라, <b>검증된 소재(아세테이트·티탄)를 '프린터처럼' 맞춤으로 운용하는 것.</b></div>
-  </div>
-
-  <div class="card pad a-sec">
-    <div class="eyebrow">03 · 우리 대안</div>
-    <div class="ctitle">맞춤의 분해</div>
-    <div class="a-flow">맞춤 = 측정(SW) + 모듈(기성 소재) + 피팅지시(매뉴얼)</div>
-    <p>세 조각 모두 <b>복제 가능</b>하다. SW는 깔고, 모듈은 본부가 공급하고, 매뉴얼은 가맹점에 준다. 출력은 복제가 안 되지만 이 셋은 된다.</p>
-    <div class="a-quote">
-      <b>브리즘</b> = 한 명당 한 벌 깎는 맞춤 양복점(비싸고 느림).<br>
-      <b>우리</b> = 측정해서 기성 모듈을 조합·수선하는 맞춤 = <b>유니클로 + 수선집.</b><br>
-      둘 다 "맞춤"인데, 우리만 대중가 + 확장 가능.
+  <div class="card pad ov">
+    <h3>시장</h3>
+    <div class="nums">
+      <div><b>4.4조 원</b><span>국내 안경 시장, 연 5% 성장</span></div>
+      <div><b>약 1만 곳</b><span>전국 안경원</span></div>
+      <div><b>17,375명</b><span>면허자 42,297명 중 활동 인원</span></div>
+      <div><b>321곳</b><span>국내 최대 체인 가맹점 수</span></div>
     </div>
-    <p class="muted">3D프린터가 못 하는 건 '확장'이고, 우리가 가진 건 정확히 '확장'이다.</p>
+    <p>도수 안경 거래는 모두 매장에서 일어나요. 안경원 대부분은 직원 한두 명이 일하는 작은 매장이라, 기준을 만들고 데이터를 모으는 일을 혼자 하기 어려워요. 본사 시스템이 가장 필요한 곳이에요.</p>
   </div>
 
-  <div class="card pad a-sec">
-    <div class="eyebrow">04 · 재고</div>
-    <div class="ctitle">9사이즈 — 재고를 안 터뜨리는 구조</div>
-    <table class="bvt">
-      <tr><th>층</th><th>정체</th><th>숫자</th></tr>
-      <tr><td>9사이즈 (핏 등급)</td><td>측정값이 매핑되는 분류. 프론트폭 {S·M·L} × 템플길이 {S·M·L}</td><td>3×3 = 9</td></tr>
-      <tr><td>카탈로그 (모듈 조합)</td><td>프론트·템플 따로 소싱해 나사 조립. 프론트모듈 × 템플모듈</td><td>론칭 디자인 수에 따라 결정</td></tr>
-      <tr><td>수요표 (재고 통제)</td><td>9등급별 예상 판매 비중 → 생산량·매장 샘플 배치</td><td>M·M 최대</td></tr>
-    </table>
-    <p><b>카탈로그 숫자는 진열 숫자가 아니다.</b> 매장엔 가운데(M·M) 대표 샘플만, 실판매는 측정→매칭→본부 발주·조립. 선반에 전 조합이 안 쌓인다.</p>
-    <p class="muted">모듈식이라 '프론트 L + 템플 S' 독립 조합이 된다 — 기성테가 못 맞추는 사람을 맞춘다. 이게 맞춤 포지션의 핵심.</p>
+  <div class="card pad ov">
+    <h3>문제</h3>
+    <table class="ovt"><thead><tr><th>누가</th><th>겪는 일</th></tr></thead><tbody>
+      <tr><td>손님</td><td>안경테 사이즈는 모델마다 다르고 맞는지는 써봐야 알아요. 어지럽거나 흘러내려도 적응 중인지 잘못 맞춘 건지 알 수 없고, 다른 매장에 가면 측정부터 다시 해요.</td></tr>
+      <tr><td>가맹 안경원</td><td>면허는 같아도 실력은 사람마다 달라요. 가공값과 피팅을 경험으로 정하고, 숙련자가 나가면 판단 기준도 같이 나가요.</td></tr>
+      <tr><td>본사</td><td>측정과 처방, 구매 정보가 본사로 모이지 않아요. 가맹점이 늘수록 서비스가 들쭉날쭉해져요.</td></tr>
+    </tbody></table>
+    <p>세 쪽 모두 원인이 같아요. 얼굴을 재지 않고 기록을 남기지 않아서, 판단이 사람의 감에 맡겨져 있어요.</p>
   </div>
 
-  <div class="card pad a-sec">
-    <div class="eyebrow">05 · 가치제안 ★</div>
-    <div class="ctitle">검안·맞춤·데이터 — 누가 뭘 얻나</div>
-    <div class="tri">
-      <div class="tc cust"><div class="tk">소비자</div><div class="tv">광학적으로 맞고 + 패셔너블 + 내 데이터 기반. "젠틀몬스터 78% vs 우리 PB 96%"처럼 적합도를 숫자로 비교 → 강매 없이 신뢰.</div></div>
-      <div class="tc fran"><div class="tk">가맹점주</div><div class="tv">검안·발주·정산·마케팅 자동화 → 안경사 1 + 일반 직원으로 운영. 추천·가격 매뉴얼화로 도제식 스트레스 해방, 객단가↑.</div></div>
-      <div class="tc hq"><div class="tk">본사 = 기준과 기록</div><div class="tv">타사 브랜드 거래까지 모든 기록이 본부 데이터로. 프론트·템플·렌즈는 본부 한 경로로 공급. 매뉴얼 자체가 기록 도구.</div></div>
-    </div>
-    <table class="bvt">
-      <tr><th>하는 일 (수단)</th><th>쌓이는 것 (목적)</th></tr>
-      <tr><td>자동화 · 맞춤화 · 표준화</td><td>데이터 · 공급 · 표준 IP</td></tr>
-    </table>
-    <p class="muted">수단(자동화·맞춤화·표준화)이 곧 데이터 수집 경로가 되도록 설계한 게 핵심.</p>
+  <div class="card pad ov">
+    <h3>해법</h3>
+    <p>시스템이 측정값으로 계산하고, 안경사가 확인해서 확정해요.</p>
+    <table class="ovt"><thead><tr><th>단계</th><th>시스템</th><th>안경사</th></tr></thead><tbody>
+      <tr><td>검안</td><td>기기 값을 받아 확인 질문과 순서를 만들고, 지난 처방과 달라진 점을 표시해요</td><td>질문하고 처방을 확정해요</td></tr>
+      <tr><td>테 고르기</td><td>측정값으로 쓸 수 있는 테만 골라 적합도 순으로 보여줘요. 다른 브랜드 테도 같은 기준으로 봐요</td><td>확인하고 권해요</td></tr>
+      <tr><td>렌즈</td><td>도수와 용도, 예산에 맞는 등급을 보여주고 두께와 무게를 비교해요</td><td>설명해요</td></tr>
+      <tr><td>가공</td><td>가공량과 지름, 두께를 계산하고 안 되는 조합은 막아요</td><td>확인하고 발주해요</td></tr>
+      <tr><td>피팅</td><td>목표값을 내고 조정 결과와의 차이를 확인해요</td><td>조정하고 확정해요</td></tr>
+      <tr><td>7일째</td><td>잘 보이는지, 흘러내리는지, 가까운 게 보이는지 물어요</td><td>적응 중인지 다시 맞출지 가려요</td></tr>
+    </tbody></table>
+    <p>7일째 결과로 계산한 적합도와 실제 만족도를 비교해서 판정 기준을 고쳐요. 착용 후 만족도는 가공과 피팅을 한 매장이 물어야만 생기는 기록이에요.</p>
   </div>
 
-  <div class="card pad a-sec">
-    <div class="eyebrow">06 · 데이터</div>
-    <div class="ctitle">매뉴얼 = 기록 도구</div>
-    <p>검안→사이즈 재기→조제→피팅을 앱이 단계별로 띄운다. 따라가면 자동으로 표준 준수.</p>
-    <ul class="a-li">
-      <li><span class="mk o">✓</span>비숙련도 베테랑급 + 숙련자 판단차 제거, 둘 다.</li>
-      <li><span class="mk o">✓</span>AI가 기준값·이상치·다음 단계 제시 → 안경사는 확인·확정만.</li>
-      <li><span class="mk o">✓</span><b>가맹점이 매뉴얼대로 일하면 기록이 자동으로 본부 시스템에 쌓인다.</b></li>
-    </ul>
-    <div class="a-flow" style="font-size:14px">검안 → 측정 → 객관화 추천 → 본부 표준가 → A4 피팅시트 → 정산·발주 → 재구매 마케팅</div>
-    <p class="muted">이 매뉴얼이 곧 '검안 매뉴얼' 탭(③)이자 가맹 패키지의 본체. <a href="b.html">→ 검안 매뉴얼 보기</a></p>
+  <div class="card pad ov">
+    <h3>제품과 재고</h3>
+    <table class="ovt"><thead><tr><th>구분</th><th>파는 방식</th></tr></thead><tbody>
+      <tr><td>기존 브랜드 테</td><td>매장에 재고를 둬요. 입고할 때 본사 기준으로 치수를 재서 전 매장이 같이 써요.</td></tr>
+      <tr><td>자체 브랜드(PB)</td><td>일반 안경 9사이즈예요. 앞판 폭 S, M, L과 다리 길이 S, M, L을 조합해요. 매장에는 견본만 두고, 측정해서 맞는 사이즈를 발주해요.</td></tr>
+    </tbody></table>
+    <p>PB를 강요하지 않아요. 모든 브랜드에 같은 적합도 판정을 쓰고, PB는 가장 잘 맞을 때 선택돼요. 재고가 줄어드는 건 PB로 바뀐 만큼이고, 모든 공급은 본사를 거쳐요.</p>
   </div>
 
-  <div class="card pad a-sec">
-    <div class="eyebrow">07 · 부록 (나중)</div>
-    <div class="ctitle">스마트안경 시장에서도 먹히는 이유</div>
-    <p class="muted">스마트안경은 나중에 다루는 부록이다. 지금은 안경원 프랜차이즈가 먼저다.</p>
-    <div class="a-quote"><b>순서.</b> 하드웨어는 만들지 않는다. 프랜차이즈로 매장·데이터·공급망을 먼저 갖춘다.</div>
-    <ul class="a-li">
-      <li><span class="mk o">✓</span><b>안 예쁨</b> → 9사이즈 + 복각 + 큐레이션.</li>
-      <li><span class="mk o">✓</span><b>원 사이즈</b> → 9사이즈 + 자동 측정·피팅 = 한국인 얼굴 맞춤.</li>
-      <li><span class="mk o">✓</span><b>도수 안 됨</b> → 자동 검안 + 도수 안경 가능.</li>
-    </ul>
-    <p><b>병목 포지션.</b> 빅테크가 하드웨어를 만들어도 "한국인 얼굴 맞고 도수 되는 안경으로 만들어 파는" 마지막 단계(측정·피팅·도수·유통)는 우리 같은 플레이어가 필요. (메타가 안경은 룩소티카에 맡긴 것처럼, 빅테크의 한국 파트너 자리 선점)</p>
-    <p class="muted">브리즘은 풀출력 구조라 배터리·기판이 들어가는 스마트안경을 못 만든다. 우리는 모듈식이라 '프론트=전자모듈 / 템플=배터리·스피커'가 구조적으로 자연스럽다.</p>
+  <div class="card pad ov">
+    <h3>본사와 매장</h3>
+    <table class="ovt"><thead><tr><th>주체</th><th>형태</th><th>하는 일</th></tr></thead><tbody>
+      <tr><td>본사</td><td>법인(가맹본부)</td><td>브랜드, 시스템, 공급, 데이터, 기준</td></tr>
+      <tr><td>매장</td><td>면허 안경사가 여는 개인사업자</td><td>검안, 조제, 판매, 피팅</td></tr>
+      <tr><td>1호점</td><td>면허 안경사 명의</td><td>본사 기준을 처음 적용하고 첫 기록을 쌓아요</td></tr>
+    </tbody></table>
+    <p class="src">가맹 모집 전에 가맹사업법의 직영점 1년 요건을 어떻게 채울지 변호사와 공정거래조정원에 확인해요.</p>
   </div>
 
-  <div class="card pad a-sec">
-    <div class="eyebrow">08 · 해자</div>
-    <div class="ctitle">그래서 못 따라잡힌다</div>
-    <table class="bvt">
-      <tr><th></th><th>맞춤</th><th>스마트</th><th>데이터</th><th>대중가·확장</th></tr>
-      <tr><td>브리즘</td><td><span class="o">O</span> 풀출력</td><td><span class="x">X</span> 출력구조</td><td><span class="x">약</span></td><td><span class="x">X</span> 42만</td></tr>
-      <tr><td>빅테크</td><td><span class="x">X</span> 원사이즈</td><td><span class="o">O</span></td><td><span class="o">O</span></td><td><span class="x">X</span> 얼굴·도수</td></tr>
-      <tr><td>다비치</td><td><span class="x">X</span> 기성</td><td><span class="x">X</span></td><td><span class="x">X</span></td><td><span class="o">O</span></td></tr>
-      <tr class="us"><td><b>우리</b></td><td><span class="o">O</span> 준맞춤</td><td><span class="o">대기·가능</span></td><td><span class="o">O</span> 본부 관리</td><td><span class="o">O</span></td></tr>
-    </table>
-    <div class="punch">
-      브리즘 = <span>스마트</span> 불가 · 빅테크 = <span>한국인 얼굴·도수</span> 불가 · 다비치 = <span>맞춤 데이터</span> 부재.<br>
-      BETTERVISION = 준맞춤 + 도수 + 데이터 동시 충족 = 세 결여의 교집합.
-    </div>
+  <div class="card pad ov">
+    <h3>수익</h3>
+    <table class="ovt"><thead><tr><th>수익원</th><th>성격</th><th>언제부터</th></tr></thead><tbody>
+      <tr><td>가맹비, 보증금</td><td>한 번</td><td>초기 현금</td></tr>
+      <tr><td>시스템 구독료</td><td>매달 정액</td><td>초기부터</td></tr>
+      <tr><td>로열티</td><td>매출에 비례</td><td>가맹 시작 후</td></tr>
+      <tr><td>공급 마진</td><td>테, 렌즈, 콘택트렌즈. 반복되는 수익의 중심</td><td>매장이 늘어난 뒤</td></tr>
+    </tbody></table>
+    <p>가맹점은 소매 마진을, 본사는 도매 마진을 가져가요.</p>
+  </div>
+
+  <div class="card pad ov">
+    <h3>기록이 가장 쓸모 있는 손님층</h3>
+    <table class="ovt"><thead><tr><th>손님층</th><th>다시 오는 때</th><th>기록이 하는 일</th></tr></thead><tbody>
+      <tr><td>아이 근시</td><td>3~6개월마다 검사</td><td>측정값과 처방 변화를 기간별로 보여줘요</td></tr>
+      <tr><td>노안, 누진 렌즈</td><td>도수가 바뀔 때마다</td><td>피팅 정확도가 적응을 좌우해요</td></tr>
+      <tr><td>콘택트렌즈</td><td>렌즈를 다 쓸 때마다</td><td>쓰던 도수와 제품을 기억하고 바꿀 때를 알려요</td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="card pad ov">
+    <h3>넓히는 순서</h3>
+    <p>1호점에서 기준을 만들고, 신규 가맹, 기존 안경원 전환 순서로 넓혀요. 어느 매장에 가도 같은 기준으로 안경을 맞추는 체인이 목표예요.</p>
+    <p>따라 하기 어려운 건 소프트웨어가 아니라 치수와 처방, 피팅, 착용 결과가 한 사람 단위로 묶인 기록이에요. 이 기록은 법적으로 안경원 안에서만 생겨요.</p>
+    <p class="src">스마트안경은 사업의 중심이 아니에요. 전자 기능이 더해질 때의 위치는 사업계획서 부록에 적었어요.</p>
   </div>
 </section>
 </div>
 
 <div class="foot">
   <span>BETTERVISION OS · 사업 개요</span>
-  <span>측정 · 모듈 · 매뉴얼</span>
+  <span>사업계획서 v2.1 기준</span>
 </div>
 <script src="/assets/app.js"></script>
 <script src="/assets/bv-nav.js"></script>

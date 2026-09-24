@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BETTERVISION OS · 통합 고객 프로필</title>
+<title>BETTERVISION OS · 통합 손님 프로필</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
@@ -53,8 +53,8 @@
     <a href="hq.html">본사</a>
   </div></div></div>
 <div class="wrap"><section class="view active">
-<div class="lead"><div><div class="eyebrow">P0 · 통합 고객 프로필 · 저마찰 식별</div><h2>전화번호 하나로 — 접객·검안 이력·카톡을 한 줄로</h2>
-<div class="sub">방문/예약 시 번호만. 기존 고객이면 즉시 호출, 신규면 번호로 시작. 회원가입 강요 0.</div></div></div>
+<div class="lead"><div><div class="eyebrow">P0 · 통합 손님 프로필 · 번호로 바로 찾기</div><h2>전화번호 하나로 접객, 검안 이력, 카톡을 한 번에 봐요</h2>
+<div class="sub">방문하거나 예약할 때 번호만 받아요. 다녀간 손님이면 바로 불러오고, 처음 온 손님이면 번호로 시작해요. 회원가입은 강요하지 않아요.</div></div></div>
 
 <div class="card pad">
   <div class="look">
@@ -71,9 +71,9 @@
 
 <div id="out"></div>
 </section></div>
-<div class="foot"><span>BETTERVISION OS · 통합 고객 프로필 v0.1</span><span>전화번호 = 만능 키 · 데이터 본부 귀속</span></div>
+<div class="foot"><span>BETTERVISION OS · 통합 손님 프로필 v0.1</span><span>전화번호 하나로 찾기 · 데이터는 본사 소유</span></div>
 <script>
-// ── 데모 CRM (전화번호 키). 실제는 본부 서버 귀속. ──
+// ── 데모 CRM (전화번호 키). 실제는 본사 서버 귀속. ──
 var DB={
  '010-1234-5678':{name:'김민수',joinVia:'카카오싱크',consent:true,visits:5,first:'2021-03',
    exams:[{date:'2021-03',R:{S:-2.00,C:-0.50,A:180},L:{S:-2.25,C:-0.25,A:175}},
@@ -120,7 +120,7 @@ function seGraph(exams){
   g+='<path d="'+path+'" fill="none" stroke="#dc2626" stroke-width="2"/>';
   exams.forEach(function(e,i){g+='<circle cx="'+xs(i)+'" cy="'+ys(se(e))+'" r="3" fill="#dc2626"/>';
     g+='<text x="'+xs(i)+'" y="'+(H-4)+'" font-size="8" fill="#999" text-anchor="middle">'+e.date.slice(2)+'</text>';});
-  g+='<text x="'+pad+'" y="10" font-size="8" fill="#999">SE(구면대응치) 추세 — 근시 진행</text></svg>';
+  g+='<text x="'+pad+'" y="10" font-size="8" fill="#999">SE(구면대응치) 추세: 근시 진행</text></svg>';
   return g;
 }
 
@@ -130,12 +130,12 @@ function lookup(){
   var out=document.getElementById('out');
   if(!c){
     out.innerHTML='<div class="card pad"><div class="phead"><div class="avatar" style="background:#1d4ed8">신</div>'
-      +'<div><div class="pname">신규 고객</div><div class="pmeta">'+p+' · 기록 없음</div>'
+      +'<div><div class="pname">신규 손님</div><div class="pmeta">'+p+' · 기록 없음</div>'
       +'<div class="badges"><span class="bdg new">NEW</span></div></div></div>'
-      +'<div class="note" style="margin-top:12px">번호 하나로 시작 — 회원가입 폼 없음. 측정·검안하면 이 번호에 자동 누적. '
-      +'카카오 채널 친구추가(QR 1탭) 시 마케팅 동의·식별 동시 확보.</div>'
+      +'<div class="note" style="margin-top:12px">번호 하나로 시작해요. 회원가입 양식은 없어요. 측정하고 검안하면 이 번호에 자동으로 쌓여요. '
+      +'카카오 채널을 친구추가하면(QR 1탭) 마케팅 동의와 본인 확인을 한 번에 받아요.</div>'
       +'<div class="act"><a class="btn" href="measure.html">① 측정 시작</a><a class="btn ghost" href="exam.html">검안</a>'
-      +'<button class="btn kakao" onclick="alert(\'데모: 채널 친구추가 QR 노출 → 1탭 가입\')">카카오 친구추가 QR</button></div></div>';
+      +'<button class="btn kakao" onclick="alert(\'데모: 채널 친구추가 QR을 보여 주고 1탭으로 가입해요\')">카카오 친구추가 QR</button></div></div>';
     return;
   }
   var last=c.exams[c.exams.length-1];
@@ -160,19 +160,19 @@ function lookup(){
 
   var right='<div class="pcard"><div class="ctitle">검안 이력 · 시력 추세</div>'
     +seGraph(c.exams)
-    +'<div class="note" style="margin:6px 0 12px">5년간 SE '+trend.toFixed(2)+'D 변화 — '+(trend<-0.5?'근시 진행. 1년 주기 권장.':'안정적.')+'</div>'
+    +'<div class="note" style="margin:6px 0 12px">5년간 SE '+trend.toFixed(2)+'D 변화. '+(trend<-0.5?'근시가 진행 중이에요. 1년마다 검사를 권해요.':'안정적이에요.')+'</div>'
     +'<div class="tl">'+c.exams.slice().reverse().map(function(e){return '<div class="tle"><div class="d">'+e.date+' · SE '+se(e).toFixed(2)+'</div><div class="v">R '+rx(e.R)+' / L '+rx(e.L)+'</div></div>';}).join('')+'</div>'
     +'<div class="ctitle" style="margin-top:14px">카톡 발송</div>'
     +'<div class="seg"><span class="bdg '+(due<=2?'risk':'consent')+'">재검 D'+(due<=0?'+'+(-due):('-'+due))+'개월</span>'
-    +'<span class="bdg consent">세그먼트: '+(c.risk?'이탈위험':(c.vip?'VIP':'단골'))+'</span></div>'
-    +'<div class="msg" id="kkmsg">[알림톡 · 정보성] '+c.name+'님, 마지막 검안이 '+monthsSince(last.date)+'개월 전입니다. 시력 변화 추적을 위해 1년 주기 재검을 권장드려요. 예약: (링크)</div>'
-    +'<div class="act"><button class="btn kakao" onclick="alert(\'데모: 알림톡 발송 — 전화번호만으로 가능(마케팅 동의 불필요)\')">알림톡 발송</button>'
-    +(c.consent?'<button class="btn ghost" onclick="friendMsg(\''+p+'\')">친구톡(광고) 미리보기</button>':'<span class="note" style="align-self:center">친구톡은 수신동의 필요</span>')+'</div></div>';
+    +'<span class="bdg consent">손님 묶음: '+(c.risk?'이탈위험':(c.vip?'VIP':'단골'))+'</span></div>'
+    +'<div class="msg" id="kkmsg">[알림톡 · 정보성] '+c.name+'님, 마지막 검안이 '+monthsSince(last.date)+'개월 전이에요. 시력 변화를 살필 수 있게 1년마다 다시 검사받아 보세요. 예약: (링크)</div>'
+    +'<div class="act"><button class="btn kakao" onclick="alert(\'데모: 알림톡은 전화번호만 있으면 보낼 수 있어요(마케팅 동의 불필요)\')">알림톡 발송</button>'
+    +(c.consent?'<button class="btn ghost" onclick="friendMsg(\''+p+'\')">친구톡(광고) 미리보기</button>':'<span class="note" style="align-self:center">친구톡은 수신동의가 있어야 보낼 수 있어요</span>')+'</div></div>';
 
   out.innerHTML='<div class="prof">'+left+right+'</div>';
 }
 function friendMsg(p){var c=DB[p];
-  document.getElementById('kkmsg').innerHTML='[친구톡 · 광고성] '+c.name+'님만을 위한 '+c.prefs.shape+' 신상 입고 선호 컬러('+c.prefs.color+') 우선 안내. VIP 10% 쿠폰 → (링크)';
+  document.getElementById('kkmsg').innerHTML='[친구톡 · 광고성] '+c.name+'님, 좋아하시는 '+c.prefs.shape+' 신상이 들어왔어요. 좋아하시는 컬러('+c.prefs.color+')로 먼저 알려 드려요. VIP 10% 쿠폰: (링크)';
 }
 lookup();
 </script>

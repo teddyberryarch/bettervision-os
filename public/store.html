@@ -934,7 +934,7 @@ function autoQuote(){
   var total=framePrice+lens.p+coat;
   var hi=d>=4;
   document.getElementById('autoQuote').innerHTML=
-    '<div class="optbox"><b>자동 견적 (검안 기반).</b> 처방 최대 '+d.toFixed(2)+'D → 굴절률 '+lens.idx+' 추천'+(hi?' · 고도수라 얇은 렌즈 권장':'')+'. 사이즈 '+(c.size||'-')+' → '+frameName+'.</div>'+
+    '<div class="optbox">검안 기록으로 낸 견적이에요. 처방 최대 '+d.toFixed(2)+'D라서 굴절률 '+lens.idx+'을 권해요'+(hi?'. 고도수라 얇은 렌즈가 좋아요':'')+'. 사이즈 '+(c.size||'-')+'에는 '+frameName+'이 맞아요.</div>'+
     '<div class="pl-row"><span>테 · '+frameName+'</span><span>₩'+framePrice.toLocaleString('ko-KR')+'</span></div>'+
     '<div class="pl-row"><span>렌즈 · '+lens.idx+' (PB)</span><span>₩'+lens.p.toLocaleString('ko-KR')+'</span></div>'+
     '<div class="pl-row"><span>멀티코팅</span><span>₩'+coat.toLocaleString('ko-KR')+'</span></div>'+
