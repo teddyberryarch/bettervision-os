@@ -228,6 +228,11 @@ function matOpts(){var o='';for(var k in MAT){o+='<option value="'+k+'"'+(F.mate
 function band(v,lo,hi){ if(v==null)return '?'; if(v<lo)return 'S'; if(v>hi)return 'L'; return 'M'; }
 /* 템플 쪽 초벌 규칙 〔확인〕: 렌즈 면에서 귀 윗부분까지 = 각막~귀 앞뒤 거리 + 정점거리.
    귀 뒤로 굽는 부분 25mm를 더한 값이 필요한 템플 길이. 템플 사이즈는 140(T1) · 145(T2) · 150(T3) 중 가까운 것 */
+/* 귀 굽힘: 각도는 귀 뒤 모양에 맞추는 값이라 목표값으로 두지 않음. 그림은 시작 기울기에서 귀 뒤를 따라 완만히 내려가는 곡선.
+   내려가는 길이 40mm 초과면 자르기 검토 (Optician Online 피팅 가이드). 시작 기울기 40°는 추정값 〔1호점에서 확인〕 */
+var EAR_BEND_START=40, EAR_DROP_MAX=40;
+function earCurve(bx,by,d,w){ var a1=EAR_BEND_START*Math.PI/180, a2=(EAR_BEND_START+25)*Math.PI/180, cx=bx+d*0.5*Math.cos(a1), cy=by+d*0.5*Math.sin(a1), ex=cx+d*0.5*Math.cos(a2), ey=cy+d*0.5*Math.sin(a2);
+  return '<path d="M'+bx.toFixed(2)+' '+by.toFixed(2)+' Q'+cx.toFixed(2)+' '+cy.toFixed(2)+' '+ex.toFixed(2)+' '+ey.toFixed(2)+'" fill="none" stroke="#111" stroke-width="'+(w||0.85)+'" stroke-linecap="round"/>'; }
 var EAR_TAIL=25, TEMPLE_SZ=[[140,'T1'],[145,'T2'],[150,'T3']];
 function templeNeed(){ var d=num(F.earDepth); if(d==null) return null; var vd=num(F.vd)||12; var bend=Math.round(d+vd); return {bend:bend, need:bend+EAR_TAIL}; }
 function sizeCalc(){
@@ -343,14 +348,14 @@ function buildSheet(){
   s1+=T(0,275,'피팅한 안경사 ________________   손님 확인 ________________',{s:3.1,c:'#333'})+'</svg>';
 
   /* ===== 2장: 판토(경사각) (옆에서 본 실제 크기) ===== */
-  var hx2=28, hy2=90, up=8, down=Math.max(30,lensH-2), p=panto*R2, bendAt=Math.round(Lear), bendAng=55*R2;
+  var hx2=28, hy2=90, up=8, down=Math.max(30,lensH-2), p=panto*R2, bendAt=Math.round(Lear), bendAng=EAR_BEND_START*R2;
   var topX=hx2-up*Math.sin(p), topY=hy2-up*Math.cos(p), botX=hx2+down*Math.sin(p), botY=hy2+down*Math.cos(p);
   var bx=hx2+bendAt, tailLen=tlen-bendAt;
   var s3=svgOpen()+head('피팅 시트 2 · 판토(경사각)','2 / 2',info)+calib(29)+
     T(0,48,'옆에서 본 실제 크기',{s:3.8,w:600})+
     T(0,52.5,'안경을 옆으로 눕혀 템플은 가로선, 힌지는 점에 맞춤. 프론트 아래쪽이 얼굴 쪽(오른쪽)으로 기울어 굵은 선과 겹치면 통과.',{s:2.8,c:'#333'})+
     T(hx2-4,hy2-16,'◀ 앞',{s:2.8,a:'end',c:'#555'})+T(185,hy2-16,'귀 쪽 ▶',{s:2.8,a:'end',c:'#555'})+
-    L(hx2,hy2,bx,hy2,{w:0.9})+L(bx,hy2,bx+tailLen*Math.cos(bendAng),hy2+tailLen*Math.sin(bendAng),{w:0.9})+
+    L(hx2,hy2,bx,hy2,{w:0.9})+earCurve(bx,hy2,tailLen,0.9)+
     T((hx2+bx)/2,hy2-3,'템플 '+tlen+'mm',{s:3.1,a:'middle',c:'#333'})+
     '<circle cx="'+bx.toFixed(2)+'" cy="'+hy2+'" r="1.4" fill="#111"/>'+T(bx,hy2-4,'귀 굽힘 시작 ('+bendAt+'mm'+(earMeasured?'':', 추정')+')',{s:2.6,a:'middle',c:'#333'})+
     L(hx2,hy2-up-4,hx2,hy2+down+4,{c:'#999',d:'1.5 1.5'})+
@@ -418,8 +423,8 @@ function buildSheet(){
     // B. 옆에서 본 모습
     var hx3=X0+4, dn=22, up3=6, bx3=hx3+bendAt, tail3=tlen-bendAt;
     s4+=L(0,hy3-15,190,hy3-15,{w:0.15,c:G4})+sec(hy3-9.5,'B','옆에서 본 모습 · 판토와 귀 굽힘','실제 크기')+
-      L(hx3,hy3,bx3,hy3,{w:0.85})+L(bx3,hy3,bx3+tail3*Math.cos(bendAng),hy3+tail3*Math.sin(bendAng),{w:0.85})+
-      ring(bx3,hy3)+T(bx3+3.5,hy3-2,'귀 굽힘 '+bendAt+'mm'+(earMeasured?'':' (추정)'),{s:2.3,c:G2})+
+      L(hx3,hy3,bx3,hy3,{w:0.85})+earCurve(bx3,hy3,tail3,0.85)+T(bx3+11,hy3+5.5,'내려가는 길이 '+tail3+'mm',{s:2.3,c:G2})+(tail3>EAR_DROP_MAX?T(bx3+11,hy3+9.5,'40mm 넘음 · 자르기 검토',{s:2.3,w:600}):'')+
+      ring(bx3,hy3)+T(bx3-3.5,hy3-2,'귀 굽힘 위치 · 힌지에서 '+bendAt+'mm'+(earMeasured?'':' (추정)'),{s:2.3,c:G2,a:'end'})+
       T(186,hy3-2,'귀 쪽 →',{s:2.2,a:'end',c:G3})+
       L(hx3,hy3-up3-2,hx3,hy3+dn+2,{c:G4,w:0.2,d:'1.2 1.2'})+
       L(hx3-up3*Math.sin(p),hy3-up3*Math.cos(p),hx3+dn*Math.sin(p),hy3+dn*Math.cos(p),{w:1})+
@@ -431,7 +436,7 @@ function buildSheet(){
     // C. 확인
     var cy0=Math.max(hy3+34,246), cols=[0,64,128];
     s4+=L(0,cy0-6.5,190,cy0-6.5,{w:0.15,c:G4})+sec(cy0-1,'C','확인','목표 · 실제 · 확인');
-    var items=[['템플 간격(귀)',target+' mm'],['한쪽 벌림',angT+'°'],['안면각',(wrap?'+'+wrap:'0')+'°'],['판토',panto+'°'],['템플-프론트',(90-panto)+'°'],['정점거리',vd+' mm'],['귀 굽힘',bendAt+' mm'],['코받침',(F._npGap||'-')+' / '+(F._npAng||'-')+'°'],['템플 길이',tlen+' mm']];
+    var items=[['템플 간격(귀)',target+' mm'],['한쪽 벌림',angT+'°'],['안면각',(wrap?'+'+wrap:'0')+'°'],['판토',panto+'°'],['귀 뒤 누름','없음'],['정점거리',vd+' mm'],['귀 굽힘 위치',bendAt+' mm'],['코받침',(F._npGap||'-')+' / '+(F._npAng||'-')+'°'],['템플 길이',tlen+' mm']];
     items.forEach(function(it,i){ var x=cols[i%3], y=cy0+5+Math.floor(i/3)*5.4;
       s4+=T(x,y,it[0],{s:2.3,c:G2})+T(x+22,y,it[1],{s:2.7,w:600})+L(x+40,y+0.7,x+54,y+0.7,{w:0.15,c:G3})+box(x+56.5,y-2.6,3,3,0.5,{w:0.25})+
         (i<6?L(x,y+2.2,x+60,y+2.2,{w:0.1,c:G4}):''); });
