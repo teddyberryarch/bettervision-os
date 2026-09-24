@@ -3,11 +3,12 @@
    접객 → 검안 → 피팅 순서는 이 브라우저 탭 안에서만 기억한다(sessionStorage). 막히면 "건너뛰고 보기"로 볼 수 있다. */
 (function(){
   var page = location.pathname.split('/').pop() || 'index.html';
-  var STORE_PAGES = ['store.html','flow.html','exam.html','fit.html'];
+  var STORE_PAGES = ['store.html','flow.html','exam.html','workorder.html','fit.html'];
   var STEPS = [
     {p:'flow.html', n:'1', t:'접객', done:'접객 마치고 검안으로'},
-    {p:'exam.html', n:'2', t:'검안', done:'검안 마치고 피팅으로'},
-    {p:'fit.html',  n:'3', t:'피팅', done:'피팅 확인 마치기'}
+    {p:'exam.html', n:'2', t:'검안', done:'검안 마치고 테 판정으로'},
+    {p:'workorder.html', n:'3', t:'테 판정 · 가공', done:'가공 마치고 피팅으로'},
+    {p:'fit.html',  n:'4', t:'피팅', done:'피팅 확인 마치기'}
   ];
 
   // 1) 상단 메뉴 active
@@ -32,7 +33,6 @@
       var cls = (s.p===page?'active ':'') + (done[s.p.replace('.html','')]?'done':'');
       return '<a href="'+s.p+'" class="'+cls+'"><b>'+s.n+'</b> '+s.t+'</a>';
     }).join('<span class="sn-arrow">›</span>')+
-    '<span class="sn-arrow">›</span><span class="sn-wip"><b>4</b> 가공 지시서 · 준비 중</span>'+
     (idx>=0 ? '<button class="sn-done" type="button">'+STEPS[idx].done+'</button>' : '')+
     '</div>';
   var bar = document.createElement('div'); bar.className='subnav'; bar.innerHTML=html;
@@ -44,7 +44,7 @@
     var prev = STEPS[idx-1], key = prev.p.replace('.html','');
     if(!done[key]){
       var g = document.createElement('div'); g.className='sn-gate';
-      g.innerHTML = '<div class="subnav-in"><span><b>'+prev.t+'을 먼저 마쳐 주세요.</b> 응대는 접객, 검안, 피팅 순서로 해요.</span>'+
+      g.innerHTML = '<div class="subnav-in"><span><b>'+prev.t+'을 먼저 마쳐 주세요.</b> 응대는 접객, 검안, 테 판정·가공, 피팅 순서로 해요.</span>'+
         '<span style="display:flex;gap:8px"><a class="btn small" href="'+prev.p+'">'+prev.t+'으로 가기</a><button class="btn small ghost" type="button">건너뛰고 보기</button></span></div>';
       bar.parentNode.insertBefore(g, bar.nextSibling);
       g.querySelector('button').addEventListener('click', function(){ g.remove(); });
