@@ -403,6 +403,7 @@ function buildSheet(){
     var band=function(pts,w0,w1,wm){ var n=pts.length, lf=[], rt=[]; for(var i=0;i<n;i++){ var q1=pts[Math.max(0,i-1)], q2=pts[Math.min(n-1,i+1)], dx=q2[0]-q1[0], dy=q2[1]-q1[1], l=Math.hypot(dx,dy)||1, nx=-dy/l, ny=dx/l, t=i/(n-1), w=(wm!=null?(t<0.5?w0+(wm-w0)*t*2:wm+(w1-wm)*(t-0.5)*2):(w0+(w1-w0)*t))/2;
         lf.push([pts[i][0]+nx*w,pts[i][1]+ny*w]); rt.push([pts[i][0]-nx*w,pts[i][1]-ny*w]); }
       var ew=w1/2; return '<path d="'+P(lf)+' A'+ew+' '+ew+' 0 0 1 '+rt[n-1][0].toFixed(2)+' '+rt[n-1][1].toFixed(2)+' '+P(rt.slice().reverse()).replace(/^M/,'L')+'Z" fill="'+FILL+'" stroke="'+G1+'" stroke-width="0.26" stroke-linejoin="round"/>'; };
+    var tube=function(pts,W){ var d=P(pts); return '<path d="'+d+'" fill="none" stroke="'+G1+'" stroke-width="'+(W+0.5)+'" stroke-linecap="round" stroke-linejoin="round"/><path d="'+d+'" fill="none" stroke="'+FILL+'" stroke-width="'+W+'" stroke-linecap="round" stroke-linejoin="round"/>'; };
     var sec=function(y,num,title,right){ return T(0,y,num,{s:2.3,w:500,c:G3,ls:0.3})+T(7,y,title,{s:3.1,w:600})+(right?T(190,y,right,{s:2.1,a:'end',c:G2}):'')+L(0,y+2.1,190,y+2.1,{w:0.12,c:G4}); };
     var star=function(on){ return on?'*':''; };
     // 머리
@@ -423,16 +424,16 @@ function buildSheet(){
     var ffIn=(F.frameFF!==''&&F.frameFF!=null)?num(F.frameFF):null, ff=ffIn!=null?ffIn:wrap, ffEst=ffIn==null||/ff/.test(F.frameEst||''); if(ffEst) EST.push('ff');
     s4+=sec(33.5,'01','템플 벌림','실제 크기');
     // 프론트: 테의 휨을 곡선으로, 경첩 두 개
-    var dz=Math.max(0,(HH-dbl/2))*Math.tan(ff*R2), fpts=[]; for(var i=0;i<=24;i++){ var t=i/24, x=hL+(hR-hL)*t, u=(t-0.5)*2; fpts.push([x,AY-2.2-dz*(1-u*u)]); }
-    s4+=band(fpts,3,3)+L(95,AY+2,95,yTip,{c:G4,w:0.1,d:'2 1.2'});
+    var dz=Math.max(0,(HH-dbl/2))*Math.tan(ff*R2), fpts=[]; for(var i=0;i<=60;i++){ var t=i/60, x=hL+(hR-hL)*t, u=(t-0.5)*2; fpts.push([x,AY-2.2-dz*(1-u*u)]); }
+    s4+=tube(fpts,2.8)+L(95,AY+2,95,yTip,{c:G4,w:0.1,d:'2 1.2'});
     var tcl=function(sd,half,tipI,bw){ var H=[95+sd*HH,AY], E=[95+sd*half,yEar], dx=E[0]-H[0], dy=E[1]-H[1], l=Math.hypot(dx,dy), ux=dx/l, uy=dy/l, rest=tlen-Lear, pts=[];
-      for(var i=0;i<=20;i++){ var t=i/20, b2=(bw||0)*Math.sin(Math.PI*t); pts.push([H[0]+dx*t+sd*b2,H[1]+dy*t]); }
+      for(var i=0;i<=60;i++){ var t=i/60, b2=(bw||0)*Math.sin(Math.PI*t); pts.push([H[0]+dx*t+sd*b2,H[1]+dy*t]); }
       var C=[E[0]+ux*rest*0.45,E[1]+uy*rest*0.45], Tp=[E[0]+ux*rest-sd*tipI,E[1]+uy*rest];
-      for(var j=1;j<=12;j++){ var t2=j/12, k0=(1-t2)*(1-t2), k1=2*(1-t2)*t2, k2=t2*t2; pts.push([k0*E[0]+k1*C[0]+k2*Tp[0],k0*E[1]+k1*C[1]+k2*Tp[1]]); }
+      for(var j=1;j<=40;j++){ var t2=j/40, k0=(1-t2)*(1-t2), k1=2*(1-t2)*t2, k2=t2*t2; pts.push([k0*E[0]+k1*C[0]+k2*Tp[0],k0*E[1]+k1*C[1]+k2*Tp[1]]); }
       return pts; };
     [-1,1].forEach(function(sd){ var ox=95+sd*HH;
       if(Math.abs(bHalf-tHalf)>0.5) s4+='<path d="'+P(tcl(sd,bHalf,0,0))+'" fill="none" stroke="'+G3+'" stroke-width="0.24" stroke-dasharray="0.6 1"/>';
-      s4+=band(tcl(sd,tHalf,tipIn,bow),4.2,2.6,3.4)+'<rect x="'+(ox-1.6).toFixed(2)+'" y="'+(AY-2.2)+'" width="3.2" height="4" rx="0.8" fill="#fff" stroke="'+G1+'" stroke-width="0.26"/>'+ring(95+sd*tHalf,yEar);
+      s4+=tube(tcl(sd,tHalf,tipIn,bow),3.2)+'<rect x="'+(ox-1.6).toFixed(2)+'" y="'+(AY-2.2)+'" width="3.2" height="4" rx="0.8" fill="#fff" stroke="'+G1+'" stroke-width="0.26"/>'+ring(95+sd*tHalf,yEar);
     });
     s4+=T(95-tHalf-2.8,yEar-2.2,'귀',{s:2,a:'end',c:G2})+T(95+tHalf+2.8,yEar-2.2,'귀',{s:2,c:G2});
     s4+=ext(hL,AY+2.8,hL,AY+8.2)+ext(hR,AY+2.8,hR,AY+8.2)+dim(hL,AY+6.8,hR,AY+6.8,'경첩 '+Math.round(2*HH)+star(hwEst),2.5);
@@ -452,8 +453,10 @@ function buildSheet(){
     var eb=+F.earBend||EAR_BEND_START, ebEst=!(+F.earBend); if(ebEst) EST.push('eb');
     var by=yTip+23, bx0=16, bxB=bx0+bendAt, tail=tlen-bendAt, ea=eb*R2;
     s4+=sec(by-13,'02','귀 굽힘','실제 크기');
-    var sp2=[]; for(var i2=0;i2<=16;i2++) sp2.push([bx0+bendAt*i2/16,by]); for(var j2=1;j2<=10;j2++){ var t2=j2/10, ang=ea*Math.min(1,t2*1.6); var last=sp2[sp2.length-1]; sp2.push([last[0]+tail/10*Math.cos(ang),last[1]+tail/10*Math.sin(ang)]); }
-    s4+=band(sp2,4.4,2.6,3.6)+'<rect x="'+(bx0-3)+'" y="'+(by-2.4)+'" width="3.2" height="4.8" rx="0.8" fill="#fff" stroke="'+G1+'" stroke-width="0.26"/>'+
+    var RB=11, arcLen=RB*ea, sp2=[]; for(var i2=0;i2<=40;i2++) sp2.push([bx0+(bendAt-RB*Math.tan(ea/2))*i2/40,by]); var cX=sp2[sp2.length-1][0], cY=by+RB;
+    for(var j2=1;j2<=30;j2++){ var aa2=ea*j2/30; sp2.push([cX+RB*Math.sin(aa2),cY-RB*Math.cos(aa2)]); }
+    var lp=sp2[sp2.length-1], rest2=Math.max(0,tail-arcLen*0.5); for(var j3=1;j3<=20;j3++){ sp2.push([lp[0]+rest2*j3/20*Math.cos(ea),lp[1]+rest2*j3/20*Math.sin(ea)]); }
+    s4+=tube(sp2,3.4)+'<rect x="'+(bx0-3)+'" y="'+(by-2.4)+'" width="3.2" height="4.8" rx="0.8" fill="#fff" stroke="'+G1+'" stroke-width="0.26"/>'+
       L(bxB,by,bxB+tail+3,by,{c:G3,w:0.1,d:'0.8 0.8'})+ring(bxB,by)+T(bxB,by+5.5,'굽힘',{s:2,a:'middle',c:G2});
     var arc2=''; for(var k2=0;k2<=eb;k2++){ var a3=k2*R2; arc2+=(k2?'L':'M')+(bxB+11*Math.cos(a3)).toFixed(2)+' '+(by+11*Math.sin(a3)).toFixed(2); }
     var tipE=sp2[sp2.length-1];
