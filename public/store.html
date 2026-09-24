@@ -554,7 +554,7 @@ function pkLoad(){
     var items=(j.pickups||[]).filter(function(x){return x.status!=='건넴'&&x.status!=='방문완료'&&x.status!=='취소';});
     document.getElementById('pkCount').textContent='· '+items.length+'건';
     box.innerHTML=items.map(function(x){
-      var kind=x.kind==='R'?'<span class="pill good">기록으로 주문</span>':(x.kind==='A'?'<span class="pill">도수 예약</span>':'<span class="pill">잡아두기</span>');
+      var kind=x.kind==='R'?'<span class="pill good">기록으로 주문</span>':(x.kind==='A'?'<span class="pill">도수 예약</span>':(x.kind==='S'?'<span class="pill">온라인 스토어</span>':'<span class="pill">잡아두기</span>'));
       var nx=PK_NEXT[x.status];
       return '<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line2)">'+
         '<span>'+kind+' '+_esc(x.name)+' <span class="muted">'+_esc(x.items)+(x.rx?' · '+_esc(x.rx):'')+' · '+(x.date||'')+(x.time?' '+x.time:'')+'</span></span>'+

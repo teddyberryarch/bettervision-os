@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION · 내 검안 기록</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-toss.css">
+<style>
+.sec{margin-bottom:16px}.ctitle{font-size:19px;font-weight:600;color:var(--ink);margin:0 0 10px}
+.li{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:10px 0;font-size:17px}.li:first-of-type{border-top:none}.li .s{font-size:15px;color:var(--muted)}
+.empty{font-size:15px;color:var(--muted)}.note{font-size:15px;color:var(--muted);margin-top:8px;line-height:1.6}
+.pill2{font-size:13px;border-radius:6px;padding:2px 7px;margin-left:6px;background:var(--t-100,#f2f4f6);color:var(--t-700,#333)}.pill2.good{background:#e8f5ee;color:#1b7a47}.pill2.warn{background:#fdf3e2;color:#9a5b00}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}@media(max-width:800px){.steps{grid-template-columns:1fr}}
+.stp{background:var(--t-soft,#f6f7f9);border-radius:12px;padding:14px}.stp b{display:block;font-size:17px;margin-bottom:4px}.stp span{font-size:15px;color:var(--muted);line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+  <div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <span class="nav-div" aria-hidden="true"></span>
+    <a href="customer.html">손님 앱</a>
+    <span class="nav-dd"><a href="store.html">가맹점</a><span class="nav-menu"><a href="store.html">매장 홈</a><a href="flow.html">1 접객</a><a href="exam.html">2 검안</a><a href="workorder.html">3 테 판정 · 가공</a><a href="fit.html">4 피팅</a></span></span>
+    <a href="hq.html">본사</a>
+  </div>
+</div></div>
+<div class="wrap"><section class="view active">
+  <div class="lead"><div>
+    <div class="eyebrow">손님 · 검안 신뢰</div>
+    <h2>내 눈을 누가, 어떻게 쟀는지</h2>
+    <div class="sub">측정과 검안 기록을 날짜별로 보여드려요. 어느 매장에서 어떤 방법으로 쟀는지, 안경사가 확인한 값인지 함께 남아요.</div>
+  </div></div>
+  <div class="card pad sec"><div class="ctitle">누가 무엇을 하나요</div>
+    <div class="steps">
+      <div class="stp"><b>기계가 재요</b><span>얼굴 폭과 눈 사이 거리는 카메라가, 도수는 검안 기기가 재요.</span></div>
+      <div class="stp"><b>안경사가 확인해요</b><span>처방과 조제는 면허를 가진 안경사가 확인하고 정해요.</span></div>
+      <div class="stp"><b>기록이 남아요</b><span>언제 어디서 쟀는지 남아서 다음에 어느 매장을 가도 이어서 봐요.</span></div>
+    </div></div>
+  <div class="card pad sec"><div class="ctitle">측정 기록</div><div id="meas" class="empty">불러오는 중이에요</div>
+    <div class="note">임시값은 손님 휴대폰으로 쟀거나 신뢰도가 70%보다 낮은 값이에요. 안경을 맞출 때는 매장에서 다시 재요.</div></div>
+  <div class="card pad sec"><div class="ctitle">검안(처방) 기록</div><div id="exam" class="empty">불러오는 중이에요</div>
+    <div class="note">평균 도수는 구면 도수에 난시 도수의 절반을 더한 값이에요. 숫자가 작아질수록(마이너스가 커질수록) 근시가 진행된 거예요.</div></div>
+</section></div>
+<script>
+var CID=new URLSearchParams(location.search).get('customer_id')||1; // 데모 손님. 손님 로그인이 생기면 세션 손님으로
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function fx(v){return v==null?'-':(v>0?'+':'')+Number(v).toFixed(2);}
+fetch('/api/measurements/mine?customer_id='+CID).then(function(r){return r.json();}).then(function(j){
+  var it=j.items||[], b=document.getElementById('meas');
+  b.innerHTML=it.length?it.map(function(m){
+    var tag=m.provisional?'<span class="pill2 warn">임시값</span>':(m.checked?'<span class="pill2 good">매장 확인</span>':'');
+    return '<div class="li"><span>'+esc(m.date)+' · '+esc(m.where)+tag+'<div class="s">'+esc(m.how)+(m.confidence!=null?' · 신뢰도 '+m.confidence+'%':'')+'</div></span><span class="s" style="text-align:right">PD '+(m.pd!=null?m.pd:'-')+' · 얼굴 '+(m.face_width!=null?m.face_width:'-')+(m.ear_depth!=null?' · 귀까지 '+m.ear_depth:'')+(m.size?'<br><b style="color:var(--ink)">'+esc(m.size)+'</b>':'')+'</span></div>';
+  }).join(''):'아직 측정 기록이 없어요. 매장이나 손님 앱에서 재면 여기 남아요.';
+}).catch(function(){ document.getElementById('meas').textContent='기록을 불러오지 못했어요.'; });
+fetch('/api/customers/'+CID+'/vision').then(function(r){return r.json();}).then(function(j){
+  var me=(j.members||[]).filter(function(m){return m.member==='본인';})[0], b=document.getElementById('exam');
+  if(!me){ b.textContent='아직 검안 기록이 없어요.'; return; }
+  b.innerHTML=me.exams.slice().reverse().map(function(e){return '<div class="li"><span>'+esc(e.date)+'<div class="s">오른쪽 '+fx(e.R.S)+' / '+fx(e.R.C)+' · 왼쪽 '+fx(e.L.S)+' / '+fx(e.L.C)+(e.ADD?' · 가까운 곳 +'+e.ADD:'')+'</div></span><span class="s">평균 '+fx(e.se)+'</span></div>';}).join('')+
+    '<div class="note">다음 검사 권장일 '+esc(me.next)+(me.due?' (지났어요)':'')+'</div>';
+}).catch(function(){ document.getElementById('exam').textContent='기록을 불러오지 못했어요.'; });
+</script>
+<script src="/assets/app.js"></script>
+<script src="/assets/bv-nav.js"></script>
+</body>
+</html>

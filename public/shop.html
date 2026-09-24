@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION · 온라인 스토어</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-toss.css">
+<style>
+.sec{margin-bottom:16px}.ctitle{font-size:19px;font-weight:600;color:var(--ink);margin:0 0 10px}
+.li{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:10px 0;font-size:17px}.li:first-of-type{border-top:none}.li .s{font-size:15px;color:var(--muted)}
+.empty{font-size:15px;color:var(--muted)}.note{font-size:15px;color:var(--muted);margin-top:8px;line-height:1.6}
+.pill2{font-size:13px;border-radius:6px;padding:2px 7px;margin-left:6px;background:var(--t-100,#f2f4f6);color:var(--t-700,#333)}.pill2.good{background:#e8f5ee;color:#1b7a47}.pill2.warn{background:#fdf3e2;color:#9a5b00}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.it{background:#fff;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px}.it .n{font-size:17px;font-weight:600}.it .p{font-size:17px}.it .c{font-size:15px;color:var(--muted)}
+.it select{font-size:16px;padding:6px 8px}
+.legal{border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;color:var(--ink);background:#fff;line-height:1.6}
+.frm{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:700px){.frm{grid-template-columns:1fr}}
+.frm label{font-size:15px;color:var(--muted);display:block;margin-bottom:4px}.frm input,.frm select{width:100%;font-size:17px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+  <div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <span class="nav-div" aria-hidden="true"></span>
+    <a href="customer.html">손님 앱</a>
+    <span class="nav-dd"><a href="store.html">가맹점</a><span class="nav-menu"><a href="store.html">매장 홈</a><a href="flow.html">1 접객</a><a href="exam.html">2 검안</a><a href="workorder.html">3 테 판정 · 가공</a><a href="fit.html">4 피팅</a></span></span>
+    <a href="hq.html">본사</a>
+  </div>
+</div></div>
+<div class="wrap"><section class="view active">
+  <div class="lead"><div>
+    <div class="eyebrow">손님 · 온라인 스토어</div>
+    <h2>도수 없는 선글라스와 소품</h2>
+    <div class="sub">온라인으로 주문하고 가까운 매장에서 찾아가요. 값은 매장에서 찾을 때 내요.</div>
+  </div></div>
+  <div class="legal sec">도수 안경과 콘택트렌즈는 법으로 온라인 판매가 금지돼 있어요. 매장에서 검안한 뒤 사요. 여기서는 도수 없는 선글라스와 소품만 팔아요.</div>
+  <div class="card pad sec"><div class="ctitle">상품</div><div class="grid" id="items"><div class="empty">불러오는 중이에요</div></div></div>
+  <div class="card pad sec"><div class="ctitle">장바구니</div><div id="cart" class="empty">담은 상품이 없어요</div>
+    <div class="frm" style="margin-top:12px">
+      <div><label>찾을 매장</label><select id="store"></select></div>
+      <div><label>찾을 날짜</label><input id="date" type="date"></div>
+      <div><label>이름</label><input id="name" placeholder="이름"></div>
+      <div><label>전화번호</label><input id="phone" placeholder="010-0000-0000"></div>
+    </div>
+    <button class="btn" style="margin-top:12px" onclick="order()">주문하고 매장에서 찾기</button>
+    <div id="msg" style="font-size:15px;margin-top:8px"></div>
+  </div>
+</section></div>
+<script>
+var ITEMS=[], CART={};
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function won(n){return '₩'+(n||0).toLocaleString('ko-KR');}
+function groups(){ // 선글라스는 S·M·L을 한 상품으로 묶고 사이즈를 고르게 한다
+  var g={}, out=[]; ITEMS.forEach(function(x){ var m=x.name.match(/^(.*) ([SML])$/), k=m?m[1]:x.name;
+    if(!g[k]){ g[k]={name:k,cat:x.cat,price:x.price,skus:[]}; out.push(g[k]); } g[k].skus.push({sku:x.sku,size:m?m[2]:null}); }); return out; }
+function render(){
+  document.getElementById('items').innerHTML=groups().map(function(g,i){
+    var sel=g.skus.length>1?'<select id="sz'+i+'">'+g.skus.map(function(s){return '<option value="'+s.sku+'"'+(s.size==='M'?' selected':'')+'>사이즈 '+s.size+'</option>';}).join('')+'</select>':'<input type="hidden" id="sz'+i+'" value="'+g.skus[0].sku+'">';
+    return '<div class="it"><div class="c">'+esc(g.cat)+'</div><div class="n">'+esc(g.name)+'</div><div class="p">'+won(g.price)+'</div>'+sel+'<button class="btn small" onclick="add('+i+')">담기</button></div>';
+  }).join('');
+}
+function add(i){ var sku=document.getElementById('sz'+i).value; CART[sku]=(CART[sku]||0)+1; cart(); }
+function cart(){
+  var ks=Object.keys(CART), tot=0;
+  document.getElementById('cart').innerHTML=ks.length?ks.map(function(k){var it=ITEMS.filter(function(x){return x.sku===k;})[0]; tot+=it.price*CART[k];
+    return '<div class="li"><span>'+esc(it.name)+' ×'+CART[k]+'</span><span>'+won(it.price*CART[k])+' <a href="#" onclick="delete CART[\''+k+'\'];cart();return false">빼기</a></span></div>';}).join('')+'<div class="li"><b>합계</b><b>'+won(tot)+'</b></div>':'담은 상품이 없어요';
+}
+function order(){
+  var ks=Object.keys(CART), m=document.getElementById('msg'); if(!ks.length){ m.textContent='상품을 먼저 담아 주세요.'; return; }
+  var name=document.getElementById('name').value.trim(), phone=document.getElementById('phone').value.trim(), date=document.getElementById('date').value;
+  if(!name||!phone||!date){ m.textContent='이름, 전화번호, 찾을 날짜를 넣어 주세요.'; return; }
+  var items=ks.map(function(k){var it=ITEMS.filter(function(x){return x.sku===k;})[0]; return it.name+' ×'+CART[k];}).join(', ');
+  var amount=ks.reduce(function(a,k){var it=ITEMS.filter(function(x){return x.sku===k;})[0]; return a+it.price*CART[k];},0);
+  fetch('/api/pickups',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({store:document.getElementById('store').value,kind:'S',name:name,phone:phone,items:items,date:date,time:'',payType:'매장 결제',amount:amount,deposit:0})})
+    .then(function(r){return r.json();}).then(function(j){ if(!j.ok){ m.textContent=j.error||'주문하지 못했어요.'; return; }
+      CART={}; cart(); m.style.color='var(--good)'; m.textContent='주문했어요. '+date+'에 '+document.getElementById('store').value+'에서 찾아가세요. 값은 찾을 때 내요.'; })
+    .catch(function(){ m.textContent='연결이 안 돼요. 잠시 뒤 다시 해 주세요.'; });
+}
+fetch('/api/shop/items').then(function(r){return r.json();}).then(function(j){ ITEMS=j.items||[];
+  document.getElementById('store').innerHTML=(j.stores||[]).map(function(s){return '<option>'+esc(s)+'</option>';}).join('');
+  var d=new Date(); d.setDate(d.getDate()+2); document.getElementById('date').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  render(); }).catch(function(){ document.getElementById('items').textContent='상품을 불러오지 못했어요.'; });
+</script>
+<script src="/assets/app.js"></script>
+<script src="/assets/bv-nav.js"></script>
+</body>
+</html>

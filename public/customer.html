@@ -879,7 +879,7 @@ var CAT_DATA={
     {n:'로마 슬림',pb:true,price:'189,000',desc:'얇은 림·가벼운 무게. 작은 얼굴·미니멀 취향. F1~F2 사이즈 추천.'},
     {n:'로마 와이드',pb:true,price:'189,000',desc:'넓은 프론트·또렷한 인상. F2~F3, 광대·얼굴폭 넓은 분께.'},
     {n:'로마 라운드',pb:true,price:'189,000',desc:'둥근 림·클래식 무드. 각진 얼굴과 대비로 부드럽게.'},
-    {n:'수입 브랜드 A',pb:false,price:'390,000',desc:'수입 티타늄 라인 (예시). 초경량 프리미엄.'}
+    {n:'수입 A 라인 티타늄',pb:false,price:'470,000',desc:'수입 티타늄 라인 (예시). 가볍고 튼튼해요.'}
   ],
   sun:[
     {n:'편광 선글라스',pb:true,price:'230,000',desc:'난반사 차단 편광 렌즈. 운전·수상·설원. 자외선 100% 차단.'},
@@ -896,12 +896,12 @@ var CONTACTS=[
   {n:'난시용 (30P)',pb:true,price:'42,000',desc:'토릭 설계로 난시 축 보정. 시야 안정. 난시 있는 분 전용.'},
   {n:'컬러 (10P)',pb:true,price:'30,000',desc:'자연스러운 홍채 확장·컬러. 도수/무도수. 미용 목적.'}
 ];
-var LENS_IDX=[
-  {idx:'1.50',thick:'가장 두꺼움',rec:'약도수 ~ -2.00D',price:'기본 포함',note:'CR-39 표준. 가볍고 저렴하나 도수 높으면 두께 부담.'},
-  {idx:'1.56',thick:'두꺼움',rec:'~ -3.00D',price:'+30,000',note:'가성비 중간 굴절. 무난한 일상 도수.'},
-  {idx:'1.60',thick:'얇음',rec:'-3.00 ~ -4.00D',price:'+60,000',note:'가장 보편적 추천. 두께·무게·가격 균형 최적.'},
-  {idx:'1.67',thick:'더 얇음',rec:'-4.00 ~ -6.00D',price:'+100,000',note:'고도수. 렌즈 두께 확 줄어 인상·착용감 개선.'},
-  {idx:'1.74',thick:'가장 얇음',rec:'-6.00D 이상',price:'+160,000',note:'초고도수 전용. 가장 얇고 가볍지만 최고가.'}
+var LENS_IDX=[ // [09.24] 가격은 본사 상품 목록에서. 목록에 없는 굴절률은 "매장 문의"
+  {idx:'1.50',thick:'가장 두꺼움',rec:'약도수 ~ -2.00D'},
+  {idx:'1.56',thick:'두꺼움',rec:'~ -3.00D'},
+  {idx:'1.60',thick:'얇음',rec:'-3.00 ~ -4.00D',sku:'알도R 1.60 렌즈'},
+  {idx:'1.67',thick:'더 얇음',rec:'-4.00 ~ -6.00D'},
+  {idx:'1.74',thick:'가장 얇음',rec:'-6.00D 이상'}
 ];
 var COATINGS=[
   {i:'청',n:'블루라이트(청광) 차단',d:'디지털 기기 청색광 완화. 눈 피로·수면 영향 줄임. 사무직·학생 추천.'},
@@ -922,17 +922,40 @@ function pcard(it){
 }
 function pbIntro(txt){return '<div class="pbnote"><div class="pt">BETTERVISION LAB · 자체 개발(PB)</div><div class="pd">'+txt+'</div></div>';}
 
+/* [09.24] 카드 가격을 본사 상품 목록(권장가)과 맞춘다. 이름이 다른 카드는 여기서 짝을 지어 준다 */
+var PRICE_ALIAS={'로마 ACE-02':'로마 클래식 M','로마 클래식':'로마 클래식 M','로마 슬림':'로마 슬림 M','로마 와이드':'로마 와이드 M','로마 라운드':'로마 라운드 M',
+  '수입 A 라인 티타늄':'수입 A 라인 티타늄','편광 선글라스':'편광 선글라스 M','클립온 선글라스':'클립온 선글라스 M',
+  '1일용 (30P)':'1일용 콘택트(30P)','1개월용 (2P)':'1개월용 콘택트(2P)','난시용 (30P)':'난시용 콘택트(30P)','컬러 (10P)':'컬러 콘택트(10P)'};
+var CAT_PRICE=null;
+function catPrice(name){ if(!CAT_PRICE) return null; var k=PRICE_ALIAS[name]||name; return CAT_PRICE[k]!=null?CAT_PRICE[k]:null; }
+function syncCardPrices(){
+  var all=[].concat(CAT_DATA.frame||[],CAT_DATA.sun||[],CAT_DATA.goggle||[],CONTACTS);
+  all.forEach(function(it){ var p=catPrice(it.n); if(p!=null) it.price=p.toLocaleString('ko-KR'); });
+}
+function loadCatPrices(){
+  if(CAT_PRICE) return Promise.resolve();
+  return fetch('/api/catalog').then(function(r){return r.json();}).then(function(j){
+    CAT_PRICE={}; (j.catalog||[]).forEach(function(x){CAT_PRICE[x.name]=x.price;}); SIM_CAT=SIM_CAT||j.catalog; syncCardPrices();
+    var a=document.querySelector('#csub .cs.active'); if(a) renderCat(a.dataset.c);
+  }).catch(function(){ CAT_PRICE={}; });
+}
 function renderCat(c){
   var b=document.getElementById('catBody'); if(!b)return;
+  if(!CAT_PRICE){ loadCatPrices(); }
   if(c==='lens'){
-    var rows=LENS_IDX.map(function(l){return '<tr><td><b>'+l.idx+'</b></td><td>'+l.thick+'</td><td>'+l.rec+'</td><td>'+l.price+'</td></tr>';}).join('');
+    var rows=LENS_IDX.map(function(l){var p=l.sku?catPrice(l.sku):null; return '<tr><td><b>'+l.idx+'</b></td><td>'+l.thick+'</td><td>'+l.rec+'</td><td>'+(p!=null?'₩'+p.toLocaleString('ko-KR'):'매장 문의')+'</td></tr>';}).join('');
+    var lensCards=[{k:'알도R 1.60 렌즈',n:'알도R 1.60',hero:true,desc:'BETTERVISION 대표 렌즈. 가장 많이 쓰는 1.60 굴절률에 멀티코팅 기본. 두께·무게·가격이 고르게 맞아 대부분의 도수에 권해요.'},
+      {k:'누진 렌즈',n:'누진 렌즈',desc:'한 렌즈로 먼 곳과 가까운 곳을 함께 봐요. 노안이 시작된 분께 권해요.'},
+      {k:'청광 렌즈',n:'청광 렌즈',desc:'화면에서 나오는 파란빛을 줄여요. 화면을 오래 보는 분께 권해요.'},
+      {k:'변색 렌즈',n:'변색 렌즈',desc:'실내에서는 투명하고 햇빛 아래에서는 짙어져요. 안경과 선글라스를 하나로 써요.'}]
+      .map(function(x){var p=catPrice(x.k); return pcard({n:x.n,pb:true,hero:x.hero,price:p!=null?p.toLocaleString('ko-KR'):'-',desc:x.desc});}).join('');
     var coat=COATINGS.map(function(o){return '<div class="coatrow"><span class="ci">'+o.i+'</span><div><b>'+o.n+'</b><br>'+o.d+'</div></div>';}).join('');
     b.innerHTML=
-      pbIntro('렌즈는 BETTERVISION가 직접 설계·공급하는 자체 렌즈예요. 같은 굴절률·코팅을 합리적인 가격에, 품질은 본사가 책임집니다. 도수에 맞는 굴절률을 골라야 두께·무게가 달라져요.')+
-      pcard({n:'알도R 1.60 (PB)',pb:true,price:'110,000',hero:true,desc:'BETTERVISION 대표 렌즈. 가장 보편적인 1.60 굴절률에 멀티코팅 기본 적용. 두께·무게·가격 균형이 최적이라 대부분의 도수에 추천.',spec:[['굴절률','1.60'],['아베수','42'],['자외선','UV400 차단'],['코팅','멀티코팅 기본'],['옵션','블루라이트·변색'],['추천도수','-3.00~-4.00D']]})+
+      pbIntro('렌즈는 BETTERVISION가 직접 설계·공급하는 자체 렌즈예요. 같은 굴절률·코팅을 합리적인 가격에, 품질은 본사가 책임져요. 도수에 맞는 굴절률을 골라야 두께·무게가 달라져요.')+
+      lensCards+
       '<div class="catsec-h">굴절률(렌즈 두께)별 안내</div>'+
       '<table class="lenstbl"><thead><tr><th>굴절률</th><th>두께감</th><th>추천 도수</th><th>가격</th></tr></thead><tbody>'+rows+'</tbody></table>'+
-      '<div class="label" style="font-size:13px;margin-top:6px">굴절률이 높을수록 같은 도수에서 더 얇고 가벼워요. 고도수일수록 1.60↑ 권장. 정확한 추천은 측정·검안 후.</div>'+
+      '<div class="label" style="font-size:13px;margin-top:6px">굴절률이 높을수록 같은 도수에서 더 얇고 가벼워요. 도수가 높으면 1.60 이상을 권해요. 1.60 말고는 매장에서 가격을 알려드려요. 정확한 추천은 측정·검안 뒤에 해요.</div>'+
       '<div class="catsec-h">기능 코팅</div>'+coat;
     return;
   }

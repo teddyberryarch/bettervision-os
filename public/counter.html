@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION OS · 접객 데스크</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/bv-toss.css">
+<style>
+.sec{margin-bottom:16px}.ctitle{font-size:19px;font-weight:600;color:var(--ink);margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}@media(max-width:800px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#fff;border-radius:14px;padding:14px 16px}.kpi .l{font-size:15px;color:var(--muted)}.kpi .v{font-size:30px;font-weight:600;color:var(--ink);margin-top:2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.li{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:10px 0;font-size:17px}.li:first-child{border-top:none}.li .s{font-size:15px;color:var(--muted)}
+.srch{width:100%;font-size:17px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.hit{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;background:#fff}
+.hit .n{font-size:19px;font-weight:600}.hit .m{font-size:15px;color:var(--muted);margin-top:2px}
+.tip{font-size:16px;margin-top:8px;padding:10px 12px;border-radius:10px;background:var(--t-soft,#f6f7f9)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.empty{font-size:15px;color:var(--muted)}
+.fld select{font-size:17px;padding:8px 10px}
+</style>
+</head>
+<body>
+<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
+  <div class="nav-links">
+    <a href="index.html">홈</a>
+    <a href="a.html">사업 개요</a>
+    <span class="nav-div" aria-hidden="true"></span>
+    <a href="customer.html">손님 앱</a>
+    <span class="nav-dd"><a href="store.html">가맹점</a><span class="nav-menu"><a href="store.html">매장 홈</a><a href="flow.html">1 접객</a><a href="exam.html">2 검안</a><a href="workorder.html">3 테 판정 · 가공</a><a href="fit.html">4 피팅</a></span></span>
+    <a href="hq.html">본사</a>
+  </div>
+</div></div>
+<div class="wrap"><section class="view active">
+  <div class="lead"><div>
+    <div class="eyebrow">가맹점 · 접객 데스크</div>
+    <h2>오늘 올 손님과 할 일을 한 화면에</h2>
+    <div class="sub">예약, 앱 주문 픽업, 7일째 확인, 열린 A/S를 모아 표시. 손님을 찾으면 지난 기록 기준 응대 포인트와 다음 할 일로 바로 이동.</div>
+  </div><div class="fld"><select id="store" onchange="loadAll()"><option>성수점</option><option>홍대점</option><option>판교점</option></select></div></div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="l">오늘 예약</div><div class="v" id="kBook">-</div></div>
+    <div class="kpi"><div class="l">앱 주문 픽업 (오늘·내일)</div><div class="v" id="kPick">-</div></div>
+    <div class="kpi"><div class="l">7일째 확인 (오늘까지)</div><div class="v" id="kCare">-</div></div>
+    <div class="kpi"><div class="l">열린 A/S</div><div class="v" id="kAs">-</div></div>
+  </div>
+
+  <div class="card pad sec">
+    <div class="ctitle">손님 찾기</div>
+    <input id="q" class="srch" placeholder="이름 또는 전화번호 뒤 4자리" oninput="search()">
+    <div id="hits"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card pad sec"><div class="ctitle">오늘 예약 <a class="btn small ghost" href="store.html">예약 관리</a></div><div id="lBook" class="empty">불러오는 중</div></div>
+    <div class="card pad sec"><div class="ctitle">앱 주문 픽업 <a class="btn small ghost" href="store.html">주문 관리</a></div><div id="lPick" class="empty">불러오는 중</div></div>
+    <div class="card pad sec"><div class="ctitle">7일째 확인 <a class="btn small ghost" href="store.html#care">사후 확인</a></div><div id="lCare" class="empty">불러오는 중</div></div>
+    <div class="card pad sec"><div class="ctitle">열린 A/S <a class="btn small ghost" href="store.html#care">A/S 처리</a></div><div id="lAs" class="empty">불러오는 중</div></div>
+  </div>
+</section></div>
+<script>
+var CUSTS=[], CARE=[], PICK=[], QUOTES=[];
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function J(u){return fetch(u).then(function(r){return r.json();});}
+function today(){var d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);}
+function plus(n){var d=new Date(today()+'T00:00:00');d.setDate(d.getDate()+n);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);}
+function st(){return encodeURIComponent(document.getElementById('store').value);}
+function list(id, rows, fn, empty){ document.getElementById(id).innerHTML=rows.length?rows.map(fn).join(''):'<div class="empty">'+empty+'</div>'; }
+function loadAll(){
+  var t=today();
+  J('/api/bookings?store='+st()+'&date='+t).then(function(j){ var b=(j.bookings||[]).filter(function(x){return !x.date||x.date===t;}).sort(function(a,b){return String(a.time).localeCompare(b.time);});
+    document.getElementById('kBook').textContent=b.length;
+    list('lBook',b,function(x){return '<div class="li"><span>'+esc(x.time)+' · '+esc(x.name)+'</span><span class="s">'+esc(x.phone||'')+'</span></div>';},'오늘 예약 없음'); }).catch(function(){});
+  J('/api/pickups?store='+st()).then(function(j){ PICK=(j.pickups||[]).filter(function(x){return x.status!=='완료'&&x.status!=='취소'&&(!x.date||x.date<=plus(1));});
+    document.getElementById('kPick').textContent=PICK.length;
+    list('lPick',PICK,function(x){return '<div class="li"><span>'+esc(x.date||'')+' '+esc(x.time||'')+' · '+esc(x.name)+'<div class="s">'+esc(x.items||'')+'</div></span><span class="s">'+esc(x.status)+'</span></div>';},'픽업 예정 없음'); }).catch(function(){});
+  J('/api/aftercare?store='+st()).then(function(j){ CARE=(j.items||[]).filter(function(x){return x.status==='예정'&&x.due_date<=t;});
+    document.getElementById('kCare').textContent=CARE.length;
+    list('lCare',CARE,function(x){return '<div class="li"><span>'+esc(x.name)+'<div class="s">구매 '+esc(x.sale_date)+(x.note?' · '+esc(x.note):'')+'</div></span><span class="s">'+(x.due_date<t?'지남 ':'')+esc(x.due_date)+'</span></div>';},'오늘 확인할 손님 없음'); }).catch(function(){});
+  J('/api/as?store='+st()+'&status='+encodeURIComponent('열림')).then(function(j){ var a=j.items||[];
+    document.getElementById('kAs').textContent=a.length;
+    list('lAs',a,function(x){return '<div class="li"><span>'+esc(x.name)+'<div class="s">'+esc(x.symptom)+'</div></span><span class="s">'+esc(String(x.opened_at||'').slice(0,10))+'</span></div>';},'열린 A/S 없음'); }).catch(function(){});
+  J('/api/customers?store='+st()).then(function(j){ CUSTS=j.customers||[]; search(); }).catch(function(){});
+  J('/api/quotes?store='+st()).then(function(j){ QUOTES=j.items||[]; search(); }).catch(function(){});
+}
+function tipFor(c){
+  var open=QUOTES.filter(function(q){return q.customer_id===c.id&&q.status==='발행';})[0];
+  var care=CARE.filter(function(x){return x.customer_id===c.id;})[0], pick=PICK.filter(function(x){return x.customer_id===c.id;})[0];
+  var t=[];
+  if(pick) t.push('앱 주문 픽업 '+esc(pick.date||'')+' '+esc(pick.time||'')+' · '+esc(pick.items||''));
+  if(care) t.push('7일째 확인 대상. 잘 보이는지·흘러내리는지·가까운 게 보이는지 확인');
+  if(open) t.push('발행한 견적서 '+esc(open.no)+' ('+(open.total||0).toLocaleString('ko-KR')+'원) 있음');
+  if(!c.size) t.push('측정 기록 없음. 측정부터');
+  else if(c.seg==='단골') t.push('단골. 지난 사이즈 '+esc(c.size)+' 기준으로 바로 추천');
+  else if(c.seg==='재방문') t.push('재방문. 지난 처방과 달라졌는지 검안부터');
+  else t.push('신규. 측정 → 검안 순서 안내');
+  return t;
+}
+function pick(id){
+  var c=CUSTS.filter(function(x){return x.id===id;})[0]; if(!c) return;
+  try{ var r=JSON.parse(sessionStorage.getItem('bv_active_record')||'{}')||{}; r.customerId=c.id; r.name=c.name; sessionStorage.setItem('bv_active_record',JSON.stringify(r)); }catch(e){}
+}
+function search(){
+  var q=document.getElementById('q').value.trim(), box=document.getElementById('hits'); if(!q){ box.innerHTML=''; return; }
+  var hs=CUSTS.filter(function(c){return String(c.name).indexOf(q)>=0||String(c.phone||'').replace(/-/g,'').slice(-4)===q;}).slice(0,5);
+  box.innerHTML=hs.length?hs.map(function(c){
+    return '<div class="hit"><div class="n">'+esc(c.name)+' <span class="s" style="font-size:15px;color:var(--muted)">'+esc(c.seg||'')+'</span></div>'+
+      '<div class="m">사이즈 '+esc(c.size||'-')+' · PD '+esc(c.pd||'-')+' · 처방 '+esc(c.rx||'-')+'</div>'+
+      '<div class="tip">'+tipFor(c).join('<br>')+'</div>'+
+      '<div class="acts"><a class="btn small" href="flow.html" onclick="pick('+c.id+')">접객 시작</a><a class="btn small ghost" href="measure.html" onclick="pick('+c.id+')">측정</a><a class="btn small ghost" href="quote.html?customer='+c.id+'" onclick="pick('+c.id+')">견적서</a><a class="btn small ghost" href="store.html" onclick="pick('+c.id+')">손님 기록</a></div></div>';
+  }).join(''):'<div class="empty" style="margin-top:8px">찾는 손님 없음. 신규면 접객 시작에서 등록</div>';
+}
+loadAll();
+</script>
+<script src="/assets/app.js"></script>
+<script src="/assets/bv-nav.js"></script>
+</body>
+</html>

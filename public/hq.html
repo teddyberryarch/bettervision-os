@@ -269,6 +269,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     </div>
     <div class="label" style="font-size:13px;margin:8px 0 6px">권장가 변경 시 매장 결제 화면의 기본 표시 가격 변경. 판매가는 매장 결정, 권장 범위 이탈 시 안내만 표시.</div>
     <div id="ppBox"></div>
+    <div class="eyebrow" style="margin-top:18px">권장 할인 범위를 넘긴 견적 <span class="label" style="font-weight:400">· 막지 않고 기록 (D-12)</span></div>
+    <div id="qoBox" class="label">불러오는 중</div>
   </div>
 
   <!-- 공급·물류 자동화 -->
@@ -964,6 +966,17 @@ function pushSend(){
 /* ===== 본사 권장가 ===== */
 var PP_ALL=[];
 (function(){ if(document.getElementById('ppBox')) fetch('/api/price-policy').then(function(r){return r.json();}).then(function(j){ PP_ALL=j.policy||[]; ppLoad(); }); })();
+function qoLoad(){
+  var box=document.getElementById('qoBox'); if(!box) return;
+  fetch('/api/quotes/over').then(function(r){return r.json();}).then(function(j){
+    if(!j.ok){ box.textContent='불러오지 못함'; return; }
+    var st=Object.keys(j.byStore).map(function(k){var b=j.byStore[k]; return k+' '+b.over+'/'+b.quotes+'건';}).join(' · ');
+    box.innerHTML='<div class="label" style="margin:4px 0 8px">견적서 '+j.total+'건 중 범위 초과 '+j.overQuotes+'건'+(st?' ('+st+')':'')+'. 초과가 한 품목·한 매장에 몰리면 권장가나 범위를 다시 볼 신호.</div>'+
+      (j.lines.length?'<table class="tbl"><thead><tr><th>견적</th><th>매장</th><th>품목</th><th>할인</th><th>범위</th><th>상태</th></tr></thead><tbody>'+j.lines.slice(0,10).map(function(l){
+        return '<tr style="cursor:default"><td>'+l.no+'</td><td>'+(l.store||'-')+'</td><td>'+l.name+'</td><td><b>'+l.disc+'%</b></td><td>'+l.maxDisc+'%</td><td>'+l.status+'</td></tr>';}).join('')+'</tbody></table>':'<div class="label">초과 없음</div>');
+  }).catch(function(){ box.textContent='불러오지 못함'; });
+}
+(function(){ if(document.getElementById('qoBox')) qoLoad(); })();
 function ppLoad(){
   var cat=document.getElementById('ppCat').value;
   var rows=PP_ALL.filter(function(p){return p.cat===cat;});
