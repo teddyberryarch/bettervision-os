@@ -70,7 +70,7 @@
     var prev = STEPS[idx-1], key = prev.p.replace('.html','');
     if(!done[key]){
       var g = document.createElement('div'); g.className='sn-gate';
-      g.innerHTML = '<div class="subnav-in"><span><b>'+prev.t+'을 먼저 마쳐 주세요.</b> 응대는 접객, 검안, 테 판정·가공, 피팅 순서로 해요.</span>'+
+      g.innerHTML = '<div class="subnav-in"><span><b>'+prev.t+' 먼저.</b> 응대 순서: 접객 → 검안 → 테 판정·가공 → 피팅</span>'+
         '<span style="display:flex;gap:8px"><a class="btn small" href="'+prev.p+'">'+prev.t+'으로 가기</a><button class="btn small ghost" type="button">건너뛰고 보기</button></span></div>';
       bar.parentNode.insertBefore(g, bar.nextSibling);
       g.querySelector('button').addEventListener('click', function(){ g.remove(); });
