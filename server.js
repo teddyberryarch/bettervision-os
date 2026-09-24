@@ -72,7 +72,7 @@ async function api(req, res, url){
             '/api/analytics','/api/forecast','/api/activity','/api/orders/push','/api/price-policy'];
           const HQ_ONLY_GET_OK=['/api/price-policy']; // 권장가 조회는 가맹점도 가능, 수정은 본부만
           if(HQ_ONLY.indexOf(url.pathname)>=0 && !(req.method==='GET' && HQ_ONLY_GET_OK.indexOf(url.pathname)>=0))
-            return send(res,403,{ok:false,error:'본부 전용이에요'});
+            return send(res,403,{ok:false,error:'본사 전용이에요'});
           const qs=url.searchParams.get('store');
           if(qs && qs!==u.store) return send(res,403,{ok:false,error:'다른 지점 데이터는 볼 수 없어요'});
           // store 파라미터를 빼고 호출하면 전 지점이 나오던 문제 → 본인 지점으로 고정
@@ -157,7 +157,7 @@ async function api(req, res, url){
     if(req.method==='POST' && url.pathname==='/api/sales'){
       const b=await body(req);
       if(!b.store||!b.date||!b.lines||!b.lines.length) return send(res,400,{ok:false,error:'필수값 누락'});
-      const r=await db.recordSale(b.store, b.date, b.method||'카드', b.lines, b.customerId, b.redeem);
+      const r=await db.recordSale(b.store, b.date, b.method||'카드', b.lines, b.customerId, b.redeem, b.fit);
       return send(res, r.ok?201:409, r);
     }
     // GET /api/sales/summary?store=&date= -> {total,byCat}
@@ -188,7 +188,7 @@ async function api(req, res, url){
     }
     // POST /api/price-policy {sku,list_price,max_disc} -> 본부 정책 수정
     if(req.method==='POST' && url.pathname==='/api/price-policy'){
-      if(AUTH_ON){ const u=await db.userByToken(getCookie(req,'bv_token')); if(u && u.role!=='hq') return send(res,403,{ok:false,error:'본부 전용이에요'}); }
+      if(AUTH_ON){ const u=await db.userByToken(getCookie(req,'bv_token')); if(u && u.role!=='hq') return send(res,403,{ok:false,error:'본사 전용이에요'}); }
       const b=await body(req);
       if(!b.sku) return send(res,400,{ok:false,error:'sku 필요'});
       return send(res,200, await db.setPricePolicy(b.sku, b.list_price, b.max_disc));
@@ -262,7 +262,13 @@ async function api(req, res, url){
     // ===== [09.24] 판 다음 확인 (7일째 착용 확인) =====
     const U=req.bvUser; const scopeOK=function(st){ return !U || U.role!=='store' || st===U.store; };
     if(req.method==='GET' && url.pathname==='/api/aftercare'){
-      return send(res,200,{ok:true, items:await db.listAftercare(url.searchParams.get('store'), url.searchParams.get('status')), issues:db.CARE_ISSUES});
+      return send(res,200,{ok:true, items:await db.listAftercare(url.searchParams.get('store'), url.searchParams.get('status')), issues:db.CARE_ISSUES, questions:db.CARE_QUESTIONS, judges:db.CARE_JUDGE});
+    }
+    if(req.method==='POST' && url.pathname==='/api/aftercare/judge'){
+      const b=await body(req); const cur=await db.getAftercare(b.id);
+      if(!cur) return send(res,404,{ok:false,error:'확인 건이 없어요'});
+      if(!scopeOK(cur.store)) return send(res,403,{ok:false,error:'다른 지점 건이에요'});
+      const r=await db.judgeAftercare(b.id, b.judge); return send(res, r.ok?200:400, r);
     }
     if(req.method==='POST' && url.pathname==='/api/aftercare/record'){
       const b=await body(req); const cur=await db.getAftercare(b.id);
@@ -272,12 +278,12 @@ async function api(req, res, url){
     }
     if(req.method==='GET' && url.pathname==='/api/aftercare/mine'){
       const cid=url.searchParams.get('customer_id'); if(!cid) return send(res,400,{ok:false,error:'customer_id 필요'});
-      return send(res,200,{ok:true, items:await db.pendingAftercareFor(cid), issues:db.CARE_ISSUES});
+      return send(res,200,{ok:true, items:await db.pendingAftercareFor(cid), issues:db.CARE_ISSUES, questions:db.CARE_QUESTIONS});
     }
     if(req.method==='POST' && url.pathname==='/api/aftercare/respond'){
       const b=await body(req); const cur=await db.getAftercare(b.id);
       if(!cur || +cur.customer_id!==+b.customer_id) return send(res,404,{ok:false,error:'확인 건이 없어요'});
-      const r=await db.recordAftercare(b.id,{comfort:b.comfort,issues:b.issues,note:b.note,source:'고객 앱',onlyPending:true});
+      const r=await db.recordAftercare(b.id,{comfort:b.comfort,issues:b.issues,note:b.note,source:'손님 앱',onlyPending:true});
       return send(res, r.ok?200:400, {ok:r.ok, error:r.error, comfort:r.comfort});
     }
     // ===== [09.24] A/S — 원인(검안·가공·피팅·추천)을 골라야 종결 =====
@@ -293,6 +299,13 @@ async function api(req, res, url){
       if(!cur) return send(res,404,{ok:false,error:'A/S 건이 없어요'});
       if(!scopeOK(cur.store)) return send(res,403,{ok:false,error:'다른 지점 건이에요'});
       const r=await db.closeAS(b.id, b.cause, b.action); return send(res, r.ok?200:400, r);
+    }
+    // ===== [09.24] 기준 보정 · 기준 관리 (본사) =====
+    if(req.method==='GET' && url.pathname==='/api/calibration'){ return send(res,200,Object.assign({ok:true}, await db.calibration())); }
+    if(req.method==='GET' && url.pathname==='/api/standards'){ return send(res,200,Object.assign({ok:true}, await db.listStandards())); }
+    if(req.method==='POST' && url.pathname==='/api/standards/deploy'){
+      if(U && U.role!=='hq') return send(res,403,{ok:false,error:'본사만 배포할 수 있어요'});
+      const b=await body(req); const r=await db.deployStandard(b.kind); return send(res, r.ok?200:400, r);
     }
     if(req.method==='GET' && url.pathname==='/api/care/summary'){
       return send(res,200,Object.assign({ok:true}, await db.careSummary(url.searchParams.get('store'))));
@@ -343,7 +356,7 @@ async function pageGate(req,res,p){
   const u=await db.userByToken(getCookie(req,'bv_token'));
   var need = HQ_PAGES.indexOf(page)>=0 ? 'hq' : 'any';
   if(u && (need==='any' || u.role==='hq')) return true;
-  if(u){ res.writeHead(403,{'content-type':TYPES['.html']}); res.end('본부 계정만 볼 수 있는 페이지예요. <a href="/index.html">처음으로</a>'); return false; }
+  if(u){ res.writeHead(403,{'content-type':TYPES['.html']}); res.end('본사 계정만 볼 수 있는 페이지예요. <a href="/index.html">처음으로</a>'); return false; }
   res.writeHead(302,{location:'/login.html?next='+encodeURIComponent(page.slice(1))}); res.end(); return false;
 }
 
