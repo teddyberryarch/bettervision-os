@@ -154,6 +154,13 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div id="feedBox" class="feedbox"></div>
   </div>
 
+  <!-- [09.24] 확인할 지표 (사업계획서 12.3) -->
+  <div class="card pad" style="margin-bottom:6px">
+    <div class="eyebrow">확인할 지표 <span class="label" style="font-weight:400">· 사업계획서 12.3. 1호점에서 잴 것들</span></div>
+    <div class="label" id="kpiBasis" style="font-size:13px;margin:6px 0 12px"></div>
+    <div id="kpiBox"><div class="muted" style="font-size:15px">불러오는 중</div></div>
+  </div>
+
   <!-- 지점별 관리 (서버 API — 지점이 판 게 본사에 실시간 반영) -->
   <div class="card pad" style="margin-bottom:6px">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
@@ -319,42 +326,26 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div id="hqOrders" style="margin-top:12px"></div>
   </div>
 
-  <!-- 신규 가맹 시뮬레이터 -->
+  <!-- 새 매장 수익 계산 (사업계획서 13.2 계산 구조) -->
   <div class="card pad" style="margin-bottom:6px">
     <div class="eyebrow">새 매장 수익 계산</div>
-    <div class="label" style="font-size:13px;margin:6px 0 12px">상권·평수 입력 → 예상 매출·회수 기간 계산. 추정치.</div>
-    <div class="frgrid">
-      <div><div class="label" style="margin-bottom:4px">상권 유형</div>
-        <select id="frTrade" class="hqsel" style="width:100%" onchange="frCalc()">
-          <option value="hot">핫플(홍대·성수)</option>
-          <option value="office">오피스 상권</option>
-          <option value="resi" selected>주거 상권</option>
-          <option value="road">로드샵</option>
-        </select></div>
-      <div><div class="label" style="margin-bottom:4px">입지 등급</div>
-        <select id="frLoc" class="hqsel" style="width:100%" onchange="frCalc()">
-          <option value="A">A급 (핵심 동선)</option>
-          <option value="B" selected>B급 (양호)</option>
-          <option value="C">C급 (이면)</option>
-        </select></div>
-      <div><div class="label" style="margin-bottom:4px">매장 평수: <b id="frAreaV">25</b>평</div>
-        <input type="range" id="frArea" min="10" max="60" value="25" oninput="frCalc()" style="width:100%"></div>
-    </div>
+    <div class="label" style="font-size:13px;margin:6px 0 12px">사업계획서 13.2 계산 구조. 기본값은 사업계획서의 가정이고 빈칸은 직접 넣음. 확정값은 1호점 실측 뒤.</div>
+    <div class="frgrid"><div><div class="label" style="margin-bottom:4px">월 매출 (원)</div><input id="frSales" class="hqsel" type="number" min="0" value="36670000" placeholder="입력" oninput="frCalc()" style="width:100%"><div class="label" style="font-size:13px;margin-top:2px">사업계획서 점당 연매출 4.4억 ÷ 12 (추정)</div></div><div><div class="label" style="margin-bottom:4px">매입 원가율 (%)</div><input id="frCost" class="hqsel" type="number" min="0" value="40" placeholder="입력" oninput="frCalc()" style="width:100%"><div class="label" style="font-size:13px;margin-top:2px">사업계획서 가정 약 40%</div></div><div><div class="label" style="margin-bottom:4px">본사 도매 마진 (%)</div><input id="frMargin" class="hqsel" type="number" min="0" value="15" placeholder="입력" oninput="frCalc()" style="width:100%"><div class="label" style="font-size:13px;margin-top:2px">사업계획서 가정 15~20%</div></div><div><div class="label" style="margin-bottom:4px">로열티 (% 매출)</div><input id="frRoy" class="hqsel" type="number" min="0" value="2" placeholder="입력" oninput="frCalc()" style="width:100%"><div class="label" style="font-size:13px;margin-top:2px">사업계획서 가정 1~3%</div></div><div><div class="label" style="margin-bottom:4px">구독료 (% 매출)</div><input id="frSub" class="hqsel" type="number" min="0" value="1" placeholder="입력" oninput="frCalc()" style="width:100%"><div class="label" style="font-size:13px;margin-top:2px">사업계획서 가정 약 1%</div></div><div><div class="label" style="margin-bottom:4px">임대료 (원/월)</div><input id="frRent" class="hqsel" type="number" min="0" value="" placeholder="입력" oninput="frCalc()" style="width:100%"><div class="label" style="font-size:13px;margin-top:2px">입지 정해지면 입력</div></div><div><div class="label" style="margin-bottom:4px">인건비 (원/월)</div><input id="frLabor" class="hqsel" type="number" min="0" value="" placeholder="입력" oninput="frCalc()" style="width:100%"><div class="label" style="font-size:13px;margin-top:2px">채용 조건 정해지면 입력</div></div><div><div class="label" style="margin-bottom:4px">기타 고정비 (원/월)</div><input id="frEtc" class="hqsel" type="number" min="0" value="" placeholder="입력" oninput="frCalc()" style="width:100%"><div class="label" style="font-size:13px;margin-top:2px">관리비·장비 리스 등</div></div><div><div class="label" style="margin-bottom:4px">개설 비용 (원)</div><input id="frOpen" class="hqsel" type="number" min="0" value="" placeholder="입력" oninput="frCalc()" style="width:100%"><div class="label" style="font-size:13px;margin-top:2px">보증금·인테리어·장비·초도 재고</div></div></div>
     <div class="dash-top" style="margin-top:16px">
-      <div class="dash-kpi"><div class="label">월 예상 소매 매출</div><div class="big kfig" id="frRetail">₩0</div><div class="label" id="frVisit" style="font-size:13px"></div></div>
-      <div class="dash-kpi pb"><div class="label">월 본사 마진 (공급+가맹비+구독)</div><div class="big kfig" id="frHQ">₩0</div><div class="label" style="font-size:13px">본사 관점 수익</div></div>
+      <div class="dash-kpi"><div class="label">매장 월 영업이익</div><div class="big kfig" id="frRetail">-</div><div class="label" id="frVisit" style="font-size:13px"></div></div>
+      <div class="dash-kpi pb"><div class="label">점당 월 본사 수익</div><div class="big kfig" id="frHQ">-</div><div class="label" style="font-size:13px">공급 마진 + 로열티 + 구독료</div></div>
     </div>
     <div class="hq-grid l" style="margin-top:16px">
-      <div><div class="eyebrow" style="margin-bottom:8px">가맹점 손익 (월)</div><div id="frStoreBox"></div></div>
+      <div><div class="eyebrow" style="margin-bottom:8px">매장 손익 (월)</div><div id="frStoreBox"></div></div>
       <div><div class="eyebrow" style="margin-bottom:8px">개설 비용과 회수 기간</div><div id="frInvBox"></div></div>
     </div>
   </div>
 
   <div class="kpis">
-    <div class="card pad kpi"><div class="label">이번 달 GMV</div><div class="big kfig">₩4.82<small>억</small></div><div class="delta up">▲ 12.4% 전월</div></div>
-    <div class="card pad kpi"><div class="label">활성 가맹점</div><div class="big kfig">14<small>개점</small></div><div class="delta up">▲ 2개점 신규</div></div>
-    <div class="card pad kpi weapon"><div class="label">누적 손님 데이터 ⬡</div><div class="big kfig">38,402<small>건</small></div><div class="delta" style="color:#a1a1aa">측정 12,910 · 처방 9,540</div></div>
-    <div class="card pad kpi"><div class="label">손님 1인 LTV (5년)</div><div class="big kfig">₩76<small>만</small></div><div class="delta up">통째 30만 + 재구매</div></div>
+    <div class="card pad kpi"><div class="label">이번 달 매출 (전 매장)</div><div class="big kfig" id="kMonth">-</div><div class="delta" id="kMonthSub"></div></div>
+    <div class="card pad kpi"><div class="label">연결된 매장</div><div class="big kfig" id="kStores">-</div><div class="delta">예시 매장 · 실제 가맹은 1호점 이후</div></div>
+    <div class="card pad kpi weapon"><div class="label">손님 기록 ⬡</div><div class="big kfig" id="kData">-</div><div class="delta" id="kDataSub" style="color:#a1a1aa"></div></div>
+    <div class="card pad kpi"><div class="label">7일째 확인 완료율</div><div class="big kfig" id="kCare">-</div><div class="delta" id="kCareSub"></div></div>
   </div>
   <!-- 실시간 가맹점 현황 + 드릴다운 -->
   <div class="card pad" style="margin-top:18px">
@@ -363,7 +354,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="label">행을 누르면 매장 상세(매출·재고)로 드릴다운</div>
     </div>
     <table class="tbl" id="liveTable" style="margin-top:12px">
-      <thead><tr><th>가맹점</th><th>상태</th><th>오늘 매출</th><th>방문 / 대기</th><th>재고 경고</th><th>발주</th><th>알림</th></tr></thead>
+      <thead><tr><th>매장</th><th>오늘 매출</th><th>오늘 판매 건</th><th>재고 경고</th><th>발주 진행</th><th>7일째 불편</th><th>알림</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
@@ -377,12 +368,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     </div>
     <div class="card pad">
       <div class="eyebrow">실시간 알림 (전 매장)</div>
-      <div class="stockrow"><span style="color:var(--warn)">● 성수점 · 알도 R 렌즈 재고 2개 남음</span><span class="muted">방금</span></div>
-      <div class="stockrow"><span style="color:var(--warn)">● 강남점 · 대기 3명, 직원 부족</span><span class="muted">3분 전</span></div>
-      <div class="stockrow"><span style="color:var(--bad)">● 부산서면 · 재고 부족 3품목, 발주 필요</span><span class="muted">8분 전</span></div>
-      <div class="stockrow"><span style="color:var(--good)">● 홍대점 · 목표 매출 102% 달성</span><span class="muted">12분 전</span></div>
-      <div class="stockrow" style="border-bottom:0"><span class="muted">● 판교점 · 누진렌즈 검수 중</span><span class="muted">21분 전</span></div>
-      <div class="note" style="margin-top:14px"><b>관제.</b> 매장별 매출, 방문, 대기, 재고. 문제 매장은 본사가 먼저 연락.</div>
+      <div id="alertBox"><div class="muted" style="font-size:15px">불러오는 중</div></div>
+      <div class="note" style="margin-top:14px"><b>관제.</b> 이상 탐지에서 조사·경고 건만 모음. 문제 매장은 본사가 먼저 연락.</div>
     </div>
   </div>
 
@@ -412,14 +399,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <div class="switch" onclick="ntSwitch(this,'진열',&quot;이번 주 권장 진열 'F2 가을 컬러'&quot;)"></div>
         </div>
         <div style="padding:9px 0">
-          <div style="font-size:16px;margin-bottom:6px">매장 운영 점수</div>
-          <div class="qc-row"><span class="label">성수점</span><div class="qc-track"><div class="qc-fill" style="width:94%;background:var(--good)"></div></div><span class="muted" style="text-align:right">94</span></div>
-          <div class="qc-row"><span class="label">홍대점</span><div class="qc-track"><div class="qc-fill" style="width:88%;background:var(--good)"></div></div><span class="muted" style="text-align:right">88</span></div>
-          <div class="qc-row"><span class="label">강남점</span><div class="qc-track"><div class="qc-fill" style="width:82%;background:var(--accent)"></div></div><span class="muted" style="text-align:right">82</span></div>
-          <div class="qc-row"><span class="label">판교점</span><div class="qc-track"><div class="qc-fill" style="width:79%;background:var(--warn)"></div></div><span class="muted" style="text-align:right">79</span></div>
-          <div class="qc-row"><span class="label">부산서면</span><div class="qc-track"><div class="qc-fill" style="width:71%;background:var(--warn)"></div></div><span class="muted" style="text-align:right">71</span></div>
+          <div style="font-size:16px;margin-bottom:6px">매장 운영 지표 <span class="label">· 7일째 확인에서 편하다고 답한 비율</span></div>
+          <div id="opsBox"><div class="muted" style="font-size:15px">불러오는 중</div></div>
         </div>
-        <div class="note" style="font-size:15px"><b>연결.</b> 점수가 낮은 매장에 본사 피팅 교육 지원.</div>
+        <div class="note" style="font-size:15px"><b>연결.</b> 편함 비율이 낮거나 기준 미달 건넴이 많은 매장에 본사 피팅 교육 지원.</div>
       </div>
     </div>
     <div class="note" style="margin-top:4px"><b>역할.</b> 가격·발주의 최종 결정은 매장.</div>
@@ -431,15 +414,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="eyebrow">부품 공급 (프론트, 템플, 렌즈)</div>
       <div class="label" style="margin-bottom:6px">완성품이 아니라 부품 단위로 소싱·관리. "Designed &amp; Assembled in Korea".</div>
       <table class="tbl">
-        <thead><tr><th>부품</th><th>공급사 / 허브</th><th>리드타임</th><th>발주 잔량</th><th>전국 재고</th><th>상태</th></tr></thead>
-        <tbody>
-          <tr style="cursor:default"><td>프론트 (아세테이트)</td><td>대구 · 원저우</td><td>21일</td><td>1,200</td><td>3,400</td><td><span class="pill good">적정</span></td></tr>
-          <tr style="cursor:default"><td>템플 (메탈)</td><td>선전</td><td>18일</td><td>800</td><td>1,100</td><td><span class="pill warn">주의</span></td></tr>
-          <!-- [09.24 숨김] 오디오 템플 행 (방향결정 §0·§11) <tr style="cursor:default"><td>오디오 템플 (ZhuoHao)</td><td>선전</td><td>30일</td><td>500</td><td>300</td><td><span class="pill bad">부족</span></td></tr> -->
-          <tr style="cursor:default"><td>렌즈 (알도 R)</td><td>본사 공급</td><td>7일</td><td>5,000</td><td>12,000</td><td><span class="pill good">적정</span></td></tr>
-        </tbody>
+        <thead><tr><th>부품</th><th>공급사 / 허브</th><th>리드타임</th><th>생산 대기</th><th>전국 재고</th><th>상태</th></tr></thead>
+        <tbody id="partsBody"></tbody>
       </table>
-      <div class="note" style="font-size:15px"><b>관리.</b> 프론트와 템플은 입고 기간이 달라 따로 관리.</div>
+      <div class="note" style="font-size:15px"><b>관리.</b> 프론트와 템플은 입고 기간이 달라 따로 관리. 공급사·리드타임은 계약 뒤 입력.</div>
     </div>
     <div class="card pad">
       <div class="eyebrow">생산 발주 수량</div>
@@ -477,24 +455,14 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- 전 매장 그리드 + 이상 탐지 -->
   <div class="card pad" style="margin-top:18px">
     <div class="eyebrow">매장별 현황</div>
-    <div class="sgrid">
-      <div class="scard"><div class="sn">성수점 <span class="pill good">정상</span></div><div class="sm"><span class="label">오늘 매출</span><span class="mv">₩412만</span></div><div class="sm"><span class="label">QC</span><span class="mv">94</span></div><div class="sm"><span class="label">재고 경고</span><span class="mv">2품목</span></div><div class="sm"><span class="label">알림</span><span class="mv">F2 렌즈 임박</span></div></div>
-      <div class="scard"><div class="sn">홍대점 <span class="pill good">정상</span></div><div class="sm"><span class="label">오늘 매출</span><span class="mv">₩388만</span></div><div class="sm"><span class="label">QC</span><span class="mv">88</span></div><div class="sm"><span class="label">재고 경고</span><span class="mv">0</span></div><div class="sm"><span class="label">알림</span><span class="mv">목표 102%</span></div></div>
-      <div class="scard flag"><div class="sn">판교점 <span class="pill warn">주의</span></div><div class="sm"><span class="label">오늘 매출</span><span class="mv">₩256만</span></div><div class="sm"><span class="label">QC</span><span class="mv supplywarn">79 ▼</span></div><div class="sm"><span class="label">재고 경고</span><span class="mv">1품목</span></div><div class="sm"><span class="label">알림</span><span class="mv">플래노그램 미인증</span></div></div>
-      <div class="scard flag"><div class="sn">강남점 <span class="pill bad">위반</span></div><div class="sm"><span class="label">오늘 매출</span><span class="mv">₩301만</span></div><div class="sm"><span class="label">QC</span><span class="mv">82</span></div><div class="sm"><span class="label">재고 경고</span><span class="mv">0</span></div><div class="sm"><span class="label">알림</span><span class="mv supplybad">임의 할인 시도</span></div></div>
-      <div class="scard flag"><div class="sn">부산서면 <span class="pill bad">위반</span></div><div class="sm"><span class="label">오늘 매출</span><span class="mv">₩188만</span></div><div class="sm"><span class="label">QC</span><span class="mv">71</span></div><div class="sm"><span class="label">재고 경고</span><span class="mv">3품목</span></div><div class="sm"><span class="label">알림</span><span class="mv supplybad">미경유 거래 의심</span></div></div>
-      <div class="scard"><div class="sn">예비 슬롯 <span class="pill">출점 대기</span></div><div class="sm"><span class="label">상태</span><span class="mv">계약 진행</span></div><div class="sm"><span class="label">입지</span><span class="mv">성수 2호</span></div><div class="sm"><span class="label">오픈</span><span class="mv">D-40</span></div><div class="sm"><span class="label">유형</span><span class="mv">신규 가맹</span></div></div>
-    </div>
+    <div class="sgrid" id="sgrid"></div>
   </div>
 
   <div class="hq-grid l" style="margin-top:18px">
     <div class="card pad">
-      <div class="eyebrow">이상 탐지 (자동)</div>
-      <div class="flagrow"><span class="supplybad">● 강남점 · 권장 범위 밖 판매 5건 (참고)</span><span class="pill">참고</span></div>
-      <div class="flagrow"><span class="supplybad">● 부산서면 · 판매 기록과 본사 출고 기록 불일치</span><span class="pill warn">조사</span></div>
-      <div class="flagrow"><span class="supplywarn">● 판교점 · 운영 점수 94 → 79 하락</span><span class="pill warn">경고</span></div>
-      <div class="flagrow"><span class="muted">● 본사 공급 품목 기준 재고 대조 작동 중</span><span class="pill good">정상</span></div>
-      <div class="note" style="margin-top:14px"><b>목적.</b> 운영 점수·공급 기록 이상 시 매장과 함께 확인. 권장 범위 밖 판매는 참고용.</div>
+      <div class="eyebrow">이상 탐지 (자동) <span class="label" id="flagRule"></span></div>
+      <div id="flagBox"><div class="muted" style="font-size:15px">불러오는 중</div></div>
+      <div class="note" style="margin-top:14px"><b>목적.</b> 판매와 본사 입고가 안 맞거나 7일째 불편이 쌓이면 매장과 함께 확인. 권장 범위 밖 견적은 참고용.</div>
     </div>
     <div class="card pad">
       <div class="eyebrow">본사 조치 (원클릭)</div>
@@ -513,10 +481,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div class="card pad">
       <div style="display:flex;justify-content:space-between;align-items:baseline">
         <div class="eyebrow">월별 전체 매출</div>
-        <div class="label">최근 8개월 · 단위 억원</div>
+        <div class="label">최근 8개월 · 단위 만원</div>
       </div>
       <div class="trend" id="trend"></div>
-      <div class="note"><b>등락 읽기.</b> 1~2월 감소 후 3월부터 5개월 연속 증가.</div>
+      <div class="note" id="trendNote"></div>
     </div>
     <div class="card pad">
       <div class="eyebrow">본사 수익</div>
@@ -534,8 +502,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- 프론트×템플 매트릭스 + 사용자 데이터 -->
   <div class="hq-grid">
     <div class="card pad">
-      <div class="eyebrow">프론트 × 템플 수요 매트릭스 (전국)</div>
-      <div class="label" style="margin-bottom:12px">칸은 프론트와 템플 조합별 수요, 가장자리 %는 프론트·템플 각각의 생산 비중.</div>
+      <div class="eyebrow">프론트 × 템플 수요 매트릭스</div>
+      <div class="label" style="margin-bottom:12px">손님 기록의 사이즈(F×T) 수로 시작. 칸을 고치면 생산 비중이 다시 계산됨. 가장자리 %는 프론트·템플 각각의 생산 비중.</div>
       <div id="ftMatrix"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap">
         <span class="label">월 총 생산량</span>
@@ -545,12 +513,9 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="note" id="prodOut"></div>
     </div>
     <div class="card pad">
-      <div class="eyebrow">사용자 데이터 (전국 손님)</div>
-      <div class="label" style="margin-bottom:6px">연령대 분포</div>
-      <div id="ageBars"></div>
-      <div class="label" style="margin:14px 0 2px">성별</div>
-      <div class="gender"><div class="gm" style="width:54%">남 54%</div><div class="gf" style="width:46%">여 46%</div></div>
-      <div class="note" style="margin-top:14px"><b>활용.</b> 30~40대 남성 손님의 재방문 비율이 가장 높음.</div>
+      <div class="eyebrow">손님 기록 (전 매장)</div>
+      <div id="custData"><div class="muted" style="font-size:15px">불러오는 중</div></div>
+      <div class="note" style="margin-top:14px"><b>수집 범위.</b> 연령·성별은 받지 않음. 받을지는 개인정보 검토 뒤 결정.</div>
     </div>
   </div>
 
@@ -561,10 +526,10 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <table class="tbl">
       <thead><tr><th>브랜드 / 라인</th><th>포지션</th><th>매장 공급가</th><th>권장 소비자가</th><th>공급 경로</th></tr></thead>
       <tbody>
-        <tr style="cursor:default"><td>BETTERVISION 로마 클래식 (PB)</td><td>자체 PB</td><td>60,000</td><td>189,000</td><td><span class="pill good">본사 공급</span></td></tr>
-        <tr style="cursor:default"><td>BETTERVISION 로마 슬림 (PB)</td><td>자체 PB</td><td>60,000</td><td>189,000</td><td><span class="pill good">본사 공급</span></td></tr>
-        <tr style="cursor:default"><td>수입 브랜드 A 라인 (예시)</td><td>수입 (PB보다 고가)</td><td>290,000</td><td>470,000</td><td><span class="pill good">본사 공급</span></td></tr>
-        <tr style="cursor:default"><td>명품 C 라인 (수입)</td><td>명품</td><td>340,000</td><td>590,000</td><td><span class="pill good">본사 공급</span></td></tr>
+        <tr style="cursor:default"><td>BETTERVISION 로마 클래식 (PB)</td><td>자체 PB</td><td>확정 전</td><td>189,000</td><td><span class="pill good">본사 공급</span></td></tr>
+        <tr style="cursor:default"><td>BETTERVISION 로마 슬림 (PB)</td><td>자체 PB</td><td>확정 전</td><td>189,000</td><td><span class="pill good">본사 공급</span></td></tr>
+        <tr style="cursor:default"><td>수입 브랜드 A 라인 (예시)</td><td>수입 (PB보다 고가)</td><td>확정 전</td><td>470,000</td><td><span class="pill good">본사 공급</span></td></tr>
+        <tr style="cursor:default"><td>명품 C 라인 (수입)</td><td>명품</td><td>확정 전</td><td>590,000</td><td><span class="pill good">본사 공급</span></td></tr>
         <tr style="cursor:default"><td>(예) 본사 미경유 입고</td><td>-</td><td>-</td><td>-</td><td><span class="pill warn">재고 대조 안내</span></td></tr>
       </tbody>
     </table>
@@ -590,7 +555,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 </div>
 
 <div class="foot">
-  <span>BETTERVISION OS · 본사 · 더미 데이터</span>
+  <span>BETTERVISION OS · 본사</span>
   <span><a href="index.html">← 홈</a></span>
 </div>
 
@@ -600,22 +565,15 @@ window.__bvGuide={title:'본사 가이드',sub:'전 매장을 한 화면에서.'
 {sel:'#pbHQ',t:'공급 마진',d:'테·렌즈·콘택트렌즈 공급으로 남는 본사 몫.'},
 {sel:'#belongSel',t:'손님 기록',d:'이사·매장 변경에도 측정·처방·구매 기록은 본사에 보존.'},
 {sel:'#logiBox',t:'본사 출고',d:'전 매장 발주를 품목별로 묶어 출고.'},
-{sel:'#frRetail',t:'새 매장 수익 계산',d:'상권·평수 입력 → 매출·회수 기간 계산.'}
+{sel:'#frRetail',t:'새 매장 수익 계산',d:'매출·원가·고정비를 넣으면 영업이익과 회수 기간 계산.'}
 ]};
 </script>
 <script src="/assets/app.js"></script>
 <script>
-const stores=[['성수점',92,'4.8천'],['홍대점',78,'4.1천'],['판교점',64,'3.4천'],['강남점',58,'3.0천'],['부산서면',44,'2.3천']];
-document.getElementById('hqBars').innerHTML=stores.map((s,i)=>`<div class="bar-row"><span>${s[0]}</span><div class="bar-track"><div class="bar-fill ${i===0?'ink':''}" style="width:${s[1]}%"></div></div><span class="muted" style="text-align:right">₩${s[2]}만</span></div>`).join('');
-const sales=[['25.11',3.8],['25.12',4.1],['26.01',3.6],['26.02',3.3],['26.03',3.9],['26.04',4.3],['26.05',4.6],['26.06',4.82]];
-const smax=Math.max(...sales.map(s=>s[1]));
-document.getElementById('trend').innerHTML=sales.map((s,i)=>{
-  let d='';if(i>0){const ch=((s[1]-sales[i-1][1])/sales[i-1][1]*100);d=`<div class="tdelta ${ch>=0?'up':'down'}">${ch>=0?'▲':'▼'}${Math.abs(ch).toFixed(0)}%</div>`;}
-  return `<div class="tcol"><div class="tbar ${i===sales.length-1?'now':''}" style="height:${(s[1]/smax*100).toFixed(0)}%"></div><div class="tcap">${s[0]}</div>${d}</div>`;}).join('');
 
 /* front × temple matrix (편집형) */
 var MX_COLS=['T1','T2','T3'], MX_ROWS=['F1','F2','F3'];
-var MX=[[14,22,8],[30,62,26],[12,28,16]];
+var MX=[[0,0,0],[0,0,0],[0,0,0]];
 function mxRender(){
   var gt='grid-template-columns:38px repeat(3,1fr) 60px';
   var mp='display:flex;align-items:center;justify-content:center;height:46px;border-radius:8px;font-size:14px;font-weight:600;color:#111111;background:#f5f5f5';
@@ -646,46 +604,7 @@ function mxRecalc(){
   if(out) out.innerHTML='<b>생산 예측.</b> 총 '+totalQ.toLocaleString('ko-KR')+'개 기준 · 프론트 '+fLines+' / 템플: '+tLines+'. 셀 수요 변경 시 비중·생산량 자동 갱신.';
 }
 mxRender();
-/* demographics */
-const ages=[['10대',4],['20대',26],['30대',31],['40대',22],['50대',12],['60+',5]];
-document.getElementById('ageBars').innerHTML=ages.map(a=>`<div class="demo-row"><span class="label">${a[0]}</span><div class="demo-track"><div class="demo-fill" style="width:${(a[1]/31*100).toFixed(0)}%"></div></div><span class="muted" style="text-align:right">${a[1]}%</span></div>`).join('');
-const live=[
-  {n:'성수점',st:'영업중',sales:412,visit:38,wait:2,warn:2,order:'대기 1',alert:'F2 렌즈 임박',avg:'10.8만',staff:'안경사 1 · 일반인 3',
-   hours:[20,35,52,66,80,72,90,60],top:[['알도 R 렌즈','22건'],['로마 클래식 ACE-02','18건'],['로마 슬림','6건']],
-   stock:[['F2 알도 R 렌즈','재고 2 · 임박','warn'],['로마 클래식 ACE-02','재고 2 · 임박','warn'],['로마 슬림','재고 5 · 적정','ok'],['수입 브랜드 A','재고 7 · 적정','ok']]},
-  {n:'홍대점',st:'영업중',sales:388,visit:31,wait:1,warn:0,order:'-',alert:'목표 102%',avg:'12.5만',staff:'안경사 1 · 일반인 2',
-   hours:[18,30,44,58,70,66,78,52],top:[['로마 슬림','14건'],['로마 클래식','11건'],['선글라스','9건']],
-   stock:[['로마 슬림','재고 12 · 적정','ok'],['로마 클래식','재고 9 · 적정','ok'],['알도 R 렌즈','재고 20 · 적정','ok']]},
-  {n:'판교점',st:'영업중',sales:256,visit:19,wait:0,warn:1,order:'검수 중',alert:'누진렌즈 검수',avg:'13.5만',staff:'안경사 1 · 일반인 2',
-   hours:[12,20,30,38,44,40,48,30],top:[['수입 브랜드 A','7건'],['누진 렌즈','9건'],['로마 클래식','6건']],
-   stock:[['누진 렌즈','재고 3 · 부족','warn'],['수입 브랜드 A','재고 5 · 적정','ok'],['로마 클래식','재고 14 · 적정','ok']]},
-  {n:'강남점',st:'영업중',sales:301,visit:24,wait:3,warn:0,order:'-',alert:'대기 3 · 인력',avg:'12.5만',staff:'안경사 1 · 일반인 1',
-   hours:[14,26,38,50,58,54,62,40],top:[['명품 C 라인','5건'],['로마 클래식','10건'],['알도 R 렌즈','12건']],
-   stock:[['명품 C 라인','재고 4 · 적정','ok'],['로마 클래식','재고 11 · 적정','ok'],['알도 R 렌즈','재고 16 · 적정','ok']]},
-  {n:'부산서면',st:'영업중',sales:188,visit:12,wait:0,warn:3,order:'발주 대기',alert:'재고 3품목 부족',avg:'15.7만',staff:'안경사 1 · 일반인 1',
-   hours:[8,14,22,28,34,30,38,24],top:[['로마 클래식','6건'],['알도 R 렌즈','7건'],['선글라스','3건']],
-   stock:[['로마 클래식 ACE-02','재고 1 · 부족','warn'],['알도 R 렌즈','재고 2 · 부족','warn'],['로마 슬림','재고 0 · 품절','bad'],['선글라스','재고 6 · 적정','ok']]}];
-const ltb=document.querySelector('#liveTable tbody');
-live.forEach((s,i)=>{const tr=document.createElement('tr');if(i===0)tr.classList.add('sel');
-  const warnCell=s.warn>0?`<span class="pill warn">${s.warn}품목</span>`:`<span class="muted">0</span>`;
-  tr.innerHTML=`<td>${s.n}</td><td><span class="statuson">${s.st}</span></td><td>₩${s.sales}만</td><td class="muted">${s.visit} / ${s.wait}</td><td>${warnCell}</td><td class="muted">${s.order}</td><td class="muted">${s.alert||'–'}</td>`;
-  tr.onclick=()=>{document.querySelectorAll('#liveTable tr').forEach(r=>r.classList.remove('sel'));tr.classList.add('sel');storeDetail(i);};
-  ltb.appendChild(tr);});
-function storeDetail(i){const s=live[i];const hmax=Math.max(...s.hours);
-  const hrs=['10','11','12','13','14','15','16','17'];
-  document.getElementById('storeDetail').innerHTML=`
-   <div class="sd-head"><div><div class="eyebrow" style="margin:0">매장 상세</div><div class="nm" style="font-family:var(--serif);font-size:26px">${s.n}</div><div class="statuson">${s.st} · ${s.staff}</div></div>
-     <button class="btn small" onclick="lowPush('${s.n}')">발주 푸시</button></div>
-   <div class="sd-kpis"><div class="k"><div class="l">오늘 매출</div><div class="v">₩${s.sales}만</div></div><div class="k"><div class="l">방문 / 대기</div><div class="v">${s.visit} / ${s.wait}</div></div><div class="k"><div class="l">객단가</div><div class="v">${s.avg}</div></div></div>
-   <div class="label">시간대별 매출 (10–17시)</div>
-   <div class="hours">${s.hours.map((h,j)=>`<div class="hbar ${h===hmax?'now':''}" style="height:${(h/hmax*100).toFixed(0)}%"></div>`).join('')}</div>
-   <div class="hlab">${hrs.map(x=>`<span>${x}</span>`).join('')}</div>
-   <div class="divider"></div>
-   <div class="label" style="margin-bottom:2px">오늘 판매 상위 품목</div>
-   ${s.top.map(t=>`<div class="itemrow"><span>${t[0]}</span><span class="muted">${t[1]}</span></div>`).join('')}
-   <div class="label" style="margin:12px 0 2px">재고 상세</div>
-   ${s.stock.map(k=>`<div class="stockrow"><span>${k[0]}</span><span class="pill ${k[2]==='ok'?'good':k[2]==='bad'?'bad':'warn'}">${k[1]}</span></div>`).join('')}`;}
-storeDetail(0);
+/* 실시간 매장 현황: /api/hq/board 에서 그림 (아래 boardLoad) */
 
 /* ===== 전 매장 예약 현황 (오늘, 서버 API) ===== */
 (function(){
@@ -827,47 +746,29 @@ function pbLoad(){
   });
 }
 
-/* ===== 신규 가맹 시뮬레이터 (데모 추정) ===== */
+/* ===== 새 매장 수익 계산 (사업계획서 13.2) ===== */
 (function(){ if(document.getElementById('frRetail')) frCalc(); })();
-function frwon(n){return '₩'+Math.round(n).toLocaleString('ko-KR');}
-function frman(n){return '₩'+Math.round(n/10000).toLocaleString('ko-KR')+'만';}
+function frman(n){return (n<0?'-':'')+'₩'+Math.round(Math.abs(n)/10000).toLocaleString('ko-KR')+'만';}
+function frv(id){ var e=document.getElementById(id); return e&&e.value!==''?+e.value:null; }
 function frCalc(){
   if(!document.getElementById('frRetail'))return;
-  var trade=document.getElementById('frTrade').value, loc=document.getElementById('frLoc').value, area=+document.getElementById('frArea').value;
-  document.getElementById('frAreaV').textContent=area;
-  var baseV={hot:70,office:45,resi:35,road:50}[trade];
-  var aov={hot:220000,office:260000,resi:285000,road:240000}[trade];
-  var locS={A:1.3,B:1.0,C:0.72}[loc];
-  var conv=0.18;
-  var dailyVisit=Math.round(baseV*locS*(0.85+area/100));
-  var monthRetail=dailyVisit*30*conv*aov;
-  // 본사 마진: 공급마진(소매의 약 27%) + 가맹비(월 환산 100만) + CRM 구독(월 30만)
-  var hqSupply=monthRetail*0.27, hqFee=1000000, hqSub=300000;
-  var hqTotal=hqSupply+hqFee+hqSub;
-  // 가맹점 손익
-  var rent=area*180000, labor=4000000, etc=monthRetail*0.06;
-  var grossStore=monthRetail*0.45; // 매출총이익(소매-공급원가)
-  var storeProfit=grossStore-rent-labor-etc-hqSub;
-  // 초기 투자
-  var franchiseFee=30000000, interior=area*1100000, deposit=area*600000, stock=15000000;
-  var invest=franchiseFee+interior+deposit+stock;
-  var payback= storeProfit>0? invest/storeProfit : null;
-
-  document.getElementById('frRetail').textContent=frman(monthRetail);
-  document.getElementById('frVisit').textContent='일 방문 '+dailyVisit+'명 · 전환 '+Math.round(conv*100)+'% · 객단가 '+frman(aov);
-  document.getElementById('frHQ').textContent=frman(hqTotal);
+  var sales=frv('frSales')||0, cost=sales*(frv('frCost')||0)/100, roy=sales*(frv('frRoy')||0)/100, sub=sales*(frv('frSub')||0)/100;
+  var supply=cost*(frv('frMargin')||0)/100, rent=frv('frRent'), labor=frv('frLabor'), etc=frv('frEtc')||0, open=frv('frOpen');
+  var fixedKnown=rent!=null&&labor!=null, op=fixedKnown? sales-cost-rent-labor-etc-roy-sub : null;
+  document.getElementById('frHQ').textContent=frman(supply+roy+sub);
+  document.getElementById('frRetail').textContent=op==null?'-':frman(op);
+  document.getElementById('frVisit').textContent=op==null?'임대료·인건비를 넣으면 계산':'월 매출 − 매입 원가 − 고정비 − 본사 지급';
   document.getElementById('frStoreBox').innerHTML=
-    '<div class="frrow"><span>매출총이익</span><b>'+frman(grossStore)+'</b></div>'+
-    '<div class="frrow"><span>임대료(추정)</span><b>-'+frman(rent)+'</b></div>'+
-    '<div class="frrow"><span>인건비</span><b>-'+frman(labor)+'</b></div>'+
-    '<div class="frrow"><span>CRM 구독·기타</span><b>-'+frman(hqSub+etc)+'</b></div>'+
-    '<div class="frrow tot"><span>월 영업이익</span><b>'+frman(storeProfit)+'</b></div>';
+    '<div class="frrow"><span>월 매출</span><b>'+frman(sales)+'</b></div>'+
+    '<div class="frrow"><span>매입 원가</span><b>-'+frman(cost)+'</b></div>'+
+    '<div class="frrow"><span>임대료 · 인건비 · 기타</span><b>'+(fixedKnown?'-'+frman(rent+labor+etc):'입력 필요')+'</b></div>'+
+    '<div class="frrow"><span>본사 지급 (로열티 + 구독료)</span><b>-'+frman(roy+sub)+'</b></div>'+
+    '<div class="frrow tot"><span>월 영업이익</span><b>'+(op==null?'-':frman(op))+'</b></div>';
+  var pay=(op!=null&&op>0&&open)? open/op : null;
   document.getElementById('frInvBox').innerHTML=
-    '<div class="frrow"><span>가맹비</span><b>'+frman(franchiseFee)+'</b></div>'+
-    '<div class="frrow"><span>인테리어('+area+'평)</span><b>'+frman(interior)+'</b></div>'+
-    '<div class="frrow"><span>보증금</span><b>'+frman(deposit)+'</b></div>'+
-    '<div class="frrow"><span>초도 재고</span><b>'+frman(stock)+'</b></div>'+
-    '<div class="frrow tot"><span>총 투자 / 회수</span><b>'+frman(invest)+' · '+(payback?(payback.toFixed(1)+'개월'):'적자')+'</b></div>';
+    '<div class="frrow"><span>개설 비용</span><b>'+(open?frman(open):'입력 필요')+'</b></div>'+
+    '<div class="frrow"><span>본사 공급 마진 (매입 원가 × 도매 마진)</span><b>'+frman(supply)+'</b></div>'+
+    '<div class="frrow tot"><span>투자 회수 기간</span><b>'+(pay?pay.toFixed(1)+'개월':(op!=null&&op<=0?'적자':'-'))+'</b></div>';
 }
 
 /* ===== 손님 데이터 귀속 ===== */
@@ -1135,7 +1036,7 @@ function flagSend(btn){
     .then(function(rs){ var n=rs.filter(function(j){return j.ok;}).length; var t=n+'건 확인 요청을 매장 오늘 할 일에 올림'; document.getElementById('flagMsg').textContent=t; toast(t); });
 }
 var PP=null;
-function ppLoad(){ fetch('/api/production/plan').then(function(r){return r.json();}).then(function(j){ PP=j; var b=document.getElementById('ppBox'); if(!b) return;
+function ppLoad(){ fetch('/api/production/plan').then(function(r){return r.json();}).then(function(j){ PP=j; partsRender(); var b=document.getElementById('ppBox'); if(!b) return;
   b.innerHTML = (j.lines||[]).length ? j.lines.map(function(l){return '<div class="asm"><span>'+l.name+'</span><span><b>'+l.qty+'</b> ea</span></div>';}).join('')+'<div class="asm"><span>합계</span><span><b>'+j.total+'</b> ea</span></div>'
     : '<div class="muted" style="font-size:15px">본사 조제 대기 건 없음</div>'; }).catch(function(){}); }
 function ppPrint(){ if(!PP){ toast('불러오는 중'); return; }
@@ -1154,6 +1055,75 @@ function lowPush(store){
       .then(function(){ toast(store+' '+it.length+'종 발주 제안 발송. 매장 승인 대기'); if(window.hqOrdLoad)window.hqOrdLoad(); });
   }).catch(function(){ toast('불러오기 실패'); });
 }
+
+/* ===== [09.24] 본사 현황판 (사업계획서 5.6 전 매장 현황, R8 공급 대조) ===== */
+var BOARD=null;
+function bwon(n){ return '₩'+Math.round((n||0)/10000).toLocaleString('ko-KR')+'만'; }
+function hesc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function boardLoad(){ fetch('/api/hq/board').then(function(r){return r.json();}).then(function(b){ if(!b.ok) return; BOARD=b; boardRender(); }).catch(function(){}); }
+function boardRender(){
+  var b=BOARD, T=b.totals, el=function(id){return document.getElementById(id);};
+  if(el('kMonth')){ el('kMonth').textContent=bwon(T.month); el('kMonthSub').textContent=b.date.slice(0,7)+' · '+T.stores+'개 매장 합계';
+    el('kStores').innerHTML=T.stores+'<small>곳</small>'; el('kData').innerHTML=(T.customers+T.measurements+T.exams).toLocaleString('ko-KR')+'<small>건</small>';
+    el('kDataSub').textContent='손님 '+T.customers+' · 측정 '+T.measurements+' · 처방 '+T.exams;
+    el('kCare').textContent=T.careDue?Math.round(T.careDone/T.careDue*100)+'%':'-'; el('kCareSub').textContent='완료 '+T.careDone+' / 대상 '+T.careDue; }
+  var flagCls={bad:'supplybad',warn:'supplywarn',info:'muted'}, pillCls={bad:'warn',warn:'warn',info:''};
+  if(el('flagRule')) el('flagRule').textContent='· 재고 '+b.rule.lowStock+'개 이하 표시 (시작값)';
+  if(el('flagBox')) el('flagBox').innerHTML=b.flags.length?b.flags.map(function(f){return '<div class="flagrow"><span class="'+flagCls[f.lv]+'">● '+hesc(f.store)+' · '+hesc(f.text)+'</span><span class="pill '+pillCls[f.lv]+'">'+f.tag+'</span></div>';}).join('')
+    :'<div class="flagrow"><span class="muted">● 이상 없음</span><span class="pill good">정상</span></div>';
+  var alerts=b.flags.filter(function(f){return f.lv!=='info';});
+  if(el('alertBox')) el('alertBox').innerHTML=alerts.length?alerts.map(function(f){return '<div class="stockrow"><span style="color:var(--'+(f.lv==='bad'?'bad':'warn')+')">● '+hesc(f.store)+' · '+hesc(f.text)+'</span><span class="muted">'+f.tag+'</span></div>';}).join(''):'<div class="stockrow"><span class="muted">● 조사·경고 건 없음</span></div>';
+  if(el('sgrid')) el('sgrid').innerHTML=b.stores.map(function(s){ var bad=s.negStock.length, warn=s.care.uncomf||s.care.overdue;
+    return '<div class="scard'+(bad||warn?' flag':'')+'"><div class="sn">'+hesc(s.store)+' <span class="pill '+(bad?'bad':(warn?'warn':'good'))+'">'+(bad?'조사':(warn?'주의':'정상'))+'</span></div>'+
+      '<div class="sm"><span class="label">오늘 매출</span><span class="mv">'+bwon(s.today)+'</span></div>'+
+      '<div class="sm"><span class="label">이번 달</span><span class="mv">'+bwon(s.month)+'</span></div>'+
+      '<div class="sm"><span class="label">재고 경고</span><span class="mv">'+s.lowStock.length+'품목</span></div>'+
+      '<div class="sm"><span class="label">7일째 불편</span><span class="mv">'+s.care.uncomf+'건</span></div></div>'; }).join('');
+  if(el('opsBox')) el('opsBox').innerHTML=b.stores.map(function(s){ var d=s.care.done, ok=d-s.care.uncomf, p=d?Math.round(ok/d*100):null;
+    return '<div class="qc-row"><span class="label">'+hesc(s.store)+'</span><div class="qc-track"><div class="qc-fill" style="width:'+(p||0)+'%;background:var(--'+(p==null?'line':(p>=80?'good':'warn'))+')"></div></div><span class="muted" style="text-align:right">'+(p==null?'-':p+'%')+'</span></div>'+
+      '<div class="label" style="font-size:13px;margin:-2px 0 6px">완료 '+d+'건 · 기준 미달 건넴 '+s.fitBelow+'건 · 열린 A/S '+s.asOpen+'건</div>'; }).join('');
+  var tb=document.querySelector('#liveTable tbody');
+  if(tb){ tb.innerHTML=''; b.stores.forEach(function(s,i){ var tr=document.createElement('tr'); if(i===0) tr.classList.add('sel');
+    var f=b.flags.filter(function(x){return x.store===s.store&&x.lv!=='info';})[0];
+    tr.innerHTML='<td>'+hesc(s.store)+'</td><td>'+bwon(s.today)+'</td><td class="muted">'+s.todayLines+'</td><td>'+(s.lowStock.length?'<span class="pill warn">'+s.lowStock.length+'품목</span>':'<span class="muted">0</span>')+'</td><td class="muted">'+s.ordersPending+'건</td><td class="muted">'+s.care.uncomf+'건</td><td class="muted">'+(f?hesc(f.text):'–')+'</td>';
+    tr.onclick=function(){ document.querySelectorAll('#liveTable tr').forEach(function(r){r.classList.remove('sel');}); tr.classList.add('sel'); storeDetail(i); };
+    tb.appendChild(tr); }); storeDetail(0); }
+  if(el('hqBars')){ var mx=Math.max.apply(null,b.stores.map(function(s){return s.month;}))||1;
+    el('hqBars').innerHTML=b.stores.slice().sort(function(a,c){return c.month-a.month;}).map(function(s,i){return '<div class="bar-row"><span>'+hesc(s.store)+'</span><div class="bar-track"><div class="bar-fill '+(i===0?'ink':'')+'" style="width:'+Math.round(s.month/mx*100)+'%"></div></div><span class="muted" style="text-align:right">'+bwon(s.month)+'</span></div>';}).join(''); }
+  if(el('trend')){ var ms=b.monthly, tm=Math.max.apply(null,ms.map(function(m){return m.amt;}))||1;
+    el('trend').innerHTML=ms.map(function(m,i){ var d=''; if(i>0&&ms[i-1].amt>0){ var ch=(m.amt-ms[i-1].amt)/ms[i-1].amt*100; d='<div class="tdelta '+(ch>=0?'up':'down')+'">'+(ch>=0?'▲':'▼')+Math.abs(ch).toFixed(0)+'%</div>'; }
+      return '<div class="tcol"><div class="tbar '+(i===ms.length-1?'now':'')+'" style="height:'+Math.round(m.amt/tm*100)+'%"></div><div class="tcap">'+m.ym.slice(2).replace('-','.')+'</div>'+d+'</div>'; }).join('');
+    var first=ms.filter(function(m){return m.amt>0;})[0]; if(el('trendNote')) el('trendNote').innerHTML='<b>기록.</b> '+(first?first.ym+'부터 판매 기록이 있음. 이번 달은 '+b.date+'까지.':'판매 기록 없음.'); }
+  if(b.sizeMatrix && typeof mxRender==='function'){ MX=b.sizeMatrix.map(function(r){return r.slice();}); mxRender(); }
+  if(el('custData')){ var mxs=b.sizeMatrix, F=mxs.map(function(r){return r.reduce(function(a,x){return a+x;},0);}), Tt=[0,1,2].map(function(c){return mxs.reduce(function(a,r){return a+r[c];},0);}), n=b.sized||1;
+    var bar=function(lab,v){ return '<div class="demo-row"><span class="label">'+lab+'</span><div class="demo-track"><div class="demo-fill" style="width:'+Math.round(v/n*100)+'%"></div></div><span class="muted" style="text-align:right">'+v+'명</span></div>'; };
+    el('custData').innerHTML='<div class="label" style="margin-bottom:6px">프론트 사이즈</div>'+['F1','F2','F3'].map(function(k,i){return bar(k,F[i]);}).join('')+
+      '<div class="label" style="margin:12px 0 6px">템플 사이즈</div>'+['T1','T2','T3'].map(function(k,i){return bar(k,Tt[i]);}).join('')+
+      '<div class="label" style="margin-top:10px">사이즈가 기록된 손님 '+b.sized+'명 · 측정 '+T.measurements+'건 · 처방 '+T.exams+'건</div>'; }
+  partsRender();
+}
+function partsRender(){ var e=document.getElementById('partsBody'); if(!e) return; var pl=(PP&&PP.lines)||[], fr=pl.reduce(function(a,x){return a+x.qty;},0);
+  e.innerHTML='<tr style="cursor:default"><td>프론트 (마쭈첼리 아세테이트, 중국 공장 생산)</td><td>계약 전</td><td>확정 전</td><td>'+fr+'</td><td>-</td><td><span class="pill">확인</span></td></tr>'+
+    '<tr style="cursor:default"><td>템플</td><td>계약 전</td><td>확정 전</td><td>'+fr+'</td><td>-</td><td><span class="pill">확인</span></td></tr>'+
+    '<tr style="cursor:default"><td>렌즈</td><td>렌즈사 견적 전</td><td>확정 전</td><td>-</td><td>-</td><td><span class="pill">확인</span></td></tr>'; }
+function storeDetail(i){ var s=BOARD&&BOARD.stores[i]; if(!s) return;
+  document.getElementById('storeDetail').innerHTML='<div class="sd-head"><div><div class="eyebrow" style="margin:0">매장 상세</div><div class="nm" style="font-family:var(--serif);font-size:26px">'+hesc(s.store)+'</div></div>'+
+    '<button class="btn small" onclick="lowPush(\''+s.store+'\')">발주 푸시</button></div>'+
+    '<div class="sd-kpis"><div class="k"><div class="l">오늘 매출</div><div class="v">'+bwon(s.today)+'</div></div><div class="k"><div class="l">이번 달</div><div class="v">'+bwon(s.month)+'</div></div><div class="k"><div class="l">7일째 확인</div><div class="v">'+s.care.done+' / '+s.care.due+'</div></div></div>'+
+    '<div class="divider"></div><div class="label" style="margin-bottom:2px">오늘 판매 상위 품목</div>'+
+    (s.top.length?s.top.map(function(t){return '<div class="itemrow"><span>'+hesc(t.name)+'</span><span class="muted">'+t.qty+'개</span></div>';}).join(''):'<div class="itemrow"><span class="muted">오늘 판매 없음</span></div>')+
+    '<div class="label" style="margin:12px 0 2px">재고 '+BOARD.rule.lowStock+'개 이하</div>'+
+    (s.lowStock.length?s.lowStock.map(function(k){return '<div class="stockrow"><span>'+hesc(k.name)+'</span><span class="pill '+(k.stock===0?'bad':'warn')+'">재고 '+k.stock+'</span></div>';}).join(''):'<div class="stockrow"><span class="muted">없음</span></div>')+
+    (s.negStock.length?'<div class="label" style="margin:12px 0 2px;color:var(--bad)">판매가 입고보다 많은 품목</div>'+s.negStock.map(function(k){return '<div class="stockrow"><span>'+hesc(k.name)+'</span><span class="pill bad">'+k.stock+'</span></div>';}).join(''):'');
+}
+/* ===== [09.24] 확인할 지표 (사업계획서 12.3) ===== */
+function kpiLoad(){ fetch('/api/hq/kpis').then(function(r){return r.json();}).then(function(j){ if(!j.ok) return;
+  document.getElementById('kpiBasis').textContent=j.basis+'. 지금 값은 예시 데이터로 계산.';
+  document.getElementById('kpiBox').innerHTML='<table class="tbl"><thead><tr><th>지표</th><th>계산</th><th>값</th></tr></thead><tbody>'+j.items.map(function(k){
+    var v=k.v, val= v.rate==null ? '<span class="muted">'+(k.note||'1호점에서 확인')+'</span>' : (k.unit==='원'?'₩'+v.rate.toLocaleString('ko-KR'):v.rate+'%')+(v.d?' <span class="muted">('+(k.unit==='원'?v.d+'회':v.n+' / '+v.d)+')</span>':'')+(k.note&&v.rate!=null?' <span class="muted">· '+k.note+'</span>':'');
+    return '<tr style="cursor:default"><td>'+k.name+'</td><td class="muted">'+k.what+'</td><td>'+val+'</td></tr>'; }).join('')+'</tbody></table>';
+}).catch(function(){}); }
+boardLoad(); kpiLoad();
 ppLoad();
 </script>
 <script src="/assets/bv-nav.js"></script>

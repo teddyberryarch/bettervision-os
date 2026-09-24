@@ -80,6 +80,12 @@
   </div>
 
   <div class="card pad sec">
+    <div class="ctitle">상담 문장 <span class="hl">· 이 테와 렌즈를 권하는 이유. 판정·처방 값으로 만듦</span></div>
+    <div id="talk" class="hl">손님과 테를 고르면 나와요</div>
+    <details style="margin-top:12px"><summary style="font-size:17px;cursor:pointer">자주 나오는 질문</summary><div id="faq" style="margin-top:8px"></div></details>
+  </div>
+
+  <div class="card pad sec">
     <div class="ctitle">5 · 견적</div>
     <table class="qt"><thead><tr><th>품목</th><th class="n">권장가</th><th class="n">할인 %</th><th class="n">판매가</th></tr></thead><tbody id="lines"></tbody></table>
     <div class="qsum"><span>권장가 합계 <span id="sumList">₩0</span></span><span>합계 <b id="sumTotal">₩0</b></span></div>
@@ -159,8 +165,29 @@ function render(){
     return '<tr><td>'+esc(it.name)+'</td><td class="n">'+won(price(sku))+'</td><td class="n"><input type="number" min="0" max="90" value="'+d+'" onchange="DISC[\''+sku+'\']=Math.max(0,Math.min(90,+this.value||0));resetIssued();render()"></td><td class="n">'+won(u)+'</td></tr>'; }).join('')
     :'<tr><td colspan="4" class="hl">품목 없음</td></tr>';
   document.getElementById('sumList').textContent=won(sumL); document.getElementById('sumTotal').textContent=won(sum);
+  renderTalk();
   document.getElementById('overNote').textContent=over.length?('본사 안내 할인 한도 초과: '+over.join(', ')+'. 발행은 가능. 견적서 기록에 한도 초과로 남음.'):'';
 }
+/* [09.24] 상담 문장 (사업계획서 5.5 상담 지원, 12.2 모듈 3). 지금은 규칙으로 만들고, 사례집이 쌓이면 언어모델로 다듬어요 */
+function renderTalk(){
+  var box=document.getElementById('talk'); if(!box) return;
+  var f=(JUDGE&&JUDGE.items||[]).filter(function(x){return x.sku===SEL.frame;})[0], ln=SEL.lens?item(SEL.lens):null, out=[];
+  if(!CUR||!f){ box.innerHTML='손님과 테를 고르면 나와요'; return; }
+  var af=Math.abs(f.faceDiff||0), pb=/^(CL|WD|SL|RD)-/.test(f.sku);
+  out.push(esc(f.name)+'은 얼굴 폭과 테 폭 차이가 '+af+'mm라서 '+(f.lv===0?'그대로 잘 맞아요.':'조금 조정하면 맞아요.')+' 적합도는 '+f.score+'점이에요.');
+  if(pb) out.push('자체 브랜드라 템플 길이를 귀까지 거리에 맞춰 조립해요. 테는 본사에서 맞는 사이즈로 만들어 보내요.');
+  if(JUDGE&&JUDGE.rx&&+JUDGE.rx.ADD>0) out.push('가까운 것도 보셔야 해서 누진 렌즈를 권해요. 누진은 눈 높이가 맞아야 해서 매장에서 눈 위치를 재고 맞춰요.');
+  else { var ix=rxIdx(); if(ix){ var e=f.R&&f.L?Math.max(f.R.edge,f.L.edge):null;
+    out.push('처방 기준으로 굴절률 '+ix+' 렌즈를 권해요.'+(e?' 이 테에 넣으면 렌즈 가장자리가 약 '+e+'mm예요.':'')+' 굴절률이 낮을수록 가장자리가 두꺼워져요.');
+    if(ln && /1\.(50|56|60|67|74)/.test(ln.name)){ var sel=(ln.name.match(/1\.(\d\d)/)||[])[0]; if(sel && +sel < +ix) out.push('고르신 '+esc(ln.name)+'는 권장보다 굴절률이 낮아서 조금 더 두꺼워요.'); } } }
+  out.push('맞춘 뒤 7일째에 잘 보이는지, 흘러내리는지, 가까운 게 보이는지 여쭤볼게요.');
+  box.innerHTML=out.map(function(t){return '<div style="font-size:17px;padding:6px 0;border-bottom:1px solid var(--line)">'+t+'</div>';}).join('');
+}
+var FAQ=[['왜 이 테들만 보이나요?','얼굴을 잰 값으로 판정해서 맞지 않는 테는 뺐어요. 다른 브랜드 테도 같은 기준으로 봐요.'],
+  ['견적은 언제까지 유효한가요?','발행한 날부터 14일이에요.'],
+  ['쓰다가 불편하면요?','7일째 확인 때 말씀해 주시면 적응 중인지 다시 맞출지 매장이 봐요. 그 전에 오셔도 돼요.'],
+  ['렌즈 굴절률은 뭐가 달라요?','숫자가 클수록 같은 도수에서 얇고 가벼워요. 도수가 높을수록 차이가 커요.']];
+(function(){ var b=document.getElementById('faq'); if(b) b.innerHTML=FAQ.map(function(q){return '<div style="padding:6px 0;border-bottom:1px solid var(--line)"><div style="font-size:17px">'+q[0]+'</div><div class="hl">'+q[1]+'</div></div>';}).join(''); })();
 function resetIssued(){ ISSUED=null; document.getElementById('btnPrint').disabled=true; var p=document.getElementById('btnPay'); p.style.pointerEvents='none'; p.style.opacity='.5'; p.href='#'; document.getElementById('issueMsg').textContent=''; }
 function issue(){
   var ls=lines(); if(!CUR){ msg('손님 먼저 선택','warn'); return; } if(!ls.length){ msg('품목 없음','warn'); return; }

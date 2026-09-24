@@ -103,7 +103,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 </div>
 
 <div class="foot">
-  <span>BETTERVISION OS · 검안 자동 시스템 v0.1</span>
+  <span>BETTERVISION OS · 검안 v0.2</span>
   <span>표준 준수 · 결과값 본사 귀속</span>
 </div>
 
@@ -336,7 +336,54 @@ function buildResult(){
     '<div class="dump">'+JSON.stringify(bundle,null,2)+'</div>'+
     '<div class="hint">이 값들은 조제(굴절률, 정점보정), 피팅(A4 시트), 9사이즈 매칭으로 그대로 전달. 모든 값은 원본값(1층)과 본사 코드(2층)로 본사 귀속.</div>';
   try{BVRecord.save({rx:{R:S.subj.R,L:S.subj.L,add:(S.presby?S.add:''),vd:S.subj.vd}, sphMax:Math.max(Math.abs(parseFloat(S.subj.R.S)||0),Math.abs(parseFloat(S.subj.L.S)||0)), pd:(S.hasGlasses==='yes'?S.lm.R.PD:'')});}catch(e){}
-  document.getElementById('resbox').innerHTML=html;
+  document.getElementById('resbox').innerHTML='<div class="eyebrow" style="margin:0 0 4px">지난 처방과 비교 · 저장</div><div id="rxCmp"></div><div style="height:14px"></div>'+html;
+  rxCompare();
+}
+/* ---------- [09.24] 검안 보조: 지난 처방과 달라진 점·이상값 (사업계획서 5.5, 12.2 모듈 2) ----------
+   기준값은 시작값이에요. 1호점 안경사가 확정하고 착용 결과로 고쳐요 */
+var RX_RULE={change:0.50, big:1.00, aniso:2.00, axis:20, cylMin:0.75};
+var EX_CUSTS=null;
+function se(o){ var S=parseFloat(o.S), C=parseFloat(o.C)||0; return isFinite(S)?S+C/2:null; }
+function rxCompare(){
+  var box=document.getElementById('rxCmp'); if(!box) return;
+  var rec=(window.BVRecord&&BVRecord.load&&BVRecord.load())||{};
+  var draw=function(){
+    box.innerHTML='<div class="row" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="exCust" style="font-size:16px;padding:8px" onchange="rxCmpLoad()"><option value="">손님 선택</option>'+
+      EX_CUSTS.map(function(c){return '<option value="'+c.id+'"'+(String(c.id)===String(rec.customerId||'')?' selected':'')+'>'+c.name+' · '+(c.store||'')+'</option>';}).join('')+
+      '</select><button class="btn small" onclick="rxSave(this)">이 처방 저장</button></div><div id="exCmpOut" style="margin-top:8px"></div>';
+    rxCmpLoad();
+  };
+  if(EX_CUSTS) return draw();
+  fetch('/api/customers').then(function(r){return r.json();}).then(function(j){ EX_CUSTS=j.customers||[]; draw(); }).catch(function(){ box.innerHTML='<div class="flagline">손님 목록을 불러오지 못함</div>'; });
+}
+function rxCmpLoad(){
+  var id=document.getElementById('exCust').value, out=document.getElementById('exCmpOut');
+  var now={R:S.subj.R,L:S.subj.L}, f=[], sR=se(now.R), sL=se(now.L);
+  ['R','L'].forEach(function(k){ var o=now[k], Sv=parseFloat(o.S), Cv=parseFloat(o.C)||0, Av=parseFloat(o.A);
+    if(isFinite(Sv)&&(Math.abs(Sv)>20||Math.abs(Cv)>6||(o.A!==''&&(Av<0||Av>180)))) f.push({lv:'bad',t:k+' 입력값 확인',d:'범위를 벗어난 값'}); });
+  if(sR!=null&&sL!=null&&Math.abs(sR-sL)>=RX_RULE.aniso) f.push({lv:'warn',t:'좌우 차이 큼',d:'SE 차 '+Math.abs(sR-sL).toFixed(2)+'D. 상 크기 차이 설명, 적응 확인'});
+  var show=function(prev,pd){
+    if(prev){ ['R','L'].forEach(function(k){ var a=se(now[k]), b=prev[k].S+(prev[k].C||0)/2; if(a==null) return; var d=Math.round((a-b)*100)/100;
+      if(Math.abs(d)>=RX_RULE.big) f.push({lv:'bad',t:k+' 지난 처방보다 '+(d<0?'근시 쪽 ':'원시 쪽 ')+Math.abs(d).toFixed(2)+'D',d:'변화가 커요. 다시 재거나 안과 의뢰 검토 ('+pd+' 처방 기준)'});
+      else if(Math.abs(d)>=RX_RULE.change) f.push({lv:'warn',t:k+' 지난 처방보다 '+Math.abs(d).toFixed(2)+'D 변화',d:'손님에게 달라진 점 설명 ('+pd+' 처방 기준)'});
+      var Cn=Math.abs(parseFloat(now[k].C)||0), An=parseFloat(now[k].A), Ap=prev[k].A||0;
+      if(Cn>=RX_RULE.cylMin&&isFinite(An)){ var da=Math.abs(An-Ap); da=Math.min(da,180-da); if(da>RX_RULE.axis) f.push({lv:'warn',t:k+' 난시 축 '+da+'° 바뀜',d:'축 재확인'}); } }); }
+    out.innerHTML=(prev?'<div class="flagline">지난 처방 ('+pd+'): R S '+prev.R.S.toFixed(2)+' C '+(prev.R.C||0).toFixed(2)+' / L S '+prev.L.S.toFixed(2)+' C '+(prev.L.C||0).toFixed(2)+'</div>':'<div class="flagline">'+(id?'지난 검안 기록 없음. 첫 기록으로 저장':'손님을 고르면 지난 처방과 비교')+'</div>')+
+      (f.length?f.map(function(x){return '<div class="flagline"><span class="t" style="color:var(--'+x.lv+')">'+x.t+'</span>: '+x.d+'</div>';}).join(''):(prev?'<div class="flagline">지난 처방과 큰 차이 없음</div>':''))+
+      '<div class="flagline" style="color:var(--muted)">기준: 변화 '+RX_RULE.change.toFixed(2)+'D 이상 표시, '+RX_RULE.big.toFixed(2)+'D 이상 다시 확인, 좌우 '+RX_RULE.aniso.toFixed(2)+'D. 시작값이고 1호점 안경사가 확정</div>';
+  };
+  if(!id){ show(null); return; }
+  fetch('/api/customers/'+id+'/vision').then(function(r){return r.json();}).then(function(j){ var me=(j.members||[]).filter(function(m){return m.member==='본인';})[0];
+    if(!me||!me.exams.length) return show(null); var l=me.exams[me.exams.length-1]; show({R:l.R,L:l.L},l.date); }).catch(function(){ show(null); });
+}
+function rxSave(btn){
+  var id=document.getElementById('exCust').value, out=document.getElementById('exCmpOut');
+  if(!id){ out.insertAdjacentHTML('afterbegin','<div class="flagline" style="color:var(--warn)">손님을 먼저 골라 주세요</div>'); return; }
+  var add=S.presby?parseFloat(S.add)||0:0;
+  fetch('/api/exams',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({customer_id:id,R:S.subj.R,L:S.subj.L,ADD:add})}).then(function(r){return r.json();}).then(function(j){
+    if(!j.ok){ out.insertAdjacentHTML('afterbegin','<div class="flagline" style="color:var(--bad)">'+(j.error||'저장하지 못함')+'</div>'); return; }
+    btn.textContent='저장함 · '+j.date; btn.disabled=true;
+  }).catch(function(){ out.insertAdjacentHTML('afterbegin','<div class="flagline" style="color:var(--bad)">연결이 안 됨</div>'); });
 }
 
 /* ---------- 시나리오 프리셋 ---------- */

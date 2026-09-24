@@ -75,10 +75,15 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="fld"><label>브랜드</label><input id="brand" placeholder="브랜드"></div>
       <div class="fld"><label>모델/색</label><input id="model" placeholder="모델 · 색"></div>
       <div class="fld"><label>소재</label><select id="mat"></select></div>
-      <div class="fld" style="flex:0"><button class="btn small" onclick="addFrame()">목록에 추가</button></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="fld"><label>렌즈 세로(mm, 선택)</label><input id="bh" type="number" placeholder="예: 40"></div>
+      <div class="fld"><label>안면각(°, 매장 실측)</label><input id="fa" type="number" placeholder="예: 6"></div>
+      <div class="fld"><label>코받침</label><select id="pad"><option value="">모름</option><option>조절형</option><option>고정형</option></select></div>
+      <div class="fld" style="flex:0"><button class="btn small" onclick="addFrame()">본사 DB에 저장</button></div>
     </div>
     <div class="parsed" id="parsed">각인 입력 시 프론트폭(a×2+DBL) 자동 계산.</div>
-    <div class="note">각인 자동 판독(촬영하면 AI가 읽기)은 다음 단계. 현재는 직접 입력. 각인에 없는 안면각·코받침은 매장에서 2차 실측.</div>
+    <div class="note">저장하면 본사 DB에 들어가 전 매장이 같이 씀. 각인에 없는 안면각·코받침·렌즈 세로는 입고할 때 매장에서 잰 값. 각인 자동 판독(촬영)은 다음 단계.</div>
   </div>
 
   <div class="card pad sec">
@@ -122,12 +127,15 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 </section>
 </div>
 
-<div class="foot"><span>BETTERVISION OS · 타사 DB · 큐레이팅 v0.1</span><span>모든 브랜드 비교 · PB는 자연스럽게</span></div>
+<div class="foot"><span>BETTERVISION OS · 타사 DB · 큐레이팅 v0.2</span><span>모든 브랜드 비교 · PB는 자연스럽게</span></div>
 
 <script src="/assets/bv-size-engine.js"></script>
 <script src="/assets/bv-frame-db.js"></script>
 <script>
-var DB=window.BVFrameDB, db=DB.seed.slice();
+var DB=window.BVFrameDB, SEED=DB.seed.map(function(f){return Object.assign({ex:true},f);}), db=SEED.slice();
+function dbLoad(){ fetch('/api/framedb').then(function(r){return r.json();}).then(function(j){
+  var srv=(j.items||[]).map(function(f){return {brand:f.brand, model:f.model, eng:f.eng, material:DB.MAT[f.material]?f.material:'acet', b:f.b, fa:f.face_angle, pad:f.pad, store:f.store, srv:true};});
+  db=srv.concat(SEED); renderDB(); rankNow(); }).catch(function(){}); }
 function matOpts(){var o='';for(var k in DB.MAT){o+='<option value="'+k+'">'+DB.MAT[k].n+'</option>';}return o;}
 document.getElementById('mat').innerHTML=matOpts();
 
@@ -140,10 +148,13 @@ function parseNow(){
 }
 function addFrame(){
   var p=parseNow(); if(!p){document.getElementById('parsed').textContent='각인 형식 확인: 54□18-145 (또는 54-18-145)';return;}
-  db.unshift({brand:document.getElementById('brand').value||'(미입력)', model:document.getElementById('model').value||'-', color:'', eng:document.getElementById('eng').value, material:document.getElementById('mat').value});
-  document.getElementById('eng').value='';document.getElementById('brand').value='';document.getElementById('model').value='';
-  document.getElementById('parsed').textContent='추가 완료. 전체 목록·적합도 비교에 반영.';
-  renderDB(); rankNow();
+  var body={brand:document.getElementById('brand').value, model:document.getElementById('model').value, eng:document.getElementById('eng').value, material:document.getElementById('mat').value,
+    b:document.getElementById('bh').value, face_angle:document.getElementById('fa').value, pad:document.getElementById('pad').value};
+  fetch('/api/framedb',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(j){
+    if(!j.ok){ document.getElementById('parsed').textContent=j.error||'저장하지 못함'; return; }
+    ['eng','brand','model','bh','fa'].forEach(function(id){document.getElementById(id).value='';}); document.getElementById('pad').value='';
+    document.getElementById('parsed').textContent='본사 DB에 저장. 전 매장 목록·적합도 비교에 반영.'; dbLoad();
+  }).catch(function(){ document.getElementById('parsed').textContent='연결이 안 됨. 다시 시도'; });
 }
 function faceP(fw,eg,w){document.getElementById('fw').value=fw;document.getElementById('eg2').value=eg;document.getElementById('wrap').value=w;rankNow();}
 function rankNow(){
@@ -155,17 +166,19 @@ function rankNow(){
   var html=rows.map(function(r){
     var cls='rk'+(r.f.pb?' pb':'')+(!r.m.splayOK?' bad':'');
     var tag=r.f.pb?'<span class="tagpb">PB</span>':(!r.m.splayOK?'<span class="tagx">못 맞춤</span>':'');
-    return '<div class="'+cls+'"><div class="pct">'+r.m.fit+'%</div><div class="meta"><span class="b">'+r.f.brand+' '+r.f.model+'</span> '+tag+'<div class="s">'+r.f.eng+' · '+DB.MAT[r.f.material].n+' · 테 '+r.m.frameCode+' / 얼굴 '+r.m.faceCode+'. '+r.m.reason+'</div></div></div>';
+    return '<div class="'+cls+'"><div class="pct">'+r.m.fit+'%</div><div class="meta"><span class="b">'+esc(r.f.brand)+' '+esc(r.f.model)+(r.f.ex?' <span class="muted">(예시)</span>':'')+'</span> '+tag+'<div class="s">'+r.f.eng+' · '+DB.MAT[r.f.material].n+' · 테 '+r.m.frameCode+' / 얼굴 '+r.m.faceCode+'. '+r.m.reason+'</div></div></div>';
   }).join('');
   document.getElementById('rank').innerHTML=html;
 }
 function renderDB(){
-  var h='<tr><th>브랜드</th><th>모델</th><th>각인</th><th>프론트폭</th><th>소재</th></tr>';
+  var h='<tr><th>브랜드</th><th>모델</th><th>각인</th><th>프론트폭</th><th>소재</th><th>안면각</th><th>코받침</th><th>출처</th></tr>';
   db.forEach(function(f){var p=DB.parseEngraving(f.eng)||{frontSpan:'?'};
-    h+='<tr><td>'+f.brand+(f.pb?' <b style="color:var(--good)">PB</b>':'')+'</td><td>'+f.model+'</td><td>'+f.eng+'</td><td>'+p.frontSpan+'mm</td><td>'+DB.MAT[f.material].n+'</td></tr>';});
+    h+='<tr><td>'+esc(f.brand)+(f.pb?' <b style="color:var(--good)">PB</b>':'')+'</td><td>'+esc(f.model)+'</td><td>'+esc(f.eng)+'</td><td>'+p.frontSpan+'mm</td><td>'+DB.MAT[f.material].n+'</td><td>'+(f.fa!=null?f.fa+'°':'-')+'</td><td>'+(f.pad||'-')+'</td><td>'+(f.srv?('본사 DB'+(f.store?' · '+esc(f.store):'')):'예시')+'</td></tr>';});
+  h='<caption style="text-align:left;font-size:15px;color:var(--muted);padding-bottom:6px">본사 DB '+db.filter(function(f){return f.srv;}).length+'개 · 예시 '+SEED.length+'개</caption>'+h;
   document.getElementById('dbtbl').innerHTML=h;
 }
-renderDB(); rankNow();
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+renderDB(); rankNow(); dbLoad();
 </script>
 <script src="/assets/bv-nav.js"></script>
 </body>

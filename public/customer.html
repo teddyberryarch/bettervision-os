@@ -142,8 +142,8 @@
           <!-- HOME -->
           <div class="pscreen active" id="s-home">
             <div class="vip">
-              <div><div class="vt">멤버십 포인트</div><div class="vp">2,480 P</div><div class="vg">GOLD까지 520P · 다음 구매 5% 적립</div></div>
-              <span class="vbadge">VIP · SILVER</span>
+              <div><div class="vt">멤버십 포인트</div><div class="vp" id="myPoints">- P</div><div class="vg">적립률과 등급은 1호점에서 정해요</div></div>
+              <span class="vbadge" id="mySeg">회원</span>
             </div>
             <div class="appcard">
               <h4>내 안경 정보</h4>
@@ -161,10 +161,12 @@
               <button class="btn small" style="background:#ffffff;color:#111111;border-color:#ffffff" onclick="goTryOn()">가상으로 써보기</button>
             </div>
             <div class="appcard">
-              <h4>내 사이즈 추천 <span class="label">F2×T2 매칭</span></h4>
-              <div class="frame-row"><div class="frame-th"></div><div class="frame-meta"><div class="n">로마 클래식 ACE-02</div><div class="match">매칭 98%</div></div><div class="label">189,000</div></div>
-              <div class="frame-row"><div class="frame-th b"></div><div class="frame-meta"><div class="n">로마 슬림</div><div class="match">매칭 95%</div></div><div class="label">189,000</div></div>
-              <div class="frame-row"><div class="frame-th c"></div><div class="frame-meta"><div class="n">수입 브랜드 A 라인</div><div class="match">매칭 91%</div></div><div class="label">470,000</div></div>
+              <h4>내 사이즈 추천 <span class="label" id="homeRecSize"></span></h4>
+              <div id="homeRec"><div class="label">불러오는 중이에요</div></div>
+            </div>
+            <div class="appcard">
+              <h4>지금 많이 팔리는 테 <span class="label">전 매장 · 최근 30일</span></h4>
+              <div id="trendBox"><div class="label">불러오는 중이에요</div></div>
             </div>
             <div class="appcard member">
               <h4>BETTERVISION 멤버십 <span class="pill" style="background:rgba(255,255,255,.16);color:#ffffff">구독</span></h4>
@@ -820,8 +822,24 @@ renderCart();
     if(!j.ok||!j.customer)return; var c=j.customer;
     var set=function(id,v){var el=document.getElementById(id); if(el&&v)el.textContent=v;};
     set('mySize', c.size); set('myFace', c.face? c.face.split(' / ')[0] : null); set('myPD', c.pd); set('myRx', c.rx);
+    set('myPoints', (c.points||0).toLocaleString('ko-KR')+' P'); set('mySeg', c.seg||'회원');
+    homeRec(c);
   }).catch(function(){});
 })();
+/* [09.24] 홈: 내 측정값으로 판정한 추천 3개, 전 매장 판매 순위 */
+function homeRec(c){
+  var face=parseFloat(c.face)||0, t=(String(c.size||'').match(/T(\d)/)||[])[1], temple=[140,145,150][(+t||2)-1], pd=parseFloat(c.pd)||63;
+  var box=document.getElementById('homeRec'); document.getElementById('homeRecSize').textContent=c.size||'';
+  if(!face){ box.innerHTML='<div class="label">얼굴을 재면 맞는 테를 보여드려요.</div>'; return; }
+  fetch('/api/frames/match?face='+face+'&temple='+temple+'&pd='+pd+'&customer_id='+DEMO_CUSTOMER_ID).then(function(r){return r.json();}).then(function(j){
+    if(!j.ok||!j.items.length){ box.innerHTML='<div class="label">맞는 테를 찾지 못했어요. 매장에서 다시 재 볼게요.</div>'; return; }
+    box.innerHTML=j.items.slice(0,3).map(function(x,i){ return '<div class="frame-row"><div class="frame-th'+(i===1?' b':(i===2?' c':''))+'"></div><div class="frame-meta"><div class="n">'+x.name+'</div><div class="match">'+(x.lv===0?'바로 맞아요':'매장에서 조정')+' '+x.score+'%</div></div><div class="label">'+x.price.toLocaleString('ko-KR')+'</div></div>'; }).join('');
+  }).catch(function(){ box.innerHTML='<div class="label">불러오지 못했어요.</div>'; });
+}
+(function(){ fetch('/api/trend').then(function(r){return r.json();}).then(function(j){
+  var b=document.getElementById('trendBox'); if(!b) return;
+  b.innerHTML=(j.items||[]).length ? j.items.map(function(x){ return '<div class="kv"><span class="label">'+x.rank+'위</span><span>'+x.name+(x.pb?' <span class="pill">PB</span>':'')+'</span></div>'; }).join('')+'<div class="label" style="margin-top:6px">판매 수량 순이에요. 내 사이즈에 맞는지는 측정 탭에서 봐요.</div>'
+    : '<div class="label">아직 판매 기록이 적어요.</div>'; }).catch(function(){}); })();
 
 /* ===== [09.24] 시력 변화 · 다음 검사 ===== */
 var VISION=null;
