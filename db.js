@@ -251,6 +251,7 @@ async function init(){
   if(fc.rows[0].c===0){ const d=_demoCare();
     for(const x of d.care.filter(function(x){return x.fit!=null&&x.status==='완료';})){ await pool.query('INSERT INTO aftercare(customer_id,store,sale_date,due_date,status,comfort,issues,note,source,done_at,fit,judge) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',[x.customer_id,x.store,x.sale_date,x.due_date,x.status,x.comfort,x.issues,x.note,x.source,x.done_at,x.fit,x.judge]); } }
   await pool.query(`CREATE TABLE IF NOT EXISTS workorders(id SERIAL PRIMARY KEY, store TEXT, customer_id INT, sku TEXT, frame TEXT, lens TEXT, rx TEXT, calc TEXT, status TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS frame_db(id SERIAL PRIMARY KEY, brand TEXT, model TEXT, eng TEXT, a INT, dbl INT, temple INT, b REAL, face_angle REAL, pad TEXT, material TEXT, store TEXT, created_by TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   await pool.query(`CREATE TABLE IF NOT EXISTS vision_exams(id SERIAL PRIMARY KEY, customer_id INT, member TEXT, grp TEXT, date TEXT, rx TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   const vec=await pool.query('SELECT COUNT(*)::int AS c FROM vision_exams');
   if(vec.rows[0].c===0){ for(const x of _demoExams()) await pool.query('INSERT INTO vision_exams(customer_id,member,grp,date,rx) VALUES($1,$2,$3,$4,$5)',[x.customer_id,x.member,x.grp,x.date,x.rx]); }
@@ -1221,7 +1222,114 @@ async function logMeasureAccess(username, customerId, action){
   mem.accesslog.push({username:username,customer_id:customerId,action:action,at:new Date().toISOString()});
 }
 
-module.exports={ init, addNotice, listNotices, addOutbox, listOutbox, OUTBOX_CH, openASByCustomer, productionPlan, measurementsForCustomer, quoteOverSummary, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+
+/* ===== [09.24] 사업계획서 싱크: 본사 현황판 · 확인할 지표 · 트렌드 · 타사 테 DB ===== */
+const _MEMKEY={sales:'sales',orders:'orders',inventory:'inventory',customers:'customers',measurements:'measurements',vision_exams:'exams',aftercare:'aftercare',as_cases:'ascases',overrides:'overrides',quotes:'quotes',workorders:'workorders',outbox:'outbox',frame_db:'framedb'};
+async function _all(table){ if(ready) return (await pool.query('SELECT * FROM '+table)).rows; return mem[_MEMKEY[table]]||[]; }
+function _ymd(d){ return _iso(d); }
+function _daysAgo(n){ return _iso(new Date(Date.now()-n*864e5)); }
+// 이상 탐지 기준값: 시작값이에요. 1호점 운영으로 고쳐요
+const BOARD_RULE={lowStock:5};
+async function hqBoard(){
+  var today=_iso(new Date()), m0=today.slice(0,8)+'01';
+  var sales=await _all('sales'), inv=await _all('inventory'), orders=await _all('orders'), care=await listAftercare(null,null), as=await listAS(null,null);
+  var ovr=await _all('overrides'), qo=await quoteOverSummary(null), exams=await _all('vision_exams'), custs=await _all('customers'), meas=await _all('measurements');
+  var stores=STORES.map(function(st){
+    var sl=sales.filter(function(x){return x.store===st;}), td=sl.filter(function(x){return x.date===today;});
+    var top={}; td.filter(function(x){return x.qty>0;}).forEach(function(x){ top[x.name]=(top[x.name]||0)+x.qty; });
+    var iv=inv.filter(function(x){return x.store===st && !isPBFrame(x.sku);});
+    var c=care.filter(function(x){return x.store===st && x.due_date<=today;});
+    var done=c.filter(function(x){return x.status==='완료';});
+    var qs=(qo.byStore||{})[st]||{};
+    return { store:st,
+      today:td.reduce(function(a,x){return a+(x.amount||0);},0), todayLines:td.filter(function(x){return x.qty>0;}).length,
+      month:sl.filter(function(x){return x.date>=m0&&x.date<=today;}).reduce(function(a,x){return a+(x.amount||0);},0),
+      top:Object.keys(top).map(function(k){return {name:k,qty:top[k]};}).sort(function(a,b){return b.qty-a.qty;}).slice(0,3),
+      lowStock:iv.filter(function(x){return x.stock>=0 && x.stock<=BOARD_RULE.lowStock;}).map(function(x){return {sku:x.sku,name:x.name,stock:x.stock};}).sort(function(a,b){return a.stock-b.stock;}),
+      negStock:iv.filter(function(x){return x.stock<0;}).map(function(x){return {sku:x.sku,name:x.name,stock:x.stock};}),
+      ordersPending:orders.filter(function(x){return x.store===st && (x.status==='대기'||x.status==='푸시대기'||x.status==='승인');}).length,
+      asOpen:as.filter(function(x){return x.store===st && x.status==='열림';}).length,
+      care:{due:c.length, done:done.length, uncomf:done.filter(function(x){return x.comfort==='불편';}).length, overdue:c.filter(function(x){return x.status==='예정';}).length},
+      fitBelow:ovr.filter(function(x){return x.store===st && x.kind==='fit_below';}).length,
+      quoteOver:qs.over||0 };
+  });
+  var flags=[];
+  stores.forEach(function(s){
+    if(s.negStock.length) flags.push({store:s.store, lv:'bad', tag:'조사', text:'판매 기록이 본사 입고보다 많은 품목 '+s.negStock.length+'개 ('+s.negStock.map(function(x){return x.name;}).slice(0,2).join(', ')+')'});
+    if(s.care.overdue) flags.push({store:s.store, lv:'warn', tag:'경고', text:'7일째 확인 밀림 '+s.care.overdue+'건'});
+    if(s.care.uncomf) flags.push({store:s.store, lv:'warn', tag:'경고', text:'7일째 불편 응답 '+s.care.uncomf+'건'});
+    if(s.fitBelow) flags.push({store:s.store, lv:'warn', tag:'참고', text:'피팅 기준 미달로 건넨 건 '+s.fitBelow+'건'});
+    if(s.quoteOver) flags.push({store:s.store, lv:'info', tag:'참고', text:'권장 할인 범위 밖 견적 '+s.quoteOver+'건'});
+    if(s.lowStock.length) flags.push({store:s.store, lv:'info', tag:'참고', text:'재고 '+BOARD_RULE.lowStock+'개 이하 '+s.lowStock.length+'품목'});
+    if(s.asOpen) flags.push({store:s.store, lv:'info', tag:'참고', text:'열린 A/S '+s.asOpen+'건'});
+  });
+  var monthly=[]; for(var i=7;i>=0;i--){ var d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-i); var ym=_iso(d).slice(0,7);
+    monthly.push({ym:ym, amt:sales.filter(function(x){return String(x.date).slice(0,7)===ym;}).reduce(function(a,x){return a+(x.amount||0);},0)}); }
+  var mx=[[0,0,0],[0,0,0],[0,0,0]], sized=0; custs.forEach(function(c){ var m=String(c.size||'').match(/F(\d)\s*[×x]\s*T(\d)/); if(m&&mx[m[1]-1]&&mx[m[1]-1][m[2]-1]!=null){ mx[m[1]-1][m[2]-1]++; sized++; } });
+  var monthAll=stores.reduce(function(a,s){return a+s.month;},0);
+  return {ok:true, date:today, rule:BOARD_RULE, stores:stores, flags:flags, monthly:monthly, sizeMatrix:mx, sized:sized,
+    totals:{month:monthAll, stores:STORES.length, customers:custs.length, measurements:meas.length, exams:exams.length,
+      careDue:care.filter(function(x){return x.due_date<=today;}).length, careDone:care.filter(function(x){return x.due_date<=today&&x.status==='완료';}).length}};
+}
+// 사업계획서 12.3 확인할 지표. 분모가 없으면 null (화면에서 "1호점에서 확인")
+async function planKpis(){
+  var sales=(await _all('sales')).filter(function(x){return x.qty>0 && x.amount>0;}), care=await listAftercare(null,null), as=await listAS(null,null);
+  var meas=await _all('measurements'), wo=await _all('workorders'), ob=await _all('outbox');
+  var withC=sales.filter(function(x){return x.customer_id;});
+  var tx={}; withC.forEach(function(x){ var k=x.customer_id+'|'+x.store+'|'+x.date; var t=tx[k]=tx[k]||{amt:0,cats:{}}; t.amt+=x.amount; t.cats[x.cat]=1; });
+  var txs=Object.keys(tx).map(function(k){return tx[k];});
+  var visits={}; Object.keys(tx).forEach(function(k){ var c=k.split('|')[0]; visits[c]=(visits[c]||0)+1; });
+  var buyers=Object.keys(visits), repeat=buyers.filter(function(c){return visits[c]>=2;}).length;
+  var mc={}; meas.forEach(function(m){ if(m.customer_id){ var t=String(m.measured_at instanceof Date?m.measured_at.toISOString():m.measured_at).slice(0,10); if(!mc[m.customer_id]||t<mc[m.customer_id]) mc[m.customer_id]=t; } });
+  var mIds=Object.keys(mc), mBought=mIds.filter(function(c){ return withC.some(function(x){return +x.customer_id===+c && x.date>=mc[c];}); }).length;
+  var asProc=as.filter(function(x){return x.status==='종결'&&x.cause==='가공';}).length;
+  var glasses=care.length;
+  var pb=await pbMargin(_daysAgo(90), _iso(new Date()));
+  function r(n,d){ return d? {n:n,d:d,rate:Math.round(n/d*1000)/10} : {n:n,d:d,rate:null}; }
+  return {ok:true, basis:'손님이 연결된 결제 기준. 같은 날 같은 매장 결제를 한 번 방문으로 셈',
+    items:[
+      {key:'repeat', name:'재구매율', what:'두 번 이상 방문해 산 손님 / 산 손님', v:r(repeat,buyers.length)},
+      {key:'notify', name:'알림 전환율', what:'교체 알림 받고 산 손님 / 알림 받은 손님', v:{n:null,d:ob.filter(function(x){return x.channel==='카카오 알림톡';}).length,rate:null}, note:'카카오 연동 전이라 알림이 나가지 않음. 연동 후 집계'},
+      {key:'pb', name:'PB 테 비중', what:'최근 90일 테 판매 중 PB', v:{n:null,d:null,rate:(pb&&pb.pbShare!=null)?pb.pbShare:null}, note:'목표로 두지 않고 관찰만 함'},
+      {key:'aov', name:'객단가', what:'방문 1회 평균 결제액', v:{n:txs.reduce(function(a,t){return a+t.amt;},0),d:txs.length,rate:txs.length?Math.round(txs.reduce(function(a,t){return a+t.amt;},0)/txs.length):null}, unit:'원'},
+      {key:'attach', name:'추가 구매율', what:'두 품목군 이상 함께 산 방문 / 전체 방문', v:r(txs.filter(function(t){return Object.keys(t.cats).length>=2;}).length,txs.length)},
+      {key:'measconv', name:'측정 손님 구매 전환율', what:'측정 뒤 산 손님 / 측정한 손님', v:r(mBought,mIds.length)},
+      {key:'rework', name:'가공 재작업률', what:'원인이 가공인 A/S / 가공 지시서', v:r(asProc,wo.length)},
+      {key:'asin', name:'A/S 유입률', what:'A/S 건 / 7일째 확인 대상(안경 판매)', v:r(as.length,glasses)}
+    ]};
+}
+// 손님 앱 트렌드: 최근 30일 전 매장 판매 수량 순위 (금액은 보여주지 않음)
+async function trendFrames(days){
+  var from=_daysAgo(days||30), rows=(await _all('sales')).filter(function(x){return x.date>=from && x.qty>0 && (x.cat==='테'||x.cat==='선글라스');});
+  var by={}; rows.forEach(function(x){ var base=String(x.name).replace(/ [SML]$/,''); by[base]=(by[base]||0)+x.qty; });
+  return {ok:true, days:days||30, items:Object.keys(by).map(function(k){return {name:k,qty:by[k]};}).sort(function(a,b){return b.qty-a.qty;}).slice(0,5).map(function(x,i){return {rank:i+1,name:x.name,pb:/^로마/.test(x.name)};})};
+}
+// 타사 테 DB: 입고할 때 본사 기준으로 잰 값. 전 매장이 같이 씀 (사업계획서 6.1)
+const FRAME_MATS=['titan','metal','tr','acet'];
+async function addFrameDb(f, who){
+  var m=String(f.eng||'').match(/(\d{2})\s*[□㏘oOx×\-\s]\s*(\d{2})\s*[-\s]\s*(\d{3})/); if(!m) return {ok:false,error:'각인 형식을 확인해 주세요 (54□18-145)'};
+  var row={brand:String(f.brand||'(미입력)').slice(0,40), model:String(f.model||'-').slice(0,60), eng:m[1]+'□'+m[2]+'-'+m[3], a:+m[1], dbl:+m[2], temple:+m[3],
+    b:(+f.b>20&&+f.b<70)?+f.b:null, face_angle:(+f.face_angle>=0&&+f.face_angle<=20&&f.face_angle!=='')?+f.face_angle:null, pad:['고정형','조절형'].indexOf(f.pad)>=0?f.pad:null,
+    material:FRAME_MATS.indexOf(f.material)>=0?f.material:'acet', store:(who&&who.store)||f.store||null, created_by:who?who.username:null};
+  if(ready){ const r=await pool.query('INSERT INTO frame_db(brand,model,eng,a,dbl,temple,b,face_angle,pad,material,store,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id,created_at',[row.brand,row.model,row.eng,row.a,row.dbl,row.temple,row.b,row.face_angle,row.pad,row.material,row.store,row.created_by]); row.id=r.rows[0].id; row.created_at=r.rows[0].created_at; }
+  else { mem.framedb=mem.framedb||[]; row.id=mem.framedb.length+1; row.created_at=new Date().toISOString(); mem.framedb.push(row); }
+  return {ok:true, frame:row};
+}
+async function listFrameDb(){ return (await _all('frame_db')).slice().sort(function(a,b){return b.id-a.id;}); }
+async function addExam(b, who){
+  var cid=+b.customer_id, c=cid?await getCustomer(cid):null; if(!c) return {ok:false,error:'손님을 골라 주세요'};
+  function eye(o){ o=o||{}; var S=parseFloat(o.S), C=parseFloat(o.C)||0, A=parseInt(o.A)||0; if(!isFinite(S)||Math.abs(S)>25||Math.abs(C)>8||A<0||A>180) return null; return {S:S,C:C,A:A}; }
+  var R=eye(b.R), L=eye(b.L); if(!R||!L) return {ok:false,error:'처방 값을 확인해 주세요'};
+  var rx={R:R,L:L,ADD:Math.max(0,Math.min(4,parseFloat(b.ADD)||0))}, grp=['일반','아이 근시','노안·누진','콘택트'].indexOf(b.grp)>=0?b.grp:(rx.ADD>0?'노안·누진':'일반');
+  var row={customer_id:cid, member:'본인', grp:grp, date:_iso(new Date()), rx:JSON.stringify(rx)};
+  if(ready) await pool.query('INSERT INTO vision_exams(customer_id,member,grp,date,rx) VALUES($1,$2,$3,$4,$5)',[row.customer_id,row.member,row.grp,row.date,row.rx]);
+  else { mem.exams=mem.exams||[]; mem.exams.push(row); }
+  var f=function(e){return (e.S>0?'+':'')+e.S.toFixed(2);};
+  if(ready) await pool.query('UPDATE customers SET rx=$2 WHERE id=$1',[cid,'OD '+f(R)+' / OS '+f(L)]); else c.rx='OD '+f(R)+' / OS '+f(L);
+  return {ok:true, date:row.date};
+}
+
+module.exports={ init, hqBoard, planKpis, trendFrames, addFrameDb, listFrameDb, addExam, BOARD_RULE, addNotice, listNotices, addOutbox, listOutbox, OUTBOX_CH, openASByCustomer, productionPlan, measurementsForCustomer, quoteOverSummary, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,

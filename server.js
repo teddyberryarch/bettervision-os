@@ -57,7 +57,7 @@ async function api(req, res, url){
       //  /api/customer(단건)는 공개 예외에서 제외
       const PUBLIC_ANY=['/api/catalog'];
       //  - 고객 앱: 7일째 착용 확인 응답(본인 건만), 자가측정 결과 제출(항상 임시값으로 저장)
-      const PUBLIC_GET=['/api/bookings','/api/aftercare/mine','/api/quotes/mine','/api/measurements/mine','/api/shop/items'];
+      const PUBLIC_GET=['/api/trend','/api/bookings','/api/aftercare/mine','/api/quotes/mine','/api/measurements/mine','/api/shop/items'];
       const PUBLIC_POST=['/api/bookings','/api/pickups','/api/aftercare/respond','/api/as/mine','/api/outbox/subscribe'];
       const isPublic = PUBLIC_ANY.indexOf(url.pathname)>=0
         || (req.method==='POST' && /^\/api\/measure\/sessions\/[^/]+\/result$/.test(url.pathname))
@@ -69,7 +69,7 @@ async function api(req, res, url){
         if(!u) return send(res,401,{ok:false,error:'로그인이 필요해요'});
         if(u.role==='store'){
           const HQ_ONLY=['/api/sales/range','/api/pb-margin','/api/orders/status','/api/customers/move',
-            '/api/analytics','/api/forecast','/api/activity','/api/orders/push','/api/price-policy','/api/notices/new','/api/production/plan'];
+            '/api/analytics','/api/forecast','/api/activity','/api/orders/push','/api/price-policy','/api/notices/new','/api/production/plan','/api/hq/board','/api/hq/kpis'];
           const HQ_ONLY_GET_OK=['/api/price-policy']; // 권장가 조회는 가맹점도 가능, 수정은 본부만
           if(HQ_ONLY.indexOf(url.pathname)>=0 && !(req.method==='GET' && HQ_ONLY_GET_OK.indexOf(url.pathname)>=0))
             return send(res,403,{ok:false,error:'본사 전용이에요'});
@@ -321,6 +321,13 @@ async function api(req, res, url){
       const r=await db.addOutbox({channel:'구독',kind:String(b.kind||'콘택트렌즈 정기 배송').slice(0,40),store:c.store,target:c.name,count:1,body:'손님 앱 신청'},null); return send(res, r.ok?201:400, r); }
     if(req.method==='POST' && url.pathname==='/api/as/mine'){ const b=await body(req); if(!b.customer_id||!String(b.symptom||'').trim()) return send(res,400,{ok:false,error:'증상을 적어 주세요'});
       const r=await db.openASByCustomer(b.customer_id,b.symptom); return send(res, r.ok?201:400, r); }
+    // [09.24] 사업계획서 싱크: 본사 현황판·지표, 손님 앱 트렌드, 타사 테 DB, 검안 저장
+    if(req.method==='GET' && url.pathname==='/api/hq/board'){ return send(res,200, await db.hqBoard()); }
+    if(req.method==='GET' && url.pathname==='/api/hq/kpis'){ return send(res,200, await db.planKpis()); }
+    if(req.method==='GET' && url.pathname==='/api/trend'){ return send(res,200, await db.trendFrames(30)); }
+    if(req.method==='GET' && url.pathname==='/api/framedb'){ return send(res,200,{ok:true, items:await db.listFrameDb()}); }
+    if(req.method==='POST' && url.pathname==='/api/framedb'){ const b=await body(req); const r=await db.addFrameDb(b,U); return send(res, r.ok?201:400, r); }
+    if(req.method==='POST' && url.pathname==='/api/exams'){ const b=await body(req); const c=b.customer_id?await db.getCustomer(b.customer_id):null; if(c&&!scopeOK(c.store)) return send(res,403,{ok:false,error:'다른 매장 손님이에요'}); const r=await db.addExam(b,U); return send(res, r.ok?201:400, r); }
     if(req.method==='GET' && url.pathname==='/api/production/plan'){ return send(res,200, await db.productionPlan()); }
     if(req.method==='GET' && url.pathname==='/api/measurements/mine'){
       const cid=url.searchParams.get('customer_id'); if(!cid) return send(res,400,{ok:false,error:'customer_id 필요'});
