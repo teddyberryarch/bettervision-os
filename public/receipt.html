@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BETTERVISION · 의료비 영수증</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+body{font-family:'Pretendard Variable',Pretendard,sans-serif;background:#fff;color:#111;margin:0}
+.bar{display:flex;gap:10px;align-items:center;justify-content:flex-end;max-width:760px;margin:16px auto 0;padding:0 16px;font-size:17px}
+.bar select,.bar button{font:inherit;font-size:17px;padding:8px 14px;border:1px solid #ccc;border-radius:10px;background:#fff}
+.bar button{background:#111;color:#fff;border-color:#111;cursor:pointer}
+.doc{max-width:760px;margin:12px auto 40px;padding:28px 16px;box-sizing:border-box;font-size:17px;line-height:1.5}
+.brand{font-size:15px;letter-spacing:.12em;font-weight:600}
+h1{font-size:28px;font-weight:600;margin:4px 0 16px}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;border-top:1px solid #000;border-bottom:1px solid #000;padding:10px 0;margin-bottom:16px}
+.meta span{color:#555;display:inline-block;min-width:90px}
+table{width:100%;border-collapse:collapse}
+th,td{border-bottom:1px solid #ddd;padding:8px 6px;text-align:left}
+th{font-size:15px;color:#555;font-weight:600}
+td.n,th.n{text-align:right}
+.tot{display:flex;justify-content:flex-end;gap:20px;margin-top:12px;font-size:19px}
+.tot b{font-size:24px}
+.note{font-size:15px;color:#555;margin-top:20px}
+.empty{padding:24px 0;color:#555}
+@media print{ .bar{display:none} .doc{margin:0;padding:0;font-size:10pt} h1{font-size:18pt} th,.note{font-size:9pt} .tot b{font-size:14pt} }
+</style>
+</head><body>
+<div class="bar">
+  <label>연도 <select id="yr"></select></label>
+  <button onclick="window.print()">인쇄 · PDF 저장</button>
+</div>
+<div class="doc">
+  <div class="brand">BETTERVISION</div>
+  <h1>의료비 영수증 <span style="font-size:17px;color:#555">(시력 보정용)</span></h1>
+  <div class="meta">
+    <div><span>이름</span><b id="nm">-</b></div>
+    <div><span>대상 연도</span><b id="yv">-</b></div>
+    <div><span>발급일</span><b id="today">-</b></div>
+    <div><span>건수</span><b id="cnt">-</b></div>
+  </div>
+  <div id="body"><div class="empty">불러오는 중이에요.</div></div>
+  <div class="tot"><span>합계</span><b id="total">₩0</b></div>
+  <div class="note">연말정산 의료비 공제 제출용입니다. 공제 대상과 한도는 국세청 기준을 따릅니다. 내역이 다르면 구매한 매장에 말씀해 주세요.</div>
+</div>
+<script>
+var q=new URLSearchParams(location.search), cid=q.get('customer_id')||'1';
+function won(n){return '₩'+(n||0).toLocaleString('ko-KR');}
+function kst(){ var d=new Date(Date.now()+9*36e5); return d.toISOString().slice(0,10); }
+var y0=+kst().slice(0,4), sel=document.getElementById('yr');
+for(var y=y0;y>=y0-4;y--){ var o=document.createElement('option'); o.value=o.textContent=y; sel.appendChild(o); }
+sel.value=q.get('year')||y0; sel.onchange=load;
+document.getElementById('today').textContent=kst();
+function load(){
+  fetch('/api/receipts/mine?customer_id='+encodeURIComponent(cid)+'&year='+sel.value).then(function(r){return r.json();}).then(function(j){
+    if(!j.ok){ document.getElementById('body').innerHTML='<div class="empty">'+(j.error||'불러오지 못했어요')+'</div>'; return; }
+    document.getElementById('nm').textContent=j.name; document.getElementById('yv').textContent=j.year+'년';
+    document.getElementById('cnt').textContent=j.items.length+'건'; document.getElementById('total').textContent=won(j.total);
+    document.getElementById('body').innerHTML = j.items.length ? '<table><tr><th>날짜</th><th>매장</th><th>품목</th><th class="n">수량</th><th class="n">금액</th><th>결제</th></tr>'+
+      j.items.map(function(r){return '<tr><td>'+r.date+'</td><td>'+r.store+'</td><td>'+r.name+'</td><td class="n">'+r.qty+'</td><td class="n">'+won(r.amount)+'</td><td>'+(r.method||'')+'</td></tr>';}).join('')+'</table>'
+      : '<div class="empty">'+j.year+'년에 의료비로 잡힌 구매가 없어요.</div>';
+  }).catch(function(){ document.getElementById('body').innerHTML='<div class="empty">연결이 안 됐어요. 다시 시도해 주세요.</div>'; });
+}
+load();
+</script>
+</body></html>

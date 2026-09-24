@@ -397,18 +397,19 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
         <div class="priolock"><span>수입 브랜드 A 라인</span><span><b>₩470,000</b> <span class="locktag">권장가</span></span></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
           <span class="label">프로모션 'F2 가을 컬러 10%'</span>
-          <button class="btn small" onclick="toast('전 매장에 프로모션 안내 발송 · 참여는 매장 선택 (프로토타입)')">전 매장에 안내</button>
+          <button class="btn small" onclick="ntSend(this,'프로모션',&quot;프로모션 'F2 가을 컬러 10%'&quot;,'참여는 매장 선택')">전 매장에 안내</button>
         </div>
+        <div class="label" id="ntMsg" style="margin-top:6px"></div>
         <div class="note" style="margin-top:12px;font-size:15px"><b>원칙.</b> 판매가는 매장 결정. 본사는 권장가·프로모션 안내, 참여는 매장 선택.</div>
       </div>
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2)">
           <div><div style="font-size:16px">자동 발주 제안</div><div class="label">재고 임계점 도달 시 매장에 발주안 발송 · 매장이 승인해야 발주</div></div>
-          <div class="switch" onclick="this.classList.toggle('off');toast('자동 발주 제안 설정 변경 (프로토타입)')"></div>
+          <div class="switch" onclick="ntSwitch(this,'설정','자동 발주 제안')"></div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2)">
           <div><div style="font-size:16px">진열 가이드 배포</div><div class="label">이번 주 권장 진열 'F2 가을 컬러'. 적용은 매장 결정</div></div>
-          <div class="switch" onclick="this.classList.toggle('off');toast('진열 가이드 배포 변경 (프로토타입)')"></div>
+          <div class="switch" onclick="ntSwitch(this,'진열',&quot;이번 주 권장 진열 'F2 가을 컬러'&quot;)"></div>
         </div>
         <div style="padding:9px 0">
           <div style="font-size:16px;margin-bottom:6px">매장 운영 점수</div>
@@ -442,13 +443,9 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     </div>
     <div class="card pad">
       <div class="eyebrow">생산 발주 수량</div>
-      <div class="label" style="margin-bottom:6px">프론트×템플 수요 매트릭스를 부품 생산 수량으로 자동 환산.</div>
-      <div class="asm"><span>프론트 F2</span><span><b>320</b> ea 추천</span></div>
-      <div class="asm"><span>프론트 F1 / F3</span><span><b>240 / 190</b> ea</span></div>
-      <div class="asm"><span>템플 T2</span><span><b>280</b> ea 추천</span></div>
-      <div class="asm"><span>템플 T1</span><span><b>220</b> ea</span></div>
-      <div class="asm"><span>렌즈 알도 R 1.60</span><span><b>900</b> ea</span></div>
-      <button class="btn" style="margin-top:14px;width:100%" onclick="toast('부품별 생산 발주서 생성 (프로토타입)')">생산 발주서 생성</button>
+      <div class="label" style="margin-bottom:6px">매장에서 팔린 PB 테(본사 조제 대기)를 모델·사이즈별로 합산.</div>
+      <div id="ppBox"><div class="muted" style="font-size:15px">불러오는 중</div></div>
+      <button class="btn" style="margin-top:14px;width:100%" onclick="ppPrint()">생산 발주서 생성</button>
     </div>
   </div>
 
@@ -506,7 +503,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
         <div class="feat"><div class="ic">◉</div><div><div class="ft">원격 피팅 코칭 투입</div><div class="fd">QC 낮은 매장에 본사 베테랑 원격 지도.</div></div></div>
         <div class="feat"><div class="ic">⟳</div><div><div class="ft">발주 제안 보내기</div><div class="fd">결품 위험 매장에 발주안 발송. 매장이 승인하면 출고.</div></div></div>
       </div>
-      <button class="btn" style="margin-top:14px;width:100%" onclick="toast('3건 확인 요청 발송 (프로토타입)')">탐지 건 확인 요청</button>
+      <button class="btn" style="margin-top:14px;width:100%" onclick="flagSend(this)">탐지 건 확인 요청</button>
+      <div class="label" id="flagMsg" style="margin-top:6px"></div>
     </div>
   </div>
 
@@ -677,7 +675,7 @@ function storeDetail(i){const s=live[i];const hmax=Math.max(...s.hours);
   const hrs=['10','11','12','13','14','15','16','17'];
   document.getElementById('storeDetail').innerHTML=`
    <div class="sd-head"><div><div class="eyebrow" style="margin:0">매장 상세</div><div class="nm" style="font-family:var(--serif);font-size:26px">${s.n}</div><div class="statuson">${s.st} · ${s.staff}</div></div>
-     <button class="btn small" onclick="toast('${s.n} 발주 푸시 전송 (프로토타입)')">발주 푸시</button></div>
+     <button class="btn small" onclick="lowPush('${s.n}')">발주 푸시</button></div>
    <div class="sd-kpis"><div class="k"><div class="l">오늘 매출</div><div class="v">₩${s.sales}만</div></div><div class="k"><div class="l">방문 / 대기</div><div class="v">${s.visit} / ${s.wait}</div></div><div class="k"><div class="l">객단가</div><div class="v">${s.avg}</div></div></div>
    <div class="label">시간대별 매출 (10–17시)</div>
    <div class="hours">${s.hours.map((h,j)=>`<div class="hbar ${h===hmax?'now':''}" style="height:${(h/hmax*100).toFixed(0)}%"></div>`).join('')}</div>
@@ -1123,6 +1121,40 @@ function stdDeploy(kind){
 }
 calLoad(); stdLoad();
 
+</script>
+<script>
+/* ===== [09.24] 본사 → 매장 알림 · 생산 발주서 · 발주 푸시 ===== */
+function ntPost(n){ return fetch('/api/notices/new',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(n)}).then(function(r){return r.json();}); }
+function ntSend(btn,kind,title,body){ ntPost({kind:kind,title:title,body:body}).then(function(j){
+  var t=j.ok?'전 매장 오늘 할 일에 올림':(j.error||'보내지 못함'); var m=document.getElementById('ntMsg'); if(m) m.textContent=t; toast(t); }); }
+function ntSwitch(el,kind,title){ el.classList.toggle('off'); var on=!el.classList.contains('off');
+  ntPost({kind:kind,title:title+(on?' 켬':' 끔'),body:on?'적용은 매장 결정':'본사 안내 중단'}).then(function(j){ toast(j.ok?(title+(on?' 켬':' 끔')+' · 전 매장에 알림'):(j.error||'보내지 못함')); }); }
+function flagSend(btn){
+  var rows=[].slice.call(document.querySelectorAll('.flagrow .supplybad,.flagrow .supplywarn')).map(function(e){return e.textContent.replace(/^●\s*/,'');});
+  Promise.all(rows.map(function(t){ var st=t.split(' · ')[0]; return ntPost({kind:'확인 요청',title:t.split(' · ').slice(1).join(' · ')||t,body:'본사와 함께 확인',store:st}); }))
+    .then(function(rs){ var n=rs.filter(function(j){return j.ok;}).length; var t=n+'건 확인 요청을 매장 오늘 할 일에 올림'; document.getElementById('flagMsg').textContent=t; toast(t); });
+}
+var PP=null;
+function ppLoad(){ fetch('/api/production/plan').then(function(r){return r.json();}).then(function(j){ PP=j; var b=document.getElementById('ppBox'); if(!b) return;
+  b.innerHTML = (j.lines||[]).length ? j.lines.map(function(l){return '<div class="asm"><span>'+l.name+'</span><span><b>'+l.qty+'</b> ea</span></div>';}).join('')+'<div class="asm"><span>합계</span><span><b>'+j.total+'</b> ea</span></div>'
+    : '<div class="muted" style="font-size:15px">본사 조제 대기 건 없음</div>'; }).catch(function(){}); }
+function ppPrint(){ if(!PP){ toast('불러오는 중'); return; }
+  if(!(PP.lines||[]).length){ toast('본사 조제 대기 건 없음'); return; }
+  var d=new Date(Date.now()+9*36e5).toISOString().slice(0,10), w=window.open('','_blank'); if(!w){ toast('팝업이 막혔어요'); return; }
+  w.document.write('<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>생산 발주서 '+d+'</title><style>body{font-family:Pretendard,sans-serif;font-size:17px;padding:24px;color:#000}table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid #999;padding:8px;text-align:left}td.n,th.n{text-align:right}h1{font-size:26px;font-weight:600}@media print{button{display:none}}</style></head><body>'+
+    '<button onclick="print()" style="font-size:17px;padding:8px 14px">인쇄 · PDF 저장</button><h1>BETTERVISION 생산 발주서</h1><div>발행일 '+d+' · 기준: 매장 판매 후 본사 조제 대기</div><br>'+
+    '<table><tr><th>SKU</th><th>모델 · 사이즈</th><th class="n">수량</th></tr>'+PP.lines.map(function(l){return '<tr><td>'+l.sku+'</td><td>'+l.name+'</td><td class="n">'+l.qty+'</td></tr>';}).join('')+
+    '<tr><th colspan="2">합계</th><th class="n">'+PP.total+'</th></tr></table><br><div>매장별: '+Object.keys(PP.stores).map(function(k){return k+' '+PP.stores[k];}).join(' · ')+'</div></body></html>');
+  w.document.close(); }
+function lowPush(store){
+  fetch('/api/lowstock?store='+encodeURIComponent(store)+'&threshold=5').then(function(r){return r.json();}).then(function(j){
+    var it=j.items||[]; if(!it.length){ toast(store+' 부족 품목 없음'); return; }
+    var dl=new Date(Date.now()+24*36e5).toISOString();
+    Promise.all(it.map(function(x){ return fetch('/api/orders/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:store,sku:x.sku,name:x.name,cat:x.cat,qty:Math.max(5,10-x.stock),deadline:dl})}); }))
+      .then(function(){ toast(store+' '+it.length+'종 발주 제안 발송. 매장 승인 대기'); if(window.hqOrdLoad)window.hqOrdLoad(); });
+  }).catch(function(){ toast('불러오기 실패'); });
+}
+ppLoad();
 </script>
 <script src="/assets/bv-nav.js"></script>
 </body>

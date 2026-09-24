@@ -94,17 +94,19 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
     <div id="runlist">
       <div class="runitem done" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">어제 매출 마감 확인</div></div>
       <div class="runitem done" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">재고 부족 2품목 본사 발주 승인</div><span class="frombhq">본사 안내</span></div>
-      <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">재방문 권장 손님 4명 카톡 발송</div><span class="frombhq">원클릭</span></div>
+      <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">재방문 권장 손님 카톡 안내</div><span class="frombhq">원클릭</span></div>
       <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">신규 프로모션 'F2 가을 컬러' 매대 세팅 (선택)</div><span class="frombhq">본사 안내</span></div>
       <div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">안경사·일반인 오늘 스케줄 확인</div></div>
     </div>
+    <div id="noticeBox" style="margin-top:10px"></div>
     <div class="divider"></div>
     <div class="eyebrow" style="margin:0 0 2px">원클릭 마케팅 <span class="locktag">본사 제작 · 우리 동네용 자동 변환</span></div>
     <div class="mkbtns">
-      <button class="btn small" onclick="toast('성수점 단골 대상 카톡 발송 (프로토타입)')">카톡 단골 발송</button>
-      <button class="btn small ghost" onclick="toast('인스타 스토리 게시 (프로토타입)')">SNS 게시</button>
-      <button class="btn small ghost" onclick="toast('동네 전단 PDF 생성 (프로토타입)')">동네 전단</button>
+      <button class="btn small" onclick="obQuick('카카오 알림톡','단골 안내','단골')">카톡 단골 발송</button>
+      <button class="btn small ghost" onclick="obQuick('인스타그램','스토리 게시','매장 계정')">SNS 게시</button>
+      <button class="btn small ghost" onclick="flyerOpen()">동네 전단</button>
     </div>
+    <div class="label" id="obQuickMsg" style="margin-top:8px;font-size:13px"></div>
   </div>
 
   <div class="subtabs" id="subtabs" style="max-width:680px">
@@ -249,7 +251,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
           <div id="setMethods"></div>
         </div>
       </div>
-      <button class="btn small ghost" style="margin-top:12px" onclick="toast('세무 리포트 PDF 내보내기 (데모)')">세무 리포트 내보내기</button>
+      <button class="btn small ghost" style="margin-top:12px" onclick="taxExport()">세무 리포트 내보내기 (CSV)</button>
     </div>
 
     <div class="hq-grid" style="margin-top:18px">
@@ -311,18 +313,19 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- HR / 채용 -->
   <div class="stab" id="t-hr">
     <div class="eff" style="grid-template-columns:repeat(3,1fr)">
-      <div class="effcard"><div class="el">인건비 중 안경사 비중</div><div class="ev">45<small> %</small></div><div class="eb"><s>70%</s>일반인 전환·AI 보조</div></div>
-      <div class="effcard"><div class="el">안경사 1인당 일반인 보조</div><div class="ev">3<small> 명</small></div><div class="eb">처리량 64% 증가</div></div>
-      <div class="effcard"><div class="el">채용 소요일 (안경사)</div><div class="ev">9<small> 일</small></div><div class="eb"><s>40일+</s>본사 인재풀 매칭</div></div>
+      <div class="effcard"><div class="el">인건비 중 안경사 비중</div><div class="ev">—</div><div class="eb">1호점에서 확인</div></div>
+      <div class="effcard"><div class="el">안경사 1인당 일반인 보조</div><div class="ev">—</div><div class="eb">1호점에서 확인</div></div>
+      <div class="effcard"><div class="el">채용 소요일 (안경사)</div><div class="ev">—</div><div class="eb">1호점에서 확인</div></div>
     </div>
 
     <div class="store-grid">
       <div class="card pad">
         <div class="eyebrow">안경사 채용</div>
         <div class="label" style="margin-bottom:8px">본사가 안경사 지원자를 모아 매장에 연결.</div>
-        <div class="rec"><div><div class="rn">안경사 A · 경력 6년</div><div class="rd">성동/광진 · 즉시 가능 · 누진·조제 강점</div></div><button class="btn small" onclick="toast('면접 요청 전송 (프로토타입)')">매칭 요청</button></div>
-        <div class="rec"><div><div class="rn">안경사 B · 경력 3년</div><div class="rd">마포 · 2주 후 · 검안 강점</div></div><button class="btn small" onclick="toast('면접 요청 전송 (프로토타입)')">매칭 요청</button></div>
-        <div class="rec"><div><div class="rn">안경사 C · 경력 11년 (점장급)</div><div class="rd">강남 · 협의 · 매장관리 경험</div></div><button class="btn small ghost" onclick="toast('프로필 열람 (프로토타입)')">프로필</button></div>
+        <div class="rec"><div><div class="rn">안경사 A · 경력 6년 <span class="muted">(예시)</span></div><div class="rd">성동/광진 · 즉시 가능 · 누진·조제 강점</div></div><button class="btn small" onclick="obHr(this,'면접 요청','안경사 A')">매칭 요청</button></div>
+        <div class="rec"><div><div class="rn">안경사 B · 경력 3년 <span class="muted">(예시)</span></div><div class="rd">마포 · 2주 후 · 검안 강점</div></div><button class="btn small" onclick="obHr(this,'면접 요청','안경사 B')">매칭 요청</button></div>
+        <div class="rec"><div><div class="rn">안경사 C · 경력 11년 (점장급) <span class="muted">(예시)</span></div><div class="rd">강남 · 협의 · 매장관리 경험</div></div><button class="btn small ghost" onclick="obHr(this,'프로필 요청','안경사 C')">프로필 요청</button></div>
+        <div class="label" id="hrMsg" style="margin-top:8px;font-size:13px">지원자 목록은 예시. 채용 채널 연동 전이라 요청은 본사 대기함에 쌓임.</div>
         <div class="optbox" style="margin-top:14px"><b>본사 가치.</b> 공고·서류 확인은 본사. 매장은 면접만.</div>
       </div>
 
@@ -342,7 +345,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
             <div class="si">안경집·세척액 등 일반상품 판매</div>
           </div>
         </div>
-        <div class="rec" style="margin-top:10px"><div><div class="rn">BV 일반인 직무 인증 (온라인)</div><div class="rd">4개 모듈 · 수료 시 인증 발급</div></div><button class="btn small" onclick="toast('직무 교육 모듈 시작 (프로토타입)')">교육 시작</button></div>
+        <div class="rec" style="margin-top:10px"><div><div class="rn">BV 일반인 직무 인증 (온라인)</div><div class="rd">4개 모듈 · 수료 시 인증 발급</div></div><button class="btn small" onclick="obHr(this,'직무 교육 신청','일반인 직원','교육')">교육 신청</button></div>
+        <div class="label" id="eduMsg" style="margin-top:6px;font-size:13px">교육 과정 연동 전. 신청은 본사 대기함에 쌓임.</div>
         <div class="optbox" style="margin-top:12px"><b>구조.</b> 매장당 <b>안경사 1명 + 인증 일반인 다수</b>. 안경사는 검안·조제에 집중. 나머지는 직원 담당.</div>
       </div>
     </div>
@@ -394,11 +398,11 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
   <!-- 마케팅 (가맹점 자체) -->
   <div class="stab" id="t-mkt">
     <div class="lead"><div><div class="eyebrow">매장 마케팅</div><h2 style="font-size:30px">우리 매장 단골 마케팅</h2>
-      <div class="sub">매장이 단골 손님에게 카톡·문자 직접 발송.</div></div></div>
+      <div class="sub">매장이 단골 손님에게 카톡·문자 발송. 카카오·문자 연동 전이라 지금은 대기함에 기록.</div></div></div>
 
     <div class="card pad" style="margin-bottom:16px">
       <div class="eyebrow">바꿀 때가 된 단골 손님</div>
-      <div class="label" style="font-size:13px;margin:6px 0 10px">렌즈·콘택트렌즈 교체 시기 손님 자동 추출. 보내기만 누르면 발송.</div>
+      <div class="label" style="font-size:13px;margin:6px 0 10px">렌즈·콘택트렌즈 교체 시기 손님 자동 추출. 누르면 대기함에 기록 (연동 전).</div>
       <div id="autoMkBox"></div>
     </div>
 
@@ -437,7 +441,7 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 
       <!-- 이력·성과 -->
       <div class="card pad">
-        <div class="eyebrow">발송 성과 (누적)</div>
+        <div class="eyebrow">발송 대기함</div>
         <div class="mkt-kpis" id="mkKpis"></div>
         <div class="divider"></div>
         <div class="eyebrow" style="margin-bottom:6px">발송 이력</div>
@@ -613,7 +617,7 @@ function crmSel(i){
       '<div class="kv"><span class="label">최근 처방(시력)</span><span>'+(cust.rx||'-')+'</span></div>'+
       '<div class="label" style="margin:14px 0 6px">측정 기록</div><div id="measBox" class="muted" style="font-size:15px">불러오는 중</div>'+
       '<div class="label" style="margin:14px 0 6px">구매 이력 (매장·본사 전용)</div>'+histHtml+
-      '<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><a class="btn small" href="quote.html?customer='+cust.id+'">견적서 만들기</a><button class="btn small ghost" onclick="toast(\''+cust.name+'님 재방문 카톡 발송 (프로토타입)\')">카톡 발송</button></div>';
+      '<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><a class="btn small" href="quote.html?customer='+cust.id+'">견적서 만들기</a><button class="btn small ghost" onclick="obQuick(\'카카오 알림톡\',\'재방문 안내\',\''+cust.name+'\')">카톡 발송</button></div>';
   });
 }
 function toggleRun(el){el.classList.toggle('done');
@@ -799,13 +803,22 @@ function importQuote(id){
   });
 }
 
-/* ===== 매장 마케팅 (데모: 더미 세그먼트·이력) ===== */
-var MK_SEG=[];
-var MK_LOG=[
-  {date:'2026-06-05', seg:'재방문 권장', ch:'카카오', sent:16, open:11, visit:4, coupon:'렌즈 교체 10% 할인'},
-  {date:'2026-05-28', seg:'단골', ch:'카카오', sent:40, open:29, visit:9, coupon:'멤버십 첫 달 무료'},
-  {date:'2026-05-20', seg:'선글라스 관심군', ch:'문자', sent:14, open:8, visit:3, coupon:'선글라스 2만원 할인'}
-];
+/* ===== 매장 마케팅: 발송은 대기함에 기록 (카카오·문자 연동 전) ===== */
+var MK_SEG=[], MK_LOG=[];
+function mkChName(v){ return v==='문자'?'문자':'카카오 알림톡'; }
+function obPost(o){ o.store=o.store||curStore(); return fetch('/api/outbox',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(o)}).then(function(r){return r.json();}); }
+function mkLoadLog(){ return fetch('/api/outbox?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
+  MK_LOG=(j.items||[]).filter(function(x){return x.channel==='카카오 알림톡'||x.channel==='문자'||x.channel==='인스타그램';}); mkRenderKpis(); mkRenderLog(); }).catch(function(){}); }
+function obQuick(ch,kind,target){
+  obPost({channel:ch,kind:kind,target:target,count:target==='단골'?((mkSegName('단골')||{}).n||0):1,body:kind}).then(function(j){
+    var m=document.getElementById('obQuickMsg'); var t=j.ok?(ch+' '+kind+' 대기함에 기록. 연동 전이라 실제 발송은 아직 안 됨'):(j.error||'기록 실패');
+    if(m) m.textContent=t; toast(t); mkLoadLog(); });
+}
+function obHr(btn,kind,target,ch){
+  obPost({channel:ch||'채용',kind:kind,target:target,count:1,body:kind}).then(function(j){
+    if(!j.ok){ toast(j.error||'기록 실패'); return; } btn.textContent='요청함 · 연동 전'; btn.disabled=true;
+    toast(kind+' 본사 대기함에 기록'); });
+}
 function mkSegName(id){for(var i=0;i<MK_SEG.length;i++)if(MK_SEG[i].id===id)return MK_SEG[i];}
 function mkChVal(){var a=document.querySelector('#mkCh .chip.active');return a?a.dataset.v:'카카오';}
 (function(){
@@ -835,30 +848,65 @@ function mkTemplate(t){
 function mkSend(){
   var seg=mkSegName(document.getElementById('mkTarget').value), body=document.getElementById('mkBody').value.trim();
   if(!body){toast('내용 입력 필요');return;}
-  var ch=mkChVal(), cp=document.getElementById('mkCoupon').value, sent=seg?seg.n:0;
-  var open=Math.round(sent*(0.6+Math.random()*0.15)), visit=Math.round(open*(0.25+Math.random()*0.1));
-  var d=new Date(); var iso=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
-  MK_LOG.unshift({date:iso, seg:seg?seg.name:'-', ch:ch, sent:sent, open:open, visit:visit, coupon:cp});
-  document.getElementById('mkBody').value=''; mkPrevUpd(); mkRenderKpis(); mkRenderLog();
-  toast(ch+' '+sent+'명 발송 완료 (프로토타입)');
+  var ch=mkChName(mkChVal()), cp=document.getElementById('mkCoupon').value, n=seg?seg.n:0;
+  obPost({channel:ch,kind:seg?seg.name:'-',target:cp?('쿠폰: '+cp):'',count:n,body:body}).then(function(j){
+    if(!j.ok){ toast(j.error||'기록 실패'); return; }
+    document.getElementById('mkBody').value=''; mkPrevUpd(); mkLoadLog();
+    toast(ch+' '+n+'명 대기함에 기록. 연동 전이라 실제 발송은 아직 안 됨');
+  });
 }
 function mkRenderKpis(){
-  var sent=MK_LOG.reduce(function(a,l){return a+l.sent;},0);
-  var open=MK_LOG.reduce(function(a,l){return a+l.open;},0);
-  var visit=MK_LOG.reduce(function(a,l){return a+l.visit;},0);
-  var orate=sent?Math.round(open/sent*100):0, vrate=sent?Math.round(visit/sent*100):0;
+  var n=MK_LOG.reduce(function(a,l){return a+(l.count||0);},0);
   document.getElementById('mkKpis').innerHTML=
-    '<div class="mk"><div class="v">'+sent+'</div><div class="l">총 발송</div></div>'+
-    '<div class="mk"><div class="v">'+orate+'%</div><div class="l">열람률</div></div>'+
-    '<div class="mk"><div class="v">'+vrate+'%</div><div class="l">방문 전환</div></div>';
+    '<div class="mk"><div class="v">'+MK_LOG.length+'</div><div class="l">대기 건수</div></div>'+
+    '<div class="mk"><div class="v">'+n+'</div><div class="l">대상 인원</div></div>'+
+    '<div class="mk"><div class="v">-</div><div class="l">열람·방문은 연동 후 집계</div></div>';
 }
 function mkRenderLog(){
-  document.getElementById('mkLog').innerHTML=MK_LOG.map(function(l){
-    return '<div class="mklog-row"><div class="top"><span>'+l.seg+' <span class="muted">· '+l.ch+'</span></span><span class="muted">'+l.date+'</span></div>'+
-      '<div class="meta">발송 '+l.sent+' · 열람 '+l.open+' · 방문 '+l.visit+(l.coupon?(' · 쿠폰: '+l.coupon):'')+'</div></div>';
-  }).join('');
+  document.getElementById('mkLog').innerHTML = MK_LOG.length ? MK_LOG.map(function(l){
+    return '<div class="mklog-row"><div class="top"><span>'+(l.kind||'-')+' <span class="muted">· '+l.channel+'</span></span><span class="muted">'+String(l.created_at||'').slice(0,10)+'</span></div>'+
+      '<div class="meta">대상 '+(l.count||0)+'명'+(l.target?(' · '+l.target):'')+' · <b>'+(l.status||'연동 전')+'</b></div></div>';
+  }).join('') : '<div class="muted" style="font-size:14px">아직 보낸 메시지 없음. 카카오·문자 연동 전이라 발송은 대기함에 기록됨.</div>';
 }
+(function(){ var s=document.getElementById('posStore'); if(s) s.addEventListener('change',function(){ mkLoadLog(); ntLoad(); }); setTimeout(function(){ mkLoadLog(); ntLoad(); },300); })();
 
+/* ===== 본사 알림 (오늘 할 일) ===== */
+function ntLoad(){ var box=document.getElementById('noticeBox'); if(!box) return;
+  fetch('/api/notices?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
+    var it=(j.items||[]).slice(0,5);
+    box.innerHTML = it.length ? '<div class="eyebrow" style="margin:0 0 4px">본사 알림</div>'+it.map(function(n){
+      return '<div class="runitem" onclick="toggleRun(this)"><div class="check">✓</div><div class="rtext">'+n.title+(n.body?(' <span class="muted">· '+n.body+'</span>'):'')+'</div><span class="frombhq">'+n.kind+'</span></div>'; }).join('') : '';
+  }).catch(function(){}); }
+
+/* ===== 세무 리포트 CSV · 동네 전단 ===== */
+var SET_LAST=null;
+function taxExport(){
+  var y=finYM.y, m=finYM.m, from=y+'-'+pad(m+1)+'-01', to=y+'-'+pad(m+1)+'-'+pad(new Date(y,m+1,0).getDate()), st=finStoreVal();
+  fetch('/api/settlement?store='+encodeURIComponent(st)+'&from='+from+'&to='+to).then(function(r){return r.json();}).then(function(j){
+    var rows=[['매장',st],['기간',from+' ~ '+to],[],['항목','금액'],['순매출(환불 차감 후)',j.net],['환불 합계',j.refunds],['부가세 추정(합계/11)',j.vat],['의료비 공제 대상',j.medical],[],['결제수단','금액']];
+    (j.methods||[]).forEach(function(x){ rows.push([x.method,x.amt]); });
+    rows.push([]); rows.push(['일자','매출']); Object.keys(finDaily).sort().forEach(function(d){ rows.push([d,finDaily[d]]); });
+    var csv='\ufeff'+rows.map(function(r){return r.map(function(v){v=v==null?'':String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}).join(',');}).join('\r\n');
+    var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='세무리포트_'+st+'_'+y+pad(m+1)+'.csv'; document.body.appendChild(a); a.click(); a.remove();
+    toast('세무 리포트 CSV 저장');
+  }).catch(function(){ toast('불러오기 실패'); });
+}
+function flyerOpen(){
+  var st=curStore(), w=window.open('','_blank'); if(!w){ toast('팝업이 막혔어요. 팝업 허용 후 다시'); return; }
+  w.document.write('<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>동네 전단 · '+st+'</title>'+
+    '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">'+
+    '<style>@page{size:A4;margin:14mm}body{font-family:"Pretendard Variable",Pretendard,sans-serif;color:#000;margin:0;padding:24px;font-size:17px;line-height:1.5}'+
+    '.b{font-size:14px;letter-spacing:.14em;font-weight:600}h1{font-size:40px;font-weight:600;margin:40px 0 12px;line-height:1.2}'+
+    '.box{border:1px solid #000;padding:16px 18px;margin:12px 0}.box b{font-size:19px}.f{border-top:1px solid #000;margin-top:40px;padding-top:12px}'+
+    '.bar{margin-bottom:16px}@media print{.bar{display:none}body{padding:0}}</style></head><body>'+
+    '<div class="bar"><button onclick="print()" style="font-size:17px;padding:8px 14px">인쇄 · PDF 저장</button></div>'+
+    '<div class="b">BETTERVISION '+st+'</div><h1>얼굴을 재고 맞는 테만 권합니다</h1>'+
+    '<div class="box"><b>얼굴 측정</b><br>얼굴 폭, 코 높이, 귀 위치를 재서 맞는 사이즈부터 찾아요.</div>'+
+    '<div class="box"><b>7일째 확인</b><br>맞춘 뒤 7일째에 잘 보이는지, 흘러내리지 않는지 물어봐요.</div>'+
+    '<div class="box"><b>견적 먼저</b><br>테와 렌즈 가격을 견적서로 먼저 보여드려요.</div>'+
+    '<div class="f">BETTERVISION '+st+' · 방문 예약은 손님 앱에서</div></body></html>');
+  w.document.close();
+}
 /* ===== 재무: 월별 일매출 달력 (서버 API) ===== */
 var finYM, finDaily={};
 function finWon(n){ if(n>=10000) return Math.round(n/10000)+'만'; return n?(''+Math.round(n/1000)+'천'):''; }
@@ -957,39 +1005,13 @@ function autoMkLoad(){
   }).catch(function(){box.innerHTML='<div class="muted" style="font-size:14px">불러오기 실패</div>';});
 }
 function autoMkSend(i){var c=AUTO_MK[i]; if(!c)return;
-  MK_LOG.unshift({date:_mkToday(),seg:'교체주기 자동('+c.name+')',ch:'카카오',sent:1,open:1,visit:0,coupon:'렌즈 교체 10% 할인'});
-  mkRenderKpis(); mkRenderLog(); toast(c.name+'님 교체 안내 카톡 예약 발송 (데모)');
+  obPost({channel:'카카오 알림톡',kind:'교체 안내',target:c.name,count:1,body:'교체 시기 안내'}).then(function(j){ mkLoadLog(); toast(j.ok?c.name+'님 교체 안내 대기함에 기록 (연동 전)':(j.error||'기록 실패')); });
 }
 function autoMkSendAll(){ if(!AUTO_MK.length)return;
   var n=AUTO_MK.length;
-  MK_LOG.unshift({date:_mkToday(),seg:'교체주기 자동 일괄',ch:'카카오',sent:n,open:Math.round(n*0.72),visit:Math.round(n*0.22),coupon:'렌즈 교체 10% 할인'});
-  mkRenderKpis(); mkRenderLog(); toast(n+'명 교체주기 자동 카톡 예약 발송 완료 (데모)');
+  obPost({channel:'카카오 알림톡',kind:'교체 안내 일괄',target:AUTO_MK.map(function(c){return c.name;}).join(', '),count:n,body:'교체 시기 안내'}).then(function(j){ mkLoadLog(); toast(j.ok?n+'명 교체 안내 대기함에 기록 (연동 전)':(j.error||'기록 실패')); });
 }
 (function(){ if(document.getElementById('autoMkBox')) autoMkLoad(); })();
-
-/* ===== 검안 기반 자동 견적 ===== */
-function _rxMax(rx){ // "OD -3.25 / OS -3.50" -> 3.50
-  if(!rx)return 0; var nums=(rx.match(/-?\d+(\.\d+)?/g)||[]).map(function(x){return Math.abs(parseFloat(x));});
-  return nums.length? Math.max.apply(null,nums):0;
-}
-function _idxByRx(d){ if(d<=2)return {idx:'1.50',p:50000}; if(d<=3)return {idx:'1.56',p:80000}; if(d<=4)return {idx:'1.60',p:110000}; if(d<=6)return {idx:'1.67',p:150000}; return {idx:'1.74',p:210000}; }
-function autoQuote(){
-  var c=CRM_CUR; if(!c){toast('손님 먼저 선택');return;}
-  var d=_rxMax(c.rx); var lens=_idxByRx(d);
-  var sizeF=(c.size||'F2×T2').split('×')[0]||'F2';
-  var frameName='로마 ACE-02 ('+sizeF+')', framePrice=189000;
-  var coat=20000; // 멀티코팅 기본(가정), 고도수면 박막 권장 문구
-  var total=framePrice+lens.p+coat;
-  var hi=d>=4;
-  document.getElementById('autoQuote').innerHTML=
-    '<div class="optbox">검안 기록 기반 견적. 처방 최대 '+d.toFixed(2)+'D → 굴절률 '+lens.idx+' 권장'+(hi?'. 고도수라 얇은 렌즈 권장':'')+'. 사이즈 '+(c.size||'-')+'에는 '+frameName+' 적합.</div>'+
-    '<div class="pl-row"><span>테 · '+frameName+'</span><span>₩'+framePrice.toLocaleString('ko-KR')+'</span></div>'+
-    '<div class="pl-row"><span>렌즈 · '+lens.idx+' (PB)</span><span>₩'+lens.p.toLocaleString('ko-KR')+'</span></div>'+
-    '<div class="pl-row"><span>멀티코팅</span><span>₩'+coat.toLocaleString('ko-KR')+'</span></div>'+
-    '<div class="pl-row" style="border-top:2px solid var(--ink);margin-top:4px;padding-top:8px"><b>예상 견적</b><b>₩'+total.toLocaleString('ko-KR')+'</b></div>'+
-    '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn small" onclick="toast(\''+c.name+'님 견적서 발행·POS 담기 (데모)\')">견적서 발행 · POS 담기</button></div>'+
-    '<div class="label" style="font-size:13px;margin-top:6px">검안·측정 기록 있음. 확인 후 조제만.</div>';
-}
 
 /* ===== 자동 정산·세무 리포트 ===== */
 function settleLoad(from, to){

@@ -158,7 +158,7 @@
             <div class="appcard ar">
               <h4>AR 가상 피팅 <span class="pill" style="background:rgba(255,255,255,.14);color:#ffffff">NEW</span></h4>
               <div class="label" style="margin:8px 0 14px">얼굴에 씌워보고 골라요. 내 사이즈 F2×T2에 맞는 테만 보여드려요.</div>
-              <button class="btn small" style="background:#ffffff;color:#111111;border-color:#ffffff" onclick="toast('AR 피팅 실행 (프로토타입)')">가상으로 써보기</button>
+              <button class="btn small" style="background:#ffffff;color:#111111;border-color:#ffffff" onclick="goTryOn()">가상으로 써보기</button>
             </div>
             <div class="appcard">
               <h4>내 사이즈 추천 <span class="label">F2×T2 매칭</span></h4>
@@ -172,8 +172,9 @@
               <div class="mrow"><span>AS·파손 보험 / 정기검사</span><span>포함</span></div>
               <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
                 <div><div class="label">월 멤버십</div><div style="font-size:20px" class="kfig">₩9,900<small style="font-size:14px"> / 월</small></div></div>
-                <button class="btn small" style="background:#ffffff;color:#111111;border-color:#ffffff" onclick="toast('첫 달 무료 시작 (프로토타입)')">첫 달 무료</button>
+                <button class="btn small" style="background:#ffffff;color:#111111;border-color:#ffffff" onclick="subStart()">첫 달 무료</button>
               </div>
+              <div class="label" id="subMsg" style="display:none;margin-top:10px;color:#ffffff"></div>
             </div>
             <div class="appcard">
               <h4>매장 방문 예약 <span class="pill">검안 · 픽업</span></h4>
@@ -370,9 +371,21 @@
               <div class="kv" style="border-bottom:1px solid var(--line2)"><span class="label">로마 클래식 ACE-02</span><span>보증 D+312 / 730일</span></div>
               <div class="kv" style="border-bottom:0"><span class="label">멤버십 파손 보험</span><span style="color:var(--good)">적용 중</span></div>
               <div style="display:flex;gap:8px;margin-top:12px">
-                <button class="btn small" onclick="toast('AS 접수 (프로토타입)')">AS 접수</button>
-                <button class="btn small ghost" onclick="toast('의료비 공제 영수증 다운로드 (프로토타입)')">의료비 영수증</button>
+                <button class="btn small" onclick="asOpen()">AS 접수</button>
+                <button class="btn small ghost" onclick="window.open('receipt.html?customer_id='+DEMO_CUSTOMER_ID,'_blank')">의료비 영수증</button>
               </div>
+              <div id="asBox" style="display:none;margin-top:12px">
+                <div class="label" style="margin-bottom:6px">어디가 불편한지 적어 주세요</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+                  <button class="btn small ghost" onclick="asPick(this)">코받침이 아파요</button>
+                  <button class="btn small ghost" onclick="asPick(this)">흘러내려요</button>
+                  <button class="btn small ghost" onclick="asPick(this)">나사가 풀렸어요</button>
+                  <button class="btn small ghost" onclick="asPick(this)">렌즈 흠집</button>
+                </div>
+                <textarea id="asText" rows="2" style="width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:10px;border:1px solid var(--line2);border-radius:10px"></textarea>
+                <button class="btn small" style="width:100%;margin-top:8px" onclick="asSend()">접수하기</button>
+              </div>
+              <div class="bookmsg" id="asMsg"></div>
             </div>
 
             <div class="appcard">
@@ -773,7 +786,32 @@ function reorder(){
   var total=CART.reduce(function(a,it){return a+it.price*it.q;},0);
   var cnt=CART.reduce(function(a,it){return a+it.q;},0);
   if(cnt===0){toast('수량을 1개 이상 골라주세요'); return;}
-  toast('재주문 '+cnt+'개 · '+won(total)+' 접수 (프로토타입)');
+  var items=CART.filter(function(it){return it.q>0;}).map(function(it){return it.n+' ×'+it.q;}).join(', ');
+  var t=new Date(Date.now()+2*864e5), date=new Date(t.getTime()-t.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  fetch('/api/pickups',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:'성수점',customerId:DEMO_CUSTOMER_ID,name:'윤서진',phone:'010-0000-0001',kind:'C',items:items,rx:'',date:date,time:'',payType:'매장결제',amount:total,deposit:0})})
+    .then(function(r){return r.json();}).then(function(j){
+      if(!j.ok){ toast('주문하지 못했어요'); return; }
+      toast('성수점에 '+cnt+'개 주문했어요. 준비되면 알려드릴게요');
+    }).catch(function(){ toast('연결이 안 됐어요. 다시 시도해 주세요'); });
+}
+/* ===== [09.24] AS 접수 · 멤버십 ===== */
+function asOpen(){ var b=document.getElementById('asBox'); b.style.display=b.style.display==='none'?'block':'none'; }
+function asPick(el){ var t=document.getElementById('asText'); t.value=(t.value?t.value+', ':'')+el.textContent; }
+function asSend(){
+  var v=document.getElementById('asText').value.trim(); if(!v){ toast('불편한 곳을 적어 주세요'); return; }
+  fetch('/api/as/mine',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({customer_id:DEMO_CUSTOMER_ID,symptom:v})})
+    .then(function(r){return r.json();}).then(function(j){
+      if(!j.ok){ toast(j.error||'접수하지 못했어요'); return; }
+      document.getElementById('asBox').style.display='none'; document.getElementById('asText').value='';
+      var m=document.getElementById('asMsg'); m.className='bookmsg show'; m.textContent='AS를 접수했어요. 매장에서 연락드릴게요. (접수 번호 '+j.id+')';
+    }).catch(function(){ toast('연결이 안 됐어요. 다시 시도해 주세요'); });
+}
+function subStart(){
+  fetch('/api/outbox/subscribe',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({customer_id:DEMO_CUSTOMER_ID,kind:'멤버십 첫 달 무료'})})
+    .then(function(r){return r.json();}).then(function(j){
+      var m=document.getElementById('subMsg'); m.style.display='block';
+      m.textContent=j.ok?'신청을 받았어요. 결제 연동 전이라 매장에서 시작을 도와드려요.':'신청하지 못했어요. 다시 시도해 주세요';
+    }).catch(function(){ toast('연결이 안 됐어요. 다시 시도해 주세요'); });
 }
 renderCart();
 
@@ -1046,6 +1084,7 @@ function simOrder(){
   renderCat('frame');
 })();
 
+function goTryOn(){ var t=document.querySelector('.ptab[data-s="measure"]'); if(t) t.click(); setTimeout(function(){ var c=document.getElementById('tryonCard'); if(c) c.scrollIntoView({behavior:'smooth',block:'center'}); },80); }
 function goProducts(){var t=document.querySelector('.ptab[data-s="products"]'); if(t)t.click(); window.scrollTo({top:0,behavior:'smooth'});}
 
 /* ===== 위시리스트 & 재구매 알림 (세션 메모리) ===== */
