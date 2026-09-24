@@ -139,6 +139,12 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
 
   <!-- ERP + POS -->
   <div class="stab" id="t-erp">
+    <!-- [09.24] 앱 주문 · 방문 예약 -->
+    <div class="card pad" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center"><div class="eyebrow" style="margin:0">앱 주문 · 방문 예약 <span id="pkCount" class="muted"></span></div></div>
+      <div class="label" style="margin:6px 0 10px">앱으로 들어온 주문은 가공하고 피팅한 뒤 건네요. 결제는 건넬 때 해요.</div>
+      <div id="pkList"></div>
+    </div>
     <div class="eyebrow">도입 전후 비교 (성수점)</div>
     <div class="eff">
       <div class="effcard"><div class="el">안경사 1인 일 처리</div><div class="ev">18<small> 건/일</small></div><div class="eb"><s>11건</s>▲ 64%</div></div>
@@ -538,6 +544,28 @@ function asClose(id){
     .then(function(r){return r.json();}).then(function(j){ if(!j.ok){toast(j.error||'종결 실패');return;} toast('종결했어요 · 원인 '+cause); careLoad(); });
 }
 document.querySelector('.subtab[data-t="care"]').addEventListener('click',careLoad);
+/* ===== [09.24] 앱 주문 · 방문 예약 ===== */
+var PK_NEXT={'주문 접수':'가공 중','가공 중':'피팅 대기','피팅 대기':'건넴','예약':'방문완료'};
+var PK_BTN={'주문 접수':'가공 시작','가공 중':'가공 끝','피팅 대기':'피팅하고 건넴','예약':'방문함'};
+function pkLoad(){
+  var box=document.getElementById('pkList'); if(!box) return;
+  fetch('/api/pickups?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
+    var items=(j.pickups||[]).filter(function(x){return x.status!=='건넴'&&x.status!=='방문완료'&&x.status!=='취소';});
+    document.getElementById('pkCount').textContent='· '+items.length+'건';
+    box.innerHTML=items.map(function(x){
+      var kind=x.kind==='R'?'<span class="pill good">기록으로 주문</span>':(x.kind==='A'?'<span class="pill">도수 예약</span>':'<span class="pill">잡아두기</span>');
+      var nx=PK_NEXT[x.status];
+      return '<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line2)">'+
+        '<span>'+kind+' '+_esc(x.name)+' <span class="muted">'+_esc(x.items)+(x.rx?' · '+_esc(x.rx):'')+' · '+(x.date||'')+(x.time?' '+x.time:'')+'</span></span>'+
+        '<span style="display:flex;gap:6px;align-items:center;white-space:nowrap"><span class="pill warn">'+x.status+'</span>'+(nx?'<button class="btn small" onclick="pkNext('+x.id+',\''+nx+'\')">'+PK_BTN[x.status]+'</button>':'')+'</span></div>';
+    }).join('')||'<div class="muted">지금 들어온 주문이 없어요</div>';
+  }).catch(function(){});
+}
+function pkNext(id, st){
+  fetch('/api/pickups/status',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:id,status:st})}).then(function(r){return r.json();}).then(function(){
+    toast(st==='건넴'?'건넸어요. 결제는 POS에서 해요':st+'(으)로 바꿨어요'); pkLoad(); });
+}
+document.querySelector('.subtab[data-t="erp"]').addEventListener('click',pkLoad); setTimeout(function(){ pkLoad(); var ps=document.getElementById('posStore'); if(ps) ps.addEventListener('change',pkLoad); },600);
 if(location.hash==='#care'){ var _ct=document.querySelector('.subtab[data-t="care"]'); if(_ct) _ct.click(); }
 var CRM_LIST=[], CRM_CUR=null;
 function dotName(st){return st==='재방문'?'재방문':st==='신규'?'신규':'안정';}

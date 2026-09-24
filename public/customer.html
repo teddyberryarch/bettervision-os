@@ -265,6 +265,23 @@
               <button class="btn small ghost" style="width:100%;margin-top:10px" onclick="goProducts()">전체 상품 보기</button>
             </div>
 
+            <!-- [09.24] 기록으로 다시 주문 (사업계획서 §5.4 앱 주문) -->
+            <div class="appcard" id="reordCard">
+              <h4>내 기록으로 다시 주문</h4>
+              <div class="label" style="margin:6px 0 10px">저장된 사이즈와 마지막 처방으로 주문해요. 매장에서 가공하고 피팅한 뒤 찾아가요. 결제는 매장에서 해요.</div>
+              <div class="kv"><span class="label">내 사이즈</span><span id="roSize">-</span></div>
+              <div class="kv"><span class="label">마지막 처방</span><span id="roRx">-</span></div>
+              <div class="label" style="margin:11px 0 4px">안경테</div>
+              <select id="roFrame" class="finput"><option>로마 클래식</option><option>로마 슬림</option><option>로마 와이드</option><option>로마 라운드</option><option>수입 A 라인 티타늄</option><option>국산 B 라인 아세테이트</option></select>
+              <div class="label" style="margin:11px 0 4px">렌즈</div>
+              <select id="roLens" class="finput"><option>알도R 1.60 렌즈</option><option>청광 렌즈</option><option>변색 렌즈</option><option>누진 렌즈</option></select>
+              <div class="label" style="margin:11px 0 4px">찾아갈 매장과 날짜</div>
+              <select id="roStore" class="finput"><option>성수점</option><option>홍대점</option><option>판교점</option></select>
+              <input type="date" id="roDate" class="finput" style="margin-top:6px">
+              <button class="btn" style="width:100%;margin-top:11px" onclick="roSend()">주문하기</button>
+              <div id="roMsg" class="bookmsg"></div>
+              <div class="label" style="margin-top:8px">처방이 1년 넘게 지났으면 매장에서 다시 검사하고 만들어요. 앱 주문이 어디까지 허용되는지는 법률 확인 중이에요.</div>
+            </div>
             <div class="appcard" id="ordCard">
               <h4>주문 / 픽업</h4>
               <div class="label" style="margin:6px 0 8px">도수 안경과 콘택트렌즈는 매장에서 결제해요. 앱에서는 예약만 하고 소액 보증금을 받아요. 방문하면 결제 금액에서 빼드려요.</div>
@@ -304,6 +321,12 @@
                 <input id="ccNote" class="finput" placeholder="더 적을 게 있으면 한 줄로 (선택)" style="width:100%;margin-top:10px;font-size:15px;padding:10px">
                 <button class="btn small" style="margin-top:10px;width:100%" onclick="ccSend()">보내기</button>
               </div>
+            </div>
+            <!-- [09.24] 시력 변화 · 다음 검사 (사업계획서 §5.4, §10.2) -->
+            <div class="appcard" id="visionCard">
+              <h4>시력 변화와 다음 검사</h4>
+              <div class="label" style="margin:6px 0 4px">검사할 때마다 기록이 쌓여요. 가족 기록도 같이 봐요.</div>
+              <div id="visionBox"><div class="label">불러오는 중이에요</div></div>
             </div>
             <div class="appcard" id="remindCard">
               <h4>재구매 알림 </h4>
@@ -741,6 +764,58 @@ renderCart();
   }).catch(function(){});
 })();
 
+/* ===== [09.24] 시력 변화 · 다음 검사 ===== */
+var VISION=null;
+function seChart(ex){
+  var W=300,H=110,px=44,py=16, v=ex.map(function(e){return e.se;}), mn=Math.min.apply(null,v), mx=Math.max.apply(null,v);
+  if(mx-mn<0.5){ mn-=0.25; mx+=0.25; }
+  var x=function(i){return px+(W-px-10)*(ex.length<2?0.5:i/(ex.length-1));}, y=function(s){return py+(H-py*2)*(mx-s)/(mx-mn);};
+  var pts=ex.map(function(e,i){return x(i).toFixed(1)+','+y(e.se).toFixed(1);}).join(' ');
+  var g='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;margin:8px 0 4px">';
+  g+='<line x1="'+px+'" y1="'+(H-py)+'" x2="'+(W-10)+'" y2="'+(H-py)+'" stroke="var(--t-200,#E5E8EB)"/>';
+  g+='<polyline points="'+pts+'" fill="none" stroke="var(--t-navy,#1F3A5F)" stroke-width="2"/>';
+  ex.forEach(function(e,i){ g+='<circle cx="'+x(i).toFixed(1)+'" cy="'+y(e.se).toFixed(1)+'" r="3.5" fill="var(--t-navy,#1F3A5F)"/>'; });
+  g+='<text x="0" y="'+(y(v[0])+4).toFixed(1)+'" font-size="13" fill="#6B7684">'+v[0].toFixed(2)+'</text>';
+  g+='<text x="'+(W-4)+'" y="'+(Math.max(10,y(v[v.length-1])-8)).toFixed(1)+'" font-size="13" fill="#191F28" text-anchor="end">'+v[v.length-1].toFixed(2)+'</text>';
+  return g+'</svg><div style="display:flex;justify-content:space-between;font-size:13px;color:#8B95A1"><span>'+ex[0].date.slice(0,7)+'</span><span>'+ex[ex.length-1].date.slice(0,7)+'</span></div>';
+}
+function vmd(iso){ var p=iso.split('-'); return (+p[0]!==new Date().getFullYear()?p[0]+'년 ':'')+(+p[1])+'월 '+(+p[2])+'일'; }
+function visionLoad(){
+  fetch('/api/customers/'+DEMO_CUSTOMER_ID+'/vision').then(function(r){return r.json();}).then(function(j){
+    VISION=j; var box=document.getElementById('visionBox'); if(!box) return;
+    var ms=j.members||[]; if(!ms.length){ box.innerHTML='<div class="label">아직 검사 기록이 없어요. 매장에서 검사하면 여기에 쌓여요.</div>'; return; }
+    box.innerHTML=ms.map(function(m){
+      var who=m.member==='본인'?'나':m.member.replace(/^딸 |^아들 /,'');
+      var trend = m.perYear==null ? '' : (m.grp==='노안·누진'
+        ? '가까이 보는 도수(ADD)가 '+m.exams[0].ADD.toFixed(2)+'에서 '+m.exams[m.exams.length-1].ADD.toFixed(2)+'로 바뀌었어요.'
+        : (m.perYear<=-0.1 ? '1년에 '+Math.abs(m.perYear).toFixed(2)+'D씩 근시가 늘었어요.' : '도수가 거의 그대로예요.'));
+      return '<div style="border-top:1px solid var(--line2);padding:12px 0">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:16px">'+who+'</b><span class="pill">'+m.grp+' · '+m.months+'개월마다 검사</span></div>'+
+        seChart(m.exams)+
+        '<div class="label" style="margin-top:6px">'+trend+' 검사 '+m.exams.length+'번의 평균 도수(SE)예요.</div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><span style="font-size:15px">다음 검사 <b>'+vmd(m.next)+'</b>'+(m.due?' <span class="pill warn">지났어요</span>':'')+'</span>'+
+        '<button class="btn small'+(m.due?'':' ghost')+'" style="white-space:nowrap" onclick="visionBook()">예약하기</button></div></div>';
+    }).join('');
+    var me=ms.find(function(m){return m.member==='본인';}); if(me){ var l=me.exams[me.exams.length-1]; var f=function(o){return (o.S>0?'+':'')+o.S.toFixed(2)+(o.C?' '+o.C.toFixed(2):'');};
+      var el=document.getElementById('roRx'); if(el) el.textContent='R '+f(l.R)+' / L '+f(l.L)+' ('+l.date.slice(0,7)+')'; }
+  }).catch(function(){});
+}
+function visionBook(){ var t=document.querySelector('.ptab[data-s="home"]'); if(t) t.click(); var b=document.getElementById('bkStore'); if(b) setTimeout(function(){ b.scrollIntoView({behavior:'smooth',block:'center'}); },80); }
+visionLoad();
+/* ===== [09.24] 기록으로 다시 주문 ===== */
+(function(){ var d=document.getElementById('roDate'); if(!d) return; var t=new Date(Date.now()+3*864e5); var iso=new Date(t.getTime()-t.getTimezoneOffset()*60000).toISOString().slice(0,10); d.value=iso; d.min=iso;
+  fetch('/api/customer?id='+DEMO_CUSTOMER_ID).then(function(r){return r.json();}).then(function(j){ if(j.ok&&j.customer&&j.customer.size){ document.getElementById('roSize').textContent=j.customer.size; } }).catch(function(){}); })();
+function roSend(){
+  var frame=document.getElementById('roFrame').value, lens=document.getElementById('roLens').value, store=document.getElementById('roStore').value, date=document.getElementById('roDate').value;
+  var size=document.getElementById('roSize').textContent, rx=document.getElementById('roRx').textContent;
+  if(!date){ toast('찾아갈 날짜를 골라 주세요'); return; }
+  fetch('/api/pickups',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({store:store,customerId:DEMO_CUSTOMER_ID,name:'윤서진',phone:'010-0000-0001',kind:'R',items:frame+' ('+size+') + '+lens,rx:rx,date:date,time:'',payType:'매장결제',amount:0,deposit:0})})
+    .then(function(r){return r.json();}).then(function(j){
+      if(!j.ok){ toast('주문하지 못했어요'); return; }
+      var m=document.getElementById('roMsg'); m.className='bookmsg show'; m.textContent=store+'에 주문했어요. 가공과 피팅이 끝나면 알려드릴게요. '+vmd(date)+'에 찾아가서 결제해요.';
+      toast('주문했어요');
+    }).catch(function(){ toast('연결이 안 됐어요. 다시 시도해 주세요'); });
+}
 /* ===== 주문 / 픽업 ===== */
 var ORD_SLOTS=['10:00','11:00','14:00','16:00','18:00'];
 var ORD_DEPOSIT=10000;
