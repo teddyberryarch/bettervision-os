@@ -879,9 +879,10 @@ function _eyeCalc(e, monoPD, sp){
   return {S:e.S,C:e.C||0,A:e.A||0,se:Math.round(se*100)/100,pd:monoPD,dec:dec,ocH:Math.round(sp.B/2*10)/10,ed:ED,mbs:mbs,idx:n.toFixed(2),edge:edge};
 }
 function judgeFrame(c, rx, sp, pb){
-  var face=_num1(c.face), pd=_num1(c.pd)||63, t=(String(c.size||'').match(/T(\d)/)||[])[1], need=[140,145,150][(+t||2)-1];
+  var face=_num1(c.face), pd=_num1(c.pd)||63, t=(String(c.size||'').match(/T(\d)/)||[])[1], need=c.templeLen?Math.round(+c.templeLen/5)*5:[140,145,150][(+t||2)-1];
+  if(c.templeLen && !t) t=need<=140?1:(need>=150?3:2);
   var frameW=2*sp.a+sp.dbl+14, fd=face!=null?Math.round(frameW-face):0, td=sp.temple-need;
-  var R=_eyeCalc(rx.R,pd/2,sp), L=_eyeCalc(rx.L,pd/2,sp), mbs=Math.max(R.mbs,L.mbs);
+  var R=rx?_eyeCalc(rx.R,pd/2,sp):null, L=rx?_eyeCalc(rx.L,pd/2,sp):null, mbs=rx?Math.max(R.mbs,L.mbs):0;
   var lv=0, why=[];
   function mark(l,t){ if(l>lv) lv=l; if(l>0) why.push(t); }
   var af=Math.abs(fd);
@@ -889,7 +890,7 @@ function judgeFrame(c, rx, sp, pb){
   var at=Math.abs(td);
   if(pb && at>0){ why.push('PB라 다리를 T'+(+t||2)+' 길이로 바꿔 조립해요'); at=0; td=0; }
   mark(at<=JUDGE_RULE.temple[0]?0:(at<=JUDGE_RULE.temple[1]?1:2), '다리가 '+at+'mm '+(td>0?'길어요':'짧아요')+(at<=JUDGE_RULE.temple[1]?'. 다리 끝 굽힘으로 맞춰요':''));
-  mark(mbs<=JUDGE_RULE.blank[0]?0:(mbs<=JUDGE_RULE.blank[1]?1:2), '최소 블랭크 '+mbs+'mm'+(mbs<=JUDGE_RULE.blank[1]?'. 큰 블랭크로 주문해요':'. 가공할 수 없어요'));
+  if(rx) mark(mbs<=JUDGE_RULE.blank[0]?0:(mbs<=JUDGE_RULE.blank[1]?1:2), '최소 블랭크 '+mbs+'mm'+(mbs<=JUDGE_RULE.blank[1]?'. 큰 블랭크로 주문해요':'. 가공할 수 없어요'));
   var score=Math.max(0,Math.min(100,Math.round(100-2.5*af-1.5*at-Math.max(0,mbs-65)*1.5)));
   return {level:['가능','조정 필요','불가'][lv], lv:lv, why:why, score:score, frameW:frameW, faceDiff:fd, templeDiff:td, R:R, L:L, spec:sp};
 }
@@ -905,6 +906,16 @@ async function judgeFrames(customerId, store){
   var items=inv.map(function(i){ return Object.assign({sku:i.sku,name:i.name,price:i.price,stock:i.stock,pb:isPBFrame(i.sku)}, judgeFrame(o.c,o.rx,FRAME_SPECS[i.sku],isPBFrame(i.sku))); });
   items.sort(function(a,b){ return a.lv-b.lv || b.score-a.score; });
   return {ok:true, customer:{id:o.c.id,name:o.c.name,size:o.c.size,face:o.c.face,pd:o.c.pd}, rx:o.rx, rxDate:o.rxDate, rule:JUDGE_RULE, items:items};
+}
+// 손님 앱: 측정값만으로 판정 (처방이 있으면 블랭크까지). 쓸 수 없는 테는 빼고 보여줘요
+async function judgeByMeasure(q){
+  var face=+q.face, temple=+q.temple, pd=+q.pd||63; if(!(face>100&&face<180)) return {ok:false,error:'얼굴 폭 값이 이상해요'};
+  var rx=null; if(q.customer_id){ var o=await _custRx(q.customer_id); rx=o.rx||null; }
+  var store=q.store||'성수점', inv=(await getInventory(store)).filter(function(i){return i.cat==='테'&&FRAME_SPECS[i.sku];});
+  var c={face:face+'mm', pd:pd+'mm', templeLen:temple||145};
+  var items=inv.map(function(i){ var j=judgeFrame(c,rx,FRAME_SPECS[i.sku],isPBFrame(i.sku)); return {sku:i.sku,name:i.name,price:i.price,pb:isPBFrame(i.sku),level:j.level,lv:j.lv,score:j.score,why:j.why,spec:j.spec,faceDiff:j.faceDiff}; });
+  items.sort(function(a,b){ return a.lv-b.lv || b.score-a.score; });
+  return {ok:true, store:store, withRx:!!rx, items:items.filter(function(x){return x.lv<2;}), hidden:items.filter(function(x){return x.lv===2;}).length};
 }
 async function createWorkorder(b){
   var o=await _custRx(b.customer_id); if(!o.c||!o.rx) return {ok:false,error:'손님이나 처방 기록이 없어요'};
@@ -1050,7 +1061,7 @@ async function logMeasureAccess(username, customerId, action){
   mem.accesslog.push({username:username,customer_id:customerId,action:action,at:new Date().toISOString()});
 }
 
-module.exports={ init, judgeFrames, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+module.exports={ init, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,

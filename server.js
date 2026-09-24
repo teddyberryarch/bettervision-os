@@ -113,6 +113,8 @@ async function api(req, res, url){
     // [09.24] 테 판정 · 가공 지시서
     if(req.method==='GET' && url.pathname==='/api/frames/judge'){
       const r=await db.judgeFrames(url.searchParams.get('customer_id'), url.searchParams.get('store')); return send(res, r.ok?200:400, r); }
+    if(req.method==='GET' && url.pathname==='/api/frames/match'){
+      const q={}; url.searchParams.forEach(function(v,k){q[k]=v;}); const r=await db.judgeByMeasure(q); return send(res, r.ok?200:400, r); }
     if(req.method==='GET' && url.pathname==='/api/workorders'){ return send(res,200,{ok:true, items:await db.listWorkorders(url.searchParams.get('store'))}); }
     if(req.method==='POST' && url.pathname==='/api/workorders'){ const b=await body(req); const r=await db.createWorkorder(b); return send(res, r.ok?201:400, r); }
     // [09.24] GET /api/customers/:id/vision -> 시력 기록, 가족, 다음 검사일
