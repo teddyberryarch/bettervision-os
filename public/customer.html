@@ -945,54 +945,68 @@ function renderCat(c){
   b.innerHTML=(CAT_DATA[c]||[]).map(pcard).join('');
 }
 
-/* ===== 가격 시뮬레이터 ===== */
-var SIM_FRAMES=[
-  {n:'로마 클래식 (PB)',p:189000},{n:'로마 슬림 (PB)',p:189000},
-  {n:'로마 와이드 (PB)',p:189000},{n:'로마 라운드 (PB)',p:189000},
-  {n:'수입 브랜드 A',p:390000},{n:'편광 선글라스 (PB)',p:230000}
-];
-var SIM_LENS=[
-  {n:'1.50 (약도수 ~ -2.00D)',p:50000},{n:'1.56 (~ -3.00D)',p:80000},
-  {n:'1.60 (-3~-4D · 추천)',p:110000},{n:'1.67 (-4~-6D 고도수)',p:150000},
-  {n:'1.74 (-6D↑ 초고도수)',p:210000}
-];
-var SIM_COAT=[
-  {n:'멀티코팅(발수·반사방지)',p:0,base:true},{n:'블루라이트 차단',p:30000},
-  {n:'변색(포토크로믹)',p:60000},{n:'누진(다초점)',p:120000}
-];
-function comma(n){return n.toLocaleString('ko-KR');}
+/* ===== 견적 (09.24): 매장에서 받은 견적서 + 본사 권장가로 직접 계산 ===== */
+var SIM_CAT=null;
+function comma(n){return (n||0).toLocaleString('ko-KR');}
+function _e(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function renderSim(b){
   b.innerHTML=
-    '<div class="pbnote"><div class="pt">투명한 견적</div><div class="pd">테 + 렌즈(굴절률) + 코팅을 고르면 최종가가 실시간으로 분해돼요. 안경값이 왜 이런지 숨기지 않아요. 렌즈·코팅은 BETTERVISION 자체(PB)라 합리적이에요.</div></div>'+
-    '<div class="label" style="margin:4px 0 4px">테 선택</div>'+
-    '<select id="simFrame" class="finput" onchange="simCalc()">'+SIM_FRAMES.map(function(f,i){return '<option value="'+f.p+'">'+f.n+' · ₩'+comma(f.p)+'</option>';}).join('')+'</select>'+
-    '<div class="label" style="margin:11px 0 4px">렌즈 굴절률</div>'+
-    '<select id="simLens" class="finput" onchange="simCalc()">'+SIM_LENS.map(function(l,i){return '<option value="'+l.p+'"'+(i===2?' selected':'')+'>'+l.n+' · ₩'+comma(l.p)+'</option>';}).join('')+'</select>'+
-    '<div class="label" style="margin:11px 0 6px">코팅 (복수 선택)</div>'+
-    '<div id="simCoats">'+SIM_COAT.map(function(c,i){return '<label class="simcoat"><input type="checkbox" class="simCoat" value="'+c.p+'" onchange="simCalc()"'+(c.base?' checked disabled':'')+'> '+c.n+(c.p?(' · +₩'+comma(c.p)):' · 기본 포함')+'</label>';}).join('')+'</div>'+
+    '<div class="pbnote"><div class="pt">매장에서 받은 견적서</div><div class="pd">매장에서 발행한 견적서가 여기 모여요. 품목마다 본사 권장가와 매장 판매가를 같이 보여드려요.</div></div>'+
+    '<div id="myQuotes" class="label" style="margin-bottom:14px">불러오는 중이에요</div>'+
+    '<div class="pbnote"><div class="pt">직접 계산해 보기</div><div class="pd">테, 렌즈, 함께 살 것을 고르면 본사 권장가로 합계를 보여드려요. 실제 판매가는 매장이 정해요.</div></div>'+
+    '<div id="simForm" class="label">가격표를 불러오고 있어요</div>';
+  loadMyQuotes();
+  (SIM_CAT?Promise.resolve():fetch('/api/catalog').then(function(r){return r.json();}).then(function(j){SIM_CAT=j.catalog||[];})).then(renderSimForm).catch(function(){ document.getElementById('simForm').textContent='가격표를 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.'; });
+}
+function loadMyQuotes(){
+  fetch('/api/quotes/mine?customer_id='+DEMO_CUSTOMER_ID).then(function(r){return r.json();}).then(function(j){
+    var it=j.items||[], box=document.getElementById('myQuotes'); if(!box) return;
+    if(!it.length){ box.innerHTML='아직 받은 견적서가 없어요. 매장에서 상담하면 여기서 다시 볼 수 있어요.'; return; }
+    box.innerHTML=it.slice(0,3).map(function(q){
+      var md=function(d){d=String(d||'');return d.slice(5,7)+'.'+d.slice(8,10);};
+      var st=q.status==='결제됨'?'결제 완료':q.status==='기간 지남'?'기간 지남':(md(q.valid_until)+'까지');
+      return '<div class="simbreak" style="margin-top:0;margin-bottom:12px;border:1px solid var(--line2);border-radius:12px;padding:12px">'+
+        '<div class="sbrow" style="color:var(--ink)"><b style="white-space:nowrap">'+_e(q.store||'매장')+' · '+md(q.date)+' 발행</b><span style="white-space:nowrap">'+_e(st)+'</span></div>'+
+        q.items.map(function(l){return '<div class="sbrow"><span>'+_e(l.name)+(l.pb?' (본사 조제)':'')+(l.qty>1?' ×'+l.qty:'')+(l.disc?' · 권장 ₩'+comma(l.list)+'에서 '+l.disc+'% 할인':'')+'</span><span>₩'+comma(l.amount)+'</span></div>';}).join('')+
+        '<div class="sbrow" style="color:var(--ink);border-top:1px solid var(--line2);margin-top:4px;padding-top:8px"><b>합계</b><b>₩'+comma(q.total)+'</b></div>'+
+        '<div class="label" style="font-size:13px;margin-top:4px">견적 번호 '+_e(q.no)+(q.list_total>q.total?' · 권장가 합계 ₩'+comma(q.list_total):'')+'</div></div>';
+    }).join('');
+  }).catch(function(){ var box=document.getElementById('myQuotes'); if(box) box.textContent='견적서를 불러오지 못했어요.'; });
+}
+function _simFrames(){ // PB 디자인은 S·M·L 가격이 같아서 디자인 단위로 보여준다
+  var seen={}, out=[]; SIM_CAT.filter(function(x){return x.cat==='테';}).forEach(function(x){
+    var pb=/^(CL|WD|SL|RD)-/.test(x.sku), key=pb?x.name.replace(/ [SML]$/,''):x.name; if(seen[key]) return; seen[key]=1;
+    out.push({sku:x.sku, n:key+(pb?' (PB · 사이즈는 측정으로)':''), p:x.price}); }); return out; }
+function renderSimForm(){
+  var fr=_simFrames(), ln=SIM_CAT.filter(function(x){return x.cat==='렌즈';}), ex=SIM_CAT.filter(function(x){return x.cat==='액세서리';});
+  document.getElementById('simForm').innerHTML=
+    '<div class="label" style="margin:4px 0 4px">테</div>'+
+    '<select id="simFrame" class="finput" onchange="simCalc()">'+fr.map(function(f){return '<option value="'+f.p+'" data-n="'+_e(f.n)+'">'+_e(f.n)+' · ₩'+comma(f.p)+'</option>';}).join('')+'</select>'+
+    '<div class="label" style="margin:11px 0 4px">렌즈 (양쪽)</div>'+
+    '<select id="simLens" class="finput" onchange="simCalc()">'+ln.map(function(l){return '<option value="'+l.price+'" data-n="'+_e(l.name)+'">'+_e(l.name)+' · ₩'+comma(l.price)+'</option>';}).join('')+'</select>'+
+    '<div class="label" style="margin:11px 0 6px">함께 (선택)</div>'+
+    '<div id="simCoats">'+ex.map(function(c){return '<label class="simcoat"><input type="checkbox" class="simCoat" value="'+c.price+'" data-n="'+_e(c.name)+'" onchange="simCalc()"> '+_e(c.name)+' · +₩'+comma(c.price)+'</label>';}).join('')+'</div>'+
     '<div class="simbreak" id="simBreak"></div>'+
-    '<div class="simtotal"><span>최종 예상가</span><b id="simTotal">₩0</b></div>'+
+    '<div class="simtotal"><span>본사 권장가 합계</span><b id="simTotal">₩0</b></div>'+
     '<button class="btn" style="width:100%;margin-top:12px" onclick="simOrder()">이 구성으로 주문/예약</button>'+
-    '<div class="label" style="font-size:13px;margin-top:8px">도수 안경은 매장 검안 후 확정돼요. 위 견적은 참고용이며 처방에 따라 달라질 수 있어요.</div>';
+    '<div class="label" style="font-size:13px;margin-top:8px">도수 안경은 매장 검안 뒤 확정돼요. 처방에 따라 더 얇은 렌즈가 필요하면 가격이 달라질 수 있어요.</div>';
   simCalc();
 }
 function simCalc(){
-  var f=+document.getElementById('simFrame').value, l=+document.getElementById('simLens').value;
-  var coats=[].slice.call(document.querySelectorAll('.simCoat:checked')).map(function(x){return +x.value;});
-  var coatSum=coats.reduce(function(a,b){return a+b;},0);
-  var total=f+l+coatSum;
-  var fn=document.getElementById('simFrame').selectedOptions[0].text.split(' · ')[0];
-  var ln=document.getElementById('simLens').selectedOptions[0].text.split(' · ')[0];
+  var fs=document.getElementById('simFrame'), ls=document.getElementById('simLens'); if(!fs||!ls) return;
+  var f=+fs.value||0, l=+ls.value||0;
+  var ex=[].slice.call(document.querySelectorAll('.simCoat:checked'));
+  var exSum=ex.reduce(function(a,x){return a+(+x.value||0);},0);
   document.getElementById('simBreak').innerHTML=
-    '<div class="sbrow"><span>테 · '+fn+'</span><span>₩'+comma(f)+'</span></div>'+
-    '<div class="sbrow"><span>렌즈 · '+ln+'</span><span>₩'+comma(l)+'</span></div>'+
-    '<div class="sbrow"><span>코팅 '+(coatSum?('×'+coats.length):'기본')+'</span><span>₩'+comma(coatSum)+'</span></div>';
-  document.getElementById('simTotal').textContent='₩'+comma(total);
+    '<div class="sbrow"><span>테 · '+_e(fs.selectedOptions[0].getAttribute('data-n').replace(' (PB · 사이즈는 측정으로)',' (PB)'))+'</span><span>₩'+comma(f)+'</span></div>'+
+    '<div class="sbrow"><span>렌즈 · '+_e(ls.selectedOptions[0].getAttribute('data-n'))+'</span><span>₩'+comma(l)+'</span></div>'+
+    ex.map(function(x){return '<div class="sbrow"><span>'+_e(x.getAttribute('data-n'))+'</span><span>₩'+comma(+x.value)+'</span></div>';}).join('');
+  document.getElementById('simTotal').textContent='₩'+comma(f+l+exSum);
 }
 function simOrder(){
-  var fn=document.getElementById('simFrame').selectedOptions[0].text.split(' · ')[0];
-  var ln=document.getElementById('simLens').selectedOptions[0].text.split(' (')[0];
-  var item=fn+' + 렌즈 '+ln;
+  var fn=document.getElementById('simFrame').selectedOptions[0].getAttribute('data-n').split(' (')[0];
+  var ln=document.getElementById('simLens').selectedOptions[0].getAttribute('data-n');
+  var item=fn+' + '+ln;
   var t=document.querySelector('.ptab[data-s="measure"]'); if(t)t.click();
   var k=document.querySelector('#ordKind .chip[data-k="A"]'); if(k){document.querySelectorAll('#ordKind .chip').forEach(function(x){x.classList.remove('active');});k.classList.add('active');if(typeof ordKindUpd==='function')ordKindUpd();}
   var oi=document.getElementById('ordItem'); if(oi)oi.value=item;
