@@ -226,6 +226,13 @@ function splayCalc(){
   return {target:(target!=null?Math.round(target):'-'), off:off, base:base, adjNeed:adjNeed, note:note};
 }
 
+/* [09.24] D-12: 기준 미달이면 "피팅 확인 마치기"에서 사유를 받고 넘어간다 (막지 않음) */
+window.BV_STEP_CHECK=function(){
+  var out=[], sp=splayCalc(), tn=templeNeed(), tl=num(F.templeLen);
+  if(sp.adjNeed!=null && MAT[F.material] && Math.abs(sp.adjNeed)>MAT[F.material].adj) out.push('템플 벌림 조정량 '+Math.abs(sp.adjNeed)+'mm, 소재 한계 ±'+MAT[F.material].adj+'mm 초과');
+  if(tn && tl!=null && Math.abs(tl-tn.need)>=5) out.push('템플 길이 '+tl+'mm, 필요 '+tn.need+'mm');
+  return out.length?out.join(' · '):null;
+};
 function collectAll(){
   // 입력 단계 값들은 각 단계 collect에서 이미 F에 반영됨
 }

@@ -1078,8 +1078,17 @@ function calLoad(){
     if(!j.ok) return;
     box.innerHTML='<table class="tbl"><thead><tr><th>계산 적합도</th><th>건수</th><th>7일째 편함</th><th>흘러내림</th></tr></thead><tbody>'+
       j.bands.map(function(b){return '<tr style="cursor:default"><td>'+b.name+'</td><td>'+b.n+'</td><td><b>'+(b.rate==null?'-':b.rate+'%')+'</b></td><td>'+b.slip+'</td></tr>';}).join('')+'</tbody></table>'+
-      '<div class="label" style="margin-top:10px">적합도가 있는 확인 '+j.total+'건 기준. 적합도가 높을수록 편함 비율도 높아야 기준이 맞음.</div>';
+      '<div class="label" style="margin-top:10px">적합도가 있는 확인 '+j.total+'건 기준. 적합도가 높을수록 편함 비율도 높아야 기준이 맞음.</div>'+ovrHtml(j.overrides);
   }).catch(function(){});
+}
+function ovrHtml(o){
+  if(!o) return '';
+  var fb=o.fitBelow||{};
+  var rs=(o.reasons||[]).map(function(r){return '<tr style="cursor:default"><td>'+(r.kind==='fit_below'?'기준 미달 건넴':'순서 건너뜀')+'</td><td>'+r.reason+'</td><td>'+r.n+'</td></tr>';}).join('');
+  return '<div class="eyebrow" style="margin-top:18px">사유 남기고 넘어간 건 (D-12, 막지 않고 기록)</div>'+
+    '<div class="label" style="margin:4px 0 8px">순서 건너뜀 '+o.step_skip+'건 · 기준 미달 건넴 '+o.fit_below+'건. 기준 미달 건넴 중 7일째 확인 '+(fb.checked||0)+'건, 편함 '+(fb.rate==null?'-':fb.rate+'%')+'.</div>'+
+    (rs?'<table class="tbl"><thead><tr><th>종류</th><th>사유</th><th>건수</th></tr></thead><tbody>'+rs+'</tbody></table>':'<div class="label">아직 없음</div>')+
+    '<div class="label" style="margin-top:8px">기준 미달 건넴의 편함 비율이 기준 안 건과 비슷하면 기준이 너무 엄격한 것, 낮으면 기준이 맞는 것.</div>';
 }
 function stdLoad(){
   var box=document.getElementById('stdBox'); if(!box) return;
