@@ -322,6 +322,7 @@ async function api(req, res, url){
     if(req.method==='POST' && url.pathname==='/api/as/mine'){ const b=await body(req); if(!b.customer_id||!String(b.symptom||'').trim()) return send(res,400,{ok:false,error:'증상을 적어 주세요'});
       const r=await db.openASByCustomer(b.customer_id,b.symptom); return send(res, r.ok?201:400, r); }
     // [09.24] 사업계획서 싱크: 본사 현황판·지표, 손님 앱 트렌드, 타사 테 DB, 검안 저장
+    if(req.method==='GET' && url.pathname==='/api/fit/prefill'){ const c=await db.getCustomer(url.searchParams.get('customer_id')); if(c&&!scopeOK(c.store)) return send(res,403,{ok:false,error:'다른 매장 손님이에요'}); const r=await db.fitPrefill(url.searchParams.get('customer_id')); return send(res, r.ok?200:400, r); }
     if(req.method==='GET' && url.pathname==='/api/hq/board'){ return send(res,200, await db.hqBoard()); }
     if(req.method==='GET' && url.pathname==='/api/hq/kpis'){ return send(res,200, await db.planKpis()); }
     if(req.method==='GET' && url.pathname==='/api/trend'){ return send(res,200, await db.trendFrames(30)); }

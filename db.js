@@ -1329,7 +1329,32 @@ async function addExam(b, who){
   return {ok:true, date:row.date};
 }
 
-module.exports={ init, hqBoard, planKpis, trendFrames, addFrameDb, listFrameDb, addExam, BOARD_RULE, addNotice, listNotices, addOutbox, listOutbox, OUTBOX_CH, openASByCustomer, productionPlan, measurementsForCustomer, quoteOverSummary, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+
+/* [09.24] 피팅 자동 입력: 손님 최신 측정값·처방, 가공 지시서에서 고른 테 치수 */
+async function fitPrefill(customerId){
+  var c=await getCustomer(customerId); if(!c) return {ok:false,error:'손님이 없어요'};
+  var ms=await listMeasurements(c.id), m=ms[0]||null;
+  var o=await _custRx(c.id), rx=o.rx||null;
+  var wos=(await _all('workorders')).filter(function(w){return +w.customer_id===+c.id;}).sort(function(a,b){return b.id-a.id;}), wo=wos[0]||null, spec=null;
+  if(wo){ try{ var calc=typeof wo.calc==='string'?JSON.parse(wo.calc):wo.calc; spec=calc&&calc.spec||null; }catch(e){} if(!spec) spec=FRAME_SPECS[wo.sku]||null; }
+  var MATK={'티타늄':'titan','금속':'metal','메탈':'metal','TR':'tr','울템':'tr','아세테이트':'acet'};
+  var out={ok:true, customer:{id:c.id,name:c.name,store:c.store,size:c.size}, filled:[], missing:[]};
+  var f={name:c.name};
+  var faceTxt=_num1(c.face), pdTxt=_num1(c.pd);
+  f.faceW=m&&m.face_width||faceTxt||null; f.pd=m&&m.pd||pdTxt||null;
+  if(f.pd){ f.pdR=Math.round(f.pd/2*10)/10; f.pdL=f.pdR; }
+  f.earGap=(m&&m.ear_l&&m.ear_r)?Math.round((+m.ear_l+ +m.ear_r)*10)/10:null;
+  f.earDepth=m&&m.ear_depth||null; f.noseH=m&&m.nose_height||null; f.faceWrap=(m&&m.wrap_angle!=null)?m.wrap_angle:null;
+  if(rx){ f.sphMax=Math.max(Math.abs(rx.R.S||0),Math.abs(rx.L.S||0)); f.rxR=rx.R; f.rxL=rx.L; f.rxAdd=rx.ADD||''; }
+  if(spec){ f.frontA=2*spec.a+spec.dbl; f.dbl=spec.dbl; f.templeLen=spec.temple; f.lensH=spec.B; f.material=MATK[spec.mat]||'acet'; f.bridge=spec.pad==='고정형'?'fix':'adj'; out.frame={sku:wo.sku,name:wo.frame,workorder:wo.id}; }
+  Object.keys(f).forEach(function(k){ if(f[k]!=null&&f[k]!=='') out.filled.push(k); });
+  ['faceW','pd','earGap','earDepth','noseH','faceWrap','sphMax','frontA','templeLen','material'].forEach(function(k){ if(f[k]==null||f[k]==='') out.missing.push(k); });
+  out.missing.push('frameSpread'); // 테의 지금 템플 간격은 실제로 재야 함
+  out.values=f; out.measuredAt=m?String(m.measured_at instanceof Date?m.measured_at.toISOString():m.measured_at).slice(0,10):null; out.rxDate=o.rxDate||null;
+  return out;
+}
+
+module.exports={ init, fitPrefill, hqBoard, planKpis, trendFrames, addFrameDb, listFrameDb, addExam, BOARD_RULE, addNotice, listNotices, addOutbox, listOutbox, OUTBOX_CH, openASByCustomer, productionPlan, measurementsForCustomer, quoteOverSummary, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,
