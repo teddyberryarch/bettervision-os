@@ -22,9 +22,10 @@ const AUTH_ON = process.env.AUTH_ON === 'true';
 const PUBLIC_PAGES = ['/index.html','/login.html','/customer.html','/catalog.html','/lookbook.html','/pricing.html','/shop.html','/trust.html'];
 // [09.24] 서비스하지 않는 페이지 — 방향결정 v2.6 이전 내부 문서. 파일은 그대로 두고(삭제 금지) 404로 막음
 //  기준 문서는 구글드라이브 01_코어·02_문서세트
-function isBlockedPage(p){ return p==='/receipt.html' || p==='/receipt' || /^\/BETTERVISION_[^/]*\.html$/.test(p) || /^\/BETTERVISION_[^/.]*$/.test(p); }
+// [09.29] recommend.html(옛 6기준 추천)은 테 판정(workorder)으로 합침 → 막음 (OS 모듈 기획 v1.1 3장)
+function isBlockedPage(p){ return p==='/receipt.html' || p==='/receipt' || p==='/recommend.html' || /^\/BETTERVISION_[^/]*\.html$/.test(p) || /^\/BETTERVISION_[^/.]*$/.test(p); }
 // 본부 계정만 여는 페이지 (내부 전략·재무)
-const HQ_PAGES = ['/hq.html','/a.html','/finance.html','/insights.html','/todo.html','/painmap.html'];
+const HQ_PAGES = ['/hq.html','/a.html','/finance.html','/insights.html','/todo.html','/painmap.html','/production.html','/engine.html']; // [09.29] 생산·9사이즈 엔진 설정은 본부만
 function isSecure(req){ return (req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https'; }
 function tokenCookie(req, token, maxAge){ return 'bv_token='+token+'; Path=/; Max-Age='+maxAge+'; HttpOnly; SameSite=Lax'+(isSecure(req)?'; Secure':''); }
 function getCookie(req,name){ var c=req.headers.cookie||''; var m=c.match(new RegExp('(?:^|; )'+name+'=([^;]+)')); return m?decodeURIComponent(m[1]):null; }
@@ -354,6 +355,17 @@ async function api(req, res, url){
     if(req.method==='POST' && url.pathname==='/api/overrides'){
       const b=await body(req); const r=await db.recordOverride(b, U); return send(res, r.ok?201:400, r);
     }
+    // ===== [09.29] P0 모듈: 동의(CM-PRV-01) · 손님 이력(ST-CRM-02) · 리콜(ST-CRM-03) · 피팅 결과(ST-FIT-02) =====
+    const ownCust = async function(cid){ const c=await db.getCustomer(cid); if(!c) return {err:[404,'손님이 없어요']}; if(U && U.role==='store' && c.store!==U.store) return {err:[403,'다른 지점 손님이에요']}; return {c:c}; };
+    if(url.pathname==='/api/consent'){
+      if(req.method==='GET'){ const cid=url.searchParams.get('customer_id'); if(cid){ const o=await ownCust(cid); if(o.err) return send(res,o.err[0],{ok:false,error:o.err[1]}); }
+        return send(res,200,{ok:true, version:db.CONSENT_VERSION, text:db.CONSENT_TEXT, consent:cid?await db.getConsent(cid):null, history:cid?await db.consentHistory(cid):[]}); }
+      if(req.method==='POST'){ const b=await body(req); const o=await ownCust(b.customer_id); if(o.err) return send(res,o.err[0],{ok:false,error:o.err[1]}); const r=await db.addConsent(b,U); return send(res, r.ok?201:400, r); }
+    }
+    if(req.method==='GET' && url.pathname==='/api/customer/timeline'){ const cid=url.searchParams.get('id'); const o=await ownCust(cid); if(o.err) return send(res,o.err[0],{ok:false,error:o.err[1]}); return send(res,200, await db.customerTimeline(cid)); }
+    if(req.method==='GET' && url.pathname==='/api/recall'){ return send(res,200, await db.recallList(url.searchParams.get('store'))); }
+    if(req.method==='POST' && url.pathname==='/api/recall/log'){ const b=await body(req); const o=await ownCust(b.customer_id); if(o.err) return send(res,o.err[0],{ok:false,error:o.err[1]}); const r=await db.addRecallLog(b,U); return send(res, r.ok?201:400, r); }
+    if(req.method==='POST' && url.pathname==='/api/fit/result'){ const b=await body(req); const o=await ownCust(b.customer_id); if(o.err) return send(res,o.err[0],{ok:false,error:o.err[1]}); const r=await db.addFitResult(b,U); return send(res, r.ok?201:400, r); }
     // ===== [09.24] 기준 보정 · 기준 관리 (본사) =====
     if(req.method==='GET' && url.pathname==='/api/calibration'){ return send(res,200,Object.assign({ok:true}, await db.calibration())); }
     if(req.method==='GET' && url.pathname==='/api/standards'){ return send(res,200,Object.assign({ok:true}, await db.listStandards())); }

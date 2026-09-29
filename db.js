@@ -2,7 +2,7 @@
 // 테이블: bookings(예약), inventory(지점×SKU 재고), sales(결제 라인)
 let pool=null, ready=false;
 const mem={ bookings:[], inventory:[], sales:[], orders:[], customers:[], pickups:[], users:[], policy:{},
-  aftercare:[], ascases:[], msessions:[], measurements:[], accesslog:[], overrides:[], quotes:[], notices:[], outbox:[] };
+  aftercare:[], ascases:[], msessions:[], measurements:[], accesslog:[], overrides:[], quotes:[], notices:[], outbox:[], consents:[], fitresults:[], recalllog:[] };
 try{
   if(process.env.DATABASE_URL){
     const { Pool } = require('pg');
@@ -22,6 +22,9 @@ function checkPass(stored, p){
   const parts=stored.split('$'); const h=crypto.scryptSync(String(p||''),parts[1],32);
   const want=Buffer.from(parts[2],'hex'); return want.length===h.length && crypto.timingSafeEqual(want,h);
 }
+// [09.29] 파일럿·실제 매장 DB는 DEMO_SEED=off: 데모 손님·매출·7일째·검안 기록을 넣지 않는다 (모듈 기획 v1.1 3장)
+const DEMO_SEED = process.env.DEMO_SEED!=='off';
+const DEMO_TOPUP_ON = DEMO_SEED && process.env.DEMO_TOPUP!=='off';
 function envPass(role){ return role==='hq' ? process.env.HQ_PASS : process.env.STORE_PASS; }
 const SEED_USERS=[
   {username:'hq', role:'hq', store:null},
@@ -100,6 +103,7 @@ const SEED_CUSTOMERS=[
 
 function seedStock(sku, store){
   // 데모 시드: 지점별로 살짝 다르게, 디자인/사이즈별 편차
+  if(!DEMO_SEED) return 0; // 파일럿: 재고는 본부 입고로만
   let base = 8;
   if(/-M$/.test(sku)) base=14; else if(/-S$/.test(sku)) base=7; else if(/-L$/.test(sku)) base=6;
   if(sku[0]==='X'||sku[0]==='L') base=16; // 렌즈/콘택트/액세서리 넉넉
@@ -140,7 +144,7 @@ async function init(){
     status TEXT DEFAULT '예약',  -- 예약 / 방문완료 / 구매전환 / 취소
     created_at TIMESTAMPTZ DEFAULT now())`);
   const cc=await pool.query('SELECT COUNT(*)::int AS c FROM customers');
-  if(cc.rows[0].c===0){ for(const c of SEED_CUSTOMERS){
+  if(cc.rows[0].c===0 && DEMO_SEED){ for(const c of SEED_CUSTOMERS){
     await pool.query('INSERT INTO customers(name,phone,store,size,face,pd,rx,nose,seg,points) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
       [c.name,c.phone,c.store,c.size,c.face,c.pd,c.rx,c.nose,c.seg,c.points||0]); } }
   // 재고 시드: 비어있을 때만
@@ -153,7 +157,7 @@ async function init(){
   }
   // 매출 히스토리 시드: 비어있을 때만
   const sc=await pool.query('SELECT COUNT(*)::int AS c FROM sales');
-  if(sc.rows[0].c===0){
+  if(sc.rows[0].c===0 && DEMO_SEED){
     const h=genHistory();
     for(const x of h.sales){ await pool.query('INSERT INTO sales(store,date,sku,name,cat,qty,amount,medical,method,customer_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',[x.store,x.date,x.sku,x.name,x.cat,x.qty,x.amount,x.medical,x.method,x.customer_id]); }
     for(const o of h.orders){ await pool.query('INSERT INTO orders(store,sku,name,cat,qty,status) VALUES($1,$2,$3,$4,$5,$6)',[o.store,o.sku,o.name,o.cat,o.qty,o.status]); }
@@ -161,7 +165,7 @@ async function init(){
   }
   // [09.24] 데모 매출 보충: 시드가 6월에 한 번만 들어가서 최근 기간 매출이 ₩0으로 보이던 문제
   //  마지막 매출일 다음 날 ~ 오늘(최대 60일)을 데모 매출로 채움. 끄려면 DEMO_TOPUP=off
-  if(process.env.DEMO_TOPUP!=='off'){
+  if(DEMO_TOPUP_ON){
     const mx=await pool.query('SELECT MAX(date) AS d FROM sales');
     const last=mx.rows[0].d? new Date(mx.rows[0].d+'T00:00:00') : null;
     const today=new Date(); today.setHours(0,0,0,0);
@@ -237,7 +241,7 @@ async function init(){
     id SERIAL PRIMARY KEY, kind TEXT, version TEXT, note TEXT, released_at TIMESTAMPTZ DEFAULT now())`);
   await pool.query(`CREATE TABLE IF NOT EXISTS standard_deploy(store TEXT, kind TEXT, version TEXT, at TIMESTAMPTZ DEFAULT now(), PRIMARY KEY(store,kind))`);
   const ac=await pool.query('SELECT COUNT(*)::int AS c FROM aftercare');
-  if(ac.rows[0].c===0){ const d=_demoCare();
+  if(ac.rows[0].c===0 && DEMO_SEED){ const d=_demoCare();
     for(const x of d.care){ await pool.query('INSERT INTO aftercare(customer_id,store,sale_date,due_date,status,comfort,issues,note,source,done_at,fit,judge) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',[x.customer_id,x.store,x.sale_date,x.due_date,x.status,x.comfort,x.issues,x.note,x.source,x.done_at,x.fit,x.judge]); }
     for(const a of d.as){ await pool.query('INSERT INTO as_cases(customer_id,store,symptom,cause,action,status,closed_at) VALUES($1,$2,$3,$4,$5,$6,$7)',[a.customer_id,a.store,a.symptom,a.cause,a.action,a.status,a.closed_at]); } }
   // [09.24] 예전 7일 확인 항목(코·귀·어지러움·흐림)을 새 질문 3개로 옮긴다. 기준 보정 데모 기록이 없으면 채운다
@@ -251,14 +255,14 @@ async function init(){
   await pool.query("UPDATE as_cases SET symptom=REPLACE(symptom,'다리 흘러내림','안경 흘러내림') WHERE symptom LIKE '%다리 흘러내림%'");
   await pool.query("UPDATE as_cases SET symptom=REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(symptom,'귀 (7일 확인)','흘러내림 (7일째 확인)'),'흐림 (7일 확인)','먼 곳 (7일째 확인)'),'코 (7일 확인)','흘러내림 (7일째 확인)'),'어지러움 (7일 확인)','가까운 곳 (7일째 확인)'),'(7일 확인)','(7일째 확인)') WHERE symptom LIKE '%(7일 확인)%'");
   const fc=await pool.query('SELECT COUNT(*)::int AS c FROM aftercare WHERE fit IS NOT NULL');
-  if(fc.rows[0].c===0){ const d=_demoCare();
+  if(fc.rows[0].c===0 && DEMO_SEED){ const d=_demoCare();
     for(const x of d.care.filter(function(x){return x.fit!=null&&x.status==='완료';})){ await pool.query('INSERT INTO aftercare(customer_id,store,sale_date,due_date,status,comfort,issues,note,source,done_at,fit,judge) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',[x.customer_id,x.store,x.sale_date,x.due_date,x.status,x.comfort,x.issues,x.note,x.source,x.done_at,x.fit,x.judge]); } }
   await pool.query(`CREATE TABLE IF NOT EXISTS workorders(id SERIAL PRIMARY KEY, store TEXT, customer_id INT, sku TEXT, frame TEXT, lens TEXT, rx TEXT, calc TEXT, status TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   await pool.query(`CREATE TABLE IF NOT EXISTS frame_db(id SERIAL PRIMARY KEY, brand TEXT, model TEXT, eng TEXT, a INT, dbl INT, temple INT, b REAL, face_angle REAL, pad TEXT, material TEXT, store TEXT, created_by TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   for(const c of ['hinge_w REAL','face_form REAL','temple_shape TEXT','spring BOOLEAN','temple_curve REAL']) await pool.query('ALTER TABLE frame_db ADD COLUMN IF NOT EXISTS '+c);
   await pool.query(`CREATE TABLE IF NOT EXISTS vision_exams(id SERIAL PRIMARY KEY, customer_id INT, member TEXT, grp TEXT, date TEXT, rx TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   const vec=await pool.query('SELECT COUNT(*)::int AS c FROM vision_exams');
-  if(vec.rows[0].c===0){ for(const x of _demoExams()) await pool.query('INSERT INTO vision_exams(customer_id,member,grp,date,rx) VALUES($1,$2,$3,$4,$5)',[x.customer_id,x.member,x.grp,x.date,x.rx]); }
+  if(vec.rows[0].c===0 && DEMO_SEED){ for(const x of _demoExams()) await pool.query('INSERT INTO vision_exams(customer_id,member,grp,date,rx) VALUES($1,$2,$3,$4,$5)',[x.customer_id,x.member,x.grp,x.date,x.rx]); }
   const stc=await pool.query('SELECT COUNT(*)::int AS c FROM standards');
   if(stc.rows[0].c===0){ for(const x of _demoStandards()) await pool.query('INSERT INTO standards(kind,version,note,released_at) VALUES($1,$2,$3,$4)',[x.kind,x.version,x.note,x.released_at]);
     for(const x of _demoDeploy()) await pool.query('INSERT INTO standard_deploy(store,kind,version) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',[x.store,x.kind,x.version]); }
@@ -267,13 +271,17 @@ async function init(){
     await pool.query('INSERT INTO price_policy(sku,list_price,max_disc) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',[it.sku,it.price,(DEFAULT_DISC[it.cat]!=null?DEFAULT_DISC[it.cat]:10)]); }
   // 기존 브랜드 테 판매 데모: 없으면 최근 45일에 조금 채운다 (PB 테 비중이 100%로 보이지 않게)
   const ys=await pool.query("SELECT COUNT(*)::int AS c FROM sales WHERE sku ~ '^Y'");
-  if(ys.rows[0].c===0 && process.env.DEMO_TOPUP!=='off'){
+  if(ys.rows[0].c===0 && DEMO_TOPUP_ON){
     const ycat=CATALOG.filter(function(x){return x.sku[0]==='Y';});
     for(const st of STORES){ for(let i=0;i<9;i++){ const it=ycat[i%ycat.length]; const d=new Date(Date.now()-((i*5+STORES.indexOf(st)*2)%45)*864e5);
       await pool.query('INSERT INTO sales(store,date,sku,name,cat,qty,amount,medical,method) VALUES($1,$2,$3,$4,$5,1,$6,false,$7)',[st,_iso(d),it.sku,it.name,it.cat,it.price,'카드']); } } }
   // PB 테는 견본만 (D-03): 견본 1개로 맞추고, 쌓여 있던 PB 테 발주는 취소
   await pool.query("UPDATE inventory SET stock=1 WHERE sku ~ '^(CL|WD|SL|RD)-' AND stock<>1");
   await pool.query("UPDATE orders SET status='취소' WHERE sku ~ '^(CL|WD|SL|RD)-' AND status IN ('대기','푸시대기','승인')");
+  // [09.29] P0: 개인정보 동의 기록(CM-PRV-01) · 피팅 결과(ST-FIT-02) · 리콜 연락 기록(ST-CRM-03)
+  await pool.query(`CREATE TABLE IF NOT EXISTS consents(id SERIAL PRIMARY KEY, customer_id INT, required BOOLEAN, marketing BOOLEAN, version TEXT, source TEXT, created_by TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS fit_results(id SERIAL PRIMARY KEY, customer_id INT, workorder_id INT, store TEXT, frame TEXT, target TEXT, actual TEXT, off BOOLEAN, reason TEXT, created_by TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS recall_log(id SERIAL PRIMARY KEY, customer_id INT, store TEXT, reason TEXT, how TEXT, result TEXT, created_by TEXT, created_at TIMESTAMPTZ DEFAULT now())`);
   ready=true;
 }
 // ---- 데모 히스토리 생성기 (최근 30일 매출 + 발주/픽업) ----
@@ -321,15 +329,15 @@ function genHistory(opts){
   return {sales:sales, orders:orders, pickups:pickups};
 }
 function seedMem(){
-  mem.standards=_demoStandards(); mem.deploy=_demoDeploy(); mem.exams=_demoExams();
-  (function(){ var d=_demoCare(); d.care.forEach(function(x,i){ x.id=i+1; mem.aftercare.push(x); }); d.as.forEach(function(a,i){ a.id=i+1; a.opened_at=new Date().toISOString(); mem.ascases.push(a); }); })();
+  mem.standards=_demoStandards(); mem.deploy=_demoDeploy(); mem.exams=DEMO_SEED?_demoExams():[];
+  if(DEMO_SEED) (function(){ var d=_demoCare(); d.care.forEach(function(x,i){ x.id=i+1; mem.aftercare.push(x); }); d.as.forEach(function(a,i){ a.id=i+1; a.opened_at=new Date().toISOString(); mem.ascases.push(a); }); })();
   SEED_USERS.forEach(function(u,i){ mem.users.push({id:i+1,username:u.username,pass:seedPassHash(u),role:u.role,store:u.store||null,token:null}); });
   CATALOG.forEach(function(it){ mem.policy[it.sku]={list_price:it.price, max_disc:(DEFAULT_DISC[it.cat]!=null?DEFAULT_DISC[it.cat]:10)}; });
-  SEED_CUSTOMERS.forEach(function(c,i){ mem.customers.push(Object.assign({id:i+1},c)); });
+  if(DEMO_SEED) SEED_CUSTOMERS.forEach(function(c,i){ mem.customers.push(Object.assign({id:i+1},c)); });
   STORES.forEach(function(st){ CATALOG.forEach(function(it){
     mem.inventory.push({store:st,sku:it.sku,name:it.name,cat:it.cat,price:it.price,medical:it.medical,stock:seedStock(it.sku,st),sold:0});
   });});
-  var h=genHistory();
+  var h=DEMO_SEED?genHistory():{sales:[],orders:[],pickups:[]};
   h.sales.forEach(function(x){ mem.sales.push(x); });
   h.orders.forEach(function(o,i){ mem.orders.push(Object.assign({id:i+1},o)); });
   h.pickups.forEach(function(pk,i){ mem.pickups.push(Object.assign({id:i+1,status:pk.status},pk)); });
@@ -433,9 +441,16 @@ async function listNotices(store){
 const OUTBOX_CH=['카카오 알림톡','문자','인스타그램','채용','교육','구독','전단'];
 async function addOutbox(o, who){
   var ch=OUTBOX_CH.indexOf(o.channel)>=0?o.channel:null; if(!ch) return {ok:false,error:'채널이 없어요'};
+  var excluded=0;
+  if(Array.isArray(o.customer_ids) && ['카카오 알림톡','문자'].indexOf(ch)>=0){ // [09.29] 알림 수신 동의 손님만
+    var ids=o.customer_ids.filter(function(x){return /^\d+$/.test(String(x));}), okIds=await marketingOkIds(ids); excluded=ids.length-okIds.length;
+    if(!okIds.length) return {ok:false,error:'알림 수신에 동의한 손님이 없어요', excluded:excluded};
+    var cs=(await _all('customers')).filter(function(c){return okIds.indexOf(c.id)>=0||okIds.indexOf(String(c.id))>=0;});
+    o.count=okIds.length; o.target=cs.map(function(c){return c.name;}).join(', ');
+  }
   var row={channel:ch, kind:String(o.kind||'').slice(0,40), store:(who&&who.store)||o.store||null, target:String(o.target||'').slice(0,120), count:Math.max(0,parseInt(o.count)||0), body:String(o.body||'').slice(0,1000), created_by:who?who.username:null};
-  if(ready){ const r=await pool.query('INSERT INTO outbox(channel,kind,store,target,count,body,created_by) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id',[row.channel,row.kind,row.store,row.target,row.count,row.body,row.created_by]); return {ok:true,id:r.rows[0].id,status:'연동 전'}; }
-  row.id=mem.outbox.length+1; row.status='연동 전'; row.created_at=new Date().toISOString(); mem.outbox.push(row); return {ok:true,id:row.id,status:'연동 전'};
+  if(ready){ const r=await pool.query('INSERT INTO outbox(channel,kind,store,target,count,body,created_by) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id',[row.channel,row.kind,row.store,row.target,row.count,row.body,row.created_by]); return {ok:true,id:r.rows[0].id,status:'연동 전',count:row.count,excluded:excluded}; }
+  row.id=mem.outbox.length+1; row.status='연동 전'; row.created_at=new Date().toISOString(); mem.outbox.push(row); return {ok:true,id:row.id,status:'연동 전',count:row.count,excluded:excluded};
 }
 async function listOutbox(store){
   if(ready) return (await pool.query('SELECT id,channel,kind,store,target,count,status,created_at FROM outbox WHERE ($1::text IS NULL OR store=$1) ORDER BY id DESC LIMIT 30',[store||null])).rows;
@@ -675,6 +690,9 @@ async function segCounts(store){
   const segs=['단골','재방문','신규'];
   const out={}; for(const sg of segs){ const list=await listCustomers(store, sg); out[sg]=list.length; }
   out['전체']=(await listCustomers(store)).length;
+  // [09.29] 알림 수신 동의한 손님 수 (발송 대상은 이 수만)
+  var cm=await consentMap(), okn={}; for(const sg of segs.concat(['전체'])){ const list=await listCustomers(store, sg==='전체'?null:sg); okn[sg]=list.filter(function(c){var x=cm[c.id]; return x&&x.required&&x.marketing;}).length; }
+  out._consented=okn;
   return out;
 }
 
@@ -1082,7 +1100,7 @@ async function calibration(){
   // 계산한 적합도와 실제 만족도(7일째 불편 없음 비율)를 구간별로 비교한다
   var rows=(await listAftercare(null,'완료')).filter(function(x){return x.fit!=null;});
   var bands=[{name:'90% 이상',min:90,max:101},{name:'80~89%',min:80,max:90},{name:'80% 미만',min:0,max:80}];
-  return {total:rows.length, overrides:await overrideSummary(), bands:bands.map(function(b){
+  return {total:rows.length, overrides:await overrideSummary(), fit:await fitSummary(), bands:bands.map(function(b){
     var r=rows.filter(function(x){return x.fit>=b.min&&x.fit<b.max;}); var ok=r.filter(function(x){return x.comfort==='편함';}).length;
     var slip=r.filter(function(x){return String(x.issues||'').indexOf('흘러내림')>=0;}).length;
     return {name:b.name, n:r.length, ok:ok, rate:r.length?Math.round(ok/r.length*100):null, slip:slip};
@@ -1243,7 +1261,7 @@ async function logMeasureAccess(username, customerId, action){
 
 
 /* ===== [09.24] 사업계획서 싱크: 본사 현황판 · 확인할 지표 · 트렌드 · 타사 테 DB ===== */
-const _MEMKEY={sales:'sales',orders:'orders',inventory:'inventory',customers:'customers',measurements:'measurements',vision_exams:'exams',aftercare:'aftercare',as_cases:'ascases',overrides:'overrides',quotes:'quotes',workorders:'workorders',outbox:'outbox',frame_db:'framedb'};
+const _MEMKEY={sales:'sales',orders:'orders',inventory:'inventory',customers:'customers',measurements:'measurements',vision_exams:'exams',aftercare:'aftercare',as_cases:'ascases',overrides:'overrides',quotes:'quotes',workorders:'workorders',outbox:'outbox',frame_db:'framedb',consents:'consents',fit_results:'fitresults',recall_log:'recalllog'};
 async function _all(table){ if(ready) return (await pool.query('SELECT * FROM '+table)).rows; return mem[_MEMKEY[table]]||[]; }
 function _ymd(d){ return _iso(d); }
 function _daysAgo(n){ return _iso(new Date(Date.now()-n*864e5)); }
@@ -1380,7 +1398,120 @@ async function fitPrefill(customerId, frameDbId){
   return out;
 }
 
-module.exports={ init, fitPrefill, hqBoard, planKpis, trendFrames, addFrameDb, listFrameDb, addExam, BOARD_RULE, addNotice, listNotices, addOutbox, listOutbox, OUTBOX_CH, openASByCustomer, productionPlan, measurementsForCustomer, quoteOverSummary, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
+
+/* ===== [09.29] P0 모듈 (OS 모듈 기획 v1.1) ===== */
+// CM-PRV-01 개인정보 동의. 문구는 법률 검토 전 임시본. 동의 기록은 새 줄로만 쌓는다(고치지 않음)
+const CONSENT_VERSION='v0.1-검토 전';
+const CONSENT_TEXT={
+  required:'측정·검안·구매·사후 확인 기록을 BETTERVISION 본부가 보관하고, 안경을 맞추고 관리하는 데 씁니다. (필수)',
+  marketing:'검사 시기·교체 시기·혜택 안내를 카카오톡·문자로 받습니다. (선택)'
+};
+function _row(x){ return x; }
+async function addConsent(b, who){
+  var cid=/^\d+$/.test(String(b.customer_id||''))?+b.customer_id:null; if(!cid) return {ok:false,error:'손님이 없어요'};
+  var row={customer_id:cid, required:b.required===true||b.required==='true', marketing:b.marketing===true||b.marketing==='true',
+    version:CONSENT_VERSION, source:String(b.source||'매장').slice(0,20), created_by:who?who.username:null};
+  if(ready){ const r=await pool.query('INSERT INTO consents(customer_id,required,marketing,version,source,created_by) VALUES($1,$2,$3,$4,$5,$6) RETURNING id,created_at',[row.customer_id,row.required,row.marketing,row.version,row.source,row.created_by]); row.id=r.rows[0].id; row.created_at=r.rows[0].created_at; }
+  else { row.id=mem.consents.length+1; row.created_at=new Date().toISOString(); mem.consents.push(row); }
+  return {ok:true, consent:row};
+}
+async function consentMap(){
+  var rows=(await _all('consents')).slice().sort(function(a,b){return a.id-b.id;}), m={};
+  rows.forEach(function(r){ m[r.customer_id]=r; }); return m;
+}
+async function getConsent(cid){ var m=await consentMap(); return m[+cid]||null; }
+async function consentHistory(cid){ return (await _all('consents')).filter(function(r){return +r.customer_id===+cid;}).sort(function(a,b){return a.id-b.id;}); }
+async function marketingOkIds(ids){ var m=await consentMap(); return ids.filter(function(id){ var c=m[+id]; return c&&c.required&&c.marketing; }); }
+
+// ST-FIT-02 피팅 결과 입력: 시트의 확인 6칸. 목표와 차이가 크면 사유를 남긴다(D-12, 막지 않음)
+const FIT_TOL={gap:3, bendAt:5, bendAngle:10, panto:2, vd:2}; // 허용 차이, 시작값
+async function addFitResult(b, who){
+  var cid=/^\d+$/.test(String(b.customer_id||''))?+b.customer_id:null; if(!cid) return {ok:false,error:'손님이 없어요'};
+  var num=function(v){ return (v===''||v==null||isNaN(+v))?null:+v; };
+  var a=b.actual||{}, t=b.target||{};
+  var actual={gap:num(a.gap), bendAt:num(a.bendAt), bendAngle:num(a.bendAngle), panto:num(a.panto), vd:num(a.vd), pressure:a.pressure==='있음'?'있음':'없음'};
+  var target={gap:num(t.gap), bendAt:num(t.bendAt), bendAngle:num(t.bendAngle), panto:num(t.panto), vd:num(t.vd)};
+  if(actual.gap==null) return {ok:false,error:'템플 간격을 넣어 주세요'};
+  var off=[]; Object.keys(FIT_TOL).forEach(function(k){ if(actual[k]!=null&&target[k]!=null&&Math.abs(actual[k]-target[k])>FIT_TOL[k]) off.push(k); });
+  if(actual.pressure==='있음') off.push('pressure');
+  var reason=off.length?(OVERRIDE_REASONS.fit_below.indexOf(b.reason)>=0?b.reason:null):null;
+  if(off.length && !reason) return {ok:false,error:'목표와 차이가 있어요. 사유를 골라 주세요', off:off, reasons:OVERRIDE_REASONS.fit_below};
+  var c=await getCustomer(cid);
+  var row={customer_id:cid, workorder_id:/^\d+$/.test(String(b.workorder_id||''))?+b.workorder_id:null, store:(who&&who.store)||(c&&c.store)||null, frame:String(b.frame||'').slice(0,60),
+    target:JSON.stringify(target), actual:JSON.stringify(actual), off:off.length>0, reason:reason, created_by:who?who.username:null};
+  if(ready){ const r=await pool.query('INSERT INTO fit_results(customer_id,workorder_id,store,frame,target,actual,off,reason,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',[row.customer_id,row.workorder_id,row.store,row.frame,row.target,row.actual,row.off,row.reason,row.created_by]); row.id=r.rows[0].id; }
+  else { row.id=mem.fitresults.length+1; row.created_at=new Date().toISOString(); mem.fitresults.push(row); }
+  if(off.length) await recordOverride({kind:'fit_below', step:'피팅 결과', reason:reason, detail:off.join(','), customer_id:cid}, who);
+  return {ok:true, id:row.id, off:off};
+}
+async function fitSummary(){
+  var rows=await _all('fit_results'), care=await _all('aftercare');
+  var n=rows.length, off=rows.filter(function(r){return r.off;}).length;
+  var linked=rows.map(function(r){ var a=care.filter(function(x){return +x.customer_id===+r.customer_id && x.status==='완료';}).sort(function(x,y){return (y.id||0)-(x.id||0);})[0]; return {off:!!r.off, comfort:a?a.comfort:null}; }).filter(function(x){return x.comfort;});
+  var rate=function(arr){ return arr.length?Math.round(arr.filter(function(x){return x.comfort==='편함';}).length/arr.length*100):null; };
+  return {n:n, off:off, linked:linked.length, okRateIn:rate(linked.filter(function(x){return !x.off;})), okRateOff:rate(linked.filter(function(x){return x.off;})), tol:FIT_TOL};
+}
+
+// ST-CRM-03 오늘 연락할 손님: 검사일 도래 + 콘택트 교체 시기. 주기·양은 시작값(1호점에서 확인)
+const RECALL_RULE={ahead:7, quietDays:30};
+function _contactDays(name){ // 한 통 매수 ÷ 2(양쪽) × 착용일. 1개월용은 한 쌍 = 30일
+  var m=String(name||'').match(/\((\d+)P\)/), p=m?+m[1]:0;
+  if(/1개월/.test(name)) return p?Math.round(p/2*30):30;
+  return p?Math.round(p/2):15;
+}
+async function recallList(store){
+  var today=_iso(new Date()), ahead=_iso(new Date(Date.now()+RECALL_RULE.ahead*864e5)), quiet=_iso(new Date(Date.now()-RECALL_RULE.quietDays*864e5));
+  var custs=(await _all('customers')).filter(function(c){return !store||c.store===store;});
+  var sales=await _all('sales'), logs=await _all('recall_log'), cm=await consentMap(), out=[];
+  for(const c of custs){
+    var recent=logs.filter(function(l){return +l.customer_id===+c.id && _iso(new Date(l.created_at))>=quiet;});
+    if(recent.length) continue;
+    var reasons=[];
+    var v=await visionFor(c.id);
+    v.members.forEach(function(m){ if(m.next<=ahead) reasons.push({kind:'검사일', text:(m.member==='본인'?'':m.member+' · ')+m.grp+' 검사일 '+m.next, due:m.next}); });
+    var cs=sales.filter(function(x){return +x.customer_id===+c.id && x.cat==='콘택트' && x.qty>0;}).sort(function(a,b){return a.date<b.date?1:-1;})[0];
+    if(cs){ var d=new Date(cs.date+'T00:00:00'); d.setDate(d.getDate()+_contactDays(cs.name)*(cs.qty||1)); var due=_iso(d); if(due<=ahead) reasons.push({kind:'콘택트 교체', text:cs.name+' · '+due+' 무렵 떨어짐', due:due}); }
+    if(!reasons.length) continue;
+    var cn=cm[c.id];
+    out.push({id:c.id, name:c.name, phone:c.phone, store:c.store, reasons:reasons, due:reasons.map(function(r){return r.due;}).sort()[0], marketing:!!(cn&&cn.required&&cn.marketing), consent:cn?true:false});
+  }
+  out.sort(function(a,b){return a.due<b.due?-1:1;});
+  return {ok:true, today:today, rule:RECALL_RULE, items:out};
+}
+async function addRecallLog(b, who){
+  var cid=/^\d+$/.test(String(b.customer_id||''))?+b.customer_id:null; if(!cid) return {ok:false,error:'손님이 없어요'};
+  var how=['통화','발송 대기','방문'].indexOf(b.how)>=0?b.how:'통화';
+  var c=await getCustomer(cid);
+  if(how==='발송 대기'){ var ok=await marketingOkIds([cid]); if(!ok.length) return {ok:false,error:'알림 수신 동의가 없어요. 통화로 연락해 주세요'};
+    await addOutbox({channel:'카카오 알림톡', kind:'리콜 · '+String(b.reason||'').slice(0,20), target:c?c.name:'', count:1, body:String(b.reason||'')}, who); }
+  var row={customer_id:cid, store:(who&&who.store)||(c&&c.store)||null, reason:String(b.reason||'').slice(0,60), how:how, result:String(b.result||'').slice(0,60), created_by:who?who.username:null};
+  if(ready){ const r=await pool.query('INSERT INTO recall_log(customer_id,store,reason,how,result,created_by) VALUES($1,$2,$3,$4,$5,$6) RETURNING id',[row.customer_id,row.store,row.reason,row.how,row.result,row.created_by]); row.id=r.rows[0].id; }
+  else { row.id=mem.recalllog.length+1; row.created_at=new Date().toISOString(); mem.recalllog.push(row); }
+  return {ok:true, id:row.id};
+}
+
+// ST-CRM-02 손님 이력 한 화면
+async function customerTimeline(id){
+  var c=await getCustomer(id); if(!c) return {ok:false,error:'손님이 없어요'};
+  var by=function(t){ return _all(t).then(function(r){ return r.filter(function(x){return +x.customer_id===+id;}); }); };
+  var ms=await listMeasurements(id), ex=await by('vision_exams'), wo=await by('workorders'), qt=await by('quotes'), sl=await by('sales'), ac=await by('aftercare'), as=await by('as_cases'), fr=await by('fit_results'), rl=await by('recall_log');
+  var d=function(v){ return v instanceof Date?v.toISOString():String(v||''); };
+  var ev=[];
+  ms.forEach(function(m){ ev.push({at:d(m.measured_at), kind:'측정', text:'PD '+(m.pd!=null?m.pd:'-')+' · 얼굴 폭 '+(m.face_width!=null?m.face_width:'-')+' · 9사이즈 '+(m.size_code||'-')+(m.provisional?' · 임시값':''), store:m.store}); });
+  ex.forEach(function(x){ var rx=typeof x.rx==='string'?JSON.parse(x.rx):x.rx; ev.push({at:d(x.date), kind:'검안', text:(x.member&&x.member!=='본인'?x.member+' · ':'')+'R '+rx.R.S+'/'+(rx.R.C||0)+' L '+rx.L.S+'/'+(rx.L.C||0)+(rx.ADD?' ADD '+rx.ADD:'')}); });
+  wo.forEach(function(w){ ev.push({at:d(w.created_at), kind:'가공 지시서', text:(w.frame||w.sku||'')+' · '+(w.lens||''), store:w.store}); });
+  fr.forEach(function(f){ var a=JSON.parse(f.actual||'{}'); ev.push({at:d(f.created_at), kind:'피팅', text:'템플 간격 '+a.gap+'mm'+(f.off?' · 목표와 차이('+(f.reason||'')+')':''), store:f.store}); });
+  qt.forEach(function(q){ ev.push({at:d(q.created_at), kind:'견적', text:'No.'+q.id+(q.paid_at?' · 결제됨':''), store:q.store}); });
+  sl.forEach(function(s){ ev.push({at:d(s.date), kind:s.qty<0?'환불':'구매', text:s.name+' · ₩'+Number(s.amount||0).toLocaleString('ko-KR'), store:s.store}); });
+  ac.forEach(function(a){ ev.push({at:d(a.done_at||a.due_date), kind:'7일째 확인', text:(a.status||'')+(a.comfort?' · '+a.comfort:'')+(a.judge?' · '+a.judge:''), store:a.store}); });
+  as.forEach(function(a){ ev.push({at:d(a.opened_at), kind:'A/S', text:(a.symptom||'')+(a.cause?' · 원인 '+a.cause:'')+' · '+(a.status||''), store:a.store}); });
+  rl.forEach(function(r){ ev.push({at:d(r.created_at), kind:'연락', text:r.how+' · '+r.reason+(r.result?' · '+r.result:''), store:r.store}); });
+  ev.sort(function(a,b){ return a.at<b.at?1:-1; });
+  var v=await visionFor(id);
+  return {ok:true, customer:c, consent:await getConsent(id), consentText:CONSENT_TEXT, consentVersion:CONSENT_VERSION, vision:v.members.map(function(m){return {member:m.member,grp:m.grp,last:m.last,next:m.next,due:m.due};}), events:ev};
+}
+
+module.exports={ init, CONSENT_VERSION, CONSENT_TEXT, addConsent, getConsent, consentHistory, consentMap, marketingOkIds, FIT_TOL, addFitResult, fitSummary, RECALL_RULE, recallList, addRecallLog, customerTimeline, fitPrefill, hqBoard, planKpis, trendFrames, addFrameDb, listFrameDb, addExam, BOARD_RULE, addNotice, listNotices, addOutbox, listOutbox, OUTBOX_CH, openASByCustomer, productionPlan, measurementsForCustomer, quoteOverSummary, quotesForCustomer, catalogWithPolicy, createQuote, getQuote, listQuotes, markQuotePaid, QUOTE_VALID_DAYS, OVERRIDE_REASONS, recordOverride, overrideSummary, judgeFrames, judgeByMeasure, createWorkorder, listWorkorders, FRAME_SPECS, visionFor, CARE_GROUPS, AS_CAUSES, CARE_ISSUES, CARE_QUESTIONS, CARE_JUDGE, judgeAftercare, calibration, listStandards, deployStandard, isPBFrame, listAftercare, getAftercare, recordAftercare, pendingAftercareFor, openAS, getAS, listAS, closeAS, careSummary, createMeasureSession, getMeasureSession, saveMeasurement, listMeasurements, logMeasureAccess, STORES, CATALOG, refundSale, recentSales, createOrder, pushOrder, respondPush, autoConfirmPushes, listOrders, updateOrder, lowStock, salesRange, restockSuggest, pbMargin, settlement, login, userByToken, logout,
   createPickup, listPickups, updatePickup,
   listCustomers, getCustomer, customerHistory, addCustomer, moveCustomer, segCounts,
   listBookings, countSlot, addBooking,
