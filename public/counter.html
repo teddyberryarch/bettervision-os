@@ -110,7 +110,7 @@ function search(){
     return '<div class="hit"><div class="n">'+esc(c.name)+' <span class="s" style="font-size:15px;color:var(--muted)">'+esc(c.seg||'')+'</span></div>'+
       '<div class="m">사이즈 '+esc(c.size||'-')+' · PD '+esc(c.pd||'-')+' · 처방 '+esc(c.rx||'-')+'</div>'+
       '<div class="tip">'+tipFor(c).join('<br>')+'</div>'+
-      '<div class="acts"><a class="btn small" href="flow.html" onclick="pick('+c.id+')">접객 시작</a><a class="btn small ghost" href="measure.html" onclick="pick('+c.id+')">측정</a><a class="btn small ghost" href="quote.html?customer='+c.id+'" onclick="pick('+c.id+')">견적서</a><a class="btn small ghost" href="store.html" onclick="pick('+c.id+')">손님 기록</a></div></div>';
+      '<div class="acts"><a class="btn small" href="flow.html" onclick="pick('+c.id+')">접객 시작</a><a class="btn small ghost" href="profile.html?id='+c.id+'">전체 이력</a><a class="btn small ghost" href="measure.html" onclick="pick('+c.id+')">측정</a><a class="btn small ghost" href="quote.html?customer='+c.id+'" onclick="pick('+c.id+')">견적서</a><a class="btn small ghost" href="store.html" onclick="pick('+c.id+')">손님 기록</a></div></div>';
   }).join(''):'<div class="empty" style="margin-top:8px">찾는 손님 없음. 신규면 접객 시작에서 등록</div>';
 }
 loadAll();

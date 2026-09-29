@@ -26,7 +26,7 @@
 .sec-s{font-size:13px;color:var(--muted);margin-bottom:8px}
 .note{font-size:13px;color:var(--muted);line-height:1.5}
 </style></head><body>
-<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<!-- [09.29] 공개 페이지: 로그인 이동 스크립트 뺌 (server.js PUBLIC_PAGES) -->
 <div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
 <div class="nav-links">
     <a href="index.html">홈</a>

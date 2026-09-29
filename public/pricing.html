@@ -27,7 +27,7 @@ table.pr .won{font-weight:700;color:var(--ink)} table.pr .plus{color:var(--good)
 .lock{background:var(--warn-soft);color:#92500a;font-size:13px;font-weight:700;border-radius:20px;padding:3px 10px;display:inline-block}
 .tag{font-size:13px;background:var(--surface);border-radius:20px;padding:2px 8px;color:var(--muted)}
 </style></head><body>
-<script>fetch('/api/me').then(function(r){return r.json();}).then(function(j){if(j&&j.authOn&&!j.user){var pg=location.pathname.split('/').pop()||'index.html';location.href='login.html?next='+encodeURIComponent(pg);}}).catch(function(){});</script>
+<!-- [09.29] 공개 페이지: 로그인 이동 스크립트 뺌 (server.js PUBLIC_PAGES) -->
 <div class="topbar"><div class="topbar-in"><div class="brand"><span class="mark">BETTER<b>VISION</b><sup>™</sup></span><span class="tag" style="background:none;color:inherit;font-weight:inherit;padding:0">OS</span></div>
 <div class="nav-links">
     <a href="index.html">홈</a>

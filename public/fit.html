@@ -500,6 +500,7 @@ function buildSheet(){
     var cy0=Math.max(by+24,248);
     s4+=sec(cy0,'03','확인','실제 값은 OS에도 입력');
     var rows=[['템플 간격',target+' mm'],['굽힘 위치',bendAt+' mm'],['굽힘 각도',eb+'°'],['판토',drop+' mm'],['정점거리',vd+' mm'],['눌림','없음']];
+    window.FIT_TARGET={gap:target, bendAt:bendAt, bendAngle:eb, panto:drop, vd:vd};
     rows.forEach(function(r,i){ var x=(i%3)*64, y=cy0+8.3+Math.floor(i/3)*6;
       s4+=T(x,y,r[0],{s:2.2,c:G2})+T(x+17,y,r[1],{s:2.6,w:500})+L(x+34,y+0.8,x+54,y+0.8,{w:0.1,c:G3})+box(x+56,y-2.4,2.6,2.6,0.4,{w:0.2}); });
     s4+=T(0,275.5,'안경사',{s:1.9,c:G3})+L(10,276,60,276,{w:0.1,c:G3})+T(70,275.5,'손님',{s:1.9,c:G3})+L(78,276,128,276,{w:0.1,c:G3})+
@@ -518,9 +519,33 @@ function buildSheet(){
     (one?'':'<div class="warn">템플이 길거나 테가 커서 한 장에 실제 크기로 안 들어감. 두 장으로 나눔.</div>')+
     '<div class="sheetgrid" style="grid-template-columns:repeat('+pages.length+',minmax(0,360px))">'+pages.map(function(x){return '<div class="sheetwrap">'+x+'</div>';}).join('')+'</div>'+
     '<div class="printbtns"><button class="btn small" onclick="printSheets()">'+(one?'한 장 인쇄':'두 장 인쇄')+'</button></div>'+
-    '<div class="hint">인쇄 창에서 크기는 "실제 크기(100%)", "페이지에 맞춤"은 끄기. 인쇄 후 맨 위 100mm 자를 자로 재서 먼저 확인. 광학중심 확인은 가공 지시서 인쇄에 있음.</div>';
+    '<div class="hint">인쇄 창에서 크기는 "실제 크기(100%)", "페이지에 맞춤"은 끄기. 인쇄 후 맨 위 100mm 자를 자로 재서 먼저 확인. 광학중심 확인은 가공 지시서 인쇄에 있음.</div>'+
+    fitResForm();
   var pr=document.getElementById('sheetPrint'); if(!pr){ pr=document.createElement('div'); pr.id='sheetPrint'; document.body.appendChild(pr); }
   pr.innerHTML=pages.map(function(x){return '<div class="sheetpage">'+x+'</div>';}).join('');
+}
+/* [09.29] ST-FIT-02 피팅 결과 입력: 시트 03 확인 6칸을 OS에 저장. 목표와 차이가 크면 사유(D-12, 막지 않음) */
+function fitResForm(){
+  var t=window.FIT_TARGET||{}, f=function(id,lab,unit,val){ return '<div class="fld"><label>'+lab+' <span style="color:var(--muted)">목표 '+(val!=null?val:'-')+unit+'</span></label><input id="'+id+'" inputmode="decimal" placeholder="잰 값"></div>'; };
+  if(!F.custId) return '<div class="hint" style="margin-top:14px">피팅 결과 저장은 1단계에서 손님을 고른 경우에만.</div>';
+  return '<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px"><div class="eyebrow">피팅 결과</div><div class="sdesc">맞춘 뒤 잰 값. 7일째 결과와 함께 본사 기준 보정에 쓰임</div>'+
+    '<div class="frow">'+f('r_gap','템플 간격','mm',t.gap)+f('r_bendAt','굽힘 위치','mm',t.bendAt)+f('r_bendAngle','굽힘 각도','°',t.bendAngle)+'</div>'+
+    '<div class="frow">'+f('r_panto','판토 (렌즈 아래 끝)','mm',t.panto)+f('r_vd','정점거리','mm',t.vd)+
+      '<div class="fld"><label>눌림</label><select id="r_press"><option>없음</option><option>있음</option></select></div></div>'+
+    '<div id="r_reasonBox"></div>'+
+    '<div class="printbtns"><button class="btn small" onclick="saveFitRes()">피팅 결과 저장</button></div><div id="r_msg" class="hint"></div></div>';
+}
+function saveFitRes(){
+  var g=function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
+  var rs=document.getElementById('r_reason');
+  var body={customer_id:F.custId, frame:F.frameName||'', target:window.FIT_TARGET||{}, actual:{gap:g('r_gap'),bendAt:g('r_bendAt'),bendAngle:g('r_bendAngle'),panto:g('r_panto'),vd:g('r_vd'),pressure:g('r_press')}, reason:rs?rs.value:''};
+  var msg=document.getElementById('r_msg');
+  fetch('/api/fit/result',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(j){
+    if(j.ok){ msg.textContent='저장함'+(j.off&&j.off.length?' · 목표와 차이 있음, 사유 기록':''); document.getElementById('r_reasonBox').innerHTML=''; return; }
+    if(j.reasons){ document.getElementById('r_reasonBox').innerHTML='<div class="warn">목표와 차이: '+j.off.map(function(k){return {gap:'템플 간격',bendAt:'굽힘 위치',bendAngle:'굽힘 각도',panto:'판토',vd:'정점거리',pressure:'눌림'}[k]||k;}).join(', ')+'. 사유를 고르고 다시 저장</div>'+
+      '<div class="fld"><label>사유</label><select id="r_reason">'+j.reasons.map(function(x){return '<option>'+x+'</option>';}).join('')+'</select></div>'; msg.textContent=''; return; }
+    msg.textContent=j.error||'저장 실패';
+  }).catch(function(){ msg.textContent='연결이 안 됨'; });
 }
 function printSheets(){ document.body.classList.add('printing-sheet'); window.print(); setTimeout(function(){ document.body.classList.remove('printing-sheet'); },500); }
 

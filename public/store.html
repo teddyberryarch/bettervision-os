@@ -401,8 +401,8 @@ fetch('/api/me').then(function(r){return r.json();}).then(function(j){
       <div class="sub">매장이 단골 손님에게 카톡·문자 발송. 카카오·문자 연동 전이라 지금은 대기함에 기록.</div></div></div>
 
     <div class="card pad" style="margin-bottom:16px">
-      <div class="eyebrow">바꿀 때가 된 단골 손님</div>
-      <div class="label" style="font-size:13px;margin:6px 0 10px">렌즈·콘택트렌즈 교체 시기 손님 자동 추출. 누르면 대기함에 기록 (연동 전).</div>
+      <div class="eyebrow">오늘 연락할 손님</div>
+      <div class="label" style="font-size:15px;margin:6px 0 10px">검사일·콘택트 교체 시기가 7일 안인 손님. 30일 안에 연락한 손님은 빠짐. 주기는 시작값(1호점에서 확인). 카톡은 알림 수신 동의 손님만.</div>
       <div id="autoMkBox"></div>
     </div>
 
@@ -462,7 +462,7 @@ window.__bvGuide={title:'가맹점 가이드',sub:'사장님 혼자 다 하던 �
 {click:'.subtab[data-t="crm"]',sel:'#custTable',t:'손님 관리',d:'손님별 구매·검안 기록으로 바로 견적.'},
 {click:'.subtab[data-t="erp"]',sel:'#posCatalog',t:'POS·재고',d:'결제·환불·자동 발주 제안(재고+판매속도).'},
 {click:'.subtab[data-t="fin"]',sel:'#calGrid',t:'재무·세무',d:'일매출 달력 + 자동 정산·세무 리포트.'},
-{click:'.subtab[data-t="mkt"]',sel:'#autoMkBox',t:'단골 자동 마케팅',d:'교체주기 도래 손님 자동 발굴·카톡 예약.'}
+{click:'.subtab[data-t="mkt"]',sel:'#autoMkBox',t:'오늘 연락할 손님',d:'검사일·콘택트 교체 시기 손님. 통화 기록 또는 카톡 대기.'}
 ]};
 </script>
 <script src="/assets/app.js"></script>
@@ -617,7 +617,7 @@ function crmSel(i){
       '<div class="kv"><span class="label">최근 처방(시력)</span><span>'+(cust.rx||'-')+'</span></div>'+
       '<div class="label" style="margin:14px 0 6px">측정 기록</div><div id="measBox" class="muted" style="font-size:15px">불러오는 중</div>'+
       '<div class="label" style="margin:14px 0 6px">구매 이력 (매장·본사 전용)</div>'+histHtml+
-      '<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><a class="btn small" href="quote.html?customer='+cust.id+'">견적서 만들기</a><button class="btn small ghost" onclick="obQuick(\'카카오 알림톡\',\'재방문 안내\',\''+cust.name+'\')">카톡 발송</button></div>';
+      '<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><a class="btn small" href="quote.html?customer='+cust.id+'">견적서 만들기</a><a class="btn small ghost" href="profile.html?id='+cust.id+'">전체 이력</a><button class="btn small ghost" onclick="obQuick(\'카카오 알림톡\',\'재방문 안내\',\''+cust.name+'\','+cust.id+')">카톡 발송</button></div>';
   });
 }
 function toggleRun(el){el.classList.toggle('done');
@@ -809,8 +809,12 @@ function mkChName(v){ return v==='문자'?'문자':'카카오 알림톡'; }
 function obPost(o){ o.store=o.store||curStore(); return fetch('/api/outbox',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(o)}).then(function(r){return r.json();}); }
 function mkLoadLog(){ return fetch('/api/outbox?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
   MK_LOG=(j.items||[]).filter(function(x){return x.channel==='카카오 알림톡'||x.channel==='문자'||x.channel==='인스타그램';}); mkRenderKpis(); mkRenderLog(); }).catch(function(){}); }
-function obQuick(ch,kind,target){
-  obPost({channel:ch,kind:kind,target:target,count:target==='단골'?((mkSegName('단골')||{}).n||0):1,body:kind}).then(function(j){
+function obQuick(ch,kind,target,cid){
+  var kakao=(ch==='카카오 알림톡'||ch==='문자');
+  var pre = !kakao ? Promise.resolve({channel:ch,kind:kind,target:target,count:1,body:kind})
+    : (cid ? Promise.resolve({channel:ch,kind:kind,customer_ids:[cid],body:kind})
+      : fetch('/api/customers?seg='+encodeURIComponent(target)).then(function(r){return r.json();}).then(function(cj){ return {channel:ch,kind:kind,customer_ids:(cj.customers||[]).map(function(x){return x.id;}),body:kind}; }));
+  pre.then(obPost).then(function(j){
     var m=document.getElementById('obQuickMsg'); var t=j.ok?(ch+' '+kind+' 대기함에 기록. 연동 전이라 실제 발송은 아직 안 됨'):(j.error||'기록 실패');
     if(m) m.textContent=t; toast(t); mkLoadLog(); });
 }
@@ -825,8 +829,9 @@ function mkChVal(){var a=document.querySelector('#mkCh .chip.active');return a?a
   var sel=document.getElementById('mkTarget'); if(!sel)return;
   fetch('/api/segcounts').then(function(r){return r.json();}).then(function(j){
     var c=(j.counts)||{};
-    MK_SEG=[{id:'단골',name:'단골',n:c['단골']||0},{id:'재방문',name:'재방문 권장',n:c['재방문']||0},{id:'신규',name:'신규 손님',n:c['신규']||0},{id:'전체',name:'전체 손님',n:c['전체']||0}];
-    sel.innerHTML=MK_SEG.map(function(s){return '<option value="'+s.id+'">'+s.name+' · '+s.n+'명</option>';}).join('');
+    var ok=c._consented||{};
+    MK_SEG=[{id:'단골',name:'단골',n:ok['단골']||0,all:c['단골']||0},{id:'재방문',name:'재방문 권장',n:ok['재방문']||0,all:c['재방문']||0},{id:'신규',name:'신규 손님',n:ok['신규']||0,all:c['신규']||0},{id:'전체',name:'전체 손님',n:ok['전체']||0,all:c['전체']||0}];
+    sel.innerHTML=MK_SEG.map(function(s){return '<option value="'+s.id+'">'+s.name+' · 수신 동의 '+s.n+'명 / '+s.all+'명</option>';}).join('');
     mkCountUpd();
   });
   sel.addEventListener('change',mkCountUpd);
@@ -836,7 +841,7 @@ function mkChVal(){var a=document.querySelector('#mkCh .chip.active');return a?a
   mkCountUpd(); mkRenderKpis(); mkRenderLog();
 })();
 function mkCountUpd(){var s=mkSegName(document.getElementById('mkTarget').value);
-  document.getElementById('mkCount').textContent='대상 '+(s?s.n:0)+'명에게 발송.'; mkPrevUpd();}
+  document.getElementById('mkCount').textContent='알림 수신 동의 '+(s?s.n:0)+'명에게 발송'+(s&&s.all>s.n?' (동의 없는 '+(s.all-s.n)+'명 제외)':'')+'.'; mkPrevUpd();}
 function mkPrevUpd(){var body=document.getElementById('mkBody').value.trim(), cp=document.getElementById('mkCoupon').value;
   document.getElementById('mkPrev').textContent=(body||'(내용 없음)')+(cp?(' [쿠폰: '+cp+']'):'')+' · '+mkChVal();}
 function mkTemplate(t){
@@ -848,11 +853,14 @@ function mkTemplate(t){
 function mkSend(){
   var seg=mkSegName(document.getElementById('mkTarget').value), body=document.getElementById('mkBody').value.trim();
   if(!body){toast('내용 입력 필요');return;}
-  var ch=mkChName(mkChVal()), cp=document.getElementById('mkCoupon').value, n=seg?seg.n:0;
-  obPost({channel:ch,kind:seg?seg.name:'-',target:cp?('쿠폰: '+cp):'',count:n,body:body}).then(function(j){
+  var ch=mkChName(mkChVal()), cp=document.getElementById('mkCoupon').value, sid=seg?seg.id:'전체';
+  fetch('/api/customers'+(sid==='전체'?'':'?seg='+encodeURIComponent(sid))).then(function(r){return r.json();}).then(function(cj){
+    var ids=(cj.customers||[]).map(function(x){return x.id;});
+    return obPost({channel:ch,kind:(seg?seg.name:'-')+(cp?' · 쿠폰 '+cp:''),customer_ids:ids,body:body});
+  }).then(function(j){
     if(!j.ok){ toast(j.error||'기록 실패'); return; }
     document.getElementById('mkBody').value=''; mkPrevUpd(); mkLoadLog();
-    toast(ch+' '+n+'명 대기함에 기록. 연동 전이라 실제 발송은 아직 안 됨');
+    toast(ch+' '+j.count+'명 대기함에 기록'+(j.excluded?' (동의 없는 '+j.excluded+'명 제외)':'')+'. 연동 전이라 실제 발송은 아직 안 됨');
   });
 }
 function mkRenderKpis(){
@@ -991,25 +999,23 @@ function _placeOne(it){return fetch('/api/orders',{method:'POST',headers:{'conte
 function suggestOrder(i){var it=SUG[i]; if(!it)return; _placeOne(it).then(function(){toast(it.name+' '+it.suggest+'개 발주 요청(대기)'); ordRender();});}
 function suggestOrderAll(){if(!SUG.length)return; Promise.all(SUG.map(_placeOne)).then(function(){toast(SUG.length+'종 발주 요청 완료. 본사 확인 대기'); ordRender(); document.getElementById('sugBox').innerHTML='';});}
 
-/* ===== 단골 자동 마케팅 (교체주기 도래) ===== */
-var AUTO_MK=[];
-function _mkToday(){var d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);}
+/* ===== [09.29] 오늘 연락할 손님 (ST-CRM-03 도수 변화 리콜·교체 시기) ===== */
+var RECALL=[];
 function autoMkLoad(){
   var box=document.getElementById('autoMkBox'); if(!box)return;
-  fetch('/api/customers?seg=재방문').then(function(r){return r.json();}).then(function(j){
-    AUTO_MK=j.customers||[];
-    box.innerHTML = AUTO_MK.length? AUTO_MK.map(function(c,i){
-      return '<div class="pl-row"><span>'+c.name+' <span class="muted">'+(c.store||'')+' · '+(c.size||'')+' · 교체주기 도래</span></span><button class="btn small" onclick="autoMkSend('+i+')">카톡 예약</button></div>';
-    }).join('')+'<button class="btn" style="width:100%;margin-top:10px" onclick="autoMkSendAll()">전체 자동 카톡 예약 발송</button>'
-     : '<div class="muted" style="font-size:14px">교체주기 도래 손님 없음</div>';
-  }).catch(function(){box.innerHTML='<div class="muted" style="font-size:14px">불러오기 실패</div>';});
+  fetch('/api/recall?store='+encodeURIComponent(curStore())).then(function(r){return r.json();}).then(function(j){
+    RECALL=j.items||[];
+    box.innerHTML = RECALL.length? RECALL.map(function(c,i){
+      var why=c.reasons.map(function(r){return r.kind+' · '+r.text;}).join(' / ');
+      return '<div class="pl-row" style="align-items:flex-start;gap:10px"><span style="font-size:17px"><a href="profile.html?id='+c.id+'" style="color:inherit">'+c.name+'</a> <span class="muted" style="font-size:15px">'+(c.phone||'')+'</span><br><span class="muted" style="font-size:15px">'+why+'</span></span>'+
+        '<span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn small" onclick="recallLog('+i+',\'통화\')">통화함</button>'+
+        (c.marketing?'<button class="btn small ghost" onclick="recallLog('+i+',\'발송 대기\')">카톡 대기</button>':'<span class="muted" style="font-size:15px">알림 수신 동의 없음</span>')+'</span></div>';
+    }).join('') : '<div class="muted" style="font-size:15px">오늘 연락할 손님 없음</div>';
+  }).catch(function(){box.innerHTML='<div class="muted" style="font-size:15px">불러오기 실패</div>';});
 }
-function autoMkSend(i){var c=AUTO_MK[i]; if(!c)return;
-  obPost({channel:'카카오 알림톡',kind:'교체 안내',target:c.name,count:1,body:'교체 시기 안내'}).then(function(j){ mkLoadLog(); toast(j.ok?c.name+'님 교체 안내 대기함에 기록 (연동 전)':(j.error||'기록 실패')); });
-}
-function autoMkSendAll(){ if(!AUTO_MK.length)return;
-  var n=AUTO_MK.length;
-  obPost({channel:'카카오 알림톡',kind:'교체 안내 일괄',target:AUTO_MK.map(function(c){return c.name;}).join(', '),count:n,body:'교체 시기 안내'}).then(function(j){ mkLoadLog(); toast(j.ok?n+'명 교체 안내 대기함에 기록 (연동 전)':(j.error||'기록 실패')); });
+function recallLog(i,how){ var c=RECALL[i]; if(!c)return;
+  fetch('/api/recall/log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({customer_id:c.id,how:how,reason:c.reasons.map(function(r){return r.kind;}).join('·'),result:how==='통화'?'통화':''})}).then(function(r){return r.json();}).then(function(j){
+    toast(j.ok?(c.name+' · '+(how==='통화'?'통화 기록':'카톡 대기함에 기록 (연동 전)')):(j.error||'기록 실패')); if(j.ok){ autoMkLoad(); mkLoadLog(); } });
 }
 (function(){ if(document.getElementById('autoMkBox')) autoMkLoad(); })();
 

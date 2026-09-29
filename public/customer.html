@@ -250,7 +250,6 @@
                 <div class="chips" id="tryStyle">
                   <button class="chip active" data-s="round">라운드</button>
                   <button class="chip" data-s="square">스퀘어</button>
-                  <!-- [09.24 숨김] <button class="chip" data-s="audio">오디오</button> -->
                 </div>
                 <div class="tryswatch" id="trySwatch">
                   <span class="sw on" data-c="#1a1a1a" style="background:#1a1a1a"></span>
@@ -396,21 +395,7 @@
               <div class="label" style="text-align:right;font-size:14px">우안(OD) 구면 추이 · 4회 검안</div>
             </div>
 
-            <!-- [09.24 숨김] 스마트안경 기능은 부록·나중 (방향결정 §0·§2)
-            <div class="appcard">
-              <h4>오디오 안경 기능 <span class="phaseflag">Phase 2</span></h4>
-              <div class="audiorow"><div class="ai">◑</div><div><b>실시간 번역·받아쓰기</b> — 대화를 자막·기록으로</div></div>
-              <div class="audiorow"><div class="ai">♪</div><div><b>청력 케어 리포트</b> — 볼륨·소음 노출 주간 리포트</div></div>
-              <div class="audiorow"><div class="ai">⌁</div><div><b>음성 비서</b> — 입력=안경, 출력=귀·폰</div></div>
-            </div>
 
-            <div class="appcard">
-              <h4>눈 건강 모니터링 <span class="phaseflag">Phase 3 · 예정</span></h4>
-              <div class="audiorow"><div class="ai">◉</div><div>시선추적으로 <b>도수 변화 조기 감지</b> → 검안 시기 자동 알림</div></div>
-              <div class="audiorow"><div class="ai">⊙</div><div>코받침·템플 센서로 착용 습관·눈 피로 추정</div></div>
-              <div class="label" style="margin-top:8px;font-size:14px">감시가 아니라 "돕는 도구" — 기록하되 투명하게, 돕되 의존시키지 않게.</div>
-            </div>
-            -->
           </div>
 
           <div class="pscreen" id="s-products">
@@ -503,13 +488,6 @@ function glassSVG(style,color){
     fill='<rect x="6.5" y="9" width="35" height="28" rx="9" fill="url(#lg)"/><rect x="58.5" y="9" width="35" height="28" rx="9" fill="url(#lg)"/>';
     rim ='<rect x="6.5" y="9" width="35" height="28" rx="9" fill="none" stroke="'+color+'" stroke-width="'+rimW+'"/><rect x="58.5" y="9" width="35" height="28" rx="9" fill="none" stroke="'+color+'" stroke-width="'+rimW+'"/>';
     gloss='<rect x="10" y="12" width="13" height="5" rx="2.5" fill="url(#gl)" transform="rotate(-16 16 14)"/><rect x="62" y="12" width="13" height="5" rx="2.5" fill="url(#gl)" transform="rotate(-16 68 14)"/>';
-  } else if(style==='audio'){
-    fill='<rect x="7" y="10" width="34" height="26" rx="7" fill="url(#lg)"/><rect x="59" y="10" width="34" height="26" rx="7" fill="url(#lg)"/>';
-    rim ='<rect x="7" y="10" width="34" height="26" rx="7" fill="none" stroke="'+color+'" stroke-width="'+rimW+'"/><rect x="59" y="10" width="34" height="26" rx="7" fill="none" stroke="'+color+'" stroke-width="'+rimW+'"/>';
-    gloss='<rect x="10" y="13" width="12" height="5" rx="2.5" fill="url(#gl)" transform="rotate(-16 16 15)"/><rect x="62" y="13" width="12" height="5" rx="2.5" fill="url(#gl)" transform="rotate(-16 68 15)"/>';
-    temples='<rect x="-1.5" y="16.5" width="12" height="9" rx="4.5" fill="'+color+'"/><rect x="89.5" y="16.5" width="12" height="9" rx="4.5" fill="'+color+'"/>'+
-            '<rect x="0.5" y="18" width="6" height="2" rx="1" fill="rgba(255,255,255,0.35)"/><rect x="93.5" y="18" width="6" height="2" rx="1" fill="rgba(255,255,255,0.35)"/>';
-    hinge='';
   } else {
     fill='<ellipse cx="26" cy="23" rx="18.5" ry="15.5" fill="url(#lg)"/><ellipse cx="74" cy="23" rx="18.5" ry="15.5" fill="url(#lg)"/>';
     rim ='<ellipse cx="26" cy="23" rx="18.5" ry="15.5" fill="none" stroke="'+color+'" stroke-width="'+rimW+'"/><ellipse cx="74" cy="23" rx="18.5" ry="15.5" fill="none" stroke="'+color+'" stroke-width="'+rimW+'"/>';
@@ -578,8 +556,6 @@ var CATALOG=[
   {n:'로마 라운드',   line:'PB',   lens:47, bridge:21, temple:145, nose:'표준', price:'189,000'},
   {n:'로마 스퀘어',   line:'PB',   lens:54, bridge:16, temple:147, nose:'표준', price:'189,000'},
   {n:'로마 스몰',     line:'PB',   lens:45, bridge:17, temple:135, nose:'낮음', price:'159,000'},
-  // [09.24 숨김] {n:'NORM 오디오',   line:'오디오', lens:53, bridge:18, temple:150, nose:'표준', price:'240,000'},
-  // [09.24 숨김] {n:'NORM 오디오 S', line:'오디오', lens:50, bridge:18, temple:145, nose:'낮음', price:'240,000'},
   {n:'수입 브랜드 A', line:'명품',  lens:51, bridge:19, temple:140, nose:'높음', price:'470,000'}
 ];
 function frontWidthOf(fr){ return fr.lens*2 + fr.bridge + FIT.endpiece; }
@@ -943,7 +919,6 @@ var CAT_DATA={
     {n:'클립온 선글라스',pb:true,price:'90,000',desc:'안경 위에 자석 탈착. 도수 안경 그대로 선글라스로. 가성비.'}
   ],
   goggle:[
-    // [09.24 숨김] {n:'NORM G1',pb:true,price:'290,000',hero:true,desc:'자체 브랜드 NORM 대표 모델. 오픈이어 오디오 템플 내장 — 귀를 막지 않고 통화·음악·번역. 무음 연결로 프리미엄 사용감.',spec:[['재생시간','약 7시간'],['블루투스','5.3'],['방수','IPX4 생활방수'],['무게','28g'],['연결음','무음 커스텀'],['BT명','NORM-G1']],colors:['#1a1a1a','#2b3a4a','#e8e4dd']},
     {n:'스포츠 고글',pb:true,price:'180,000',desc:'러닝·라이딩용 밀착 핏. 김서림 방지·교체 렌즈.'}
   ]
 };
